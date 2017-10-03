@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.example.android.bluetoothlegatt;
+package by.citech.bluetoothlegatt;
 
 import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,9 +35,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
-
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
  */

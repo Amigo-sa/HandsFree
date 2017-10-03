@@ -1,4 +1,4 @@
-package com.example.android.bluetoothlegatt;
+package  by.citech.bluetoothlegatt;
 
 /**
  * Created by tretyak on 02.10.2017.

@@ -1,4 +1,4 @@
-package com.example.android.bluetoothlegatt;
+package  by.citech.bluetoothlegatt;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
