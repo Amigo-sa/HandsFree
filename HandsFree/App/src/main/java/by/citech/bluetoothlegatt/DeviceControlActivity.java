@@ -45,23 +45,26 @@ import java.util.List;
  */
 public class DeviceControlActivity extends Activity {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
-
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
-
+    // выводим на дисплей состояние соединения
     private TextView mConnectionState;
+    //выводим на дисплей принимаемые данные
     private TextView mDataField;
     private String   mDeviceName;
     private String   mDeviceAddress;
+    // разворачивающийся на экране список сервисов и характеристик переферийного устройства (сервера)
     private ExpandableListView mGattServicesList;
+    // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
     private BluetoothLeService mBluetoothLeService;
+    // список характеристик устройства
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private boolean mConnected = false;
+    // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
     private BluetoothGattCharacteristic mNotifyCharacteristic;
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
-    private final String LIST_RSSI = "RSSI";
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -89,6 +92,7 @@ public class DeviceControlActivity extends Activity {
     // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.
+    // обьявляем обработчик(слушатель) соединения, для отображения состояния соединения на дисплее
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -115,13 +119,16 @@ public class DeviceControlActivity extends Activity {
     // demonstrates 'Read' and 'Notify' features.  See
     // http://d.android.com/reference/android/bluetooth/BluetoothGatt.html for the complete
     // list of supported characteristic features.
+    // обработчик события в случае нажатия на расширяющемся списке на конкретную характеристику
     private final ExpandableListView.OnChildClickListener servicesListClickListner =
             new ExpandableListView.OnChildClickListener() {
                 @Override
                 public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
                                             int childPosition, long id) {
                     if (mGattCharacteristics != null) {
+                        // получаем характеристику
                         final BluetoothGattCharacteristic characteristic = mGattCharacteristics.get(groupPosition).get(childPosition);
+                        // получаем свойство характеристики
                         final int charaProp = characteristic.getProperties();
                         /*
                         Log.e(TAG, "charaProp = " + charaProp + "\n" +
@@ -147,17 +154,16 @@ public class DeviceControlActivity extends Activity {
                             mBluetoothLeService.readCharacteristic(characteristic);
                         }
                         */
+                        // если у характеристики есть нотификация то запускаем её
                         if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
                             mNotifyCharacteristic = characteristic;
                             mBluetoothLeService.setCharacteristicNotification(characteristic, true);
                         }
-
+                        // в случае, если включена характеристика со свойством записи то производим запись
                         if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE ) > 0) {
                             //Log.e(TAG, "try to write data");
                             if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
                                 Log.e(TAG, "write!!!!!!");
-
-
 
                                 mBluetoothLeService.writeCharacteristic(characteristic);
                            }
@@ -168,7 +174,7 @@ public class DeviceControlActivity extends Activity {
                     return false;
                 }
     };
-
+    // процедура стирания списка характеристик и данных на дисплее
     private void clearUI() {
         mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
         mDataField.setText(R.string.no_data);
@@ -192,10 +198,12 @@ public class DeviceControlActivity extends Activity {
 
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        // привязываем сервис
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
+    // по запуску регистрируем наш BroadcastReceiver
     @Override
     protected void onResume() {
         super.onResume();
@@ -205,20 +213,21 @@ public class DeviceControlActivity extends Activity {
             Log.d(TAG, "Connect request result=" + result);
         }
     }
-
+    // в случае засыпания активности сбрасываем регистрацию BroadcastReceiver
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
     }
 
+    //  в случае переворачивания экрана или отключения программы отвязываем сервис и отключаем его
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
-
+    // создаём меню в котором указываем кнопку соединения устройства
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.gatt_services, menu);
@@ -232,6 +241,8 @@ public class DeviceControlActivity extends Activity {
         return true;
     }
 
+    // устанавливаем принудетельное соединение с выбранным из списка устройством при нажатии connect
+    // и сбрасываем соединение в случае нажатия disconnect
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
@@ -247,7 +258,7 @@ public class DeviceControlActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-
+    // процедура обновления данных на экране об соединении
     private void updateConnectionState(final int resourceId) {
         runOnUiThread(new Runnable() {
             @Override
@@ -256,7 +267,7 @@ public class DeviceControlActivity extends Activity {
             }
         });
     }
-
+    // отображение данных на дисплее
     private void displayData(String data) {
         if (data != null) {
             mDataField.setText(data);
@@ -266,44 +277,54 @@ public class DeviceControlActivity extends Activity {
     // Demonstrates how to iterate through the supported GATT Services/Characteristics.
     // In this sample, we populate the data structure that is bound to the ExpandableListView
     // on the UI.
+    // процедура обработки и отображения доступных сервисов и характеристик на дисплее
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
-        String uuid = null;
-        int rssi = 0;
-        String unknownServiceString = getResources().getString(R.string.unknown_service);
-        String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
-        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
-        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData = new ArrayList<ArrayList<HashMap<String, String>>>();
+        // обьявляем переменные для будущих сервисов и характеристик
+        String uuid = null;  // уникальный идентификатор сервиса или характеристики
+        String unknownServiceString = getResources().getString(R.string.unknown_service);  // если имя атрибуда сервиса не известно пишем это
+        String unknownCharaString = getResources().getString(R.string.unknown_characteristic); // если имя атрибуда характеристики не известно пишем это
+        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>(); // список доступных данных сервисов периферийного устройства
+        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData = new ArrayList<ArrayList<HashMap<String, String>>>(); // список доступных данных характеристик периферийного устройства
         mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
 
         // Loops through available GATT Services.
-        for (BluetoothGattService gattService : gattServices) {
+        for (BluetoothGattService gattService : gattServices) {  // прогоняем список всех сервисов устройства
             HashMap<String, String> currentServiceData = new HashMap<String, String>();
-            uuid = gattService.getUuid().toString();
-            rssi = mBluetoothLeService.getRssi();
+            uuid = gattService.getUuid().toString(); // получаем идентификатор каждого сервиса
+
+            // По таблице соответствия uuid имени сервиса на дисплей выводим именно имя из таблицы
+            // если соответствия в таблице нет то выводим на дисплей unknown_service
             currentServiceData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
             currentServiceData.put(LIST_UUID, uuid);
-            currentServiceData.put(LIST_RSSI, Integer.toString(rssi));
-            Log.d(TAG, "rssi = " + Integer.toString(rssi));
+            // добавляем сервис в список
             gattServiceData.add(currentServiceData);
-
+            // создаём список данных характеристики
             ArrayList<HashMap<String, String>> gattCharacteristicGroupData = new ArrayList<HashMap<String, String>>();
+            // получаем все характеристики из сервиса(неименованные)
             List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+            // создаём новый список характеристик
             ArrayList<BluetoothGattCharacteristic> charas =  new ArrayList<BluetoothGattCharacteristic>();
 
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+                //добавляем характеристики в новый список
                 charas.add(gattCharacteristic);
+                // создаём карту данных характеристики
                 HashMap<String, String> currentCharaData = new HashMap<String, String>();
+                // получаем идентификатор каждой характеристики
                 uuid = gattCharacteristic.getUuid().toString();
+                // именуем все характеристики какие возможно согласно таблице uuid - SampleGattAttributes
                 currentCharaData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownCharaString));
                 currentCharaData.put(LIST_UUID, uuid);
+                // добавляем именнованные характеристики в список
                 gattCharacteristicGroupData.add(currentCharaData);
             }
             mGattCharacteristics.add(charas);
             gattCharacteristicData.add(gattCharacteristicGroupData);
         }
-
+        // все полученные списки помещаем в SimpleExpandableListAdapter, который
+        // работает с ExpandableListView для отображения на дисплее
         SimpleExpandableListAdapter gattServiceAdapter = new SimpleExpandableListAdapter(
                 this,
                 gattServiceData,
@@ -317,7 +338,7 @@ public class DeviceControlActivity extends Activity {
         );
         mGattServicesList.setAdapter(gattServiceAdapter);
     }
-
+    // определяем фильтр для нашего BroadcastReceivera, чтобы регистрировать конкретные события
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
