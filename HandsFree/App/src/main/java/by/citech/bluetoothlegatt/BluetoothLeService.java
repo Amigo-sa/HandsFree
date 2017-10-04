@@ -53,25 +53,24 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
-            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
+    //Создаём сообщения для BroadcastReceiver-а которые будут отправляться в качестве Callback-а
+    public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
 
+    // UUID устройства HEART_RATE_MEASUREMENT
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
             UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
-
+    // UUID устройства CIT_HANDS_FREE
     public final static UUID UUID_CIT_HANDS_FREE =
             UUID.fromString(SampleGattAttributes.CIT_HANDS_FREE);
-
+    // UUID характеристики READ_BYTES
     public final static UUID READ_BYTES =
             UUID.fromString(SampleGattAttributes.READ_BYTES);
+
+    private StorageData stData = new StorageData();
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -119,12 +118,13 @@ public class BluetoothLeService extends Service {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
     };
-
+    // строку загружаем в Intent и передаём в BroadcastReceiver-у
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
-
+   // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
+   // и получаем данные
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
@@ -148,6 +148,7 @@ public class BluetoothLeService extends Service {
         } else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
+            stData.putData(data);
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
                 for(byte byteChar : data)
@@ -310,8 +311,8 @@ public class BluetoothLeService extends Service {
             return;
         }
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
-
-                WriterTransmitter wrt = new WriterTransmitter("Write", mBluetoothGatt, characteristic, 500);
+// потоовая запись данных в периферийное устройство
+                WriterTransmitter wrt = new WriterTransmitter("Write", stData, mBluetoothGatt, characteristic, 500);
                 wrt.addWriteListener(new WriterTransmitterCallbackListener() {
                     @Override
                     public void doWriteCharacteristic(String str) {
@@ -319,6 +320,7 @@ public class BluetoothLeService extends Service {
                     }
                 });
                 wrt.start();
+// одноразовая запись данных в периферийное устройство
 
 //            StringBuilder data = new StringBuilder();
 //            // посылаем на запись 16 байт данных
@@ -328,6 +330,8 @@ public class BluetoothLeService extends Service {
 //            characteristic.setValue(dataByte);
 //            Log.w(TAG, "characteristic = " + characteristic);
 //            mBluetoothGatt.writeCharacteristic(characteristic);
+
+
 
         }
     }
