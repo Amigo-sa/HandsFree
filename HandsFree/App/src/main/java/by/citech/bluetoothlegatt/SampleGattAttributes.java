@@ -25,7 +25,6 @@ public class SampleGattAttributes {
     private static HashMap<String, String> attributes = new HashMap();
     public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
     public static String CLIENT_CHARACTERISTIC_CONFIG  = "00002902-0000-1000-8000-00805f9b34fb";
-    public static String CENTRAL_CHARACTERISTIC_CONFIG = "f0002902-0451-4000-b000-000000000000";
 
 
     public static String CIT_HANDS_FREE = "00002a00-0000-1000-8000-00805f9b34fb";
@@ -35,15 +34,26 @@ public class SampleGattAttributes {
 
     static {
         // Sample Services.
+        attributes.put("00001800-0000-1000-8000-00805f9b34fb", "GAP");
+        attributes.put("00001801-0000-1000-8000-00805f9b34fb", "GATT");
+        attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information");
         attributes.put("0000180d-0000-1000-8000-00805f9b34fb", "Heart Rate Service");
-        attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Heart Rate Device Information Service");
-        attributes.put("00001800-0000-1000-8000-00805f9b34fb", "Device Information Service");
-        attributes.put("f000b000-0451-4000-b000-000000000000", "Data exchange with Hands free");
-
+        attributes.put("f000b000-0451-4000-b000-000000000000", "HandsFree Data Exchange");
         // Sample Characteristics.
-        attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
+        attributes.put(CIT_HANDS_FREE, "Device Name");
+        attributes.put("00002a01-0000-1000-8000-00805f9b34fb", "Appearance");
+        attributes.put("00002a04-0000-1000-8000-00805f9b34fb", "Peripheral Preffered Connection Parameters");
+        attributes.put("00002a23-0000-1000-8000-00805f9b34fb", "System ID");
+        attributes.put("00002a24-0000-1000-8000-00805f9b34fb", "Model Number String");
+        attributes.put("00002a25-0000-1000-8000-00805f9b34fb", "Serial Number String");
+        attributes.put("00002a26-0000-1000-8000-00805f9b34fb", "Firmware Revision String");
+        attributes.put("00002a27-0000-1000-8000-00805f9b34fb", "Hardware Revision String");
+        attributes.put("00002a28-0000-1000-8000-00805f9b34fb", "Software Revision String");
         attributes.put("00002a29-0000-1000-8000-00805f9b34fb", "Manufacturer Name String");
-        attributes.put(CIT_HANDS_FREE, "BLE Hands Free");
+        attributes.put("00002a2a-0000-1000-8000-00805f9b34fb", "IEEE 11073-20601 Regulatory");
+        attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
+        attributes.put("00002a50-0000-1000-8000-00805f9b34fb", "PNPID");
+
         attributes.put("f000b001-0451-4000-b000-000000000000", "Read/write 1 byte (now is not working)");
         attributes.put(WRITE_BYTES, "Write 16 byte");
         attributes.put(READ_BYTES, "Read/notify 16 byte from Hands free");
