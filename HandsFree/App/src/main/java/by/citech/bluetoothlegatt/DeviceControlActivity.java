@@ -66,6 +66,7 @@ public class DeviceControlActivity extends Activity {
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
 
+    private boolean loopback = false;
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -163,7 +164,17 @@ public class DeviceControlActivity extends Activity {
                         if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE ) > 0) {
                             //Log.e(TAG, "try to write data");
                             if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
-                                Log.e(TAG, "write!!!!!!");
+                                Log.e(TAG, "Before write!!!!!!");
+                                if (!loopback) {
+                                    Log.e(TAG, "write!!!!!!");
+                                    mBluetoothLeService.initStore();
+                                    loopback = true;
+                                } else {
+                                    Log.e(TAG, "close write!!!!!!");
+                                    mBluetoothLeService.closeStore();
+                                    //mBluetoothLeService.cleanStore();
+                                    loopback = false;
+                                }
 
                                 mBluetoothLeService.writeCharacteristic(characteristic);
                            }

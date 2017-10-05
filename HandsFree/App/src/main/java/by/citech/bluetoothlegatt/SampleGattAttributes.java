@@ -44,7 +44,7 @@ public class SampleGattAttributes {
         attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
         attributes.put("00002a29-0000-1000-8000-00805f9b34fb", "Manufacturer Name String");
         attributes.put(CIT_HANDS_FREE, "BLE Hands Free");
-        attributes.put("f000b001-0451-4000-b000-000000000000", "Read/write 1 byte");
+        attributes.put("f000b001-0451-4000-b000-000000000000", "Read/write 1 byte (now is not working)");
         attributes.put(WRITE_BYTES, "Write 16 byte");
         attributes.put(READ_BYTES, "Read/notify 16 byte from Hands free");
     }

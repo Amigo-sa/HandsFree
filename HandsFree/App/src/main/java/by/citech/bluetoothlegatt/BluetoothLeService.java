@@ -71,6 +71,22 @@ public class BluetoothLeService extends Service {
             UUID.fromString(SampleGattAttributes.READ_BYTES);
 
     private StorageData stData = new StorageData();
+    private boolean loopback = true;
+
+    public void initStore(){
+        stData.setOpen(true);
+        loopback = true;
+       // stData = new StorageData();
+    }
+
+    public void closeStore(){
+        stData.setOpen(false);
+        loopback = false;
+    }
+
+    public void cleanStore(){
+        stData = null;
+    }
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -148,7 +164,8 @@ public class BluetoothLeService extends Service {
         } else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
-            stData.putData(data);
+            //if (loopback)
+                stData.putData(data);
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
                 for(byte byteChar : data)
@@ -311,15 +328,21 @@ public class BluetoothLeService extends Service {
             return;
         }
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
-// потоовая запись данных в периферийное устройство
-                WriterTransmitter wrt = new WriterTransmitter("Write", stData, mBluetoothGatt, characteristic, 500);
-                wrt.addWriteListener(new WriterTransmitterCallbackListener() {
-                    @Override
-                    public void doWriteCharacteristic(String str) {
-                        System.out.println(str);
-                    }
-                });
-                wrt.start();
+// потоковая запись данных в периферийное устройство
+               // loopback = res.isLoopback();//, Resource resres,
+            WriterTransmitter wrt;
+            Log.w(TAG, "stData = " + stData.isOpen());
+                if (stData.isOpen()) {
+                    wrt = new WriterTransmitter("Write", stData, mBluetoothGatt, characteristic);
+                    wrt.addWriteListener(new WriterTransmitterCallbackListener() {
+                        @Override
+                        public void doWriteCharacteristic(String str) {
+                            System.out.println(str);
+                        }
+                    });
+                    wrt.start();
+                }
+
 // одноразовая запись данных в периферийное устройство
 
 //            StringBuilder data = new StringBuilder();

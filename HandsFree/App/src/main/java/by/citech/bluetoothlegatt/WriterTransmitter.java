@@ -10,21 +10,21 @@ import android.util.Log;
 
 public class WriterTransmitter extends Thread {
 
+    //private Resource res;
     private StorageData stData;
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
-    private long delay;
     private WriterTransmitterCallbackListener listener;
     int cnt = 0;
     // колличество отправляемых на запись пакетов данных
     final int sends = 100;
 
-    public WriterTransmitter(String name, StorageData stData, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic, long delay) {
+    public WriterTransmitter(String name, StorageData stData, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
+        //this.res = res;Resource res,
         this.stData = stData;
         this.mBluetoothGatt = mBluetoothGatt;
         this.characteristic = characteristic;
-        this.delay = delay;
     }
 
     public void addWriteListener(WriterTransmitterCallbackListener listener) {
@@ -36,24 +36,23 @@ public class WriterTransmitter extends Thread {
         //StringBuilder data = new StringBuilder();
         // посылаем на запись 16 байт данных(1 пакет)
         //data.append("FFFF0000FFFF0000");
-        //byte[] dataByte = data.toString().getBytes();
+        //byte[] stringByte = data.toString().getBytes();
         //byte[] dataByte = new byte[16];
         byte[] dataByte;
 
 
 
-        while (!isAllSendData()){
+        while (isAllSendData()){
             dataByte = stData.getData();
             final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
             for(byte byteChar : dataByte)
                 stringBuilder.append(String.format("%02X ", byteChar));
-            Log.w("Write DATA", "data = " +  stringBuilder.toString());
+            Log.w("Write DATA ", stringBuilder.toString());
 
             characteristic.setValue(dataByte);
-            Log.w("Shit", "characteristic = " + characteristic);
             mBluetoothGatt.writeCharacteristic(characteristic);
             try {
-                Thread.sleep(delay);
+                Thread.sleep(0,100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -63,8 +62,11 @@ public class WriterTransmitter extends Thread {
             listener.doWriteCharacteristic("");
     }
 
+    public void cancel() { interrupt(); }
+
     private boolean isAllSendData(){
-        return (sends - cnt++) <= 0;
+        return stData.isOpen();
+                //(sends - cnt++) <= 0;
     }
 
 }

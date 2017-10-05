@@ -11,6 +11,15 @@ import java.util.ArrayList;
 public class StorageData {
 
         private ArrayList<byte []> databuffer;
+        private boolean open;
+
+    public boolean isOpen() {
+        return open;
+    }
+
+    public void setOpen(boolean open) {
+        this.open = open;
+    }
 
     public StorageData() {
         databuffer = new ArrayList<byte[]>();
