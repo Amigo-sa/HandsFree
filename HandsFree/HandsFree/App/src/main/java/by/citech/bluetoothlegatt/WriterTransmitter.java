@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
+import by.citech.data.StorageData;
+
 /**
  * Created by tretyak on 02.10.2017.
  */
