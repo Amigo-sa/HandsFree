@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\incremental-classes\defaultFlavor\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="a0d040d207a5269f10d19022303d9ca6aab14bfb">
+        <dex dex="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run-bootstrap_ee55ca985004a7ed35f2114a89de4bc161bead89\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\incremental-runtime-classes\defaultFlavor\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
+        <dex dex="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run_c3435458627e893541f1e06a0e6f0dad6d9cf0be\classes.dex" />
+    </item>
+
+</items>
