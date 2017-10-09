@@ -31,12 +31,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 import java.util.UUID;
-
-import by.citech.data.SampleGattAttributes;
-import by.citech.data.StorageData;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

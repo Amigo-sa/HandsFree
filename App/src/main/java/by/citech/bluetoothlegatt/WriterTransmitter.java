@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
-import by.citech.data.StorageData;
-
 /**
  * Created by tretyak on 02.10.2017.
  */
@@ -52,10 +50,9 @@ public class WriterTransmitter extends Thread {
             Log.w("Write DATA ", stringBuilder.toString());
 
             characteristic.setValue(dataByte);
-            characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
             mBluetoothGatt.writeCharacteristic(characteristic);
             try {
-                Thread.sleep(0,10);
+                Thread.sleep(0,100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
