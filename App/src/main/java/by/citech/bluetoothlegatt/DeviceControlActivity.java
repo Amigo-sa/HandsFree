@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import by.citech.R;
 import by.citech.data.SampleGattAttributes;
 
 /**
@@ -146,7 +147,7 @@ public class DeviceControlActivity extends Activity {
                                    "equals = " + SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString()));
                         */
 
-/*
+
                         if ((charaProp & BluetoothGattCharacteristic.PROPERTY_READ) == BluetoothGattCharacteristic.PROPERTY_READ) {
                             // If there is an active notification on a characteristic, clear
                             // it first so it doesn't update the data field on the user interface.
@@ -158,7 +159,6 @@ public class DeviceControlActivity extends Activity {
 
                             mBluetoothLeService.readCharacteristic(characteristic);
                         }
-                        */
                         // если у характеристики есть нотификация то запускаем её
                         if ((charaProp & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == BluetoothGattCharacteristic.PROPERTY_NOTIFY) {
                             mNotifyCharacteristic = characteristic;
@@ -195,6 +195,8 @@ public class DeviceControlActivity extends Activity {
                                 mBluetoothLeService.writeCharacteristic(characteristic);
                            }
                         }
+
+
 
                         return true;
                     }

@@ -6,7 +6,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import by.citech.bluetoothlegatt.R;
 
 public class MainActivity extends Activity {
 

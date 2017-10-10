@@ -3,6 +3,8 @@ package by.citech.websocketduplex;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import by.citech.R;
+
 public class DuplexActivity extends AppCompatActivity {
 
     @Override

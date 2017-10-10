@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import by.citech.R;
 import by.citech.websocketduplex.client.asynctask.DisconnectTask;
 import by.citech.websocketduplex.client.asynctask.OpenWebSocketTask;
 import by.citech.websocketduplex.client.asynctask.SendMessageToServerTask;

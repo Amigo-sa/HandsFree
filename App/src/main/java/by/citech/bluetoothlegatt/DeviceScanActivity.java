@@ -36,6 +36,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
+
+import by.citech.R;
 /**
  *  В отличие от классического Bluetooth, BLE призван обеспечить существенно меньшее
  *  энергопотребление. Это позволяет приложениям для Android общаться с BLE-устройствами,

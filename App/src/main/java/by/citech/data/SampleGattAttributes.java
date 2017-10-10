@@ -43,6 +43,18 @@ public class SampleGattAttributes {
         attributes.put(CIT_HANDS_FREE, "Device Name");
         attributes.put("00002a01-0000-1000-8000-00805f9b34fb", "Appearance");
         attributes.put("00002a04-0000-1000-8000-00805f9b34fb", "Peripheral Preffered Connection Parameters");
+        attributes.put("00002a05-0000-1000-8000-00805f9b34fb", "Service Changed");
+        attributes.put("00002a06-0000-1000-8000-00805f9b34fb", "Alert Level");
+        attributes.put("00002a07-0000-1000-8000-00805f9b34fb", "Tx Power Level");
+        attributes.put("00002a08-0000-1000-8000-00805f9b34fb", "Date Time");
+        attributes.put("00002a09-0000-1000-8000-00805f9b34fb", "Day of Week");
+        attributes.put("00002a0a-0000-1000-8000-00805f9b34fb", "Day Date Time");
+        attributes.put("00002a0b-0000-1000-8000-00805f9b34fb", "Exact Time 100");
+
+        /** all characteristic
+         * https://www.bluetooth.com/specifications/gatt/characteristics
+         * */
+
         attributes.put("00002a23-0000-1000-8000-00805f9b34fb", "System ID");
         attributes.put("00002a24-0000-1000-8000-00805f9b34fb", "Model Number String");
         attributes.put("00002a25-0000-1000-8000-00805f9b34fb", "Serial Number String");

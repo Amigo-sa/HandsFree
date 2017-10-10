@@ -2,22 +2,112 @@
 <items version="2" >
 
     <item
-        is-multidex="true"
-        jar="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\incremental-classes\defaultFlavor\debug\instant-run-bootstrap.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.gradle\caches\modules-2\files-2.1\com.squareup.okhttp3\okhttp\3.9.0\1b6c10b5120995a7542c1a31b7828fb8593c8ba\okhttp-3.9.0.jar"
+        jumboMode="false"
         optimize="true"
-        revision="25.0.0"
-        sha1="a0d040d207a5269f10d19022303d9ca6aab14bfb">
-        <dex dex="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run-bootstrap_ee55ca985004a7ed35f2114a89de4bc161bead89\classes.dex" />
+        revision="26.0.1"
+        sha1="01b6c10b5120995a7542c1a31b7828fb8593c8ba">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\okhttp-3.9.0_09bfef8689fb3138bf9af5bca2fda4fb38e30481.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\incremental-runtime-classes\defaultFlavor\debug\instant-run.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\398ae7c2bf762b2e9ca2cda94d970e528434ed90\output\jars\classes.jar"
+        jumboMode="false"
         optimize="true"
-        revision="25.0.0"
-        sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
-        <dex dex="D:\android\work\Amigo\HandsFree\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run_c3435458627e893541f1e06a0e6f0dad6d9cf0be\classes.dex" />
+        revision="26.0.1"
+        sha1="fcd01fd11233459f546c437ec927e9b61bf7caf1">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_f872f8d1553c565d757de8c0e0db17199d654087.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\c410c50bc38f45c87618e9f83d29d5625c55b014\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="2e92aa0163544a804a0b34f169ca61801770839a">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_c716a4ba46ce0378987a048454e57e4ebc9ce65e.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\26.0.0-alpha1\support-annotations-26.0.0-alpha1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="023ee503b631f69511e335a061ea008f8da60f40">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\support-annotations-26.0.0-alpha1_1a751db0a7cd0a365b5e06b8c3881e1d0fc280b9.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\03bbe7a218cd8ad3fa8fbfe88095cc9317eb1bf4\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="47471eb19df288158b00b8d9cfa41bce7373f5cc">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_61a15bbc0766ef199947c19dfec38110ec8dc93d.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\44de488d1f3e8ccabc96b113855e644622904cb2\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="9935891f23923f39d002087085d9696568a9f657">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_2fc9891126f60b61aef72c6de15e6789dd8b461e.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\bc5f987a19f936f845ae9547f4abf7a7e74282d7\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="88246166d5afb106f532f6e6deae683c66b42c89">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_8a3b301046ca8bf13061127205a9a3423530ffa6.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\9e7e40b1cd8c8dd85d0fb37be0edb51d459338cd\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="18d31838aa4fcc768a8a0516e22cc13b94655d89">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_3d013fd40b1dbd71292935caa4b7aed937a6b738.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\50a14574c87a67e0edaa6105264a61b4f683996d\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_66ef3b72155901442d845a541d757d3d691c3934.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\62f185bf336beaddf7aaab5d42acd37df468b123\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="952944218ecedea1554a513dec0c14d570642843">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_42ab0e6797e768c8628c3ab564b35f9be3a9389a.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.gradle\caches\modules-2\files-2.1\com.squareup.okio\okio\1.13.0\a9283170b7305c8d92d25aff02a6ab7e45d06cbe\okio-1.13.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="a9283170b7305c8d92d25aff02a6ab7e45d06cbe">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\okio-1.13.0_40e7d64e21c64f8d02aa7375460dc8aecd09910b.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\tretyak.BY16\.android\build-cache\33f47a57f969fe95efa3e55357d2b79bceac85c9\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.1"
+        sha1="8df0e365e40beb151bc42dee20817721a6cab7b0">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\pre-dexed\defaultFlavor\debug\classes_ed09f976c87710b39897cb6f464ece0600bb62f7.jar" />
     </item>
 
 </items>

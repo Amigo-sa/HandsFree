@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ClientActivity">
+    tools:context="websocketduplex.ClientActivity">
 
     <EditText
         android:id="@+id/editTextCltRemSrvAddr"
@@ -19,6 +19,7 @@
         android:textSize="14sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 
     <EditText
         android:id="@+id/editTextCltRemSrvPort"
@@ -40,12 +41,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:onClick="connect"
         android:text="Connect"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginEnd="16dp" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/btnCltDiscFromSrv"
@@ -53,35 +54,36 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:onClick="disconnect"
         android:text="Disconnect"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintLeft_toLeftOf="parent" />
+
 
     <Button
         android:id="@+id/btnCltStreamOn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="15dp"
         android:layout_marginRight="16dp"
         android:onClick="streamOn"
         android:text="Stream on"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/btnCltConnToSrv"
-        android:layout_marginEnd="15dp" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/btnCltStreamOff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:onClick="streamOff"
         android:text="Stream Off"
-        android:layout_marginLeft="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/btnCltDiscFromSrv"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
         android:id="@+id/textViewCltStatus"
