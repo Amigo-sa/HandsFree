@@ -36,6 +36,50 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
 
+
+    <application android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@android:style/Theme.Holo.Light">
+        <activity android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action   android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".bluetoothlegatt.DeviceScanActivity" android:exported="true"/>
+        <activity android:name=".bluetoothlegatt.DeviceControlActivity" android:exported="true"/>
+        <service  android:name=".bluetoothlegatt.BluetoothLeService" android:enabled="true"/>
+
+        <activity
+            android:name=".websocketduplex.NetworkActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".websocketduplex.ClientActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".websocketduplex.NetworkActivity">
+        </activity>
+
+        <activity
+            android:name=".websocketduplex.ServerActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".websocketduplex.NetworkActivity">
+        </activity>
+
+        <activity
+            android:name=".websocketduplex.DuplexActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".websocketduplex.NetworkActivity">
+        </activity>
+
+
+    </application>
+
+<!--
     <application android:label="@string/app_name"
                  android:icon="@drawable/ic_launcher"
                  android:theme="@android:style/Theme.Holo.Light">
@@ -75,5 +119,5 @@
 
 
     </application>
-
+    -->
 </manifest>

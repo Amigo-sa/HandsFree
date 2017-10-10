@@ -1,5 +1,6 @@
 package by.citech.websocketduplex;
 
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,7 +18,7 @@ import by.citech.websocketduplex.client.websocket.OkWebSocketClientCtrl;
 import by.citech.websocketduplex.utils.DataSources;
 import by.citech.websocketduplex.utils.Tags;
 
-public class ClientActivity extends AppCompatActivity {
+public class ClientActivity extends Activity {
     private static final String DEFAULT_IP = "192.168.0.105";
     private static final String DEFAULT_PORT = "8080";
 

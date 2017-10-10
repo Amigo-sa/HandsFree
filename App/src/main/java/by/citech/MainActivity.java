@@ -1,22 +1,42 @@
 package by.citech;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.Button;
+
+import by.citech.bluetoothlegatt.DeviceScanActivity;
+import by.citech.websocketduplex.NetworkActivity;
 
 
 public class MainActivity extends Activity {
 
-    TextView textState;
+    private static final String TAG = "MainActivity";
+    Button btnBLE;
+    Button btnNet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textState = (TextView)findViewById(R.id.stateText);
+        btnBLE = (Button) findViewById(R.id.btnBLE);
+        btnNet = (Button) findViewById(R.id.btnNetwork);
+
+    }
+
+    public void btnBLE(View view) {
+        final Intent intent = new Intent(this, DeviceScanActivity.class);
+        startActivity(intent);
+
+    }
+
+    public void btnNetwork(View view) {
+        final Intent intent = new Intent(this, NetworkActivity.class);
+        startActivity(intent);
     }
 
 
@@ -45,6 +65,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        textState.setText(App.getInstance().getState().getName());
+        //textState.setText(App.getInstance().getState().getName());
     }
 }
