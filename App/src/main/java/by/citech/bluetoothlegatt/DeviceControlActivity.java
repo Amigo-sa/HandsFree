@@ -37,6 +37,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import by.citech.data.SampleGattAttributes;
+
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
  * and display GATT services and characteristics supported by the device.  The Activity
@@ -131,10 +134,11 @@ public class DeviceControlActivity extends Activity {
                         final BluetoothGattCharacteristic characteristic = mGattCharacteristics.get(groupPosition).get(childPosition);
                         // получаем свойство характеристики
                         final int charaProp = characteristic.getProperties();
-                        /*
+/*
                         Log.e(TAG, "charaProp = " + charaProp + "\n" +
                                 "PROPERTY_READ = " + BluetoothGattCharacteristic.PROPERTY_READ + "\n" +
                                 "PROPERTY_NOTIFY = " + BluetoothGattCharacteristic.PROPERTY_NOTIFY + "\n" +
+                                "PROPERTY_WRITE_NO_RESPONSE = " + BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE + "\n" +
                                 "PROPERTY_WRITE = " + BluetoothGattCharacteristic.PROPERTY_WRITE);
 
                         Log.e(TAG, "getUuid = " + characteristic.getUuid() + "\n" +
@@ -143,7 +147,7 @@ public class DeviceControlActivity extends Activity {
                         */
 
 /*
-                        if ((charaProp & BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+                        if ((charaProp & BluetoothGattCharacteristic.PROPERTY_READ) == BluetoothGattCharacteristic.PROPERTY_READ) {
                             // If there is an active notification on a characteristic, clear
                             // it first so it doesn't update the data field on the user interface.
 
@@ -156,21 +160,33 @@ public class DeviceControlActivity extends Activity {
                         }
                         */
                         // если у характеристики есть нотификация то запускаем её
-                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                        if ((charaProp & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == BluetoothGattCharacteristic.PROPERTY_NOTIFY) {
                             mNotifyCharacteristic = characteristic;
                             mBluetoothLeService.setCharacteristicNotification(characteristic, true);
                         }
-                        // в случае, если включена характеристика со свойством записи то производим запись
-                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE ) > 0) {
-                            //Log.e(TAG, "try to write data");
+                        /*
+                        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0) {
+                            characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                        }
+                        else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0) {
+                            characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                        }
+                        */
+
+                        // в случае, если включена характеристика со свойством записи то производим запись  PROPERTY_WRITE_NO_RESPONSE
+                        if ((charaProp & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE ) == BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) {
+
+                            //Log.e(TAG, "charaProp = " + charaProp + "\n");
+                            //Log.e(TAG, "PROPERTY_WRITE_NO_RESPONSE = " + BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE + "\n");
+
                             if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
-                                Log.e(TAG, "Before write!!!!!!");
+                                //Log.e(TAG, "Before write!!!!!!");
                                 if (!loopback) {
-                                    Log.e(TAG, "write!!!!!!");
+                                    //Log.e(TAG, "write!!!!!!");
                                     mBluetoothLeService.initStore();
                                     loopback = true;
                                 } else {
-                                    Log.e(TAG, "close write!!!!!!");
+                                   // Log.e(TAG, "close write!!!!!!");
                                     mBluetoothLeService.closeStore();
                                     //mBluetoothLeService.cleanStore();
                                     loopback = false;
