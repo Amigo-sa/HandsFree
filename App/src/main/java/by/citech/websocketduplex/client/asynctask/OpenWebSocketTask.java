@@ -3,11 +3,10 @@ package by.citech.websocketduplex.client.asynctask;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
-
 import by.citech.websocketduplex.ClientActivity;
-import by.citech.websocketduplex.client.websocket.OkWebSocketClientCtrl;
-import by.citech.websocketduplex.utils.StatusMessages;
-import by.citech.websocketduplex.utils.Tags;
+import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
+import by.citech.websocketduplex.util.StatusMessages;
+import by.citech.websocketduplex.util.Tags;
 
 public class OpenWebSocketTask extends AsyncTask<String, String, Void> {
     private static final int TIMEOUT_PERIOD = 100;
@@ -21,8 +20,8 @@ public class OpenWebSocketTask extends AsyncTask<String, String, Void> {
     }
 
     protected Void doInBackground(String... url) {
-        Log.i(Tags.TASK_OWS, "OpenWebSocketTask doInBackground");
-        Log.i(Tags.TASK_OWS, url[0]);
+        Log.i(Tags.CLT_TASK_OWS, "OpenWebSocketTask doInBackground");
+        Log.i(Tags.CLT_TASK_OWS, url[0]);
         clientCtrl = new OkWebSocketClientCtrl(url[0]);
         clientCtrl.run();
         int i = 0;
@@ -50,10 +49,10 @@ public class OpenWebSocketTask extends AsyncTask<String, String, Void> {
 
     @Override
     protected void onProgressUpdate(String... status) {
-        Log.i(Tags.TASK_OWS, "OpenWebSocketTask onProgressUpdate");
-        Log.i(Tags.TASK_OWS, status[0]);
+        Log.i(Tags.CLT_TASK_OWS, "OpenWebSocketTask onProgressUpdate");
+        Log.i(Tags.CLT_TASK_OWS, status[0]);
         switch (status[0]) {
-            case StatusMessages.WEBSOCKET_OPEN:
+            case StatusMessages.WEBSOCKET_OPENED:
                 activity.textViewCltStatus.setText("Состояние: подключено");
                 activity.editTextCltToSrvText.setVisibility(View.VISIBLE);
                 activity.editTextCltToSrvText.setText("РОИССЯ ВПЕРДЕ");
@@ -61,6 +60,7 @@ public class OpenWebSocketTask extends AsyncTask<String, String, Void> {
                 activity.btnCltSendMsg.setEnabled(true);
                 activity.btnCltStreamOn.setEnabled(true);
                 activity.clientCtrl = clientCtrl;
+                break;
             case StatusMessages.WEBSOCKET_NOTAVAILABLE:
                 activity.textViewCltStatus.setText("Состояние: подключение не удалось.");
                 break;

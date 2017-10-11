@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import by.citech.R;
-
 public class NetworkActivity extends Activity {
 
     @Override

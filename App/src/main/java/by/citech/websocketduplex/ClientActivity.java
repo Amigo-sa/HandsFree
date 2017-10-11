@@ -8,19 +8,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import by.citech.R;
 import by.citech.websocketduplex.client.asynctask.DisconnectTask;
 import by.citech.websocketduplex.client.asynctask.OpenWebSocketTask;
 import by.citech.websocketduplex.client.asynctask.SendMessageToServerTask;
 import by.citech.websocketduplex.client.asynctask.StreamTask;
-import by.citech.websocketduplex.client.websocket.OkWebSocketClientCtrl;
-import by.citech.websocketduplex.utils.DataSources;
-import by.citech.websocketduplex.utils.Tags;
+import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
+import by.citech.websocketduplex.util.DataSources;
+import by.citech.websocketduplex.util.Tags;
 
 public class ClientActivity extends Activity {
     private static final String DEFAULT_IP = "192.168.0.105";
     private static final String DEFAULT_PORT = "8080";
+    public boolean isStreaming;
 
     public OkWebSocketClientCtrl clientCtrl;
 
@@ -46,9 +45,11 @@ public class ClientActivity extends Activity {
         btnCltSendMsg = (Button) findViewById(R.id.btnCltSendMsg);
         btnCltStreamOn = (Button) findViewById(R.id.btnCltStreamOn);
         btnCltStreamOff = (Button) findViewById(R.id.btnCltStreamOff);
+
         editTextCltToSrvText = (EditText) findViewById(R.id.editTextCltToSrvText);
         editTextCltRemSrvAddr = (EditText) findViewById(R.id.editTextCltRemSrvAddr);
         editTextCltRemSrvPort = (EditText) findViewById(R.id.editTextCltRemSrvPort);
+
         textViewCltStatus = (TextView) findViewById(R.id.textViewCltStatus);
 
         editTextCltToSrvText.setVisibility(View.INVISIBLE);
@@ -59,7 +60,8 @@ public class ClientActivity extends Activity {
         btnCltSendMsg.setEnabled(false);
         btnCltStreamOn.setEnabled(false);
         btnCltStreamOff.setEnabled(false);
-        textViewCltStatus.setText("Состояние: ожидание");
+
+        textViewCltStatus.setText("Состояние: ожидание.");
     }
 
     public void disconnect(View view) {
@@ -78,8 +80,7 @@ public class ClientActivity extends Activity {
 
     public void streamOff(View view) {
         Log.i(Tags.ACT_CLT, "streamOff");
-        btnCltStreamOff.setEnabled(false);
-
+        isStreaming = false;
     }
 
     public void connect(View view) {

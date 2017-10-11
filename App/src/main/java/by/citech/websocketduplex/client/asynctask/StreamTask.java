@@ -3,7 +3,7 @@ package by.citech.websocketduplex.client.asynctask;
 import android.os.AsyncTask;
 
 import by.citech.websocketduplex.ClientActivity;
-import by.citech.websocketduplex.client.websocket.OkWebSocketClientCtrl;
+import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
 
 public class StreamTask extends AsyncTask<String, String, Void> {
     private ClientActivity activity;

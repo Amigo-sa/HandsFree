@@ -1,19 +1,12 @@
-package by.citech.websocketduplex.client.websocket;
+package by.citech.websocketduplex.client.network;
 
 import android.util.Log;
-import java.util.concurrent.TimeUnit;
 
-import by.citech.websocketduplex.utils.Tags;
-import okhttp3.WebSocket;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.WebSocketListener;
-import okio.ByteString;
-import by.citech.websocketduplex.utils.Messages;
-import by.citech.websocketduplex.utils.StatusMessages;
+import by.citech.websocketduplex.util.Tags;
 import okhttp3.WebSocket;
 import okio.ByteString;
+import by.citech.websocketduplex.util.Messages;
+import by.citech.websocketduplex.util.StatusMessages;
 
 public class OkWebSocketClientCtrl implements IOkWebSocketClientListener {
     private WebSocket webSocket;
@@ -25,28 +18,28 @@ public class OkWebSocketClientCtrl implements IOkWebSocketClientListener {
     }
 
     public void run() {
-        Log.i(Tags.WSOCKET_CLT, "run");
+        Log.i(Tags.CLT_WSOCKETCTRL, "run");
         OkWebSocketClient client = new OkWebSocketClient(true, 15000, this.url, this);
-        Log.i(Tags.WSOCKET_CLT, "OkWebSocketClient instance created");
+        Log.i(Tags.CLT_WSOCKETCTRL, "OkWebSocketClient instance created");
         client.run();
-        Log.i(Tags.WSOCKET_CLT, "OkWebSocketClient instance runned");
+        Log.i(Tags.CLT_WSOCKETCTRL, "OkWebSocketClient instance runned");
     }
 
     public void cancel() {
-        Log.i(Tags.WSOCKET_CLT, "cancel");
+        Log.i(Tags.CLT_WSOCKETCTRL, "cancel");
         webSocket.cancel();
     }
 
     public void stop(String reason) {
-        Log.i(Tags.WSOCKET_CLT, "stop");
+        Log.i(Tags.CLT_WSOCKETCTRL, "stop");
         webSocket.close(1000, reason);
     }
 
     @Override
     public void onOpen(WebSocket webSocket) {
-        Log.i(Tags.WSOCKET_CLT, "onOpen");
+        Log.i(Tags.CLT_WSOCKETCTRL, "onOpen");
         this.webSocket = webSocket;
-        status = StatusMessages.WEBSOCKET_OPEN;
+        status = StatusMessages.WEBSOCKET_OPENED;
         webSocket.send(Messages.CLT2SRV_ONOPEN);
     }
 
@@ -77,7 +70,7 @@ public class OkWebSocketClientCtrl implements IOkWebSocketClientListener {
     }
 
     public void sendMessage(String string) {
-        Log.i(Tags.WSOCKET_CLT, "sendMessage");
+        Log.i(Tags.CLT_WSOCKETCTRL, "sendMessage");
         webSocket.send(string);
     }
 }

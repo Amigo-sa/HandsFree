@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.client.websocket;
+package by.citech.websocketduplex.client.network;
 
 import java.util.concurrent.TimeUnit;
 import okhttp3.WebSocket;
@@ -27,7 +27,7 @@ public class OkWebSocketClient extends WebSocketListener {
                 .retryOnConnectionFailure(this.retryOnConnectionFailure)
                 .build();
         Request request = new Request.Builder()
-//              .url("ws://echo.websocket.org")
+//              .url("ws://echo.network.org")
                 .url(this.url)
                 .build();
         client.newWebSocket(request, this);

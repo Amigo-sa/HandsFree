@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.utils;
+package by.citech.websocketduplex.util;
 
 public class DataSources {
     public static final String MIC = "MIC";

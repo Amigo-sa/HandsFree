@@ -5,9 +5,9 @@ import android.util.Log;
 import android.view.View;
 
 import by.citech.websocketduplex.ClientActivity;
-import by.citech.websocketduplex.client.websocket.OkWebSocketClientCtrl;
-import by.citech.websocketduplex.utils.StatusMessages;
-import by.citech.websocketduplex.utils.Tags;
+import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
+import by.citech.websocketduplex.util.StatusMessages;
+import by.citech.websocketduplex.util.Tags;
 
 public class DisconnectTask extends AsyncTask<OkWebSocketClientCtrl, String, Void> {
     private static final int TIMEOUT_PERIOD = 100;
@@ -20,7 +20,7 @@ public class DisconnectTask extends AsyncTask<OkWebSocketClientCtrl, String, Voi
 
     @Override
     protected Void doInBackground(OkWebSocketClientCtrl... clientCtrl) {
-        Log.i(Tags.TASK_SMSG, "DisconnectTask doInBackground");
+        Log.i(Tags.CLT_TASK_SMSG, "DisconnectTask doInBackground");
         clientCtrl[0].stop("User manually closed connection.");
         int i = 0;
 
@@ -47,8 +47,8 @@ public class DisconnectTask extends AsyncTask<OkWebSocketClientCtrl, String, Voi
 
     @Override
     protected void onProgressUpdate(String... status) {
-        Log.i(Tags.TASK_OWS, "DisconnectTask onProgressUpdate");
-        Log.i(Tags.TASK_OWS, status[0]);
+        Log.i(Tags.CLT_TASK_OWS, "DisconnectTask onProgressUpdate");
+        Log.i(Tags.CLT_TASK_OWS, status[0]);
         switch (status[0]) {
             case StatusMessages.WEBSOCKET_CLOSED:
                 activity.textViewCltStatus.setText("Состояние: соединение завершено корректно.");

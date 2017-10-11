@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.client.websocket;
+package by.citech.websocketduplex.client.network;
 
 import okhttp3.WebSocket;
 import okio.ByteString;
