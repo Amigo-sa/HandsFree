@@ -1,56 +1,53 @@
-package by.citech.data;
+package by.citech.websocketduplex.data;
 
 import android.util.Log;
-
 import java.util.ArrayList;
 
-/**
- * Created by tretyak on 04.10.2017.
- */
+import by.citech.websocketduplex.param.Settings;
+import by.citech.websocketduplex.param.Tags;
 
 public class StorageData {
+    private String TAG;
+    private ArrayList<byte[]> databuffer;
 
-        private ArrayList<byte []> databuffer;
-        private boolean open;
-
-    public boolean isOpen() {
-        return open;
-    }
-
-    public void setOpen(boolean open) {
-        this.open = open;
-    }
-
-    public StorageData() {
+    public StorageData(String TAG) {
+        this.TAG = TAG;
         databuffer = new ArrayList<byte[]>();
     }
 
     public synchronized byte[] getData() {
-            byte[]  tmpData;
-            if (databuffer.isEmpty()) {
-                try {
-                    wait();
-                }
-                catch (InterruptedException e) {
-                }
+        if (Settings.debug) Log.i(TAG, "getData");
+        byte[] tmpData;
+
+        if (databuffer.isEmpty()) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Log.i(TAG, "getData cant wait");
             }
-            tmpData = databuffer.get(0);
-            databuffer.remove(0);
-            notify();
-            return tmpData;
         }
 
+        tmpData = databuffer.get(0);
+        databuffer.remove(0);
+        notify();
+        if (Settings.debug) Log.i(TAG, "getData done");
+        return tmpData;
+    }
 
-        public synchronized void putData(byte[] dataByte) {
-            if (databuffer.size() > 100) {
-                try {
-                    wait();
-                }
-                catch (InterruptedException e) {
-                }
+
+    public synchronized void putData(byte[] dataByte) {
+        if (Settings.debug) Log.i(TAG, "putData");
+
+        if (databuffer.size() > Settings.storageMaxSize) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Log.i(TAG, "putData cant wait");
             }
-            databuffer.add(dataByte);
-            notify();
         }
 
+        databuffer.add(dataByte);
+        notify();
+        if (Settings.debug) Log.i(TAG, "putData done");
+    }
 }

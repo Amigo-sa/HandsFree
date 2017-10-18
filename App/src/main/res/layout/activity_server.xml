@@ -30,23 +30,23 @@
         android:id="@+id/btnSrvOn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
         android:onClick="onServer"
         android:text="Server on"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <Button
         android:id="@+id/btnSrvOff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
         android:onClick="offServer"
         android:text="Server off"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnSrvOn" />
 
     <EditText
         android:id="@+id/editTextSrvPort"
@@ -87,36 +87,61 @@
         android:id="@+id/btnSrvSendMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
         android:onClick="sendMessage"
         android:text="Send message"
+        android:layout_marginRight="16dp"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnSrvRedirectData" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="16dp" />
 
     <EditText
         android:id="@+id/editTextSrvToCltText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
         android:ems="10"
         android:hint="Введите сообщение"
         android:inputType="textPersonName"
         android:textSize="14sp"
-        app:layout_constraintRight_toRightOf="parent"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnSrvSendMsg" />
+        app:layout_constraintBottom_toTopOf="@+id/btnSrvSendMsg"
+        android:layout_marginRight="16dp"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ToggleButton
         android:id="@+id/btnSrvRedirectData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
         android:checked="false"
         android:text="Redirect data"
         android:textOff="Redirect ON"
         android:textOn="Redirect OFF"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnSrvOn" />
+        app:layout_constraintBottom_toTopOf="@+id/btnSrvOff" />
+
+    <ToggleButton
+        android:id="@+id/btnSrvSpeakerOn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:text="ToggleButton"
+        android:textOff="Speaker ON"
+        android:textOn="Speaker OFF"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnSrvRedirectData" />
+
+    <EditText
+        android:id="@+id/editTextSrvBuffSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:text="Name"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/editTextSrvToCltText"
+        app:layout_constraintRight_toRightOf="parent" />
 </android.support.constraint.ConstraintLayout>

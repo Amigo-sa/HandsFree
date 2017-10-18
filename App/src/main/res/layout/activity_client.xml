@@ -10,7 +10,7 @@
         android:id="@+id/editTextCltRemSrvAddr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="адрес сервера"
@@ -23,7 +23,6 @@
         android:id="@+id/editTextCltRemSrvPort"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="0dp"
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="порт сервера"
@@ -37,37 +36,37 @@
         android:id="@+id/btnCltConnToSrv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
         android:onClick="connect"
         android:text="Connect"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginBottom="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="16dp" />
 
     <Button
         android:id="@+id/btnCltDiscFromSrv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
         android:onClick="disconnect"
         android:text="Disconnect"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="16dp" />
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnCltConnToSrv" />
 
     <Button
         android:id="@+id/btnCltStreamOn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
         android:onClick="streamOn"
         android:text="Stream on"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnCltConnToSrv"
-        android:layout_marginEnd="15dp" />
+        app:layout_constraintBottom_toTopOf="@+id/btnCltDiscFromSrv"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp" />
 
     <Button
         android:id="@+id/btnCltStreamOff"
@@ -75,18 +74,17 @@
         android:layout_height="wrap_content"
         android:onClick="streamOff"
         android:text="Stream Off"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnCltDiscFromSrv"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintBottom_toTopOf="@+id/btnCltStreamOn" />
 
     <TextView
         android:id="@+id/textViewCltStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
         android:text="------------------"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextCltRemSrvAddr" />
@@ -95,8 +93,8 @@
         android:id="@+id/textViewCltFromSrvText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
         android:text="------------------"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewCltStatus" />
@@ -105,34 +103,50 @@
         android:id="@+id/textViewCltFromSrvByte"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="------------------"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewCltFromSrvText" />
 
-    <Button
-        android:id="@+id/btnCltSendMsg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        android:onClick="sendMessage"
-        android:text="Send message"
-        app:layout_constraintBottom_toTopOf="@+id/btnCltStreamOn"
-        app:layout_constraintRight_toRightOf="parent" />
-
     <EditText
         android:id="@+id/editTextCltToSrvText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:hint="Введите сообщение"
         android:inputType="text"
         android:textSize="14sp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/btnCltSendMsg"
+        android:layout_marginEnd="16dp"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <EditText
+        android:id="@+id/editTextCltBuffSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:ems="10"
+        android:hint="Введите размер буфера"
+        android:inputType="numberDecimal"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/editTextCltToSrvText"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/btnCltSendMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_margin="16dp"
+        android:onClick="sendMessage"
+        android:text="Send message"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="16dp" />
 
 </android.support.constraint.ConstraintLayout>
