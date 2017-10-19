@@ -1,5 +1,5 @@
 package by.citech.websocketduplex.server.network;
 
-public interface IRedirect {
+public interface IRedirectCtrl {
     void redirectOff();
 }

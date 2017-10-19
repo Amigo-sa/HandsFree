@@ -3,20 +3,22 @@ package by.citech.websocketduplex.server.asynctask;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
-
 import java.io.IOException;
-import by.citech.websocketduplex.ServerActivity;
+
+import by.citech.websocketduplex.param.Settings;
+import by.citech.websocketduplex.server.network.IServerOn;
+import by.citech.websocketduplex.server.network.IServerCtrl;
 import by.citech.websocketduplex.server.network.NanoWebSocketServerCtrl;
 import by.citech.websocketduplex.param.StatusMessages;
 import by.citech.websocketduplex.param.Tags;
 
 public class ServerOnTask extends AsyncTask<String, String, Void> {
-    private ServerActivity activity;
+    private IServerOn iServerOn;
     private Handler handler;
-    private NanoWebSocketServerCtrl serverCtrl;
+    private IServerCtrl serverCtrl;
 
-    public ServerOnTask(ServerActivity activity, Handler handler) {
-        this.activity = activity;
+    public ServerOnTask(IServerOn iServerOn, Handler handler) {
+        this.iServerOn = iServerOn;
         this.handler = handler;
     }
 
@@ -27,16 +29,16 @@ public class ServerOnTask extends AsyncTask<String, String, Void> {
         Log.i(Tags.SRV_TASK_SRVON, String.format("%d", portNum));
         serverCtrl = new NanoWebSocketServerCtrl(portNum, handler);
 
-        if (!serverCtrl.isAlive()) {
+        if (!serverCtrl.isAliveServer()) {
             try {
-                serverCtrl.start(50000);
+                serverCtrl.startServer(Settings.serverTimeout);
             } catch (IOException e) {
                 publishProgress(StatusMessages.SRV_CANTSTART);
                 Log.i(Tags.ACT_SRV, "cant start server, IOException");
             }
         }
 
-        while (!serverCtrl.isAlive()) {
+        while (!serverCtrl.isAliveServer()) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -54,13 +56,10 @@ public class ServerOnTask extends AsyncTask<String, String, Void> {
         Log.i(Tags.SRV_TASK_SRVON, "onProgressUpdate");
         switch (status[0]) {
             case StatusMessages.SRV_CANTSTART:
-                activity.textViewSrvStatus.setText("Состояние: не удалось запустить сервер.");
-                activity.btnSrvOn.setEnabled(true);
+                iServerOn.serverCantStart();
                 break;
             case StatusMessages.SRV_STARTED:
-                activity.textViewSrvStatus.setText("Состояние: сервер включен.");
-                activity.serverCtrl = serverCtrl;
-                activity.btnSrvOff.setEnabled(true);
+                iServerOn.serverStarted(serverCtrl);
         }
     }
 }

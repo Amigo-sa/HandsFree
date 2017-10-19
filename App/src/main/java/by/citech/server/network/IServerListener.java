@@ -1,5 +1,5 @@
 package by.citech.websocketduplex.server.network;
 
-interface IServerListener {
+public interface IServerListener {
     public void onMessage (byte[] data);
 }

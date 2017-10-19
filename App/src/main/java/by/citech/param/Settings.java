@@ -7,11 +7,10 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
 public class Settings {
-    
-    public static boolean loopbackBt = true;
     public static DataSource dataSource = DataSource.MICROPHONE;
     public static boolean debug = true;
     public static int bufferSize = 3000;
+    public static boolean testSendOneOnCall = true;
 
     //---------------- AUDIO COMMON
 
@@ -44,7 +43,9 @@ public class Settings {
     public static int serverRemotePortNumber = 8080;
     public static int serverLocalPortNumber = 8080;
     public static boolean reconnect = false;
-    public static long readTimeout = 15000;
+    public static long clientReadTimeout = 15000;
+    public static int serverTimeout = 50000;
     public static long connectTimeout = 15000;
     public static int storageMaxSize = 100;
+    public static boolean ipv4 = true;
 }

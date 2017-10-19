@@ -1,21 +1,22 @@
-package by.citech.websocketduplex.server.network;
+package by.citech.websocketduplex.server.asynctask;
 
 import android.media.AudioAttributes;
-import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 import by.citech.websocketduplex.param.Settings;
 import by.citech.websocketduplex.param.Tags;
+import by.citech.websocketduplex.server.network.IRedirectCtrl;
+import by.citech.websocketduplex.server.network.IServerCtrl;
+import by.citech.websocketduplex.server.network.IServerListener;
 
-public class RedirectToAudio implements IRedirect, IServerListener {
+class RedirectToAudio implements IRedirectCtrl, IServerListener {
     private int bufferSize;
-    private NanoWebSocketServerCtrl serverCtrl;
+    private IServerCtrl serverCtrl;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    public RedirectToAudio(NanoWebSocketServerCtrl serverCtrl, int bufferSize) {
+    RedirectToAudio(IServerCtrl serverCtrl, int bufferSize) {
         this.serverCtrl = serverCtrl;
         this.bufferSize = bufferSize;
     }
@@ -38,7 +39,7 @@ public class RedirectToAudio implements IRedirect, IServerListener {
         if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "redirectOff done");
     }
 
-    public IRedirect start() {
+    public IRedirectCtrl start() {
         if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "start");
         if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, String.format("start audioInBuffersize is %d", bufferSize));
         redirectOff();

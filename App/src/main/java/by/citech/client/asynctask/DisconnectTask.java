@@ -4,26 +4,27 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
-import by.citech.websocketduplex.ClientActivity;
+import by.citech.websocketduplex.client.network.IClientOff;
 import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
+import by.citech.websocketduplex.client.network.IClientCtrl;
 import by.citech.websocketduplex.param.StatusMessages;
 import by.citech.websocketduplex.param.Tags;
 
-public class DisconnectTask extends AsyncTask<OkWebSocketClientCtrl, String, Void> {
+public class DisconnectTask extends AsyncTask<IClientCtrl, String, Void> {
     private static final int TIMEOUT_PERIOD = 500;
     private static final int TIMEOUT_CYCLES = 20;
-    private ClientActivity activity;
+    private IClientOff iClientOff;
 
-    public DisconnectTask (ClientActivity activity) {
-        this.activity = activity;
+    public DisconnectTask (IClientOff iClientOff) {
+        this.iClientOff = iClientOff;
     }
 
     @Override
-    protected Void doInBackground(OkWebSocketClientCtrl... clientCtrl) {
+    protected Void doInBackground(IClientCtrl... clientCtrl) {
         Log.i(Tags.CLT_TASK_DISC, "doInBackground");
 
         if (clientCtrl[0] == null) {
-            Log.i(Tags.CLT_TASK_DISC, "doInBackground clientCtrl is null");
+            Log.i(Tags.CLT_TASK_DISC, "doInBackground iClientCtrl is null");
             publishProgress(StatusMessages.WEBSOCKET_CLOSED);
             return null;
         }
@@ -56,24 +57,13 @@ public class DisconnectTask extends AsyncTask<OkWebSocketClientCtrl, String, Voi
     protected void onProgressUpdate(String... status) {
         Log.i(Tags.CLT_TASK_DISC, "onProgressUpdate");
         Log.i(Tags.CLT_TASK_DISC, status[0]);
-
         switch (status[0]) {
             case StatusMessages.WEBSOCKET_CLOSED:
-                activity.textViewCltStatus.setText("Состояние: соединение завершено корректно.");
+                iClientOff.clientStopped("соединение завершено корректно");
                 break;
             case StatusMessages.WEBSOCKET_CANCEL:
-                activity.textViewCltStatus.setText("Состояние: соединение завершено принудительно.");
+                iClientOff.clientStopped("соединение завершено принудительно");
                 break;
-            default:
-                activity.textViewCltStatus.setText("Состояние: неизвестный статус.");
         }
-
-        activity.editTextCltToSrvText.setVisibility(View.INVISIBLE);
-        activity.btnCltSendMsg.setEnabled(false);
-        activity.btnCltStreamOn.setEnabled(false);
-        activity.btnCltStreamOff.setEnabled(false);
-        activity.btnCltConnToSrv.setEnabled(true);
-        activity.clientCtrl = null;
-        activity.btnCltConnToSrv.setEnabled(true);
     }
 }

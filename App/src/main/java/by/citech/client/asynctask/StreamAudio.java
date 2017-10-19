@@ -1,7 +1,10 @@
-package by.citech.websocketduplex.client.network;
+package by.citech.websocketduplex.client.asynctask;
 
 import android.media.AudioRecord;
 import android.util.Log;
+
+import by.citech.websocketduplex.client.network.IStream;
+import by.citech.websocketduplex.client.network.IClientCtrl;
 import by.citech.websocketduplex.param.Settings;
 import by.citech.websocketduplex.param.Tags;
 import static by.citech.websocketduplex.util.Decode.bytesToHex;
@@ -11,10 +14,10 @@ public class StreamAudio implements IStream {
     private int bufferSize;
     private AudioRecord recorder;
     private boolean isStreaming = false;
-    private OkWebSocketClientCtrl clientCtrl;
+    private IClientCtrl iClientCtrl;
 
-    public StreamAudio(OkWebSocketClientCtrl clientCtrl, int bufferSize) {
-        this.clientCtrl = clientCtrl;
+    public StreamAudio(IClientCtrl iClientCtrl, int bufferSize) {
+        this.iClientCtrl = iClientCtrl;
         this.bufferSize = bufferSize;
     }
 
@@ -64,7 +67,7 @@ public class StreamAudio implements IStream {
             if (Settings.debug) Log.i(Tags.CLT_STREAM_AUDIO, String.format("run buffer length is %d", buffer.length));
             fillBuffer(buffer, 0, buffer.length);
             if (Settings.debug) Log.i(Tags.CLT_STREAM_AUDIO, String.format("run %s: %s", "sendBytes", bytesToHex(buffer)));
-            clientCtrl.sendBytes(buffer);
+            iClientCtrl.sendBytes(buffer);
         }
 
         if (Settings.debug) Log.i(Tags.CLT_STREAM_AUDIO, "run done");

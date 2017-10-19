@@ -18,7 +18,7 @@ import by.citech.websocketduplex.param.Tags;
 
 import static by.citech.websocketduplex.util.Decode.bytesToHex;
 
-public class NanoWebSocketServerCtrl extends NanoWSD {
+public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
     private static final Logger LOG = Logger.getLogger(NanoWebSocketServerCtrl.class.getName());
     private WebSocket webSocket;
     private Handler handler;
@@ -36,9 +36,11 @@ public class NanoWebSocketServerCtrl extends NanoWSD {
         return webSocket;
     }
 
+    //--------------------- IServerCtrl BEGIN
+
+    @Override
     public void sendMessage(String message) {
         if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "sendMessage");
-
         try {
             webSocket.send(message);
         } catch (IOException e) {
@@ -46,9 +48,9 @@ public class NanoWebSocketServerCtrl extends NanoWSD {
         }
     }
 
+    @Override
     public void closeSocket() {
         if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeSocket");
-
         try {
             webSocket.close(CloseCode.NormalClosure, "Its all about me, DARLING", false);
         } catch (IOException e) {
@@ -56,19 +58,38 @@ public class NanoWebSocketServerCtrl extends NanoWSD {
         }
     }
 
-    public WebSocket getWebSocket() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getWebSocket");
-
-        return webSocket;
-    }
-
+    @Override
     public void setListener(IServerListener listener) {
         this.listener = listener;
     }
 
+    @Override
+    public WebSocket getWebSocket() {
+        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getWebSocket");
+        return webSocket;
+    }
+
+    @Override
     public String getStatus () {
         return this.status;
     }
+
+    @Override
+    public void startServer(int serverTimeout) throws IOException {
+        start(serverTimeout);
+    }
+
+    @Override
+    public boolean isAliveServer() {
+        return isAlive();
+    }
+
+    @Override
+    public void stopServer() {
+        stop();
+    }
+
+    //--------------------- IServerCtrl END
 
 //  private static class DebugWebSocket extends WebSocket {
     private class DebugWebSocket extends WebSocket {

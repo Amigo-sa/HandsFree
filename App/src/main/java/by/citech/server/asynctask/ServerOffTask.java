@@ -3,21 +3,23 @@ package by.citech.websocketduplex.server.asynctask;
 import android.os.AsyncTask;
 import android.util.Log;
 import by.citech.websocketduplex.ServerActivity;
+import by.citech.websocketduplex.server.network.IServerCtrl;
+import by.citech.websocketduplex.server.network.IServerOff;
 import by.citech.websocketduplex.server.network.NanoWebSocketServerCtrl;
 import by.citech.websocketduplex.server.network.websockets.WebSocket;
 import by.citech.websocketduplex.param.StatusMessages;
 import by.citech.websocketduplex.param.Tags;
 
 public class ServerOffTask extends AsyncTask<Void, Void, Void> {
-    private ServerActivity activity;
-    private NanoWebSocketServerCtrl serverCtrl;
+    private IServerOff iServerOff;
+    private IServerCtrl serverCtrl;
 
-    public ServerOffTask(ServerActivity activity, NanoWebSocketServerCtrl serverCtrl) throws Exception {
+    public ServerOffTask(IServerOff iServerOff, IServerCtrl serverCtrl) throws Exception {
         if (serverCtrl == null) {
             throw new Exception("serverCtrl is null");
         }
 
-        this.activity = activity;
+        this.iServerOff = iServerOff;
         this.serverCtrl = serverCtrl;
     }
 
@@ -43,10 +45,10 @@ public class ServerOffTask extends AsyncTask<Void, Void, Void> {
             Log.i(Tags.SRV_TASK_SRVOFF, "doInBackground socket null or already closed");
         }
 
-        if (serverCtrl.isAlive()) {
-            serverCtrl.stop();
+        if (serverCtrl.isAliveServer()) {
+            serverCtrl.stopServer();
 
-            while (serverCtrl.isAlive()) {
+            while (serverCtrl.isAliveServer()) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -65,8 +67,6 @@ public class ServerOffTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         Log.i(Tags.SRV_TASK_SRVOFF, "onProgressUpdate");
-        activity.btnSrvOff.setEnabled(false);
-        activity.btnSrvOn.setEnabled(true);
-        activity.textViewSrvStatus.setText("Состояние: сервер выключен.");
+        iServerOff.serverStopped();
     }
 }

@@ -20,20 +20,20 @@ import by.citech.websocketduplex.param.Settings;
 import by.citech.websocketduplex.server.asynctask.RedirectDataTask;
 import by.citech.websocketduplex.server.asynctask.ServerOffTask;
 import by.citech.websocketduplex.server.asynctask.ServerOnTask;
-import by.citech.websocketduplex.server.network.IRedirect;
-import by.citech.websocketduplex.server.network.NanoWebSocketServerCtrl;
+import by.citech.websocketduplex.server.network.IRedirectCtrl;
+import by.citech.websocketduplex.server.network.IServerOff;
+import by.citech.websocketduplex.server.network.IServerOn;
+import by.citech.websocketduplex.server.network.IServerCtrl;
+import by.citech.websocketduplex.server.network.IRedirectOn;
 import by.citech.websocketduplex.server.network.websockets.WebSocketFrame;
 import by.citech.websocketduplex.param.StatusMessages;
 import by.citech.websocketduplex.param.Tags;
-
 import static by.citech.websocketduplex.util.Decode.bytesToHex;
 import static by.citech.websocketduplex.util.NetworkInfo.getIPAddress;
 
-public class ServerActivity extends Activity implements OnCheckedChangeListener {
-    private static final boolean IPV4 = true;
-
-    public NanoWebSocketServerCtrl serverCtrl;
-    public IRedirect iRedirect;
+public class ServerActivity extends Activity implements OnCheckedChangeListener, IServerOn, IServerOff, IRedirectOn {
+    public IServerCtrl serverCtrl;
+    public IRedirectCtrl iRedirectCtrl;
     private Handler handler;
 
     public ToggleButton btnSrvRedirectData;
@@ -120,7 +120,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
         editTextSrvToCltText.setVisibility(View.INVISIBLE);
         editTextSrvBuffSize.setText(String.format("%d", Settings.bufferSize));
         editTextSrvPort.setText(String.format("%d", Settings.serverLocalPortNumber));
-        editTextSrvIp.setText(getIPAddress(IPV4));
+        editTextSrvIp.setText(getIPAddress(Settings.ipv4));
         editTextSrvIp.setFocusable(false);
 
         btnSrvOff.setEnabled(false);
@@ -133,7 +133,6 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
 
     public void offServer(View view) {
         Log.i(Tags.ACT_SRV, "offServer");
-
         try {
             new ServerOffTask(this, serverCtrl).execute();
         } catch (Exception e) {
@@ -153,8 +152,6 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
         editTextSrvToCltText.setText("");
     }
 
-
-
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Log.i(Tags.ACT_SRV, "onCheckedChanged");
@@ -163,9 +160,9 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
             case (R.id.btnSrvRedirectData):
                 if (isChecked) {
                     Log.i(Tags.ACT_SRV, "onCheckedChanged redirect on");
-                    Context context = getApplicationContext();
-                    AudioManager audiomanager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                    audiomanager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+//                  Context context = getApplicationContext();
+//                  AudioManager audiomanager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+//                  audiomanager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                     new RedirectDataTask(this, serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
                 } else {
                     Log.i(Tags.ACT_SRV, "onCheckedChanged redirect off");
@@ -173,9 +170,9 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
                         @Override
                         public void run() {
                             Log.i(Tags.ACT_CLT, "redirectOff run in new thread");
-                            iRedirect.redirectOff();
+                            iRedirectCtrl.redirectOff();
                             Log.i(Tags.ACT_CLT, "redirectOff run done in new thread");
-                            iRedirect = null;
+                            iRedirectCtrl = null;
                         }
                     }).start();
                 }
@@ -199,7 +196,6 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
     protected void onStop() {
         Log.i(Tags.ACT_SRV, "onStop");
         super.onStop();
-
         try {
             new ServerOffTask(this, serverCtrl).execute();
         } catch (Exception e) {
@@ -211,7 +207,6 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
     protected void onDestroy() {
         Log.i(Tags.ACT_SRV, "onDestroy");
         super.onDestroy();
-
         try {
             new ServerOffTask(this, serverCtrl).execute();
         } catch (Exception e) {
@@ -223,11 +218,34 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener 
     protected void onPause() {
         Log.i(Tags.ACT_SRV, "onPause");
         super.onPause();
-
         try {
             new ServerOffTask(this, serverCtrl).execute();
         } catch (Exception e) {
             Log.i(Tags.ACT_SRV, "onPause serverCtrl is null");
         }
+    }
+
+    @Override
+    public void serverStarted(IServerCtrl iServerCtrl) {
+        textViewSrvStatus.setText("Состояние: сервер включен.");
+        btnSrvOff.setEnabled(true);
+    }
+
+    @Override
+    public void serverCantStart() {
+        textViewSrvStatus.setText("Состояние: не удалось запустить сервер.");
+        btnSrvOn.setEnabled(true);
+    }
+
+    @Override
+    public void serverStopped() {
+        btnSrvOff.setEnabled(false);
+        btnSrvOn.setEnabled(true);
+        textViewSrvStatus.setText("Состояние: сервер выключен.");
+    }
+
+    @Override
+    public void setRedirect(IRedirectCtrl iRedirectCtrl) {
+        this.iRedirectCtrl = iRedirectCtrl;
     }
 }

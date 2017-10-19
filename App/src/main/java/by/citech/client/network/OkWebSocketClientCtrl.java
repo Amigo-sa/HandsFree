@@ -3,6 +3,7 @@ package by.citech.websocketduplex.client.network;
 import android.os.Handler;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
+
 import by.citech.websocketduplex.param.Settings;
 import by.citech.websocketduplex.param.Tags;
 import okhttp3.OkHttpClient;
@@ -16,7 +17,7 @@ import by.citech.websocketduplex.param.StatusMessages;
 
 import static by.citech.websocketduplex.util.Decode.bytesToHex;
 
-public class OkWebSocketClientCtrl extends WebSocketListener {
+public class OkWebSocketClientCtrl extends WebSocketListener implements IClientCtrl {
     private WebSocket webSocket;
     private String status = "";
     private String url = "";
@@ -27,10 +28,11 @@ public class OkWebSocketClientCtrl extends WebSocketListener {
         this.handler = handler;
     }
 
+    @Override
     public void run() {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "run");
         OkHttpClient client = new OkHttpClient.Builder()
-                .readTimeout(Settings.readTimeout, TimeUnit.MILLISECONDS)
+                .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
                 .retryOnConnectionFailure(Settings.reconnect)
                 .build();
@@ -43,28 +45,30 @@ public class OkWebSocketClientCtrl extends WebSocketListener {
         client.dispatcher().executorService().shutdown();
     }
 
+    @Override
     public void cancel() {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "cancel");
-
         if (webSocket != null) {
             webSocket.cancel();
             handler.sendEmptyMessage(StatusMessages.CLT_CANCEL);
         }
     }
 
+    @Override
     public void stop(String reason) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "stop");
-
         if (webSocket != null) {
             webSocket.close(1000, reason);
         }
     }
 
+    @Override
     public String getStatus() {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "getStatus");
         return this.status;
     }
 
+    @Override
     public void sendBytes(byte... bytes) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "sendBytes");
         Log.i(Tags.CLT_WSOCKETCTRL, String.format("sendBytes: bytes is <%s>", bytesToHex(bytes)));
@@ -73,6 +77,7 @@ public class OkWebSocketClientCtrl extends WebSocketListener {
         webSocket.send(byteString);
     }
 
+    @Override
     public void sendMessage(String string) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "sendMessage");
         webSocket.send(string);

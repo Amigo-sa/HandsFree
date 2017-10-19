@@ -18,19 +18,23 @@ import by.citech.websocketduplex.client.asynctask.DisconnectTask;
 import by.citech.websocketduplex.client.asynctask.OpenWebSocketTask;
 import by.citech.websocketduplex.client.asynctask.SendMessageToServerTask;
 import by.citech.websocketduplex.client.asynctask.StreamTask;
+import by.citech.websocketduplex.client.network.IClientOff;
+import by.citech.websocketduplex.client.network.IClientOn;
+import by.citech.websocketduplex.client.network.IMessage;
 import by.citech.websocketduplex.client.network.IStream;
-import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
+import by.citech.websocketduplex.client.network.IStreamOn;
+import by.citech.websocketduplex.client.network.IClientCtrl;
 import by.citech.websocketduplex.param.Settings;
 import by.citech.websocketduplex.param.StatusMessages;
 import by.citech.websocketduplex.param.Tags;
 import okio.ByteString;
 
-public class ClientActivity extends Activity {
+public class ClientActivity extends Activity implements IClientOn, IClientOff, IStreamOn, IMessage {
     private static final int RECORD_AUDIO_REQUEST_CODE = 1;
 
     private Handler handler;
     private boolean isPermittedAudioRecord;
-    public OkWebSocketClientCtrl clientCtrl;
+    public IClientCtrl iClientCtrl;
     public IStream iStream;
 
     public TextView textViewCltStatus;
@@ -144,7 +148,7 @@ public class ClientActivity extends Activity {
     public void disconnect(View view) {
         Log.i(Tags.ACT_CLT, "disconnect");
         btnCltDiscFromSrv.setEnabled(false);
-        new DisconnectTask(this).execute(clientCtrl);
+        new DisconnectTask(this).execute(iClientCtrl);
     }
 
     public void streamOn(View view) {
@@ -163,7 +167,7 @@ public class ClientActivity extends Activity {
             btnCltStreamOn.setEnabled(false);
             btnCltDiscFromSrv.setEnabled(false);
             btnCltSendMsg.setEnabled(false);
-            new StreamTask(this, clientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
+            new StreamTask(this, iClientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
             btnCltStreamOff.setEnabled(true);
         }
     }
@@ -198,7 +202,7 @@ public class ClientActivity extends Activity {
     public void sendMessage(View view) {
         Log.i(Tags.ACT_CLT, "sendMessage");
         btnCltSendMsg.setEnabled(false);
-        new SendMessageToServerTask(this, clientCtrl).execute(editTextCltToSrvText.getText().toString());
+        new SendMessageToServerTask(this, iClientCtrl).execute(editTextCltToSrvText.getText().toString());
     }
 
     private void requestRecordAudioPermission() {
@@ -277,8 +281,36 @@ public class ClientActivity extends Activity {
 
     private void turnOffSocket() {
         Log.i(Tags.ACT_CLT, "turnOffSocket");
-        if (clientCtrl != null) {
-            new DisconnectTask(this).execute(clientCtrl);
+        if (iClientCtrl != null) {
+            new DisconnectTask(this).execute(iClientCtrl);
         }
+    }
+
+    @Override
+    public void setStream(IStream iStream) {
+        this.iStream = iStream;
+    }
+
+    @Override
+    public void clientStopped(String reason) {
+        textViewCltStatus.setText("Состояние: " + reason);
+        editTextCltToSrvText.setVisibility(View.INVISIBLE);
+        btnCltSendMsg.setEnabled(false);
+        btnCltStreamOn.setEnabled(false);
+        btnCltStreamOff.setEnabled(false);
+        btnCltConnToSrv.setEnabled(true);
+        btnCltConnToSrv.setEnabled(true);
+    }
+
+    @Override
+    public void clientStarted(IClientCtrl iClientCtrl) {
+        this.iClientCtrl = iClientCtrl;
+    }
+
+    @Override
+    public void messageSended() {
+        editTextCltToSrvText.setText("");
+        btnCltSendMsg.setEnabled(true);
+        textViewCltStatus.setText("Состояние: сообщение отправлено");
     }
 }

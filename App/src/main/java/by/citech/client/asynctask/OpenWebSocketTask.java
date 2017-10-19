@@ -5,16 +5,18 @@ import android.os.Handler;
 import android.util.Log;
 
 import by.citech.websocketduplex.ClientActivity;
+import by.citech.websocketduplex.client.network.IClientCtrl;
+import by.citech.websocketduplex.client.network.IClientOn;
 import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
 import by.citech.websocketduplex.param.Tags;
 
 public class OpenWebSocketTask extends AsyncTask<String, Void, Void> {
-    private ClientActivity activity;
+    private IClientOn iClientOn;
     private Handler handler;
-    private OkWebSocketClientCtrl clientCtrl;
+    private IClientCtrl clientCtrl;
 
-    public OpenWebSocketTask (ClientActivity activity, Handler handler) {
-        this.activity = activity;
+    public OpenWebSocketTask (IClientOn iClientOn, Handler handler) {
+        this.iClientOn = iClientOn;
         this.handler = handler;
     }
 
@@ -23,13 +25,12 @@ public class OpenWebSocketTask extends AsyncTask<String, Void, Void> {
         Log.i(Tags.CLT_TASK_OWS, url[0]);
         clientCtrl = new OkWebSocketClientCtrl(url[0], handler);
         clientCtrl.run();
-        publishProgress();
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         Log.i(Tags.CLT_TASK_OWS, "onPostExecute");
-        activity.clientCtrl = clientCtrl;
+        iClientOn.clientStarted(clientCtrl);
     }
 }
