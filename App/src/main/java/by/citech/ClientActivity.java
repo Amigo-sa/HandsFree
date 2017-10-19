@@ -15,7 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import by.citech.client.asynctask.DisconnectTask;
-import by.citech.client.asynctask.OpenWebSocketTask;
+import by.citech.client.asynctask.ConnectTask;
 import by.citech.client.asynctask.SendMessageToServerTask;
 import by.citech.client.asynctask.StreamTask;
 import by.citech.client.network.IClientOff;
@@ -194,7 +194,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     public void connect(View view) {
         Log.i(Tags.ACT_CLT, "connect");
         btnCltConnToSrv.setEnabled(false);
-        new OpenWebSocketTask(this, handler).execute(String.format("ws://%s:%s",
+        new ConnectTask(this, handler).execute(String.format("ws://%s:%s",
                 editTextCltRemSrvAddr.getText().toString(),
                 editTextCltRemSrvPort.getText().toString()));
     }
@@ -312,5 +312,11 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
         editTextCltToSrvText.setText("");
         btnCltSendMsg.setEnabled(true);
         textViewCltStatus.setText("Состояние: сообщение отправлено");
+    }
+
+    @Override
+    public void messageCantSend() {
+        btnCltSendMsg.setEnabled(true);
+        textViewCltStatus.setText("Состояние: сообщение не удалось отправлено");
     }
 }

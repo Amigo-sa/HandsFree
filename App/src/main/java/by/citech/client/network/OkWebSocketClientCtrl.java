@@ -29,7 +29,7 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
     }
 
     @Override
-    public void run() {
+    public IClientCtrl run() {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "run");
         OkHttpClient client = new OkHttpClient.Builder()
                 .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
@@ -43,6 +43,7 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
         client.newWebSocket(request, this);
         // Trigger shutdown of the dispatcher's executor so this process can exit cleanly.
         client.dispatcher().executorService().shutdown();
+        return this;
     }
 
     @Override
@@ -103,6 +104,7 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
         this.webSocket = webSocket;
         status = StatusMessages.WEBSOCKET_OPENED;
         webSocket.send(Messages.CLT2SRV_ONOPEN);
+        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onOpen message sended");
         handler.sendEmptyMessage(StatusMessages.CLT_ONOPEN);
     }
 

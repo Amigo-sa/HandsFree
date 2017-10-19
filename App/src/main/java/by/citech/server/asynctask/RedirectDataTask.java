@@ -2,7 +2,6 @@ package by.citech.server.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import by.citech.data.StorageData;
 import by.citech.param.DataSource;
 import by.citech.param.Settings;
@@ -24,6 +23,7 @@ public class RedirectDataTask extends AsyncTask<String, IRedirectCtrl, Void> {
     }
 
     public RedirectDataTask(IRedirectOn iRedirectOn, IServerCtrl iServerCtrl, DataSource dataSource, StorageData storageNetToBt) {
+        if (Settings.debug) Log.i(Tags.SRV_TASK_REDIR, "RedirectDataTask");
         this.iRedirectOn = iRedirectOn;
         this.iServerCtrl = iServerCtrl;
         this.dataSource = dataSource;
@@ -36,15 +36,21 @@ public class RedirectDataTask extends AsyncTask<String, IRedirectCtrl, Void> {
         switch (dataSource) {
             case MICROPHONE:
                 Log.i(Tags.SRV_TASK_REDIR, "doInBackground redirect to audio");
-                RedirectToAudio redirectToAudio = new RedirectToAudio(iServerCtrl, Integer.parseInt(params[0]));
+                final RedirectToAudio redirectToAudio = new RedirectToAudio(iServerCtrl, Integer.parseInt(params[0]));
                 publishProgress(redirectToAudio.start());
-                redirectToAudio.run();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        redirectToAudio.run();
+                    }
+                }).start();
                 break;
             case BLUETOOTH:
                 Log.i(Tags.SRV_TASK_REDIR, "doInBackground redirect to bluetooth");
                 RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iServerCtrl, Settings.bufferSize, storageNetToBt);
                 publishProgress(redirectToBluetooth.start());
                 redirectToBluetooth.run();
+                break;
         }
         return null;
     }

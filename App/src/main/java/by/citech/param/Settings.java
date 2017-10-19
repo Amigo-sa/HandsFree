@@ -7,10 +7,10 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
 public class Settings {
-    public static DataSource dataSource = DataSource.MICROPHONE;
+    public static DataSource dataSource = DataSource.BLUETOOTH;
     public static boolean debug = true;
     public static int bufferSize = 3000;
-    public static boolean testSendOneOnCall = true;
+    public static boolean testSendOneOnCall = false;
 
     //---------------- AUDIO COMMON
 
@@ -39,9 +39,9 @@ public class Settings {
 
     //---------------- NETWORK
 
-    public static String serverRemoteIpAddress = "192.168.0.129";
-    public static int serverRemotePortNumber = 8081;
+    public static String serverRemoteIpAddress = "192.168.0.126";
     public static int serverLocalPortNumber = 8080;
+    public static int serverRemotePortNumber = 8081;
     public static boolean reconnect = false;
     public static long clientReadTimeout = 15000;
     public static int serverTimeout = 50000;

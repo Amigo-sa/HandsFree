@@ -13,31 +13,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <iStreamOn android:name=".NetworkActivity"
+        <activity android:name=".NetworkActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </iStreamOn>
+        </activity>
 
-        <iStreamOn
+        <activity
             android:name=".ClientActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".NetworkActivity">
-        </iStreamOn>
+        </activity>
 
-        <iStreamOn
+        <activity
             android:name=".ServerActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".NetworkActivity">
-        </iStreamOn>
+        </activity>
 
-        <iStreamOn
+        <activity
             android:name=".DuplexActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".NetworkActivity">
-        </iStreamOn>
+        </activity>
     </application>
 
 </manifest>

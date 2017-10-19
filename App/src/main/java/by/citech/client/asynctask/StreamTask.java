@@ -2,7 +2,6 @@ package by.citech.client.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import by.citech.client.network.IStream;
 import by.citech.client.network.IStreamOn;
 import by.citech.client.network.IClientCtrl;
@@ -33,7 +32,6 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
     @Override
     protected Void doInBackground(String... params) {
         Log.i(Tags.CLT_TASK_STREAM, "doInBackground");
-
         switch (dataSource) {
             case MICROPHONE:
                 StreamAudio streamAudio = new StreamAudio(iClientCtrl, Integer.parseInt(params[0]));
@@ -41,9 +39,14 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
                 streamAudio.run();
                 break;
             case BLUETOOTH:
-                StreamBluetooth streamBluetooth = new StreamBluetooth(iClientCtrl, Settings.bufferSize, storageBtToNet);
+                final StreamBluetooth streamBluetooth = new StreamBluetooth(iClientCtrl, Settings.bufferSize, storageBtToNet);
                 publishProgress(streamBluetooth.start());
-                streamBluetooth.run();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        streamBluetooth.run();
+                    }
+                }).start();
                 break;
         }
 

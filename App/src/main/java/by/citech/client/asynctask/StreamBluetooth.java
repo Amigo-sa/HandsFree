@@ -22,12 +22,12 @@ class StreamBluetooth implements IStream {
     }
 
     public IStream start() {
-        if (Settings.debug) Log.i(Tags.DPL_STREAM_BLUETOOTH, "streamOff");
+        if (Settings.debug) Log.i(Tags.CLT_STREAM_BLUETOOTH, "start");
         return this;
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.DPL_STREAM_BLUETOOTH, "run");
+        if (Settings.debug) Log.i(Tags.CLT_STREAM_BLUETOOTH, "run");
         isStreaming = true;
         while (isStreaming) {
             buffer = storageBtToNet.getData();
@@ -35,12 +35,12 @@ class StreamBluetooth implements IStream {
                 iClientCtrl.sendBytes(buffer);
             }
         }
-        if (Settings.debug) Log.i(Tags.DPL_STREAM_BLUETOOTH, "run done");
+        if (Settings.debug) Log.i(Tags.CLT_STREAM_BLUETOOTH, "run done");
     }
 
     @Override
     public void streamOff() {
-        if (Settings.debug) Log.i(Tags.DPL_STREAM_BLUETOOTH, "streamOff");
+        if (Settings.debug) Log.i(Tags.CLT_STREAM_BLUETOOTH, "streamOff");
         isStreaming = false;
         storageBtToNet.notify();
     }

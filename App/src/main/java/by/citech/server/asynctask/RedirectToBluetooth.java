@@ -10,12 +10,12 @@ import by.citech.server.network.IServerListener;
 
 class RedirectToBluetooth implements IRedirectCtrl, IServerListener{
     private int bufferSize;
-    private IServerCtrl serverCtrl;
+    private IServerCtrl iServerCtrl;
     private StorageData storageNetToBt;
     private boolean isRedirecting = false;
 
-    RedirectToBluetooth(IServerCtrl serverCtrl, int bufferSize, StorageData storageNetToBt) {
-        this.serverCtrl = serverCtrl;
+    RedirectToBluetooth(IServerCtrl iServerCtrl, int bufferSize, StorageData storageNetToBt) {
+        this.iServerCtrl = iServerCtrl;
         this.bufferSize = bufferSize;
         this.storageNetToBt = storageNetToBt;
     }
@@ -28,7 +28,7 @@ class RedirectToBluetooth implements IRedirectCtrl, IServerListener{
     public void run() {
         if (Settings.debug) Log.i(Tags.SRV_REDIR_BLUETOOTH, "run");
         isRedirecting = true;
-        serverCtrl.setListener(this);
+        iServerCtrl.setListener(this);
         if (Settings.debug) Log.i(Tags.SRV_REDIR_BLUETOOTH, "run done");
     }
 

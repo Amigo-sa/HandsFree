@@ -10,8 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import by.citech.client.asynctask.OpenWebSocketTask;
-import by.citech.client.asynctask.SendMessageToServerTask;
+import by.citech.client.asynctask.ConnectTask;
 import by.citech.client.asynctask.StreamTask;
 import by.citech.client.network.IClientCtrl;
 import by.citech.client.network.IClientOn;
@@ -51,8 +50,8 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_duplex);
         final DuplexActivity activity = this;
-        storageBtToNet = new StorageData(Tags.DPL_STORE_BT2NET);
-        storageNetToBt = new StorageData(Tags.DPL_STORE_NET2BT);
+        storageBtToNet = new StorageData(Tags.CLT_STORE_BT2NET);
+        storageNetToBt = new StorageData(Tags.SRV_STORE_NET2BT);
 
         handler = new Handler() {
             @Override
@@ -67,7 +66,9 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
                     case StatusMessages.SRV_ONOPEN:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
                         if (Settings.testSendOneOnCall) {
-                            new SendMessageToServerTask(DuplexActivity.this, iClientCtrl).execute("FUCK YOU ASSHOLE");
+                            new ConnectTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
+                                    editTextSrvRemAddrDpl.getText().toString(),
+                                    editTextSrvRemPortDpl.getText().toString()));
                         } else {
                             callIn();
                         }
@@ -127,7 +128,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
 
     private void callOut() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "call");
-        new OpenWebSocketTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
+        new ConnectTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
                 editTextSrvRemAddrDpl.getText().toString(),
                 editTextSrvRemPortDpl.getText().toString()));
         if (iClientCtrl == null) {
@@ -174,5 +175,10 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
     @Override
     public void messageSended() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "messageSended");
+    }
+
+    @Override
+    public void messageCantSend() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "messageCantSend");
     }
 }

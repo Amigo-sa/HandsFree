@@ -4,7 +4,7 @@ public interface IClientCtrl {
     void sendBytes(byte... bytes);
     String getStatus();
     void cancel();
-    void run();
+    IClientCtrl run();
     void stop(String reason);
     void sendMessage(String string);
 }

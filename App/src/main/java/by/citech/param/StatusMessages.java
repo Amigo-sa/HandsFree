@@ -19,11 +19,14 @@ public final class StatusMessages {
     public static final int SRV_ONDEBUGFRAMERX = 5;
     public static final int SRV_ONDEBUGFRAMETX = 6;
 
-    public static final int CLT_ONOPEN = 0;
-    public static final int CLT_ONMESSAGE_BYTES = 1;
-    public static final int CLT_ONMESSAGE_TEXT = 2;
-    public static final int CLT_ONCLOSING = 3;
-    public static final int CLT_ONCLOSED = 4;
-    public static final int CLT_ONFAILURE = 5;
-    public static final int CLT_CANCEL = 6;
+    public static final int CLT_ONOPEN = 10;
+    public static final int CLT_ONMESSAGE_BYTES = 11;
+    public static final int CLT_ONMESSAGE_TEXT = 12;
+    public static final int CLT_ONCLOSING = 13;
+    public static final int CLT_ONCLOSED = 14;
+    public static final int CLT_ONFAILURE = 15;
+    public static final int CLT_CANCEL = 16;
+
+    public static final String CLT_MESSAGE_CANT = "CLT_MESSAGE_CANT";
+    public static final String CLT_MESSAGE_SENDED = "CLT_MESSAGE_SENDED";
 }
