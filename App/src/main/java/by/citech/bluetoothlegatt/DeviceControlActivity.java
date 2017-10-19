@@ -31,6 +31,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
@@ -55,8 +57,15 @@ public class DeviceControlActivity extends Activity {
     private TextView mConnectionState;
     //выводим на дисплей принимаемые данные
     private TextView mDataField;
+    private TextView mwDataField;
     private String   mDeviceName;
     private String   mDeviceAddress;
+    // Вьюхи для соединения с интернетом
+    private Button   btn;
+    private EditText locAddr;
+    private EditText remAddr;
+    private EditText locPort;
+    private EditText remPort;
     // разворачивающийся на экране список сервисов и характеристик переферийного устройства (сервера)
     private ExpandableListView mGattServicesList;
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
@@ -66,6 +75,7 @@ public class DeviceControlActivity extends Activity {
     private boolean mConnected = false;
     // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
     private BluetoothGattCharacteristic mNotifyCharacteristic;
+    private boolean oneClick;
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -113,9 +123,14 @@ public class DeviceControlActivity extends Activity {
                 clearUI();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 // Show all the supported services and characteristics on the user interface.
+
                 displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                //enableTransmitData();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+            } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
+                displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));
+                //Log.w(TAG,"write data to dispaly");
             }
         }
     };
@@ -133,6 +148,10 @@ public class DeviceControlActivity extends Activity {
                     if (mGattCharacteristics != null) {
                         // получаем характеристику
                         final BluetoothGattCharacteristic characteristic = mGattCharacteristics.get(groupPosition).get(childPosition);
+                        //final BluetoothGattCharacteristic characteristic_write = mGattCharacteristics.get(3).get(0);
+
+                        Log.e(TAG, "characteritic groupPosition = " + groupPosition + "\n" +
+                                   "childPosition = " + childPosition );
                         // получаем свойство характеристики
                         final int charaProp = characteristic.getProperties();
 /*
@@ -163,6 +182,8 @@ public class DeviceControlActivity extends Activity {
                         if ((charaProp & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == BluetoothGattCharacteristic.PROPERTY_NOTIFY) {
                             mNotifyCharacteristic = characteristic;
                             mBluetoothLeService.setCharacteristicNotification(characteristic, true);
+                            //Log.e(TAG, "Notification enabled");
+
                         }
                         /*
                         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0) {
@@ -193,6 +214,7 @@ public class DeviceControlActivity extends Activity {
                                 }
 
                                 mBluetoothLeService.writeCharacteristic(characteristic);
+                                //mBluetoothLeService.writeCharacteristic(characteristic_write);
                            }
                         }
 
@@ -207,6 +229,7 @@ public class DeviceControlActivity extends Activity {
     private void clearUI() {
         mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
         mDataField.setText(R.string.no_data);
+        mwDataField.setText(R.string.no_data);
     }
 
     @Override
@@ -224,12 +247,30 @@ public class DeviceControlActivity extends Activity {
         mGattServicesList.setOnChildClickListener(servicesListClickListner);
         mConnectionState = (TextView) findViewById(R.id.connection_state);
         mDataField = (TextView) findViewById(R.id.data_value);
+        mwDataField = (TextView) findViewById(R.id.wdata_value);
 
+        btn = (Button) findViewById(R.id.btnCall);
+        locAddr = (EditText)  findViewById(R.id.editTextSrvLocAddr);
+        locAddr.setFocusable(false);
+        remAddr = (EditText)  findViewById(R.id.editTextSrvRemAddr);
+        locPort= (EditText)  findViewById(R.id.editTextSrvLocPort);
+        remPort= (EditText)  findViewById(R.id.editTextSrvRemPort);
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         // привязываем сервис
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        // устанавливаем только одно нажатие клавиши Call
+         oneClick = true;
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (oneClick) {
+                    enableTransmitData();
+                    oneClick = false;
+                }
+            }
+        });
     }
 
     // по запуску регистрируем наш BroadcastReceiver
@@ -254,16 +295,22 @@ public class DeviceControlActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
+        if(mBluetoothLeService.getWriteThread() != null)
+            mBluetoothLeService.stopWriteThread();
         mBluetoothLeService = null;
+
     }
     // создаём меню в котором указываем кнопку соединения устройства
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.gatt_services, menu);
         if (mConnected) {
+            oneClick = true;
             menu.findItem(R.id.menu_connect).setVisible(false);
             menu.findItem(R.id.menu_disconnect).setVisible(true);
         } else {
+            if(mBluetoothLeService != null)
+                mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
             menu.findItem(R.id.menu_connect).setVisible(true);
             menu.findItem(R.id.menu_disconnect).setVisible(false);
         }
@@ -279,6 +326,7 @@ public class DeviceControlActivity extends Activity {
                 mBluetoothLeService.connect(mDeviceAddress);
                 return true;
             case R.id.menu_disconnect:
+
                 mBluetoothLeService.disconnect();
                 return true;
             case android.R.id.home:
@@ -296,10 +344,17 @@ public class DeviceControlActivity extends Activity {
             }
         });
     }
-    // отображение данных на дисплее
+    // отображение данных нотификации на дисплее
     private void displayData(String data) {
         if (data != null) {
             mDataField.setText(data);
+        }
+    }
+
+    // отображение данных записи на дисплее
+    private void displayWdata(String data) {
+        if (data != null) {
+            mwDataField.setText(data);
         }
     }
 
@@ -307,6 +362,17 @@ public class DeviceControlActivity extends Activity {
     // In this sample, we populate the data structure that is bound to the ExpandableListView
     // on the UI.
     // процедура обработки и отображения доступных сервисов и характеристик на дисплее
+
+
+    private void enableTransmitData(){
+        mBluetoothLeService.initStore();
+        mNotifyCharacteristic = mGattCharacteristics.get(3).get(2);
+        mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
+        final BluetoothGattCharacteristic characteristic_write = mGattCharacteristics.get(3).get(1);
+        mBluetoothLeService.writeCharacteristic(characteristic_write);
+
+    }
+
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
         // обьявляем переменные для будущих сервисов и характеристик
@@ -365,7 +431,7 @@ public class DeviceControlActivity extends Activity {
                 new String[] {LIST_NAME, LIST_UUID},
                 new int[] { android.R.id.text1, android.R.id.text2 }
         );
-        mGattServicesList.setAdapter(gattServiceAdapter);
+       // mGattServicesList.setAdapter(gattServiceAdapter);
     }
     // определяем фильтр для нашего BroadcastReceivera, чтобы регистрировать конкретные события
     private static IntentFilter makeGattUpdateIntentFilter() {
@@ -374,6 +440,7 @@ public class DeviceControlActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_WRITE);
         return intentFilter;
     }
 }

@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -37,6 +38,8 @@ import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
+
+import static android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_HIGH;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -50,6 +53,7 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
+    private  WriterTransmitter wrt;
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -60,7 +64,9 @@ public class BluetoothLeService extends Service {
     public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String ACTION_DATA_WRITE = "com.example.bluetooth.le.ACTION_DATA_WRITE";
     public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String EXTRA_WDATA = "com.example.bluetooth.le.EXTRA_WDATA";
 
     // UUID устройства HEART_RATE_MEASUREMENT
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
@@ -74,11 +80,14 @@ public class BluetoothLeService extends Service {
 
     private StorageData stData = new StorageData();
     private boolean loopback = true;
+    public Resource res;
+    private String wrData;
 
     public void initStore(){
+        res = new Resource(true);
         stData.setOpen(true);
         loopback = true;
-       // stData = new StorageData();
+        // stData = new StorageData();
     }
 
     public void closeStore(){
@@ -86,8 +95,8 @@ public class BluetoothLeService extends Service {
         loopback = false;
     }
 
-    public void cleanStore(){
-        stData = null;
+    public WriterTransmitter getWriteThread(){
+        return wrt;
     }
 
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -103,7 +112,6 @@ public class BluetoothLeService extends Service {
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
-
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
@@ -131,14 +139,81 @@ public class BluetoothLeService extends Service {
         }
 
         @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            super.onCharacteristicWrite(gatt, characteristic, status);
+            final StringBuilder stringBuilder = new StringBuilder(characteristic.getValue().length);
+            for(byte byteChar : characteristic.getValue())
+                stringBuilder.append(String.format("%02X ", byteChar));
+             wrData = stringBuilder.toString();
+            if(status==BluetoothGatt.GATT_SUCCESS)
+            {
+                Log.i("test","GATT SUCCESS " + "DATA :" + wrData);
+
+            }
+            if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
+            {
+                Log.i("test","GATT WRITE connection congested");
+            }
+            if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED)
+            {
+                Log.i("test","GATT WRITE not permitted");
+            }
+            if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH)
+            {
+                Log.i("test","GATT invalid attribute lenght");
+            }
+            if(status==BluetoothGatt.GATT_FAILURE)
+            {
+                Log.i("test","GATT WRITE other errors");
+            }
+            if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
+            {
+                Log.i("test","GATT WRITE congested");
+            }
+            if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION)
+            {
+                Log.i("test","GATT WRITE authentication");
+            }
+            else
+            {
+                Log.i("test","GATT WRITE :"+status);
+            }
+
+            broadcastUpdate(ACTION_DATA_WRITE);
+        }
+
+
+        @Override
+        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+            super.onReadRemoteRssi(gatt, rssi, status);
+            Log.w(TAG, "RSSI " + rssi);
+        }
+
+        @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+            boolean priority = true;
+            if (Build.VERSION.SDK_INT >= 21)
+                priority = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+
+            Log.d(TAG, "MTU changed (mtu/status) / Priority : (" + mtu + "/" + status + ") / " + priority);
+
+          //  broadcastUpdate(ACTION_GATT_CONNECTED);
+        }
+
+
+
     };
     // строку загружаем в Intent и передаём в BroadcastReceiver-у
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
+        intent.putExtra(EXTRA_WDATA, wrData);
         sendBroadcast(intent);
     }
    // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
@@ -167,12 +242,16 @@ public class BluetoothLeService extends Service {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             //if (loopback)
-                stData.putData(data);
+             //  stData.putData(data);
+
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
                 for(byte byteChar : data)
                     stringBuilder.append(String.format("%02X ", byteChar));
-                intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+                intent.putExtra(EXTRA_DATA, stringBuilder.toString());
+
+               // Log.w("Notify DATA ", stringBuilder.toString());
             }
         }
         sendBroadcast(intent);
@@ -261,7 +340,6 @@ public class BluetoothLeService extends Service {
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        //if (BluetoothGatt.CONNECTION_PRIORITY_HIGH = 1);
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
@@ -279,6 +357,8 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        if (getWriteThread() != null)
+            wrt.cancel();
         mBluetoothGatt.disconnect();
     }
 
@@ -292,14 +372,6 @@ public class BluetoothLeService extends Service {
         }
         mBluetoothGatt.close();
         mBluetoothGatt = null;
-    }
-
-    public int getRssi() {
-        int rssi = 0;
-         if (mBluetoothGatt.readRemoteRssi()){
-             mGattCallback.onReadRemoteRssi(mBluetoothGatt,rssi, STATE_CONNECTED);
-         }
-            return rssi;
     }
 
     /**
@@ -333,10 +405,11 @@ public class BluetoothLeService extends Service {
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
 // потоковая запись данных в периферийное устройство
                // loopback = res.isLoopback();//, Resource resres,
-            WriterTransmitter wrt;
-            Log.w(TAG, "stData = " + stData.isOpen());
+
+            //Log.w(TAG, "stData = " + stData.isOpen());
+            Log.w(TAG, "res = " + res.isWrite());
                 if (stData.isOpen()) {
-                    wrt = new WriterTransmitter("Write", stData, mBluetoothGatt, characteristic);
+                    wrt = new WriterTransmitter("Write_one", res, stData, mBluetoothGatt, characteristic);
                     wrt.addWriteListener(new WriterTransmitterCallbackListener() {
                         @Override
                         public void doWriteCharacteristic(String str) {
@@ -362,8 +435,12 @@ public class BluetoothLeService extends Service {
         }
     }
 
-
-
+    /**
+     * Stop the Write Thread
+     */
+    public void stopWriteThread() {
+        wrt.cancel();
+    }
     /**
      * Enables or disables notification on a give characteristic.
      *

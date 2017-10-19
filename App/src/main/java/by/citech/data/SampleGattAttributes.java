@@ -34,6 +34,7 @@ public class SampleGattAttributes {
 
     static {
         // Sample Services.
+        attributes.put("00000801-0000-1000-8000-00805f9b34fb", "Temperature");
         attributes.put("00001800-0000-1000-8000-00805f9b34fb", "GAP");
         attributes.put("00001801-0000-1000-8000-00805f9b34fb", "GATT");
         attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information");

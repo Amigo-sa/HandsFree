@@ -18,6 +18,105 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp">
+
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/local_ip_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_local_ip_address"
+            android:textSize="18sp"/>
+
+        <EditText
+            android:id="@+id/editTextSrvLocAddr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Local IP address"
+            android:visibility="visible" />
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/ip_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_ip_address"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/editTextSrvRemAddr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Введите IP address"/>
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/locPort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_local_port"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/editTextSrvLocPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Введите Local Port"/>
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/remPort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_remote_port"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/editTextSrvRemPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Введите Remote Port"/>
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+
+        <Button
+            android:id="@+id/btnCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/margin_small"
+            android:text="@string/label_button"
+            android:textSize="24sp"/>
+
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
     <LinearLayout android:orientation="horizontal"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
@@ -64,6 +163,22 @@
                   android:layout_height="wrap_content"
                   android:text="@string/no_data"
                   android:textSize="18sp"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_wdata"
+            android:textSize="18sp"/>
+        <Space android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/wdata_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            android:textSize="18sp"/>
     </LinearLayout>
     <ExpandableListView android:id="@+id/gatt_services_list"
             android:layout_width="match_parent"

@@ -20,12 +20,14 @@ import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -150,13 +152,14 @@ public class DeviceScanActivity extends ListActivity {
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
+    private ArrayList rssi;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActionBar().setTitle(R.string.title_devices);
         mHandler = new Handler();
-
+        rssi = new ArrayList();
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -199,6 +202,7 @@ public class DeviceScanActivity extends ListActivity {
         switch (item.getItemId()) {
             case R.id.menu_scan:
                 mLeDeviceListAdapter.clear();
+                rssi.clear();
                 scanLeDevice(true);
                 break;
             case R.id.menu_stop:
@@ -251,8 +255,10 @@ public class DeviceScanActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
         if (device == null) return;
+        Resource res = new Resource(true);
         final Intent intent = new Intent(this, DeviceControlActivity.class);
         intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
+        intent.putExtra(" fwfwefwef", res);
         intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
         if (mScanning) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
@@ -305,6 +311,7 @@ public class DeviceScanActivity extends ListActivity {
 
         public void clear() {
             mLeDevices.clear();
+
         }
 
         @Override
@@ -337,6 +344,7 @@ public class DeviceScanActivity extends ListActivity {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+
             BluetoothDevice device = mLeDevices.get(i);
             final String deviceName = device.getName();
             if (deviceName != null && deviceName.length() > 0)
@@ -344,8 +352,8 @@ public class DeviceScanActivity extends ListActivity {
             else
                 viewHolder.deviceName.setText(R.string.unknown_device);
                 viewHolder.deviceAddress.setText(device.getAddress());
-            //rssi = mBluetoothLeService.getRssi();
-            viewHolder.deviceRssi.setText("rssi");
+
+                viewHolder.deviceRssi.setText(String.format(" RSSI = %s",  rssi.get(i)));
 
             return view;
         }
@@ -361,6 +369,7 @@ public class DeviceScanActivity extends ListActivity {
                 @Override
                 public void run() {
                     mLeDeviceListAdapter.addDevice(device);
+                    DeviceScanActivity.this.rssi.add(rssi);
                     mLeDeviceListAdapter.notifyDataSetChanged();
                 }
             });

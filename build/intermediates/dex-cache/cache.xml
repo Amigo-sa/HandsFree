@@ -12,21 +12,21 @@
     </item>
     <item
         is-multidex="true"
-        jar="D:\android\work\Amigo\HandsFree\App\build\intermediates\incremental-classes\defaultFlavor\debug\instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="26.0.1"
-        sha1="679af1ab425799c61c72cbb1b94003e6cd72d622">
-        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run-bootstrap_936c8a299ea6f9dd48612de919e1d3e505dba3a0\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
         jar="D:\android\work\Amigo\HandsFree\App\build\intermediates\incremental-runtime-classes\defaultFlavor\debug\instant-run.jar"
         jumboMode="true"
         optimize="true"
         revision="26.0.1"
         sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
         <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run_d285765245cbf98c954f6da8d95d2b1eac487da5\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="D:\android\work\Amigo\HandsFree\App\build\intermediates\incremental-classes\defaultFlavor\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="26.0.1"
+        sha1="d3b6a3e3b27b7ead1dd362d5d3631295ab509084">
+        <dex dex="D:\android\work\Amigo\HandsFree\App\build\intermediates\transforms\dex\defaultFlavor\debug\folders\1000\10000\instant-run-bootstrap_936c8a299ea6f9dd48612de919e1d3e505dba3a0\classes.dex" />
     </item>
     <item
         is-multidex="false"
