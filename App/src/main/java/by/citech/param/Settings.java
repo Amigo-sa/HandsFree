@@ -40,7 +40,7 @@ public class Settings {
     //---------------- NETWORK
 
     public static String serverRemoteIpAddress = "192.168.0.129";
-    public static int serverRemotePortNumber = 8080;
+    public static int serverRemotePortNumber = 8081;
     public static int serverLocalPortNumber = 8080;
     public static boolean reconnect = false;
     public static long clientReadTimeout = 15000;
@@ -48,4 +48,5 @@ public class Settings {
     public static long connectTimeout = 15000;
     public static int storageMaxSize = 100;
     public static boolean ipv4 = true;
+    public static boolean storageWriteOnOverflow = true;
 }

@@ -32,11 +32,12 @@ import by.citech.server.network.websockets.WebSocketFrame;
 import static by.citech.util.NetworkInfo.getIPAddress;
 
 public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, IStreamOn, IClientOn, IMessage {
-    private EditText editTextSrvLocPort;
-    private EditText editTextSrvLocAddr;
-    private EditText editTextSrvRemPort;
-    private EditText editTextSrvRemAddr;
-    private Button btnCall;
+    private EditText editTextSrvLocPortDpl;
+    private EditText editTextSrvLocAddrDpl;
+    private EditText editTextSrvRemPortDpl;
+    private EditText editTextSrvRemAddrDpl;
+    private Button btnCallOutDpl;
+    private Button btnCallInDpl;
     private StorageData storageBtToNet;
     private StorageData storageNetToBt;
     private Handler handler;
@@ -85,26 +86,35 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
             }
         };
 
-        btnCall = findViewById(R.id.btnCallOut);
-        editTextSrvLocPort = findViewById(R.id.editTextSrvLocPort);
-        editTextSrvLocAddr = findViewById(R.id.editTextSrvLocAddr);
-        editTextSrvRemPort = findViewById(R.id.editTextSrvRemPort);
-        editTextSrvRemAddr = findViewById(R.id.editTextSrvRemAddr);
+        btnCallOutDpl = findViewById(R.id.btnCallOutDpl);
+        btnCallInDpl = findViewById(R.id.btnCallInDpl);
+        editTextSrvLocPortDpl = findViewById(R.id.editTextSrvLocPortDpl);
+        editTextSrvLocAddrDpl = findViewById(R.id.editTextSrvLocAddrDpl);
+        editTextSrvRemPortDpl = findViewById(R.id.editTextSrvRemPortDpl);
+        editTextSrvRemAddrDpl = findViewById(R.id.editTextSrvRemAddrDpl);
 
-        btnCall.setEnabled(false);
-        editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
-        editTextSrvLocAddr.setText(getIPAddress(Settings.ipv4));
-        editTextSrvLocAddr.setFocusable(false);
-        editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
-        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
+        btnCallOutDpl.setEnabled(false);
+        btnCallInDpl.setEnabled(false);
+        editTextSrvLocAddrDpl.setText(getIPAddress(Settings.ipv4));
+        editTextSrvLocAddrDpl.setFocusable(false);
+        editTextSrvLocPortDpl.setText(String.format("%d", Settings.serverLocalPortNumber));
+        editTextSrvRemPortDpl.setText(String.format("%d", Settings.serverRemotePortNumber));
+        editTextSrvRemAddrDpl.setText(Settings.serverRemoteIpAddress);
 
-        new ServerOnTask(this, handler).execute(editTextSrvLocPort.getText().toString());
+        new ServerOnTask(this, handler).execute(editTextSrvLocPortDpl.getText().toString());
 
-        btnCall.setOnClickListener(new View.OnClickListener() {
+        btnCallOutDpl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 enableTransmitData();
                 callOut();
+            }
+        });
+        btnCallInDpl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enableTransmitData();
+                callIn();
             }
         });
     }
@@ -118,8 +128,8 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
     private void callOut() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "call");
         new OpenWebSocketTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
-                editTextSrvRemAddr.getText().toString(),
-                editTextSrvRemPort.getText().toString()));
+                editTextSrvRemAddrDpl.getText().toString(),
+                editTextSrvRemPortDpl.getText().toString()));
         if (iClientCtrl == null) {
             if (Settings.debug) Log.i(Tags.ACT_DPL, "call iClientCtrl is null");
             return;
@@ -131,7 +141,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStarted");
-        btnCall.setEnabled(true);
+        btnCallOutDpl.setEnabled(true);
         this.iServerCtrl = iServerCtrl;
     }
 
@@ -139,7 +149,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
     public void serverCantStart() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "serverCantStart");
         final DuplexActivity activity = this;
-        btnCall.setEnabled(false);
+        btnCallOutDpl.setEnabled(false);
         Toast.makeText(activity, "CANT START SERVER", Toast.LENGTH_SHORT).show();
     }
 

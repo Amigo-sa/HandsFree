@@ -33,7 +33,6 @@ public class StorageData {
         return tmpData;
     }
 
-
     public synchronized void putData(byte[] dataByte) {
         if (Settings.debug) Log.i(TAG, "putData");
 

@@ -66,6 +66,8 @@ import by.citech.server.network.IServerCtrl;
 import by.citech.server.network.IServerOn;
 import by.citech.server.network.websockets.WebSocketFrame;
 
+import static by.citech.util.NetworkInfo.getIPAddress;
+
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
  * and display GATT services and characteristics supported by the device.  The Activity
@@ -320,10 +322,11 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
 
         btnCallOut.setEnabled(false);
         btnCallIn.setEnabled(false);
-        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
+        editTextSrvLocAddr.setText(getIPAddress(Settings.ipv4));
         editTextSrvLocAddr.setFocusable(false);
         editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
         editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
+        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
 
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
