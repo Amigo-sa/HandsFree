@@ -77,11 +77,20 @@ public class BluetoothLeService extends Service {
     public final static UUID READ_BYTES =
             UUID.fromString(SampleGattAttributes.READ_BYTES);
 
-    private StorageData storageBtToNet = new StorageData(Tags.DPL_STORE_BT2NET);
-    private StorageData storageNetToBt = new StorageData(Tags.DPL_STORE_NET2BT);
+    private StorageData storageBtToNet;
+    private StorageData storageNetToBt;
+
     private boolean loopback = true;
     public Resource res;
     private String wrData;
+
+    public void setStorageBtToNet(StorageData storageBtToNet) {
+        this.storageBtToNet = storageBtToNet;
+    }
+
+    public void setStorageNetToBt(StorageData storageNetToBt) {
+        this.storageNetToBt = storageNetToBt;
+    }
 
     public void initStore(){
         res = new Resource(true);
@@ -240,7 +249,7 @@ public class BluetoothLeService extends Service {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             //if (loopback)
-             //  storageNetToBt.putData(data);
+            storageBtToNet.putData(data);
 
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);

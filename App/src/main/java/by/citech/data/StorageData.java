@@ -4,7 +4,6 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.param.Settings;
-import by.citech.param.Tags;
 
 public class StorageData {
     private String TAG;

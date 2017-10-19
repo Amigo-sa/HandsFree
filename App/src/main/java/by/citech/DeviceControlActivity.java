@@ -426,6 +426,8 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         getMenuInflater().inflate(R.menu.gatt_services, menu);
         if (mConnected) {
             callOutOneClick = true;
+            mBluetoothLeService.setStorageBtToNet(storageBtToNet);
+            mBluetoothLeService.setStorageNetToBt(storageNetToBt);
             menu.findItem(R.id.menu_connect).setVisible(false);
             menu.findItem(R.id.menu_disconnect).setVisible(true);
         } else {
