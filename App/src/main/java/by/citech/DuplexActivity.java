@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import by.citech.R;
+
 import by.citech.client.asynctask.OpenWebSocketTask;
 import by.citech.client.asynctask.SendMessageToServerTask;
 import by.citech.client.asynctask.StreamTask;
@@ -85,7 +85,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
             }
         };
 
-        btnCall = findViewById(R.id.btnCall);
+        btnCall = findViewById(R.id.btnCallOut);
         editTextSrvLocPort = findViewById(R.id.editTextSrvLocPort);
         editTextSrvLocAddr = findViewById(R.id.editTextSrvLocAddr);
         editTextSrvRemPort = findViewById(R.id.editTextSrvRemPort);

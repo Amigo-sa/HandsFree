@@ -15,8 +15,6 @@
  limitations under the License.
 -->
 
-
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="by.citech"
     android:versionCode="1"
@@ -34,13 +32,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-
-
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <application android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:theme="@android:style/Theme.Holo.Light">
-        <activity android:name=".bluetoothlegatt.DeviceScanActivity"
+        <activity android:name=".DeviceScanActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action   android:name="android.intent.action.MAIN"/>
@@ -50,32 +47,32 @@
 
         <!-- <activity android:name=".bluetoothlegatt.DeviceScanActivity" android:exported="true"/> -->
 
-        <activity android:name=".bluetoothlegatt.DeviceControlActivity" android:exported="true"/>
+        <activity android:name=".DeviceControlActivity" android:exported="true"/>
         <service  android:name=".bluetoothlegatt.BluetoothLeService" android:enabled="true"/>
 
         <activity
-            android:name=".websocketduplex.NetworkActivity"
+            android:name=".NetworkActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
             android:exported="true">
         </activity>
 
         <activity
-            android:name=".websocketduplex.ClientActivity"
+            android:name=".ClientActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".websocketduplex.NetworkActivity">
+            android:parentActivityName=".NetworkActivity">
         </activity>
 
         <activity
-            android:name=".websocketduplex.ServerActivity"
+            android:name=".ServerActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".websocketduplex.NetworkActivity">
+            android:parentActivityName=".NetworkActivity">
         </activity>
 
         <activity
-            android:name=".websocketduplex.DuplexActivity"
+            android:name=".DuplexActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".websocketduplex.NetworkActivity">
+            android:parentActivityName=".NetworkActivity">
         </activity>
 
 
@@ -118,7 +115,6 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".websocketduplex.NetworkActivity">
         </activity>
-
 
     </application>
     -->

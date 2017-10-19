@@ -21,7 +21,8 @@
     <string name="label_ip_address">IP address: </string>
     <string name="label_local_port">Local port: </string>
     <string name="label_remote_port">Remote port: </string>
-    <string name="label_button">Call</string>
+    <string name="label_buttonCallOut">Call Out</string>
+    <string name="label_buttonCallIn">Call In</string>
     <string name="label_device_address">Device address:</string>
     <string name="label_device_name">Device name:</string>
     <string name="label_state">State:</string>

@@ -2,14 +2,12 @@ package by.citech;
 
 import android.app.Application;
 import android.content.Intent;
-
 import by.citech.data.AppData;
 import by.citech.logic.State;
-import by.citech.utils.Logger;
+import by.citech.util.Logger;
 
 public class App extends Application {
     private static App sInstance;
-
     private State mState;
 
     @Override
@@ -17,7 +15,6 @@ public class App extends Application {
         super.onCreate();
         sInstance = this;
         AppData.init(this);
-
         setState(State.Idle);
     }
 

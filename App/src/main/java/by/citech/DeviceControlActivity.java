@@ -26,7 +26,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,12 +38,33 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import by.citech.bluetoothlegatt.BluetoothLeService;
+import by.citech.client.asynctask.OpenWebSocketTask;
+import by.citech.client.asynctask.SendMessageToServerTask;
+import by.citech.client.asynctask.StreamTask;
+import by.citech.client.network.IClientCtrl;
+import by.citech.client.network.IClientOn;
+import by.citech.client.network.IMessage;
+import by.citech.client.network.IStream;
+import by.citech.client.network.IStreamOn;
 import by.citech.data.SampleGattAttributes;
+import by.citech.data.StorageData;
+import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
+import by.citech.server.asynctask.RedirectDataTask;
+import by.citech.server.asynctask.ServerOnTask;
+import by.citech.server.network.IRedirectCtrl;
+import by.citech.server.network.IRedirectOn;
+import by.citech.server.network.IServerCtrl;
+import by.citech.server.network.IServerOn;
+import by.citech.server.network.websockets.WebSocketFrame;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -49,7 +72,7 @@ import by.citech.data.SampleGattAttributes;
  * communicates with {@code BluetoothLeService}, which in turn interacts with the
  * Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity {
+public class DeviceControlActivity extends Activity implements IServerOn, IRedirectOn, IStreamOn, IClientOn, IMessage {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
@@ -61,11 +84,12 @@ public class DeviceControlActivity extends Activity {
     private String   mDeviceName;
     private String   mDeviceAddress;
     // Вьюхи для соединения с интернетом
-    private Button   btn;
-    private EditText locAddr;
-    private EditText remAddr;
-    private EditText locPort;
-    private EditText remPort;
+    private Button btnCallOut;
+    private Button btnCallIn;
+    private EditText editTextSrvLocAddr;
+    private EditText editTextSrvRemAddr;
+    private EditText editTextSrvLocPort;
+    private EditText editTextSrvRemPort;
     // разворачивающийся на экране список сервисов и характеристик переферийного устройства (сервера)
     private ExpandableListView mGattServicesList;
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
@@ -75,7 +99,19 @@ public class DeviceControlActivity extends Activity {
     private boolean mConnected = false;
     // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
     private BluetoothGattCharacteristic mNotifyCharacteristic;
-    private boolean oneClick;
+    private boolean callOutOneClick;
+    private boolean callInOneClick;
+
+    // работа с сетью
+    private Handler handler;
+    private IServerCtrl iServerCtrl;
+    private IClientCtrl iClientCtrl;
+    private IRedirectCtrl iRedirectCtrl;
+    private IStream iStream;
+
+    // хранилища данных
+    private StorageData storageBtToNet;
+    private StorageData storageNetToBt;
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -217,25 +253,51 @@ public class DeviceControlActivity extends Activity {
                                 //mBluetoothLeService.writeCharacteristic(characteristic_write);
                            }
                         }
-
-
-
                         return true;
                     }
                     return false;
                 }
     };
-    // процедура стирания списка характеристик и данных на дисплее
-    private void clearUI() {
-        mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
-        mDataField.setText(R.string.no_data);
-        mwDataField.setText(R.string.no_data);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
+        final DeviceControlActivity activity = this;
+        storageBtToNet = new StorageData(Tags.DPL_STORE_BT2NET);
+        storageNetToBt = new StorageData(Tags.DPL_STORE_NET2BT);
+
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case StatusMessages.SRV_ONMESSAGE:
+                        if (Settings.debug) Log.i(Tags.ACT_DPL, String.format("handleMessage SRV_ONMESSAGE %s", ((WebSocketFrame) msg.obj).getTextPayload()));
+                        break;
+                    case StatusMessages.SRV_ONCLOSE:
+                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONCLOSE");
+                        break;
+                    case StatusMessages.SRV_ONOPEN:
+                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
+                        if (Settings.testSendOneOnCall) {
+                            new SendMessageToServerTask(DeviceControlActivity.this, iClientCtrl).execute("FUCK YOU ASSHOLE");
+                        } else {
+                            btnCallIn.setEnabled(true);
+                        }
+                        break;
+                    case StatusMessages.SRV_ONEXCEPTION:
+                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
+                        break;
+                    case StatusMessages.CLT_ONFAILURE:
+                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONFAILURE");
+                        Toast.makeText(activity, "SUBSCRIBER NOT ONLINE", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage DEFAULT");
+                        break;
+                }
+            }
+        };
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -249,28 +311,84 @@ public class DeviceControlActivity extends Activity {
         mDataField = (TextView) findViewById(R.id.data_value);
         mwDataField = (TextView) findViewById(R.id.wdata_value);
 
-        btn = (Button) findViewById(R.id.btnCall);
-        locAddr = (EditText)  findViewById(R.id.editTextSrvLocAddr);
-        locAddr.setFocusable(false);
-        remAddr = (EditText)  findViewById(R.id.editTextSrvRemAddr);
-        locPort= (EditText)  findViewById(R.id.editTextSrvLocPort);
-        remPort= (EditText)  findViewById(R.id.editTextSrvRemPort);
+        btnCallOut = (Button) findViewById(R.id.btnCallOut);
+        btnCallIn = (Button) findViewById(R.id.btnCallIn);
+        editTextSrvLocAddr = (EditText)  findViewById(R.id.editTextSrvLocAddr);
+        editTextSrvRemAddr = (EditText)  findViewById(R.id.editTextSrvRemAddr);
+        editTextSrvLocPort = (EditText)  findViewById(R.id.editTextSrvLocPort);
+        editTextSrvRemPort = (EditText)  findViewById(R.id.editTextSrvRemPort);
+
+        btnCallOut.setEnabled(false);
+        btnCallIn.setEnabled(false);
+        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
+        editTextSrvLocAddr.setFocusable(false);
+        editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
+        editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
+
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         // привязываем сервис
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+        new ServerOnTask(this, handler).execute(editTextSrvLocPort.getText().toString());
+
         // устанавливаем только одно нажатие клавиши Call
-         oneClick = true;
-        btn.setOnClickListener(new View.OnClickListener() {
+        callOutOneClick = true;
+        btnCallOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (oneClick) {
+                if (callOutOneClick) {
                     enableTransmitData();
-                    oneClick = false;
+                    callOut();
+                    callOutOneClick = false;
                 }
             }
         });
+        callInOneClick = true;
+        btnCallIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (callInOneClick) {
+                    enableTransmitData();
+                    callIn();
+                    callInOneClick = false;
+                }
+            }
+        });
+    }
+
+    private void callIn() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn");
+        new OpenWebSocketTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
+                editTextSrvRemAddr.getText().toString(),
+                editTextSrvRemPort.getText().toString()));
+        if (iClientCtrl == null) {
+            if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn iClientCtrl is null");
+            return;
+        }
+        new StreamTask(DeviceControlActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
+        new RedirectDataTask(DeviceControlActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+    }
+
+    private void callOut() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut");
+        new OpenWebSocketTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
+                editTextSrvRemAddr.getText().toString(),
+                editTextSrvRemPort.getText().toString()));
+        if (iClientCtrl == null) {
+            if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut iClientCtrl is null");
+            return;
+        }
+        new StreamTask(DeviceControlActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
+        new RedirectDataTask(DeviceControlActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+    }
+
+    // процедура стирания списка характеристик и данных на дисплее
+    private void clearUI() {
+        mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
+        mDataField.setText(R.string.no_data);
+        mwDataField.setText(R.string.no_data);
     }
 
     // по запуску регистрируем наш BroadcastReceiver
@@ -283,6 +401,7 @@ public class DeviceControlActivity extends Activity {
             Log.d(TAG, "Connect request result=" + result);
         }
     }
+
     // в случае засыпания активности сбрасываем регистрацию BroadcastReceiver
     @Override
     protected void onPause() {
@@ -300,12 +419,13 @@ public class DeviceControlActivity extends Activity {
         mBluetoothLeService = null;
 
     }
+
     // создаём меню в котором указываем кнопку соединения устройства
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.gatt_services, menu);
         if (mConnected) {
-            oneClick = true;
+            callOutOneClick = true;
             menu.findItem(R.id.menu_connect).setVisible(false);
             menu.findItem(R.id.menu_disconnect).setVisible(true);
         } else {
@@ -335,6 +455,7 @@ public class DeviceControlActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     // процедура обновления данных на экране об соединении
     private void updateConnectionState(final int resourceId) {
         runOnUiThread(new Runnable() {
@@ -344,6 +465,7 @@ public class DeviceControlActivity extends Activity {
             }
         });
     }
+
     // отображение данных нотификации на дисплее
     private void displayData(String data) {
         if (data != null) {
@@ -362,7 +484,6 @@ public class DeviceControlActivity extends Activity {
     // In this sample, we populate the data structure that is bound to the ExpandableListView
     // on the UI.
     // процедура обработки и отображения доступных сервисов и характеристик на дисплее
-
 
     private void enableTransmitData(){
         mBluetoothLeService.initStore();
@@ -442,5 +563,43 @@ public class DeviceControlActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_WRITE);
         return intentFilter;
+    }
+
+    @Override
+    public void serverStarted(IServerCtrl iServerCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStarted");
+        btnCallOut.setEnabled(true);
+        this.iServerCtrl = iServerCtrl;
+    }
+
+    @Override
+    public void serverCantStart() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverCantStart");
+        final DeviceControlActivity activity = this;
+        btnCallOut.setEnabled(false);
+        Toast.makeText(activity, "CANT START SERVER", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void setRedirect(IRedirectCtrl iRedirectCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "setRedirect");
+        this.iRedirectCtrl = iRedirectCtrl;
+    }
+
+    @Override
+    public void setStream(IStream iStream) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "setStream");
+        this.iStream = iStream;
+    }
+
+    @Override
+    public void clientStarted(IClientCtrl iClientCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "clientStarted");
+        this.iClientCtrl = iClientCtrl;
+    }
+
+    @Override
+    public void messageSended() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "messageSended");
     }
 }
