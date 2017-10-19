@@ -1,10 +1,10 @@
-package by.citech.websocketduplex.server.network.websockets;
+package by.citech.server.network.websockets;
 
-import by.citech.websocketduplex.server.network.protocols.http.IHTTPSession;
-import by.citech.websocketduplex.server.network.protocols.http.NanoHTTPD;
-import by.citech.websocketduplex.server.network.protocols.http.response.Response;
-import by.citech.websocketduplex.server.network.protocols.http.response.Status;
-import by.citech.websocketduplex.server.network.util.IHandler;
+import by.citech.server.network.protocols.http.IHTTPSession;
+import by.citech.server.network.protocols.http.NanoHTTPD;
+import by.citech.server.network.protocols.http.response.Response;
+import by.citech.server.network.protocols.http.response.Status;
+import by.citech.server.network.util.IHandler;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

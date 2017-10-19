@@ -1,13 +1,13 @@
-package by.citech.websocketduplex.server.network.protocols.http;
+package by.citech.server.network.protocols.http;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import by.citech.websocketduplex.server.network.protocols.http.NanoHTTPD.ResponseException;
-import by.citech.websocketduplex.server.network.protocols.http.content.CookieHandler;
-import by.citech.websocketduplex.server.network.protocols.http.request.Method;
+import by.citech.server.network.protocols.http.NanoHTTPD.ResponseException;
+import by.citech.server.network.protocols.http.content.CookieHandler;
+import by.citech.server.network.protocols.http.request.Method;
 
 /**
  * Handles one session, i.e. parses the HTTP request and returns the response.

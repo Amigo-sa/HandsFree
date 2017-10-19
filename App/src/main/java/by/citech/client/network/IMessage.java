@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.client.network;
+package by.citech.client.network;
 
 public interface IMessage {
     void messageSended();

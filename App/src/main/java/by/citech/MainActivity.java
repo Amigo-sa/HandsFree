@@ -8,9 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import by.citech.bluetoothlegatt.DeviceScanActivity;
-import by.citech.websocketduplex.NetworkActivity;
-
 
 public class MainActivity extends Activity {
 

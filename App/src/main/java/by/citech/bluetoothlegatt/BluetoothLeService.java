@@ -38,8 +38,7 @@ import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
-
-import static android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_HIGH;
+import by.citech.param.Tags;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -78,20 +77,19 @@ public class BluetoothLeService extends Service {
     public final static UUID READ_BYTES =
             UUID.fromString(SampleGattAttributes.READ_BYTES);
 
-    private StorageData stData = new StorageData();
+    private StorageData storageBtToNet = new StorageData(Tags.DPL_STORE_BT2NET);
+    private StorageData storageNetToBt = new StorageData(Tags.DPL_STORE_NET2BT);
     private boolean loopback = true;
     public Resource res;
     private String wrData;
 
     public void initStore(){
         res = new Resource(true);
-        stData.setOpen(true);
         loopback = true;
-        // stData = new StorageData();
+        // storageNetToBt = new StorageData();
     }
 
     public void closeStore(){
-        stData.setOpen(false);
         loopback = false;
     }
 
@@ -242,7 +240,7 @@ public class BluetoothLeService extends Service {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             //if (loopback)
-             //  stData.putData(data);
+             //  storageNetToBt.putData(data);
 
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
@@ -258,7 +256,7 @@ public class BluetoothLeService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        BluetoothLeService getService() {
+        public BluetoothLeService getService() {
             return BluetoothLeService.this;
         }
     }
@@ -406,18 +404,16 @@ public class BluetoothLeService extends Service {
 // потоковая запись данных в периферийное устройство
                // loopback = res.isLoopback();//, Resource resres,
 
-            //Log.w(TAG, "stData = " + stData.isOpen());
+            //Log.w(TAG, "storageNetToBt = " + storageNetToBt.isOpen());
             Log.w(TAG, "res = " + res.isWrite());
-                if (stData.isOpen()) {
-                    wrt = new WriterTransmitter("Write_one", res, stData, mBluetoothGatt, characteristic);
-                    wrt.addWriteListener(new WriterTransmitterCallbackListener() {
-                        @Override
-                        public void doWriteCharacteristic(String str) {
-                            System.out.println(str);
-                        }
-                    });
-                    wrt.start();
+            wrt = new WriterTransmitter("Write_one", res, storageNetToBt, mBluetoothGatt, characteristic);
+            wrt.addWriteListener(new WriterTransmitterCallbackListener() {
+                @Override
+                public void doWriteCharacteristic(String str) {
+                    System.out.println(str);
                 }
+            });
+            wrt.start();
 
 // одноразовая запись данных в периферийное устройство
 

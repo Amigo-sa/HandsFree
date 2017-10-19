@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.todo;
+package by.citech.server.network.todo;
 
 public class TcpServerCtrl {
 }

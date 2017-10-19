@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.util;
+package by.citech.server.network.util;
 
 /**
  * Represents a factory that can throw an exception instead of actually creating

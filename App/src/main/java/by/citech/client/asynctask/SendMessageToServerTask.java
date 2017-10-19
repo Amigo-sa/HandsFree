@@ -1,11 +1,11 @@
-package by.citech.websocketduplex.client.asynctask;
+package by.citech.client.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import by.citech.websocketduplex.client.network.IMessage;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.client.network.IMessage;
+import by.citech.client.network.IClientCtrl;
+import by.citech.param.Tags;
 
 public class SendMessageToServerTask extends AsyncTask<String, Void, Void> {
     private IMessage iMessage;

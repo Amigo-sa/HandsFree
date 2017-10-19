@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network;
+package by.citech.server.network;
 
 import android.os.Handler;
 import android.util.Log;
@@ -6,17 +6,17 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.server.network.protocols.http.IHTTPSession;
-import by.citech.websocketduplex.server.network.websockets.CloseCode;
-import by.citech.websocketduplex.server.network.websockets.NanoWSD;
-import by.citech.websocketduplex.server.network.websockets.WebSocket;
-import by.citech.websocketduplex.server.network.websockets.WebSocketFrame;
-import by.citech.websocketduplex.param.Messages;
-import by.citech.websocketduplex.param.StatusMessages;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.param.Settings;
+import by.citech.server.network.protocols.http.IHTTPSession;
+import by.citech.server.network.websockets.CloseCode;
+import by.citech.server.network.websockets.NanoWSD;
+import by.citech.server.network.websockets.WebSocket;
+import by.citech.server.network.websockets.WebSocketFrame;
+import by.citech.param.Messages;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
 
-import static by.citech.websocketduplex.util.Decode.bytesToHex;
+import static by.citech.util.Decode.bytesToHex;
 
 public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
     private static final Logger LOG = Logger.getLogger(NanoWebSocketServerCtrl.class.getName());

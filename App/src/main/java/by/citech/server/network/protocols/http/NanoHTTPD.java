@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http;
+package by.citech.server.network.protocols.http;
 
 import android.util.Log;
 
@@ -28,18 +28,18 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-import by.citech.websocketduplex.server.network.protocols.http.response.Response;
-import by.citech.websocketduplex.server.network.protocols.http.response.Status;
-import by.citech.websocketduplex.server.network.protocols.http.sockets.DefaultServerSocketFactory;
-import by.citech.websocketduplex.server.network.protocols.http.sockets.SecureServerSocketFactory;
-import by.citech.websocketduplex.server.network.protocols.http.tempfiles.DefaultTempFileManagerFactory;
-import by.citech.websocketduplex.server.network.protocols.http.tempfiles.ITempFileManager;
-import by.citech.websocketduplex.server.network.protocols.http.threading.DefaultAsyncRunner;
-import by.citech.websocketduplex.server.network.protocols.http.threading.IAsyncRunner;
-import by.citech.websocketduplex.server.network.util.IFactory;
-import by.citech.websocketduplex.server.network.util.IFactoryThrowing;
-import by.citech.websocketduplex.server.network.util.IHandler;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.server.network.protocols.http.response.Response;
+import by.citech.server.network.protocols.http.response.Status;
+import by.citech.server.network.protocols.http.sockets.DefaultServerSocketFactory;
+import by.citech.server.network.protocols.http.sockets.SecureServerSocketFactory;
+import by.citech.server.network.protocols.http.tempfiles.DefaultTempFileManagerFactory;
+import by.citech.server.network.protocols.http.tempfiles.ITempFileManager;
+import by.citech.server.network.protocols.http.threading.DefaultAsyncRunner;
+import by.citech.server.network.protocols.http.threading.IAsyncRunner;
+import by.citech.server.network.util.IFactory;
+import by.citech.server.network.util.IFactoryThrowing;
+import by.citech.server.network.util.IHandler;
+import by.citech.param.Tags;
 
 /**
  * A simple, tiny, nicely embeddable HTTP server in Java

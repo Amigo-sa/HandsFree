@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.request;
+package by.citech.server.network.protocols.http.request;
 
 /**
  * HTTP Request methods, with the ability to decode a <code>String</code> back

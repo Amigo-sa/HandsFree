@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network;
+package by.citech.server.network;
 
 public interface IServerOff {
     void serverStopped();

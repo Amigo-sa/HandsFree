@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.tempfiles;
+package by.citech.server.network.protocols.http.tempfiles;
 
 import java.io.OutputStream;
 

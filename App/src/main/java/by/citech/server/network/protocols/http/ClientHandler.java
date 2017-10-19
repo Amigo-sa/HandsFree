@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http;
+package by.citech.server.network.protocols.http;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,7 +7,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 
-import by.citech.websocketduplex.server.network.protocols.http.tempfiles.ITempFileManager;
+import by.citech.server.network.protocols.http.tempfiles.ITempFileManager;
 
 /**
  * The runnable that will be used for every new client connection.

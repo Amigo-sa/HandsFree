@@ -1,10 +1,12 @@
-package by.citech.websocketduplex;
+package by.citech;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+
+import by.citech.ClientActivity;
+import by.citech.R;
 
 public class NetworkActivity extends Activity {
     @Override

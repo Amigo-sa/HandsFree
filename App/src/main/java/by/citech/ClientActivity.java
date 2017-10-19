@@ -1,4 +1,4 @@
-package by.citech.websocketduplex;
+package by.citech;
 
 import android.Manifest;
 import android.app.Activity;
@@ -14,19 +14,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import by.citech.websocketduplex.client.asynctask.DisconnectTask;
-import by.citech.websocketduplex.client.asynctask.OpenWebSocketTask;
-import by.citech.websocketduplex.client.asynctask.SendMessageToServerTask;
-import by.citech.websocketduplex.client.asynctask.StreamTask;
-import by.citech.websocketduplex.client.network.IClientOff;
-import by.citech.websocketduplex.client.network.IClientOn;
-import by.citech.websocketduplex.client.network.IMessage;
-import by.citech.websocketduplex.client.network.IStream;
-import by.citech.websocketduplex.client.network.IStreamOn;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.StatusMessages;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.client.asynctask.DisconnectTask;
+import by.citech.client.asynctask.OpenWebSocketTask;
+import by.citech.client.asynctask.SendMessageToServerTask;
+import by.citech.client.asynctask.StreamTask;
+import by.citech.client.network.IClientOff;
+import by.citech.client.network.IClientOn;
+import by.citech.client.network.IMessage;
+import by.citech.client.network.IStream;
+import by.citech.client.network.IStreamOn;
+import by.citech.client.network.IClientCtrl;
+import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
 import okio.ByteString;
 
 public class ClientActivity extends Activity implements IClientOn, IClientOff, IStreamOn, IMessage {

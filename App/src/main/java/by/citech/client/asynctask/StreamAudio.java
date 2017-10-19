@@ -1,13 +1,13 @@
-package by.citech.websocketduplex.client.asynctask;
+package by.citech.client.asynctask;
 
 import android.media.AudioRecord;
 import android.util.Log;
 
-import by.citech.websocketduplex.client.network.IStream;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.Tags;
-import static by.citech.websocketduplex.util.Decode.bytesToHex;
+import by.citech.client.network.IStream;
+import by.citech.client.network.IClientCtrl;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+import static by.citech.util.Decode.bytesToHex;
 
 public class StreamAudio implements IStream {
     private byte[] buffer;

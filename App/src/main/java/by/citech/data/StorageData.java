@@ -1,10 +1,10 @@
-package by.citech.websocketduplex.data;
+package by.citech.data;
 
 import android.util.Log;
 import java.util.ArrayList;
 
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 public class StorageData {
     private String TAG;

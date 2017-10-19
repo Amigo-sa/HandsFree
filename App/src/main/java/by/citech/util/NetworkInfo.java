@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.util;
+package by.citech.util;
 
 import java.io.*;
 import java.net.*;

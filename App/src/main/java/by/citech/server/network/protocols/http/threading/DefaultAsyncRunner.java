@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.threading;
+package by.citech.server.network.protocols.http.threading;
 
 /*
  * #%L
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import by.citech.websocketduplex.server.network.protocols.http.ClientHandler;
+import by.citech.server.network.protocols.http.ClientHandler;
 
 /**
  * Default threading strategy for NanoHTTPD.

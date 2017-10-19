@@ -1,14 +1,13 @@
-package by.citech.websocketduplex.server.asynctask;
+package by.citech.server.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import by.citech.websocketduplex.ServerActivity;
-import by.citech.websocketduplex.server.network.IServerCtrl;
-import by.citech.websocketduplex.server.network.IServerOff;
-import by.citech.websocketduplex.server.network.NanoWebSocketServerCtrl;
-import by.citech.websocketduplex.server.network.websockets.WebSocket;
-import by.citech.websocketduplex.param.StatusMessages;
-import by.citech.websocketduplex.param.Tags;
+
+import by.citech.server.network.IServerCtrl;
+import by.citech.server.network.IServerOff;
+import by.citech.server.network.websockets.WebSocket;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
 
 public class ServerOffTask extends AsyncTask<Void, Void, Void> {
     private IServerOff iServerOff;

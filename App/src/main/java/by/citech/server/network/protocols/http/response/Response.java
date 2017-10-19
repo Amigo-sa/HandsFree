@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.response;
+package by.citech.server.network.protocols.http.response;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -23,9 +23,9 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 
-import by.citech.websocketduplex.server.network.protocols.http.NanoHTTPD;
-import by.citech.websocketduplex.server.network.protocols.http.content.ContentType;
-import by.citech.websocketduplex.server.network.protocols.http.request.Method;
+import by.citech.server.network.protocols.http.NanoHTTPD;
+import by.citech.server.network.protocols.http.content.ContentType;
+import by.citech.server.network.protocols.http.request.Method;
 
 /**
  * HTTP response. Return one of these from serve().

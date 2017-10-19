@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.websockets;
+package by.citech.server.network.websockets;
 
 import java.io.EOFException;
 import java.io.IOException;

@@ -1,11 +1,11 @@
-package by.citech.websocketduplex.server.network.protocols.http.tempfiles;
+package by.citech.server.network.protocols.http.tempfiles;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import by.citech.websocketduplex.server.network.protocols.http.NanoHTTPD;
+import by.citech.server.network.protocols.http.NanoHTTPD;
 
 /**
  * Default strategy for creating and cleaning up temporary files.

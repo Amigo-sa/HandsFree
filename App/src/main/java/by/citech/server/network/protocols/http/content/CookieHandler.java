@@ -1,11 +1,11 @@
-package by.citech.websocketduplex.server.network.protocols.http.content;
+package by.citech.server.network.protocols.http.content;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import by.citech.websocketduplex.server.network.protocols.http.response.Response;
+import by.citech.server.network.protocols.http.response.Response;
 
 /**
  * Provides rudimentary support for cookies. Doesn't support 'path', 'secure'

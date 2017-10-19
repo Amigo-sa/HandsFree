@@ -1,4 +1,4 @@
-package by.citech.websocketduplex;
+package by.citech;
 
 import android.app.Activity;
 import android.os.Handler;
@@ -9,28 +9,27 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import by.citech.websocketduplex.client.asynctask.OpenWebSocketTask;
-import by.citech.websocketduplex.client.asynctask.SendMessageToServerTask;
-import by.citech.websocketduplex.client.asynctask.StreamTask;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.client.network.IClientOn;
-import by.citech.websocketduplex.client.network.IMessage;
-import by.citech.websocketduplex.client.network.IStream;
-import by.citech.websocketduplex.client.network.IStreamOn;
-import by.citech.websocketduplex.data.StorageData;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.StatusMessages;
-import by.citech.websocketduplex.param.Tags;
-import by.citech.websocketduplex.server.asynctask.RedirectDataTask;
-import by.citech.websocketduplex.server.asynctask.ServerOnTask;
-import by.citech.websocketduplex.server.network.IRedirectCtrl;
-import by.citech.websocketduplex.server.network.IRedirectOn;
-import by.citech.websocketduplex.server.network.IServerOn;
-import by.citech.websocketduplex.server.network.IServerCtrl;
-import by.citech.websocketduplex.server.network.websockets.WebSocketFrame;
-
-import static by.citech.websocketduplex.util.NetworkInfo.getIPAddress;
+import by.citech.R;
+import by.citech.client.asynctask.OpenWebSocketTask;
+import by.citech.client.asynctask.SendMessageToServerTask;
+import by.citech.client.asynctask.StreamTask;
+import by.citech.client.network.IClientCtrl;
+import by.citech.client.network.IClientOn;
+import by.citech.client.network.IMessage;
+import by.citech.client.network.IStream;
+import by.citech.client.network.IStreamOn;
+import by.citech.data.StorageData;
+import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
+import by.citech.server.asynctask.RedirectDataTask;
+import by.citech.server.asynctask.ServerOnTask;
+import by.citech.server.network.IRedirectCtrl;
+import by.citech.server.network.IRedirectOn;
+import by.citech.server.network.IServerOn;
+import by.citech.server.network.IServerCtrl;
+import by.citech.server.network.websockets.WebSocketFrame;
+import static by.citech.util.NetworkInfo.getIPAddress;
 
 public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, IStreamOn, IClientOn, IMessage {
     private EditText editTextSrvLocPort;
@@ -68,6 +67,8 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
                         if (Settings.testSendOneOnCall) {
                             new SendMessageToServerTask(DuplexActivity.this, iClientCtrl).execute("FUCK YOU ASSHOLE");
+                        } else {
+                            callIn();
                         }
                         break;
                     case StatusMessages.SRV_ONEXCEPTION:
@@ -103,15 +104,18 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
             @Override
             public void onClick(View v) {
                 enableTransmitData();
-                call();
+                callOut();
             }
         });
+    }
+
+    private void callIn() {
     }
 
     private void enableTransmitData() {
     }
 
-    private void call() {
+    private void callOut() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "call");
         new OpenWebSocketTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
                 editTextSrvRemAddr.getText().toString(),

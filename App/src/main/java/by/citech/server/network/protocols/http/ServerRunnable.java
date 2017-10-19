@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http;
+package by.citech.server.network.protocols.http;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.util;
+package by.citech.server.network.util;
 
 /**
  * Defines a generic handler that returns an object of type O when given an

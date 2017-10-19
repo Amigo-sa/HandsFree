@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.threading;
+package by.citech.server.network.protocols.http.threading;
 
 /*
  * #%L
@@ -33,7 +33,7 @@ package by.citech.websocketduplex.server.network.protocols.http.threading;
  * #L%
  */
 
-import by.citech.websocketduplex.server.network.protocols.http.ClientHandler;
+import by.citech.server.network.protocols.http.ClientHandler;
 
 /**
  * Pluggable strategy for asynchronously executing requests.

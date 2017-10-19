@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http;
+package by.citech.server.network.protocols.http;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -29,14 +29,14 @@ import java.util.regex.Matcher;
 
 import javax.net.ssl.SSLException;
 
-import by.citech.websocketduplex.server.network.protocols.http.NanoHTTPD.ResponseException;
-import by.citech.websocketduplex.server.network.protocols.http.content.ContentType;
-import by.citech.websocketduplex.server.network.protocols.http.content.CookieHandler;
-import by.citech.websocketduplex.server.network.protocols.http.request.Method;
-import by.citech.websocketduplex.server.network.protocols.http.response.Response;
-import by.citech.websocketduplex.server.network.protocols.http.response.Status;
-import by.citech.websocketduplex.server.network.protocols.http.tempfiles.ITempFile;
-import by.citech.websocketduplex.server.network.protocols.http.tempfiles.ITempFileManager;
+import by.citech.server.network.protocols.http.NanoHTTPD.ResponseException;
+import by.citech.server.network.protocols.http.content.ContentType;
+import by.citech.server.network.protocols.http.content.CookieHandler;
+import by.citech.server.network.protocols.http.request.Method;
+import by.citech.server.network.protocols.http.response.Response;
+import by.citech.server.network.protocols.http.response.Status;
+import by.citech.server.network.protocols.http.tempfiles.ITempFile;
+import by.citech.server.network.protocols.http.tempfiles.ITempFileManager;
 
 public class HTTPSession implements IHTTPSession {
     

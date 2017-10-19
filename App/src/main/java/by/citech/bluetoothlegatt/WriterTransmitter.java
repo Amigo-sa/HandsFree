@@ -13,7 +13,7 @@ import by.citech.data.StorageData;
 public class WriterTransmitter extends Thread {
 
     private Resource res;
-    private StorageData stData;
+    private StorageData storageNetToBt;
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
     private WriterTransmitterCallbackListener listener;
@@ -22,10 +22,10 @@ public class WriterTransmitter extends Thread {
     // колличество отправляемых на запись пакетов данных
     final int sends = 100;
 
-    public WriterTransmitter(String name, Resource res, StorageData stData, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
+    public WriterTransmitter(String name, Resource res, StorageData storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
         this.res = res;
-        this.stData = stData;
+        this.storageNetToBt = storageNetToBt;
         this.mBluetoothGatt = mBluetoothGatt;
         this.characteristic = characteristic;
     }
@@ -36,13 +36,14 @@ public class WriterTransmitter extends Thread {
 
     @Override
     public void run() {
-        byte[] dataByte = new byte[ ]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        byte[] dataByte;
         isRunning = true;
         while (isRunning){
 
-            dataByte[0]++;
-           // dataByte = stData.getData();
-            if(stData.isOpen() && !stData.isEmptyStorage()) {
+           // dataByte[0]++;
+           //
+            if (isAllSendData()) {
+                dataByte = storageNetToBt.getData();
                 characteristic.setValue(dataByte);
                 characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                 mBluetoothGatt.writeCharacteristic(characteristic);
@@ -66,8 +67,7 @@ public class WriterTransmitter extends Thread {
                 Log.w("Write DATA ", stringBuilder.toString());
             }
             try {
-                Thread.sleep(5000);
-                stData.putData(dataByte);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -78,10 +78,13 @@ public class WriterTransmitter extends Thread {
             listener.doWriteCharacteristic("");
     }
 
-    public void cancel() {isRunning = false; }
+    public void cancel() {
+        isRunning = false;
+        storageNetToBt.notify();
+    }
 
     private boolean isAllSendData(){
-        return stData.isOpen();
+        return true;
                 //(sends - cnt++) <= 0;
     }
 

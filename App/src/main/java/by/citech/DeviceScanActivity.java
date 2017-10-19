@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package by.citech.bluetoothlegatt;
+package by.citech;
 
 import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 
-import by.citech.R;
+import by.citech.bluetoothlegatt.Resource;
 /**
  *  В отличие от классического Bluetooth, BLE призван обеспечить существенно меньшее
  *  энергопотребление. Это позволяет приложениям для Android общаться с BLE-устройствами,

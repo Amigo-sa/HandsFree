@@ -1,8 +1,8 @@
-package by.citech.websocketduplex.server.network.websockets;
+package by.citech.server.network.websockets;
 
-import by.citech.websocketduplex.server.network.protocols.http.IHTTPSession;
-import by.citech.websocketduplex.server.network.protocols.http.response.Response;
-import by.citech.websocketduplex.server.network.protocols.http.response.Status;
+import by.citech.server.network.protocols.http.IHTTPSession;
+import by.citech.server.network.protocols.http.response.Response;
+import by.citech.server.network.protocols.http.response.Status;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.param;
+package by.citech.param;
 
 public enum DataSource {
     MICROPHONE,

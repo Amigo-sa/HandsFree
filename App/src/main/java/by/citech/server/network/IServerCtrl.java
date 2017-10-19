@@ -1,7 +1,7 @@
-package by.citech.websocketduplex.server.network;
+package by.citech.server.network;
 
 import java.io.IOException;
-import by.citech.websocketduplex.server.network.websockets.WebSocket;
+import by.citech.server.network.websockets.WebSocket;
 
 public interface IServerCtrl {
     void sendMessage(String message);

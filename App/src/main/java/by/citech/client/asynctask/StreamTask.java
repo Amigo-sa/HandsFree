@@ -1,15 +1,15 @@
-package by.citech.websocketduplex.client.asynctask;
+package by.citech.client.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import by.citech.websocketduplex.client.network.IStream;
-import by.citech.websocketduplex.client.network.IStreamOn;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.data.StorageData;
-import by.citech.websocketduplex.param.DataSource;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.client.network.IStream;
+import by.citech.client.network.IStreamOn;
+import by.citech.client.network.IClientCtrl;
+import by.citech.data.StorageData;
+import by.citech.param.DataSource;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 public class StreamTask extends AsyncTask<String, IStream, Void> {
     private IStreamOn iStreamOn;

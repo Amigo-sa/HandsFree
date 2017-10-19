@@ -1,14 +1,14 @@
-package by.citech.websocketduplex.server.asynctask;
+package by.citech.server.asynctask;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.Tags;
-import by.citech.websocketduplex.server.network.IRedirectCtrl;
-import by.citech.websocketduplex.server.network.IServerCtrl;
-import by.citech.websocketduplex.server.network.IServerListener;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+import by.citech.server.network.IRedirectCtrl;
+import by.citech.server.network.IServerCtrl;
+import by.citech.server.network.IServerListener;
 
 class RedirectToAudio implements IRedirectCtrl, IServerListener {
     private int bufferSize;

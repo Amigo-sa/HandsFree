@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.param;
+package by.citech.param;
 
 public final class StatusMessages {
     public static final String WEBSOCKET_OPENED = "WEBSOCKET_OPENED";

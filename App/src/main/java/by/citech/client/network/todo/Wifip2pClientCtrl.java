@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.client.network.todo;
+package by.citech.client.network.todo;
 
 public class Wifip2pClientCtrl {
 }

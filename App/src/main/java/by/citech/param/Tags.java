@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.param;
+package by.citech.param;
 
 public class Tags {
     public static final String ACT_CLT              = "WSD_ACT_CLT";

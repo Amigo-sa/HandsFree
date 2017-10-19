@@ -1,15 +1,15 @@
-package by.citech.websocketduplex.server.asynctask;
+package by.citech.server.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import by.citech.websocketduplex.data.StorageData;
-import by.citech.websocketduplex.param.DataSource;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.server.network.IRedirectCtrl;
-import by.citech.websocketduplex.server.network.IRedirectOn;
-import by.citech.websocketduplex.server.network.IServerCtrl;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.data.StorageData;
+import by.citech.param.DataSource;
+import by.citech.param.Settings;
+import by.citech.server.network.IRedirectCtrl;
+import by.citech.server.network.IRedirectOn;
+import by.citech.server.network.IServerCtrl;
+import by.citech.param.Tags;
 
 public class RedirectDataTask extends AsyncTask<String, IRedirectCtrl, Void> {
     private IRedirectOn iRedirectOn;

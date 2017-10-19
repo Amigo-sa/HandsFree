@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.websockets;
+package by.citech.server.network.websockets;
 
 public enum State {
     UNCONNECTED,

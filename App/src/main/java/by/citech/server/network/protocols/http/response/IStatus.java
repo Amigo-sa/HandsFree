@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.response;
+package by.citech.server.network.protocols.http.response;
 
 public interface IStatus {
 

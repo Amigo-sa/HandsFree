@@ -1,14 +1,14 @@
-package by.citech.websocketduplex.client.asynctask;
+package by.citech.client.asynctask;
 
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
-import by.citech.websocketduplex.ClientActivity;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.client.network.IClientOn;
-import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.ClientActivity;
+import by.citech.client.network.IClientCtrl;
+import by.citech.client.network.IClientOn;
+import by.citech.client.network.OkWebSocketClientCtrl;
+import by.citech.param.Tags;
 
 public class OpenWebSocketTask extends AsyncTask<String, Void, Void> {
     private IClientOn iClientOn;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package  by.citech.bluetoothlegatt;
+package by.citech;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import by.citech.R;
+import by.citech.bluetoothlegatt.BluetoothLeService;
 import by.citech.data.SampleGattAttributes;
 
 /**

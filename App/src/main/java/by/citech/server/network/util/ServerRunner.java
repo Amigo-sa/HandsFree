@@ -1,10 +1,10 @@
-package by.citech.websocketduplex.server.network.util;
+package by.citech.server.network.util;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import by.citech.websocketduplex.server.network.protocols.http.NanoHTTPD;
+import by.citech.server.network.protocols.http.NanoHTTPD;
 
 public class ServerRunner {
 

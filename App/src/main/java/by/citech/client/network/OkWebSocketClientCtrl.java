@@ -1,21 +1,21 @@
-package by.citech.websocketduplex.client.network;
+package by.citech.client.network;
 
 import android.os.Handler;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
 
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
-import by.citech.websocketduplex.param.Messages;
-import by.citech.websocketduplex.param.StatusMessages;
+import by.citech.param.Messages;
+import by.citech.param.StatusMessages;
 
-import static by.citech.websocketduplex.util.Decode.bytesToHex;
+import static by.citech.util.Decode.bytesToHex;
 
 public class OkWebSocketClientCtrl extends WebSocketListener implements IClientCtrl {
     private WebSocket webSocket;

@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.util;
+package by.citech.util;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -10,7 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import by.citech.websocketduplex.param.Tags;
+import by.citech.param.Tags;
 
 public class Decode {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();

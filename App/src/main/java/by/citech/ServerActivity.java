@@ -1,9 +1,7 @@
-package by.citech.websocketduplex;
+package by.citech;
 
 import android.app.Activity;
-import android.content.Context;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -16,20 +14,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import by.citech.websocketduplex.param.Settings;
-import by.citech.websocketduplex.server.asynctask.RedirectDataTask;
-import by.citech.websocketduplex.server.asynctask.ServerOffTask;
-import by.citech.websocketduplex.server.asynctask.ServerOnTask;
-import by.citech.websocketduplex.server.network.IRedirectCtrl;
-import by.citech.websocketduplex.server.network.IServerOff;
-import by.citech.websocketduplex.server.network.IServerOn;
-import by.citech.websocketduplex.server.network.IServerCtrl;
-import by.citech.websocketduplex.server.network.IRedirectOn;
-import by.citech.websocketduplex.server.network.websockets.WebSocketFrame;
-import by.citech.websocketduplex.param.StatusMessages;
-import by.citech.websocketduplex.param.Tags;
-import static by.citech.websocketduplex.util.Decode.bytesToHex;
-import static by.citech.websocketduplex.util.NetworkInfo.getIPAddress;
+
+import by.citech.R;
+import by.citech.param.Settings;
+import by.citech.server.asynctask.RedirectDataTask;
+import by.citech.server.asynctask.ServerOffTask;
+import by.citech.server.asynctask.ServerOnTask;
+import by.citech.server.network.IRedirectCtrl;
+import by.citech.server.network.IServerOff;
+import by.citech.server.network.IServerOn;
+import by.citech.server.network.IServerCtrl;
+import by.citech.server.network.IRedirectOn;
+import by.citech.server.network.websockets.WebSocketFrame;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
+import static by.citech.util.Decode.bytesToHex;
+import static by.citech.util.NetworkInfo.getIPAddress;
 
 public class ServerActivity extends Activity implements OnCheckedChangeListener, IServerOn, IServerOff, IRedirectOn {
     public IServerCtrl serverCtrl;

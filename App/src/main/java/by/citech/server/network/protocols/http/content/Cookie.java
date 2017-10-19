@@ -1,4 +1,4 @@
-package by.citech.websocketduplex.server.network.protocols.http.content;
+package by.citech.server.network.protocols.http.content;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

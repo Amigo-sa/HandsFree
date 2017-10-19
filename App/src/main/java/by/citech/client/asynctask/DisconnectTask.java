@@ -1,14 +1,14 @@
-package by.citech.websocketduplex.client.asynctask;
+package by.citech.client.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
-import by.citech.websocketduplex.client.network.IClientOff;
-import by.citech.websocketduplex.client.network.OkWebSocketClientCtrl;
-import by.citech.websocketduplex.client.network.IClientCtrl;
-import by.citech.websocketduplex.param.StatusMessages;
-import by.citech.websocketduplex.param.Tags;
+import by.citech.client.network.IClientOff;
+import by.citech.client.network.OkWebSocketClientCtrl;
+import by.citech.client.network.IClientCtrl;
+import by.citech.param.StatusMessages;
+import by.citech.param.Tags;
 
 public class DisconnectTask extends AsyncTask<IClientCtrl, String, Void> {
     private static final int TIMEOUT_PERIOD = 500;
