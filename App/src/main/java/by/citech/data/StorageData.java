@@ -2,6 +2,7 @@ package by.citech.data;
 
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import by.citech.param.Settings;
 
@@ -17,8 +18,8 @@ public class StorageData {
     public synchronized byte[] getData() {
         if (Settings.debug) Log.i(TAG, "getData");
         byte[] tmpData;
-
-        if (databuffer.isEmpty()) {
+        Log.i(TAG, "isEmpty = " + databuffer.isEmpty());
+        while (databuffer.isEmpty()) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -36,13 +37,18 @@ public class StorageData {
     public synchronized void putData(byte[] dataByte) {
         if (Settings.debug) Log.i(TAG, "putData");
 
-        if (databuffer.size() > Settings.storageMaxSize) {
+        while (databuffer.size() > Settings.storageMaxSize) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 Log.i(TAG, "putData cant wait");
             }
         }
+
+        final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
+        for (byte byteChar : dataByte)
+            stringBuilder.append(String.format("%02X ", byteChar));
+        Log.i(TAG, "PUT DATA = " + stringBuilder.toString());
 
         databuffer.add(dataByte);
         notify();

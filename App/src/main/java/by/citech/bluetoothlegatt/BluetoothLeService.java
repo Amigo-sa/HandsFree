@@ -258,7 +258,7 @@ public class BluetoothLeService extends Service {
                 //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
                 intent.putExtra(EXTRA_DATA, stringBuilder.toString());
 
-               // Log.w("Notify DATA ", stringBuilder.toString());
+                Log.w("WSD_BLE_DATA ","storageBtToNet.putData = " + stringBuilder.toString());
             }
         }
         sendBroadcast(intent);
@@ -411,10 +411,6 @@ public class BluetoothLeService extends Service {
         }
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
 // потоковая запись данных в периферийное устройство
-               // loopback = res.isLoopback();//, Resource resres,
-
-            //Log.w(TAG, "storageNetToBt = " + storageNetToBt.isOpen());
-            Log.w(TAG, "res = " + res.isWrite());
             wrt = new WriterTransmitter("Write_one", res, storageNetToBt, mBluetoothGatt, characteristic);
             wrt.addWriteListener(new WriterTransmitterCallbackListener() {
                 @Override
@@ -423,7 +419,6 @@ public class BluetoothLeService extends Service {
                 }
             });
             wrt.start();
-
 // одноразовая запись данных в периферийное устройство
 
 //            StringBuilder data = new StringBuilder();
