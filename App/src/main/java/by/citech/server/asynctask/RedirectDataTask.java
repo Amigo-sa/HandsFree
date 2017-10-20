@@ -2,6 +2,9 @@ package by.citech.server.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
+import by.citech.connection.IReceiver;
+import by.citech.connection.IReceiverRegister;
 import by.citech.data.StorageData;
 import by.citech.param.DataSource;
 import by.citech.param.Settings;
@@ -12,20 +15,20 @@ import by.citech.param.Tags;
 
 public class RedirectDataTask extends AsyncTask<String, IRedirectCtrl, Void> {
     private IRedirectOn iRedirectOn;
-    private IServerCtrl iServerCtrl;
+    private IReceiverRegister iReceiverRegister;
     private DataSource dataSource;
     private StorageData storageNetToBt;
 
-    public RedirectDataTask(IRedirectOn iRedirectOn, IServerCtrl iServerCtrl, DataSource dataSource) {
+    public RedirectDataTask(IRedirectOn iRedirectOn, IReceiverRegister iReceiverRegister, DataSource dataSource) {
         this.iRedirectOn = iRedirectOn;
-        this.iServerCtrl = iServerCtrl;
+        this.iReceiverRegister = iReceiverRegister;
         this.dataSource = dataSource;
     }
 
-    public RedirectDataTask(IRedirectOn iRedirectOn, IServerCtrl iServerCtrl, DataSource dataSource, StorageData storageNetToBt) {
+    public RedirectDataTask(IRedirectOn iRedirectOn, IReceiverRegister iReceiverRegister, DataSource dataSource, StorageData storageNetToBt) {
         if (Settings.debug) Log.i(Tags.SRV_TASK_REDIR, "RedirectDataTask");
         this.iRedirectOn = iRedirectOn;
-        this.iServerCtrl = iServerCtrl;
+        this.iReceiverRegister = iReceiverRegister;
         this.dataSource = dataSource;
         this.storageNetToBt = storageNetToBt;
     }
@@ -36,7 +39,7 @@ public class RedirectDataTask extends AsyncTask<String, IRedirectCtrl, Void> {
         switch (dataSource) {
             case MICROPHONE:
                 Log.i(Tags.SRV_TASK_REDIR, "doInBackground redirect to audio");
-                final RedirectToAudio redirectToAudio = new RedirectToAudio(iServerCtrl, Integer.parseInt(params[0]));
+                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverRegister, Integer.parseInt(params[0]));
                 publishProgress(redirectToAudio.start());
                 new Thread(new Runnable() {
                     @Override
@@ -47,7 +50,7 @@ public class RedirectDataTask extends AsyncTask<String, IRedirectCtrl, Void> {
                 break;
             case BLUETOOTH:
                 Log.i(Tags.SRV_TASK_REDIR, "doInBackground redirect to bluetooth");
-                RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iServerCtrl, Settings.bufferSize, storageNetToBt);
+                RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iReceiverRegister, Settings.bufferSize, storageNetToBt);
                 publishProgress(redirectToBluetooth.start());
                 redirectToBluetooth.run();
                 break;

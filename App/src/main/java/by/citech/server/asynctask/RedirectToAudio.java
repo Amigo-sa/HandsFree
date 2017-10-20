@@ -4,20 +4,22 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
+
+import by.citech.connection.IReceiverRegister;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.server.network.IRedirectCtrl;
 import by.citech.server.network.IServerCtrl;
-import by.citech.server.network.IServerListener;
+import by.citech.connection.IReceiver;
 
-class RedirectToAudio implements IRedirectCtrl, IServerListener {
+class RedirectToAudio implements IRedirectCtrl, IReceiver {
     private int bufferSize;
-    private IServerCtrl serverCtrl;
+    private IReceiverRegister iReceiverRegister;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    RedirectToAudio(IServerCtrl serverCtrl, int bufferSize) {
-        this.serverCtrl = serverCtrl;
+    RedirectToAudio(IReceiverRegister iReceiverRegister, int bufferSize) {
+        this.iReceiverRegister = iReceiverRegister;
         this.bufferSize = bufferSize;
     }
 
@@ -25,7 +27,7 @@ class RedirectToAudio implements IRedirectCtrl, IServerListener {
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "redirectOff");
         isRedirecting = false;
-        serverCtrl.setListener(null);
+        iReceiverRegister.setListener(null);
 
         if (audioTrack != null) {
             if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
@@ -66,7 +68,7 @@ class RedirectToAudio implements IRedirectCtrl, IServerListener {
         if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "run");
         isRedirecting = true;
         audioTrack.play();
-        serverCtrl.setListener(this);
+        iReceiverRegister.setListener(this);
     }
 
     @Override

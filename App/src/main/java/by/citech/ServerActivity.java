@@ -16,6 +16,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import by.citech.R;
+import by.citech.connection.IReceiverRegister;
 import by.citech.param.Settings;
 import by.citech.server.asynctask.RedirectDataTask;
 import by.citech.server.asynctask.ServerOffTask;
@@ -148,7 +149,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 
     public void sendMessage(View view) {
         Log.i(Tags.ACT_SRV, "sendMessage");
-        serverCtrl.sendMessage(editTextSrvToCltText.getText().toString());
+        serverCtrl.getTransmitter().sendMessage(editTextSrvToCltText.getText().toString());
         editTextSrvToCltText.setText("");
     }
 
@@ -163,7 +164,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 //                  Context context = getApplicationContext();
 //                  AudioManager audiomanager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 //                  audiomanager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                    new RedirectDataTask(this, serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
+                    new RedirectDataTask(this, (IReceiverRegister) serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
                 } else {
                     Log.i(Tags.ACT_SRV, "onCheckedChanged redirect off");
                     new Thread(new Runnable() {

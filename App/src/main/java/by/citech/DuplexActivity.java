@@ -17,6 +17,9 @@ import by.citech.client.network.IClientOn;
 import by.citech.client.network.IMessage;
 import by.citech.client.network.IStream;
 import by.citech.client.network.IStreamOn;
+import by.citech.connection.IReceiver;
+import by.citech.connection.IReceiverRegister;
+import by.citech.connection.ITransmitter;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
@@ -135,8 +138,8 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
             if (Settings.debug) Log.i(Tags.ACT_DPL, "call iClientCtrl is null");
             return;
         }
-        new StreamTask(DuplexActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-        new RedirectDataTask(DuplexActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+        new StreamTask(DuplexActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
+        new RedirectDataTask(DuplexActivity.this, (IReceiverRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
     }
 
     @Override

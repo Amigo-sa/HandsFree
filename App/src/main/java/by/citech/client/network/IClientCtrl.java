@@ -1,10 +1,13 @@
 package by.citech.client.network;
 
+import by.citech.connection.IReceiverRegister;
+import by.citech.connection.ITransmitter;
+
 public interface IClientCtrl {
-    void sendBytes(byte... bytes);
-    String getStatus();
-    void cancel();
     IClientCtrl run();
     void stop(String reason);
-    void sendMessage(String string);
+    void cancel();
+    ITransmitter getTransmitter();
+    IReceiverRegister getReceiverRegister();
+    String getStatus();
 }

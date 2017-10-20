@@ -4,19 +4,20 @@ import android.util.Log;
 
 import by.citech.client.network.IStream;
 import by.citech.client.network.IClientCtrl;
+import by.citech.connection.ITransmitter;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 class StreamBluetooth implements IStream {
     private byte[] buffer;
-    private IClientCtrl iClientCtrl;
+    private ITransmitter iTransmitter;
     private int bufferSize;
     private StorageData storageBtToNet;
     private boolean isStreaming = false;
 
-    public StreamBluetooth(IClientCtrl iClientCtrl, int bufferSize, StorageData storageBtToNet) {
-        this.iClientCtrl = iClientCtrl;
+    public StreamBluetooth(ITransmitter iTransmitter, int bufferSize, StorageData storageBtToNet) {
+        this.iTransmitter = iTransmitter;
         this.bufferSize = bufferSize;
         this.storageBtToNet = storageBtToNet;
     }
@@ -32,7 +33,7 @@ class StreamBluetooth implements IStream {
         while (isStreaming) {
             buffer = storageBtToNet.getData();
             if (buffer.length > 0) {
-                iClientCtrl.sendBytes(buffer);
+                iTransmitter.sendBytes(buffer);
             }
         }
         if (Settings.debug) Log.i(Tags.CLT_STREAM_BLUETOOTH, "run done");

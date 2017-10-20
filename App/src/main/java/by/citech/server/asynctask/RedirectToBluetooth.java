@@ -1,21 +1,23 @@
 package by.citech.server.asynctask;
 
 import android.util.Log;
+
+import by.citech.connection.IReceiverRegister;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.server.network.IRedirectCtrl;
 import by.citech.server.network.IServerCtrl;
-import by.citech.server.network.IServerListener;
+import by.citech.connection.IReceiver;
 
-class RedirectToBluetooth implements IRedirectCtrl, IServerListener{
+class RedirectToBluetooth implements IRedirectCtrl, IReceiver {
     private int bufferSize;
-    private IServerCtrl iServerCtrl;
+    private IReceiverRegister iReceiverRegister;
     private StorageData storageNetToBt;
     private boolean isRedirecting = false;
 
-    RedirectToBluetooth(IServerCtrl iServerCtrl, int bufferSize, StorageData storageNetToBt) {
-        this.iServerCtrl = iServerCtrl;
+    RedirectToBluetooth(IReceiverRegister iReceiverRegister, int bufferSize, StorageData storageNetToBt) {
+        this.iReceiverRegister = iReceiverRegister;
         this.bufferSize = bufferSize;
         this.storageNetToBt = storageNetToBt;
     }
@@ -28,7 +30,7 @@ class RedirectToBluetooth implements IRedirectCtrl, IServerListener{
     public void run() {
         if (Settings.debug) Log.i(Tags.SRV_REDIR_BLUETOOTH, "run");
         isRedirecting = true;
-        iServerCtrl.setListener(this);
+        iReceiverRegister.setListener(this);
         if (Settings.debug) Log.i(Tags.SRV_REDIR_BLUETOOTH, "run done");
     }
 

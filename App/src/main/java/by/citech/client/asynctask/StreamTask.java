@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import by.citech.client.network.IStream;
 import by.citech.client.network.IStreamOn;
-import by.citech.client.network.IClientCtrl;
+import by.citech.connection.ITransmitter;
 import by.citech.data.StorageData;
 import by.citech.param.DataSource;
 import by.citech.param.Settings;
@@ -12,19 +12,19 @@ import by.citech.param.Tags;
 
 public class StreamTask extends AsyncTask<String, IStream, Void> {
     private IStreamOn iStreamOn;
-    private IClientCtrl iClientCtrl;
+    private ITransmitter iTransmitter;
     private DataSource dataSource;
     private StorageData storageBtToNet;
 
-    public StreamTask(IStreamOn iStreamOn, IClientCtrl clientCtrl, DataSource dataSource) {
+    public StreamTask(IStreamOn iStreamOn, ITransmitter iTransmitter, DataSource dataSource) {
         this.iStreamOn = iStreamOn;
-        this.iClientCtrl = clientCtrl;
+        this.iTransmitter = iTransmitter;
         this.dataSource = dataSource;
     }
 
-    public StreamTask(IStreamOn iStreamOn, IClientCtrl clientCtrl, DataSource dataSource, StorageData storageBtToNet) {
+    public StreamTask(IStreamOn iStreamOn, ITransmitter iTransmitter, DataSource dataSource, StorageData storageBtToNet) {
         this.iStreamOn = iStreamOn;
-        this.iClientCtrl = clientCtrl;
+        this.iTransmitter = iTransmitter;
         this.dataSource = dataSource;
         this.storageBtToNet = storageBtToNet;
     }
@@ -34,12 +34,12 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
         Log.i(Tags.CLT_TASK_STREAM, "doInBackground");
         switch (dataSource) {
             case MICROPHONE:
-                StreamAudio streamAudio = new StreamAudio(iClientCtrl, Integer.parseInt(params[0]));
+                StreamAudio streamAudio = new StreamAudio(iTransmitter, Integer.parseInt(params[0]));
                 publishProgress(streamAudio.start());
                 streamAudio.run();
                 break;
             case BLUETOOTH:
-                final StreamBluetooth streamBluetooth = new StreamBluetooth(iClientCtrl, Settings.bufferSize, storageBtToNet);
+                final StreamBluetooth streamBluetooth = new StreamBluetooth(iTransmitter, Settings.bufferSize, storageBtToNet);
                 publishProgress(streamBluetooth.start());
                 new Thread(new Runnable() {
                     @Override

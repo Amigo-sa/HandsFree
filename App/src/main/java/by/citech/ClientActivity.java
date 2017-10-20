@@ -24,6 +24,7 @@ import by.citech.client.network.IMessage;
 import by.citech.client.network.IStream;
 import by.citech.client.network.IStreamOn;
 import by.citech.client.network.IClientCtrl;
+import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
@@ -167,7 +168,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
             btnCltStreamOn.setEnabled(false);
             btnCltDiscFromSrv.setEnabled(false);
             btnCltSendMsg.setEnabled(false);
-            new StreamTask(this, iClientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
+            new StreamTask(this, (ITransmitter) iClientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
             btnCltStreamOff.setEnabled(true);
         }
     }
@@ -202,7 +203,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     public void sendMessage(View view) {
         Log.i(Tags.ACT_CLT, "sendMessage");
         btnCltSendMsg.setEnabled(false);
-        new SendMessageToServerTask(this, iClientCtrl).execute(editTextCltToSrvText.getText().toString());
+        new SendMessageToServerTask(this, iClientCtrl.getTransmitter()).execute(editTextCltToSrvText.getText().toString());
     }
 
     private void requestRecordAudioPermission() {

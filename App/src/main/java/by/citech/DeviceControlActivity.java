@@ -52,6 +52,9 @@ import by.citech.client.network.IClientOn;
 import by.citech.client.network.IMessage;
 import by.citech.client.network.IStream;
 import by.citech.client.network.IStreamOn;
+import by.citech.connection.IReceiver;
+import by.citech.connection.IReceiverRegister;
+import by.citech.connection.ITransmitter;
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
@@ -295,10 +298,12 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
 
                     case StatusMessages.CLT_ONOPEN:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN");
-                        new RedirectDataTask(DeviceControlActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new RedirectDataTask");
-                        new StreamTask(DeviceControlActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new StreamTask");
+                        new StreamTask(DeviceControlActivity.this, iClientCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
+                        new RedirectDataTask(DeviceControlActivity.this, iClientCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
+//                      new RedirectDataTask(DeviceControlActivity.this, (IReceiverRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+//                      if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new RedirectDataTask");
+//                      new StreamTask(DeviceControlActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
+//                      if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new StreamTask");
                         break;
                     case StatusMessages.CLT_ONMESSAGE_BYTES:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_BYTES");
@@ -379,8 +384,8 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
             @Override
             public void onClick(View v) {
                 if (callInOneClick) {
-//                    enableTransmitData();
-//                    callIn();
+                    enableTransmitData();
+                    callIn();
                     callInOneClick = false;
                 }
             }
@@ -390,15 +395,15 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     private void callIn() {
         enableTransmitData();
         if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn");
-        new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
-                editTextSrvRemAddr.getText().toString(),
-                editTextSrvRemPort.getText().toString()));
-        if (iClientCtrl == null) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn iClientCtrl is null");
-            return;
-        }
-        new StreamTask(DeviceControlActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-        new RedirectDataTask(DeviceControlActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+//      new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
+//              editTextSrvRemAddr.getText().toString(),
+//              editTextSrvRemPort.getText().toString()));
+//      if (iClientCtrl == null) {
+//          if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn iClientCtrl is null");
+//          return;
+//      }
+        new StreamTask(DeviceControlActivity.this, iServerCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
+        new RedirectDataTask(DeviceControlActivity.this, iServerCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
     }
 
     private void callOut() {
@@ -406,11 +411,12 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
                 editTextSrvRemAddr.getText().toString(),
                 editTextSrvRemPort.getText().toString()));
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut post new ConnectTask");
-        if (iClientCtrl == null) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut iClientCtrl is null");
-            return;
-        }
+//      if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut post new ConnectTask");
+//      if (iClientCtrl == null) {
+//          if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut iClientCtrl is null");
+//          return;
+//      }
+
 //      new StreamTask(DeviceControlActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
 //      if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut post new StreamTask");
 //      new RedirectDataTask(DeviceControlActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();

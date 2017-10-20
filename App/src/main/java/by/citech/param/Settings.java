@@ -41,7 +41,7 @@ public class Settings {
 
     public static String serverRemoteIpAddress = "192.168.0.126";
     public static int serverLocalPortNumber = 8080;
-    public static int serverRemotePortNumber = 8081;
+    public static int serverRemotePortNumber = 8080;
     public static boolean reconnect = false;
     public static long clientReadTimeout = 15000;
     public static int serverTimeout = 50000;

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import by.citech.client.network.IStream;
 import by.citech.client.network.IClientCtrl;
+import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import static by.citech.util.Decode.bytesToHex;
@@ -14,10 +15,10 @@ public class StreamAudio implements IStream {
     private int bufferSize;
     private AudioRecord recorder;
     private boolean isStreaming = false;
-    private IClientCtrl iClientCtrl;
+    private ITransmitter iTransmitter;
 
-    public StreamAudio(IClientCtrl iClientCtrl, int bufferSize) {
-        this.iClientCtrl = iClientCtrl;
+    public StreamAudio(ITransmitter iTransmitter, int bufferSize) {
+        this.iTransmitter = iTransmitter;
         this.bufferSize = bufferSize;
     }
 
@@ -67,7 +68,7 @@ public class StreamAudio implements IStream {
             if (Settings.debug) Log.i(Tags.CLT_STREAM_AUDIO, String.format("run buffer length is %d", buffer.length));
             fillBuffer(buffer, 0, buffer.length);
             if (Settings.debug) Log.i(Tags.CLT_STREAM_AUDIO, String.format("run %s: %s", "sendBytes", bytesToHex(buffer)));
-            iClientCtrl.sendBytes(buffer);
+            iTransmitter.sendBytes(buffer);
         }
 
         if (Settings.debug) Log.i(Tags.CLT_STREAM_AUDIO, "run done");

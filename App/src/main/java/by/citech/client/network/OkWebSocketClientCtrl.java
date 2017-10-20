@@ -4,6 +4,9 @@ import android.os.Handler;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
 
+import by.citech.connection.IReceiver;
+import by.citech.connection.IReceiverRegister;
+import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import okhttp3.OkHttpClient;
@@ -17,16 +20,19 @@ import by.citech.param.StatusMessages;
 
 import static by.citech.util.Decode.bytesToHex;
 
-public class OkWebSocketClientCtrl extends WebSocketListener implements IClientCtrl {
+public class OkWebSocketClientCtrl extends WebSocketListener implements IClientCtrl, ITransmitter, IReceiverRegister {
     private WebSocket webSocket;
     private String status = "";
     private String url = "";
     private Handler handler;
+    private IReceiver listener;
 
     public OkWebSocketClientCtrl(String url, Handler handler) {
         this.url = url;
         this.handler = handler;
     }
+
+    //--------------------- IClientCtrl
 
     @Override
     public IClientCtrl run() {
@@ -56,6 +62,16 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
     }
 
     @Override
+    public ITransmitter getTransmitter() {
+        return this;
+    }
+
+    @Override
+    public IReceiverRegister getReceiverRegister() {
+        return this;
+    }
+
+    @Override
     public void stop(String reason) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "stop");
         if (webSocket != null) {
@@ -68,6 +84,15 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "getStatus");
         return this.status;
     }
+
+    //--------------------- IReceiverRegister
+
+    @Override
+    public void setListener(IReceiver listener) {
+        this.listener = listener;
+    }
+
+    //--------------------- ITransmitter
 
     @Override
     public void sendBytes(byte... bytes) {
@@ -82,6 +107,8 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
     public void sendMessage(String string) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "sendMessage");
         webSocket.send(string);
+
+
 
         /*-------------------------- TEST --------------------------->>
         byte[] bytes = {0x2c, 0x56, 0x78, 0x7b};
@@ -111,6 +138,12 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onMessage bytes");
+        if (listener != null) {
+            if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onMessage listener is null");
+        } else {
+            if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onMessage listener is not null");
+            listener.onMessage(bytes.toByteArray());
+        }
         handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_BYTES, bytes).sendToTarget();
     }
 

@@ -5,7 +5,9 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import by.citech.connection.IReceiver;
+import by.citech.connection.IReceiverRegister;
+import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.server.network.protocols.http.IHTTPSession;
 import by.citech.server.network.websockets.CloseCode;
@@ -18,11 +20,11 @@ import by.citech.param.Tags;
 
 import static by.citech.util.Decode.bytesToHex;
 
-public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
+public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IReceiverRegister, ITransmitter {
     private static final Logger LOG = Logger.getLogger(NanoWebSocketServerCtrl.class.getName());
     private WebSocket webSocket;
     private Handler handler;
-    private IServerListener listener;
+    private IReceiver listener;
     private String status = "";
 
     public NanoWebSocketServerCtrl(int port, Handler handler) {
@@ -36,7 +38,7 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
         return webSocket;
     }
 
-    //--------------------- IServerCtrl BEGIN
+    //--------------------- ITransmitter
 
     @Override
     public void sendMessage(String message) {
@@ -46,6 +48,18 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
         } catch (IOException e) {
             Log.i(Tags.SRV_WSOCKETCTRL, "cant send message");
         }
+    }
+
+    @Override
+    public void sendBytes(byte... bytes) {
+
+    }
+
+    //--------------------- IServerCtrl
+
+    @Override
+    public ITransmitter getTransmitter() {
+        return this;
     }
 
     @Override
@@ -59,8 +73,8 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
     }
 
     @Override
-    public void setListener(IServerListener listener) {
-        this.listener = listener;
+    public IReceiverRegister getReceiverRegister() {
+        return this;
     }
 
     @Override
@@ -89,7 +103,12 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl {
         stop();
     }
 
-    //--------------------- IServerCtrl END
+    //--------------------- IReceiverRegister
+
+    @Override
+    public void setListener(IReceiver listener) {
+        this.listener = listener;
+    }
 
 //  private static class DebugWebSocket extends WebSocket {
     private class DebugWebSocket extends WebSocket {
