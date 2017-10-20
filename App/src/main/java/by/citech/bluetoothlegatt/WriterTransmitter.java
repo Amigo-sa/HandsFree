@@ -53,6 +53,7 @@ public class WriterTransmitter extends Thread {
                 mBluetoothGatt.executeReliableWrite();
 
                 /**
+                 *
                  *   когда использую mBluetoothGatt.beginReliableWrite();  происходит
                  *   зависание на удалённом устройстве, в логе выдаётся ошибка:
                  *   E/bt_att: value resp op_code = ATT_RSP_PREPARE_WRITE len = 20
@@ -67,7 +68,7 @@ public class WriterTransmitter extends Thread {
                 final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
                 for (byte byteChar : dataByte)
                     stringBuilder.append(String.format("%02X ", byteChar));
-                Log.w("Write DATA ", stringBuilder.toString());
+                Log.w(Tags.BLE_WRITETRANS, stringBuilder.toString());
             }
             try {
                 Thread.sleep(10);

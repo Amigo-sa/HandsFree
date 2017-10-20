@@ -253,7 +253,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
-        final DeviceControlActivity activity = this;
         storageBtToNet = new StorageData(Tags.NET_STORE_BT2NET);
         storageNetToBt = new StorageData(Tags.NET_STORE_NET2BT);
 
@@ -267,6 +266,7 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
                         break;
                     case StatusMessages.SRV_ONCLOSE:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONCLOSE");
+                        btnCallOut.setEnabled(true);
                         break;
                     case StatusMessages.SRV_ONOPEN:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
@@ -316,7 +316,7 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
                         break;
                     case StatusMessages.CLT_ONFAILURE:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONFAILURE");
-                        Toast.makeText(activity, "SUBSCRIBER NOT ONLINE", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DeviceControlActivity.this, "SUBSCRIBER NOT ONLINE", Toast.LENGTH_SHORT).show();
                         break;
                     case StatusMessages.CLT_CANCEL:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_CANCEL");
@@ -390,8 +390,9 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     }
 
     private void callIn() {
-        enableTransmitData();
         if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn");
+        enableTransmitData();
+        btnCallOut.setEnabled(false);
 //      new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
 //              editTextSrvRemAddr.getText().toString(),
 //              editTextSrvRemPort.getText().toString()));
@@ -523,13 +524,17 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     // on the UI.
     // процедура обработки и отображения доступных сервисов и характеристик на дисплее
 
-    private void enableTransmitData(){
+    private void enableTransmitData() {
         mBluetoothLeService.initStore();
-        if (mGattCharacteristics != null)
+        if (!mGattCharacteristics.isEmpty()) {
             mNotifyCharacteristic = mGattCharacteristics.get(3).get(2);
-        mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
-        final BluetoothGattCharacteristic characteristic_write = mGattCharacteristics.get(3).get(1);
-        mBluetoothLeService.writeCharacteristic(characteristic_write);
+            mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
+            final BluetoothGattCharacteristic characteristic_write = mGattCharacteristics.get(3).get(1);
+            mBluetoothLeService.writeCharacteristic(characteristic_write);
+        } else{
+            Toast.makeText(this, "Device not connected", Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
