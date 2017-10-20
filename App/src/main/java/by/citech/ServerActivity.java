@@ -15,17 +15,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import by.citech.R;
 import by.citech.connection.IReceiverRegister;
 import by.citech.param.Settings;
-import by.citech.server.asynctask.RedirectDataTask;
+import by.citech.connection.RedirectTask;
 import by.citech.server.asynctask.ServerOffTask;
 import by.citech.server.asynctask.ServerOnTask;
-import by.citech.server.network.IRedirectCtrl;
+import by.citech.connection.IRedirectCtrl;
 import by.citech.server.network.IServerOff;
 import by.citech.server.network.IServerOn;
 import by.citech.server.network.IServerCtrl;
-import by.citech.server.network.IRedirectOn;
+import by.citech.connection.IRedirectOn;
 import by.citech.server.network.websockets.WebSocketFrame;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
@@ -164,7 +163,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 //                  Context context = getApplicationContext();
 //                  AudioManager audiomanager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 //                  audiomanager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                    new RedirectDataTask(this, (IReceiverRegister) serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
+                    new RedirectTask(this, (IReceiverRegister) serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
                 } else {
                     Log.i(Tags.ACT_SRV, "onCheckedChanged redirect off");
                     new Thread(new Runnable() {

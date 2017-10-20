@@ -1,16 +1,12 @@
-package by.citech.server.asynctask;
+package by.citech.connection;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import by.citech.connection.IReceiverRegister;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
-import by.citech.server.network.IRedirectCtrl;
-import by.citech.server.network.IServerCtrl;
-import by.citech.connection.IReceiver;
 
 class RedirectToAudio implements IRedirectCtrl, IReceiver {
     private int bufferSize;
@@ -25,7 +21,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiver {
 
     @Override
     public void redirectOff() {
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "redirectOff");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
         isRedirecting = false;
         iReceiverRegister.setListener(null);
 
@@ -38,12 +34,12 @@ class RedirectToAudio implements IRedirectCtrl, IReceiver {
             audioTrack = null;
         }
 
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "redirectOff done");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff done");
     }
 
     public IRedirectCtrl start() {
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "start");
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, String.format("start audioInBuffersize is %d", bufferSize));
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "start");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, String.format("start audioInBuffersize is %d", bufferSize));
         redirectOff();
 
         audioTrack = new AudioTrack.Builder()
@@ -60,12 +56,12 @@ class RedirectToAudio implements IRedirectCtrl, IReceiver {
                 .setTransferMode(Settings.audioMode)
                 .build();
 
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "start done");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "start done");
         return this;
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "run");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "run");
         isRedirecting = true;
         audioTrack.play();
         iReceiverRegister.setListener(this);
@@ -73,7 +69,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiver {
 
     @Override
     public void onMessage(byte[] data) {
-        if (Settings.debug) Log.i(Tags.SRV_REDIR_AUDIO, "onMessage");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "onMessage");
         if (isRedirecting) {
             audioTrack.write(data, 0, bufferSize);
         }

@@ -11,23 +11,22 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import by.citech.client.asynctask.ConnectTask;
-import by.citech.client.asynctask.StreamTask;
+import by.citech.connection.StreamTask;
 import by.citech.client.network.IClientCtrl;
 import by.citech.client.network.IClientOn;
-import by.citech.client.network.IMessage;
-import by.citech.client.network.IStream;
-import by.citech.client.network.IStreamOn;
-import by.citech.connection.IReceiver;
+import by.citech.connection.IMessage;
+import by.citech.connection.IStream;
+import by.citech.connection.IStreamOn;
 import by.citech.connection.IReceiverRegister;
 import by.citech.connection.ITransmitter;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
-import by.citech.server.asynctask.RedirectDataTask;
+import by.citech.connection.RedirectTask;
 import by.citech.server.asynctask.ServerOnTask;
-import by.citech.server.network.IRedirectCtrl;
-import by.citech.server.network.IRedirectOn;
+import by.citech.connection.IRedirectCtrl;
+import by.citech.connection.IRedirectOn;
 import by.citech.server.network.IServerOn;
 import by.citech.server.network.IServerCtrl;
 import by.citech.server.network.websockets.WebSocketFrame;
@@ -53,8 +52,8 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_duplex);
         final DuplexActivity activity = this;
-        storageBtToNet = new StorageData(Tags.CLT_STORE_BT2NET);
-        storageNetToBt = new StorageData(Tags.SRV_STORE_NET2BT);
+        storageBtToNet = new StorageData(Tags.NET_STORE_BT2NET);
+        storageNetToBt = new StorageData(Tags.NET_STORE_NET2BT);
 
         handler = new Handler() {
             @Override
@@ -139,7 +138,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
             return;
         }
         new StreamTask(DuplexActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-        new RedirectDataTask(DuplexActivity.this, (IReceiverRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+        new RedirectTask(DuplexActivity.this, (IReceiverRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
     }
 
     @Override

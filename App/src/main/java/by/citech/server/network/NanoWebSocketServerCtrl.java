@@ -52,7 +52,12 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public void sendBytes(byte... bytes) {
-
+        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "sendBytes");
+        try {
+            webSocket.send(bytes);
+        } catch (IOException e) {
+            Log.i(Tags.SRV_WSOCKETCTRL, "cant send message");
+        }
     }
 
     //--------------------- IServerCtrl

@@ -1,10 +1,8 @@
-package by.citech.client.asynctask;
+package by.citech.connection;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import by.citech.client.network.IStream;
-import by.citech.client.network.IStreamOn;
-import by.citech.connection.ITransmitter;
+
 import by.citech.data.StorageData;
 import by.citech.param.DataSource;
 import by.citech.param.Settings;
@@ -31,7 +29,7 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
 
     @Override
     protected Void doInBackground(String... params) {
-        Log.i(Tags.CLT_TASK_STREAM, "doInBackground");
+        Log.i(Tags.NET_TASK_STREAM, "doInBackground");
         switch (dataSource) {
             case MICROPHONE:
                 StreamAudio streamAudio = new StreamAudio(iTransmitter, Integer.parseInt(params[0]));
@@ -55,12 +53,12 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
 
     @Override
     protected void onProgressUpdate(IStream... iStream) {
-        Log.i(Tags.CLT_TASK_STREAM, "onProgressUpdate");
+        Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate");
         if (iStream[0] != null) {
             iStreamOn.setStream(iStream[0]);
-            Log.i(Tags.CLT_TASK_STREAM, "onProgressUpdate iStream is not null");
+            Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate iStream is not null");
         } else {
-            Log.i(Tags.CLT_TASK_STREAM, "onProgressUpdate iStream is null");
+            Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate iStream is null");
         }
     }
 }

@@ -16,13 +16,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import by.citech.client.asynctask.DisconnectTask;
 import by.citech.client.asynctask.ConnectTask;
-import by.citech.client.asynctask.SendMessageToServerTask;
-import by.citech.client.asynctask.StreamTask;
+import by.citech.connection.SendMessageTask;
+import by.citech.connection.StreamTask;
 import by.citech.client.network.IClientOff;
 import by.citech.client.network.IClientOn;
-import by.citech.client.network.IMessage;
-import by.citech.client.network.IStream;
-import by.citech.client.network.IStreamOn;
+import by.citech.connection.IMessage;
+import by.citech.connection.IStream;
+import by.citech.connection.IStreamOn;
 import by.citech.client.network.IClientCtrl;
 import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
@@ -203,7 +203,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     public void sendMessage(View view) {
         Log.i(Tags.ACT_CLT, "sendMessage");
         btnCltSendMsg.setEnabled(false);
-        new SendMessageToServerTask(this, iClientCtrl.getTransmitter()).execute(editTextCltToSrvText.getText().toString());
+        new SendMessageTask(this, iClientCtrl.getTransmitter()).execute(editTextCltToSrvText.getText().toString());
     }
 
     private void requestRecordAudioPermission() {

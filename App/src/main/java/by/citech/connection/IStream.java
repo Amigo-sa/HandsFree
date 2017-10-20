@@ -1,4 +1,4 @@
-package by.citech.client.network;
+package by.citech.connection;
 
 public interface IStream {
     void streamOff();

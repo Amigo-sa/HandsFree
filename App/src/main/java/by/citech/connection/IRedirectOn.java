@@ -1,4 +1,4 @@
-package by.citech.server.network;
+package by.citech.connection;
 
 public interface IRedirectOn {
     void setRedirect(IRedirectCtrl iRedirectCtrl);
