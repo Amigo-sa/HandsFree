@@ -46,25 +46,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp">
         <TextView
-            android:id="@+id/ip_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_ip_address"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/editTextSrvRemAddr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Введите IP address"/>
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-        <TextView
             android:id="@+id/locPort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -75,6 +56,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Введите Local Port"/>
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/ip_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_ip_address"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/editTextSrvRemAddr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Введите IP address"/>
         <Space
             android:layout_width="5dp"
             android:layout_height="wrap_content"/>

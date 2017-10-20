@@ -18,7 +18,7 @@
     <string name="label_data">Read Data: </string>
     <string name="label_wdata">Write Data:</string>
     <string name="label_local_ip_address">Local IP address: </string>
-    <string name="label_ip_address">IP address: </string>
+    <string name="label_ip_address">Remote IP address: </string>
     <string name="label_local_port">Local port: </string>
     <string name="label_remote_port">Remote port: </string>
     <string name="label_buttonCallOut">Call Out</string>
