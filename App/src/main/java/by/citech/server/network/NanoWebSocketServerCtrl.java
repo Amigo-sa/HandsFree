@@ -46,7 +46,7 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
         try {
             webSocket.send(message);
         } catch (IOException e) {
-            Log.i(Tags.SRV_WSOCKETCTRL, "cant send message");
+            Log.i(Tags.SRV_WSOCKETCTRL, "sendMessage cant send");
         }
     }
 
@@ -56,7 +56,7 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
         try {
             webSocket.send(bytes);
         } catch (IOException e) {
-            Log.i(Tags.SRV_WSOCKETCTRL, "cant send message");
+            Log.i(Tags.SRV_WSOCKETCTRL, "sendBytes cant send");
         }
     }
 

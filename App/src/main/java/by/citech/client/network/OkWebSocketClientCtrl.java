@@ -89,6 +89,8 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
 
     @Override
     public void setListener(IReceiver listener) {
+        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "setListener");
+        if (Settings.debug && (listener == null)) Log.i(Tags.CLT_WSOCKETCTRL, "setListener listener is null");
         this.listener = listener;
     }
 
@@ -107,8 +109,6 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
     public void sendMessage(String string) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "sendMessage");
         webSocket.send(string);
-
-
 
         /*-------------------------- TEST --------------------------->>
         byte[] bytes = {0x2c, 0x56, 0x78, 0x7b};
@@ -138,13 +138,14 @@ public class OkWebSocketClientCtrl extends WebSocketListener implements IClientC
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
         if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onMessage bytes");
-        if (listener != null) {
+        if (listener == null) {
             if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onMessage listener is null");
         } else {
             if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onMessage listener is not null");
             listener.onMessage(bytes.toByteArray());
         }
-        handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_BYTES, bytes).sendToTarget();
+//      handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_BYTES, bytes).sendToTarget();
+        handler.sendEmptyMessage(StatusMessages.CLT_ONMESSAGE_BYTES);
     }
 
     @Override
