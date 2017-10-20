@@ -469,8 +469,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
             menu.findItem(R.id.menu_connect).setVisible(false);
             menu.findItem(R.id.menu_disconnect).setVisible(true);
         } else {
-            if(mBluetoothLeService != null)
-                mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
             menu.findItem(R.id.menu_connect).setVisible(true);
             menu.findItem(R.id.menu_disconnect).setVisible(false);
         }
@@ -527,7 +525,8 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
 
     private void enableTransmitData(){
         mBluetoothLeService.initStore();
-        mNotifyCharacteristic = mGattCharacteristics.get(3).get(2);
+        if (mGattCharacteristics != null)
+            mNotifyCharacteristic = mGattCharacteristics.get(3).get(2);
         mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
         final BluetoothGattCharacteristic characteristic_write = mGattCharacteristics.get(3).get(1);
         mBluetoothLeService.writeCharacteristic(characteristic_write);
