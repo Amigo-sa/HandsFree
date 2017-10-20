@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
 import by.citech.data.StorageData;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 /**
  * Created by tretyak on 02.10.2017.
@@ -43,7 +45,10 @@ public class WriterTransmitter extends Thread {
            // dataByte[0]++;
            //
             if (isAllSendData()) {
-                dataByte = storageNetToBt.getData();
+                if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "run storageNetToBt.getData()");
+                    dataByte = storageNetToBt.getData();
+                if (dataByte != null)
+                    dataByte = "FFFF0000FFFF0000".getBytes();
                 characteristic.setValue(dataByte);
                 characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                 mBluetoothGatt.writeCharacteristic(characteristic);
@@ -80,7 +85,7 @@ public class WriterTransmitter extends Thread {
 
     public void cancel() {
         isRunning = false;
-        storageNetToBt.notify();
+         //   storageNetToBt.notify();
     }
 
     private boolean isAllSendData(){

@@ -22,4 +22,6 @@ public class Tags {
     public static final String SRV_REDIR_AUDIO      = "WSD_SRV_REDIR_AUDIO";
     public static final String SRV_REDIR_BLUETOOTH  = "WSD_SRV_REDIR_BT";
     public static final String SRV_STORE_NET2BT     = "WSD_SRV_STORE_NET2BT";
+
+    public static final String BLE_WRITETRANS       = "WSD_BLE_WRITETRANS";
 }
