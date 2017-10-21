@@ -14,15 +14,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import by.citech.client.asynctask.DisconnectTask;
-import by.citech.client.asynctask.ConnectTask;
-import by.citech.connection.SendMessageTask;
-import by.citech.connection.StreamTask;
+import by.citech.client.asynctask.TaskDisconnect;
+import by.citech.client.asynctask.TaskConnect;
+import by.citech.connection.IStreamCtrl;
+import by.citech.connection.TaskSendMessage;
+import by.citech.connection.TaskStream;
 import by.citech.client.network.IClientOff;
-import by.citech.client.network.IClientOn;
+import by.citech.client.network.IClientCtrlRegister;
 import by.citech.connection.IMessage;
-import by.citech.connection.IStream;
-import by.citech.connection.IStreamOn;
+import by.citech.connection.IStreamCtrlRegister;
 import by.citech.client.network.IClientCtrl;
 import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
@@ -30,13 +30,13 @@ import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 import okio.ByteString;
 
-public class ClientActivity extends Activity implements IClientOn, IClientOff, IStreamOn, IMessage {
+public class ClientActivity extends Activity implements IClientCtrlRegister, IClientOff, IStreamCtrlRegister, IMessage {
     private static final int RECORD_AUDIO_REQUEST_CODE = 1;
 
     private Handler handler;
     private boolean isPermittedAudioRecord;
     public IClientCtrl iClientCtrl;
-    public IStream iStream;
+    public IStreamCtrl iStreamCtrl;
 
     public TextView textViewCltStatus;
     public TextView textViewCltFromSrvText;
@@ -149,7 +149,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     public void disconnect(View view) {
         Log.i(Tags.ACT_CLT, "disconnect");
         btnCltDiscFromSrv.setEnabled(false);
-        new DisconnectTask(this).execute(iClientCtrl);
+        new TaskDisconnect(this).execute(iClientCtrl);
     }
 
     public void streamOn(View view) {
@@ -164,11 +164,11 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
         <<-------------------------- TEST ---------------------------*/
 
         if (isPermittedAudioRecord) {
-            iStream = null;
+            iStreamCtrl = null;
             btnCltStreamOn.setEnabled(false);
             btnCltDiscFromSrv.setEnabled(false);
             btnCltSendMsg.setEnabled(false);
-            new StreamTask(this, (ITransmitter) iClientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
+            new TaskStream(this, (ITransmitter) iClientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
             btnCltStreamOff.setEnabled(true);
         }
     }
@@ -181,9 +181,9 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
             @Override
             public void run() {
                 Log.i(Tags.ACT_CLT, "streamOff run in new thread");
-                iStream.streamOff();
+                iStreamCtrl.streamOff();
                 Log.i(Tags.ACT_CLT, "streamOff run done in new thread");
-                iStream = null;
+                iStreamCtrl = null;
             }
         }).start();
 
@@ -195,7 +195,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     public void connect(View view) {
         Log.i(Tags.ACT_CLT, "connect");
         btnCltConnToSrv.setEnabled(false);
-        new ConnectTask(this, handler).execute(String.format("ws://%s:%s",
+        new TaskConnect(this, handler).execute(String.format("ws://%s:%s",
                 editTextCltRemSrvAddr.getText().toString(),
                 editTextCltRemSrvPort.getText().toString()));
     }
@@ -203,7 +203,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     public void sendMessage(View view) {
         Log.i(Tags.ACT_CLT, "sendMessage");
         btnCltSendMsg.setEnabled(false);
-        new SendMessageTask(this, iClientCtrl.getTransmitter()).execute(editTextCltToSrvText.getText().toString());
+        new TaskSendMessage(this, iClientCtrl.getTransmitter()).execute(editTextCltToSrvText.getText().toString());
     }
 
     private void requestRecordAudioPermission() {
@@ -267,14 +267,14 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     private void turnOffStream() {
         Log.i(Tags.ACT_CLT, "turnOffStream");
 
-        if (iStream != null) {
+        if (iStreamCtrl != null) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Log.i(Tags.ACT_CLT, "streamOff run in new thread");
-                    iStream.streamOff();
+                    iStreamCtrl.streamOff();
                     Log.i(Tags.ACT_CLT, "streamOff run done in new thread");
-                    iStream = null;
+                    iStreamCtrl = null;
                 }
             }).start();
         }
@@ -283,13 +283,13 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     private void turnOffSocket() {
         Log.i(Tags.ACT_CLT, "turnOffSocket");
         if (iClientCtrl != null) {
-            new DisconnectTask(this).execute(iClientCtrl);
+            new TaskDisconnect(this).execute(iClientCtrl);
         }
     }
 
     @Override
-    public void setStream(IStream iStream) {
-        this.iStream = iStream;
+    public void registerStreamCtrl(IStreamCtrl iStreamCtrl) {
+        this.iStreamCtrl = iStreamCtrl;
     }
 
     @Override
@@ -304,7 +304,7 @@ public class ClientActivity extends Activity implements IClientOn, IClientOff, I
     }
 
     @Override
-    public void clientStarted(IClientCtrl iClientCtrl) {
+    public void registerClientCtrl(IClientCtrl iClientCtrl) {
         this.iClientCtrl = iClientCtrl;
     }
 

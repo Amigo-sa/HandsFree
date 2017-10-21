@@ -6,14 +6,14 @@ import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class RedirectToBluetooth implements IRedirectCtrl, IReceiver {
+class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
     private int bufferSize;
-    private IReceiverRegister iReceiverRegister;
-    private StorageData storageNetToBt;
+    private IReceiverListenerRegister iReceiverListenerRegister;
     private boolean isRedirecting = false;
+    private final StorageData storageNetToBt;
 
-    RedirectToBluetooth(IReceiverRegister iReceiverRegister, int bufferSize, StorageData storageNetToBt) {
-        this.iReceiverRegister = iReceiverRegister;
+    RedirectToBluetooth(IReceiverListenerRegister iReceiverListenerRegister, int bufferSize, StorageData storageNetToBt) {
+        this.iReceiverListenerRegister = iReceiverListenerRegister;
         this.bufferSize = bufferSize;
         this.storageNetToBt = storageNetToBt;
     }
@@ -26,7 +26,7 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiver {
     public void run() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "run");
         isRedirecting = true;
-        iReceiverRegister.setListener(this);
+        iReceiverListenerRegister.registerReceiverListener(this);
         if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "run done");
     }
 
@@ -34,12 +34,14 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiver {
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "redirectOff");
         isRedirecting = false;
-        storageNetToBt.notify();
+        synchronized (storageNetToBt) {
+            storageNetToBt.notify();
+        }
     }
 
     @Override
-    public void onMessage(byte[] data) {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "onMessage");
+    public void onReceiveMessage(byte[] data) {
+        if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "onReceiveMessage");
         if (isRedirecting) {
             storageNetToBt.putData(data);
         }

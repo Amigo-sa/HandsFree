@@ -15,23 +15,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import by.citech.connection.IReceiverRegister;
+import by.citech.connection.IReceiverListenerRegister;
+import by.citech.connection.TaskRedirect;
 import by.citech.param.Settings;
-import by.citech.connection.RedirectTask;
-import by.citech.server.asynctask.ServerOffTask;
-import by.citech.server.asynctask.ServerOnTask;
+import by.citech.server.asynctask.TaskServerOff;
+import by.citech.server.asynctask.TaskServerOn;
 import by.citech.connection.IRedirectCtrl;
 import by.citech.server.network.IServerOff;
-import by.citech.server.network.IServerOn;
+import by.citech.server.network.IServerCtrlRegister;
 import by.citech.server.network.IServerCtrl;
-import by.citech.connection.IRedirectOn;
+import by.citech.connection.IRedirectCtrlRegister;
 import by.citech.server.network.websockets.WebSocketFrame;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
-import static by.citech.util.Decode.bytesToHex;
+import static by.citech.util.Decode.bytesToHexMark1;
 import static by.citech.util.NetworkInfo.getIPAddress;
 
-public class ServerActivity extends Activity implements OnCheckedChangeListener, IServerOn, IServerOff, IRedirectOn {
+public class ServerActivity extends Activity implements OnCheckedChangeListener, IServerCtrlRegister, IServerOff, IRedirectCtrlRegister {
     public IServerCtrl serverCtrl;
     public IRedirectCtrl iRedirectCtrl;
     private Handler handler;
@@ -66,10 +66,10 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
                     case StatusMessages.SRV_ONMESSAGE:
 //                      String textText = ((WebSocketFrame) msg.obj).getTextPayload();
 //                      byte[] bytes = ((WebSocketFrame) msg.obj).getBinaryPayload();
-//                      String textBytes = bytesToHex(bytes);
+//                      String textBytes = bytesToHexMark1(bytes);
 //                      textViewSrvFromCltText.setText(textText);
                         textViewSrvFromCltText.setText(((WebSocketFrame) msg.obj).getTextPayload());
-                        textViewSrvFromCltByte.setText(bytesToHex(((WebSocketFrame) msg.obj).getBinaryPayload()));
+                        textViewSrvFromCltByte.setText(bytesToHexMark1(((WebSocketFrame) msg.obj).getBinaryPayload()));
                         break;
                     case StatusMessages.SRV_ONCLOSE:
                         textViewSrvStatus.setText("Состояние: сокет закрыт.");
@@ -134,7 +134,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
     public void offServer(View view) {
         Log.i(Tags.ACT_SRV, "offServer");
         try {
-            new ServerOffTask(this, serverCtrl).execute();
+            new TaskServerOff(this).execute(serverCtrl);
         } catch (Exception e) {
             Log.i(Tags.ACT_SRV, "offServer serverCtrl is null");
         }
@@ -143,7 +143,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
     public void onServer(View view) {
         Log.i(Tags.ACT_SRV, "onServer");
         btnSrvOn.setEnabled(false);
-        new ServerOnTask(this, handler).execute(editTextSrvPort.getText().toString());
+        new TaskServerOn(this, handler).execute(editTextSrvPort.getText().toString());
     }
 
     public void sendMessage(View view) {
@@ -163,7 +163,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 //                  Context context = getApplicationContext();
 //                  AudioManager audiomanager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 //                  audiomanager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                    new RedirectTask(this, (IReceiverRegister) serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
+                    new TaskRedirect(this, (IReceiverListenerRegister) serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
                 } else {
                     Log.i(Tags.ACT_SRV, "onCheckedChanged redirect off");
                     new Thread(new Runnable() {
@@ -193,48 +193,21 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
     }
 
     @Override
-    protected void onStop() {
-        Log.i(Tags.ACT_SRV, "onStop");
-        super.onStop();
-        try {
-            new ServerOffTask(this, serverCtrl).execute();
-        } catch (Exception e) {
-            Log.i(Tags.ACT_SRV, "onStop serverCtrl is null");
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.i(Tags.ACT_SRV, "onDestroy");
-        super.onDestroy();
-        try {
-            new ServerOffTask(this, serverCtrl).execute();
-        } catch (Exception e) {
-            Log.i(Tags.ACT_SRV, "onDestroy serverCtrl is null");
-        }
-    }
-
-    @Override
     protected void onPause() {
         Log.i(Tags.ACT_SRV, "onPause");
         super.onPause();
-        try {
-            new ServerOffTask(this, serverCtrl).execute();
-        } catch (Exception e) {
-            Log.i(Tags.ACT_SRV, "onPause serverCtrl is null");
-        }
+        new TaskServerOff(this).execute(serverCtrl);
     }
 
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
-        textViewSrvStatus.setText("Состояние: сервер включен.");
-        btnSrvOff.setEnabled(true);
-    }
-
-    @Override
-    public void serverCantStart() {
-        textViewSrvStatus.setText("Состояние: не удалось запустить сервер.");
-        btnSrvOn.setEnabled(true);
+        if (iServerCtrl == null) {
+            textViewSrvStatus.setText("Состояние: не удалось запустить сервер.");
+            btnSrvOn.setEnabled(true);
+        } else {
+            textViewSrvStatus.setText("Состояние: сервер включен.");
+            btnSrvOff.setEnabled(true);
+        }
     }
 
     @Override
@@ -245,7 +218,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
     }
 
     @Override
-    public void setRedirect(IRedirectCtrl iRedirectCtrl) {
+    public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
         this.iRedirectCtrl = iRedirectCtrl;
     }
 }

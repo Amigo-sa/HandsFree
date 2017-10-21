@@ -12,7 +12,6 @@ public class AppData {
     private static String remoteIP;
     private static int remotePort;
 
-
     private static SharedPreferences preferences;
 
     public static void init(Context context) {

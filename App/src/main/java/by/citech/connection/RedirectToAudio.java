@@ -8,14 +8,14 @@ import android.util.Log;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class RedirectToAudio implements IRedirectCtrl, IReceiver {
+class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
     private int bufferSize;
-    private IReceiverRegister iReceiverRegister;
+    private IReceiverListenerRegister iReceiverListenerRegister;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    RedirectToAudio(IReceiverRegister iReceiverRegister, int bufferSize) {
-        this.iReceiverRegister = iReceiverRegister;
+    RedirectToAudio(IReceiverListenerRegister iReceiverListenerRegister, int bufferSize) {
+        this.iReceiverListenerRegister = iReceiverListenerRegister;
         this.bufferSize = bufferSize;
     }
 
@@ -23,7 +23,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiver {
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
         isRedirecting = false;
-        iReceiverRegister.setListener(null);
+        iReceiverListenerRegister.registerReceiverListener(null);
 
         if (audioTrack != null) {
             if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
@@ -64,12 +64,12 @@ class RedirectToAudio implements IRedirectCtrl, IReceiver {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "run");
         isRedirecting = true;
         audioTrack.play();
-        iReceiverRegister.setListener(this);
+        iReceiverListenerRegister.registerReceiverListener(this);
     }
 
     @Override
-    public void onMessage(byte[] data) {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "onMessage");
+    public void onReceiveMessage(byte[] data) {
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "onReceiveMessage");
         if (isRedirecting) {
             audioTrack.write(data, 0, bufferSize);
         }

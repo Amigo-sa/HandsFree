@@ -9,29 +9,23 @@ import by.citech.server.network.websockets.WebSocket;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
-public class ServerOffTask extends AsyncTask<Void, Void, Void> {
+public class TaskServerOff extends AsyncTask<IServerCtrl, Void, Void> {
     private IServerOff iServerOff;
-    private IServerCtrl serverCtrl;
 
-    public ServerOffTask(IServerOff iServerOff, IServerCtrl serverCtrl) throws Exception {
-        if (serverCtrl == null) {
-            throw new Exception("serverCtrl is null");
-        }
-
+    public TaskServerOff(IServerOff iServerOff) {
         this.iServerOff = iServerOff;
-        this.serverCtrl = serverCtrl;
     }
 
     @Override
-    protected Void doInBackground(Void... params) {
+    protected Void doInBackground(IServerCtrl... iServerCtrl) {
         Log.i(Tags.SRV_TASK_SRVOFF, "doInBackground");
-        WebSocket webSocket = serverCtrl.getWebSocket();
+        WebSocket webSocket = iServerCtrl[0].getWebSocket();
 
         if (webSocket != null && webSocket.isOpen()) {
-            serverCtrl.closeSocket();
+            iServerCtrl[0].closeSocket();
 //          while (webSocket.isOpen()) {
-            while (!serverCtrl.getStatus().equals(StatusMessages.WEBSOCKET_CLOSED)
-                    && !serverCtrl.getStatus().equals(StatusMessages.WEBSOCKET_FAILURE)) {
+            while (!iServerCtrl[0].getStatus().equals(StatusMessages.WEBSOCKET_CLOSED)
+                    && !iServerCtrl[0].getStatus().equals(StatusMessages.WEBSOCKET_FAILURE)) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -44,10 +38,10 @@ public class ServerOffTask extends AsyncTask<Void, Void, Void> {
             Log.i(Tags.SRV_TASK_SRVOFF, "doInBackground socket null or already closed");
         }
 
-        if (serverCtrl.isAliveServer()) {
-            serverCtrl.stopServer();
+        if (iServerCtrl[0].isAliveServer()) {
+            iServerCtrl[0].stopServer();
 
-            while (serverCtrl.isAliveServer()) {
+            while (iServerCtrl[0].isAliveServer()) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {

@@ -5,8 +5,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import by.citech.connection.IReceiver;
-import by.citech.connection.IReceiverRegister;
+import by.citech.connection.IReceiverListener;
+import by.citech.connection.IReceiverListenerRegister;
 import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.server.network.protocols.http.IHTTPSession;
@@ -18,16 +18,16 @@ import by.citech.param.Messages;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
-import static by.citech.util.Decode.bytesToHex;
+import static by.citech.util.Decode.bytesToHexMark1;
 
-public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IReceiverRegister, ITransmitter {
-    private static final Logger LOG = Logger.getLogger(NanoWebSocketServerCtrl.class.getName());
+public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiverListenerRegister, ITransmitter {
+    private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
     private WebSocket webSocket;
     private Handler handler;
-    private IReceiver listener;
+    private IReceiverListener listener;
     private String status = "";
 
-    public NanoWebSocketServerCtrl(int port, Handler handler) {
+    public ServerCtrlNanoWebSocket(int port, Handler handler) {
         super(port);
         this.handler = handler;
     }
@@ -78,7 +78,7 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
     }
 
     @Override
-    public IReceiverRegister getReceiverRegister() {
+    public IReceiverListenerRegister getReceiverRegister() {
         return this;
     }
 
@@ -108,10 +108,10 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
         stop();
     }
 
-    //--------------------- IReceiverRegister
+    //--------------------- IReceiverListenerRegister
 
     @Override
-    public void setListener(IReceiver listener) {
+    public void registerReceiverListener(IReceiverListener listener) {
         this.listener = listener;
     }
 
@@ -149,13 +149,13 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
 
         @Override
         protected void onMessage(WebSocketFrame message) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage");
+            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onReceiveMessage");
 
             if (listener != null) {
-                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage to redirect");
-                listener.onMessage(message.getBinaryPayload());
+                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onReceiveMessage to redirect");
+                listener.onReceiveMessage(message.getBinaryPayload());
             } else {
-                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage to activity");
+                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onReceiveMessage to activity");
                 handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message).sendToTarget();
             }
 //          handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message.getTextPayload()).sendToTarget();
@@ -179,7 +179,7 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
         @Override
         protected void onException(IOException exception) {
             if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onException");
-            if (Settings.debug) NanoWebSocketServerCtrl.LOG.log(Level.SEVERE, "exception occured", exception);
+            if (Settings.debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
             status = StatusMessages.WEBSOCKET_FAILURE;
             handler.sendEmptyMessage(StatusMessages.SRV_ONEXCEPTION);
         }
@@ -187,7 +187,7 @@ public class NanoWebSocketServerCtrl extends NanoWSD implements IServerCtrl, IRe
         @Override
         protected void debugFrameReceived(WebSocketFrame frame) {
             if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "debugFrameReceived");
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, String.format("debugFrameReceived: <%s>", bytesToHex(frame.getBinaryPayload())));
+            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, String.format("debugFrameReceived: <%s>", bytesToHexMark1(frame.getBinaryPayload())));
             if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "Received: " + "<" + frame + ">");
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }

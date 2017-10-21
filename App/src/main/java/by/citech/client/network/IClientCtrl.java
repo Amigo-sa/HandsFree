@@ -1,13 +1,13 @@
 package by.citech.client.network;
 
-import by.citech.connection.IReceiverRegister;
+import by.citech.connection.IReceiverListenerRegister;
 import by.citech.connection.ITransmitter;
 
-public interface IClientCtrl {
+public interface IClientCtrl extends ITransmitter, IReceiverListenerRegister {
     IClientCtrl run();
     void stop(String reason);
     void cancel();
     ITransmitter getTransmitter();
-    IReceiverRegister getReceiverRegister();
+    IReceiverListenerRegister getReceiverRegister();
     String getStatus();
 }

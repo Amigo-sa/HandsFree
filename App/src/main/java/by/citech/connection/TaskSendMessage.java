@@ -7,11 +7,11 @@ import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
-public class SendMessageTask extends AsyncTask<String, String, Void> {
+public class TaskSendMessage extends AsyncTask<String, String, Void> {
     private IMessage iMessage;
     private ITransmitter iTransmitter;
 
-    public SendMessageTask(IMessage iMessage, ITransmitter iTransmitter) {
+    public TaskSendMessage(IMessage iMessage, ITransmitter iTransmitter) {
         this.iMessage = iMessage;
         this.iTransmitter = iTransmitter;
     }

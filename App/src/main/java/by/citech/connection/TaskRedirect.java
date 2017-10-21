@@ -8,22 +8,22 @@ import by.citech.param.DataSource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class RedirectTask extends AsyncTask<String, IRedirectCtrl, Void> {
-    private IRedirectOn iRedirectOn;
-    private IReceiverRegister iReceiverRegister;
+public class TaskRedirect extends AsyncTask<String, IRedirectCtrl, Void> {
+    private IRedirectCtrlRegister iRedirectCtrlRegister;
+    private IReceiverListenerRegister iReceiverListenerRegister;
     private DataSource dataSource;
     private StorageData storageNetToBt;
 
-    public RedirectTask(IRedirectOn iRedirectOn, IReceiverRegister iReceiverRegister, DataSource dataSource) {
-        this.iRedirectOn = iRedirectOn;
-        this.iReceiverRegister = iReceiverRegister;
+    public TaskRedirect(IRedirectCtrlRegister iRedirectCtrlRegister, IReceiverListenerRegister iReceiverListenerRegister, DataSource dataSource) {
+        this.iRedirectCtrlRegister = iRedirectCtrlRegister;
+        this.iReceiverListenerRegister = iReceiverListenerRegister;
         this.dataSource = dataSource;
     }
 
-    public RedirectTask(IRedirectOn iRedirectOn, IReceiverRegister iReceiverRegister, DataSource dataSource, StorageData storageNetToBt) {
-        if (Settings.debug) Log.i(Tags.NET_TASK_REDIR, "RedirectTask");
-        this.iRedirectOn = iRedirectOn;
-        this.iReceiverRegister = iReceiverRegister;
+    public TaskRedirect(IRedirectCtrlRegister iRedirectCtrlRegister, IReceiverListenerRegister iReceiverListenerRegister, DataSource dataSource, StorageData storageNetToBt) {
+        if (Settings.debug) Log.i(Tags.NET_TASK_REDIR, "TaskRedirect");
+        this.iRedirectCtrlRegister = iRedirectCtrlRegister;
+        this.iReceiverListenerRegister = iReceiverListenerRegister;
         this.dataSource = dataSource;
         this.storageNetToBt = storageNetToBt;
     }
@@ -34,7 +34,7 @@ public class RedirectTask extends AsyncTask<String, IRedirectCtrl, Void> {
         switch (dataSource) {
             case MICROPHONE:
                 Log.i(Tags.NET_TASK_REDIR, "doInBackground redirect to audio");
-                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverRegister, Integer.parseInt(params[0]));
+                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverListenerRegister, Integer.parseInt(params[0]));
                 publishProgress(redirectToAudio.start());
                 new Thread(new Runnable() {
                     @Override
@@ -46,7 +46,7 @@ public class RedirectTask extends AsyncTask<String, IRedirectCtrl, Void> {
                 break;
             case BLUETOOTH:
                 Log.i(Tags.NET_TASK_REDIR, "doInBackground redirect to bluetooth");
-                final RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iReceiverRegister, Settings.bufferSize, storageNetToBt);
+                final RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iReceiverListenerRegister, Settings.bufferSize, storageNetToBt);
                 publishProgress(redirectToBluetooth.start());
                 new Thread(new Runnable() {
                     @Override
@@ -64,7 +64,7 @@ public class RedirectTask extends AsyncTask<String, IRedirectCtrl, Void> {
     protected void onProgressUpdate(IRedirectCtrl... iRedirectCtrl) {
         if (Settings.debug) Log.i(Tags.NET_TASK_REDIR, "onProgressUpdate");
         if (iRedirectCtrl[0] != null) {
-            iRedirectOn.setRedirect(iRedirectCtrl[0]);
+            iRedirectCtrlRegister.registerRedirectCtrl(iRedirectCtrl[0]);
             Log.i(Tags.NET_TASK_REDIR, "onProgressUpdate iRedirectCtrl is not null");
         } else {
             Log.i(Tags.NET_TASK_REDIR, "onProgressUpdate iRedirectCtrl is null");

@@ -1,5 +1,5 @@
 package by.citech.connection;
 
-public interface IStream {
+public interface IStreamCtrl {
     void streamOff();
 }

@@ -8,20 +8,20 @@ import by.citech.param.DataSource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class StreamTask extends AsyncTask<String, IStream, Void> {
-    private IStreamOn iStreamOn;
+public class TaskStream extends AsyncTask<String, IStreamCtrl, Void> {
+    private IStreamCtrlRegister iStreamCtrlRegister;
     private ITransmitter iTransmitter;
     private DataSource dataSource;
     private StorageData storageBtToNet;
 
-    public StreamTask(IStreamOn iStreamOn, ITransmitter iTransmitter, DataSource dataSource) {
-        this.iStreamOn = iStreamOn;
+    public TaskStream(IStreamCtrlRegister iStreamCtrlRegister, ITransmitter iTransmitter, DataSource dataSource) {
+        this.iStreamCtrlRegister = iStreamCtrlRegister;
         this.iTransmitter = iTransmitter;
         this.dataSource = dataSource;
     }
 
-    public StreamTask(IStreamOn iStreamOn, ITransmitter iTransmitter, DataSource dataSource, StorageData storageBtToNet) {
-        this.iStreamOn = iStreamOn;
+    public TaskStream(IStreamCtrlRegister iStreamCtrlRegister, ITransmitter iTransmitter, DataSource dataSource, StorageData storageBtToNet) {
+        this.iStreamCtrlRegister = iStreamCtrlRegister;
         this.iTransmitter = iTransmitter;
         this.dataSource = dataSource;
         this.storageBtToNet = storageBtToNet;
@@ -29,12 +29,17 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
 
     @Override
     protected Void doInBackground(String... params) {
-        Log.i(Tags.NET_TASK_STREAM, "doInBackground");
+        if (Settings.debug) Log.i(Tags.NET_TASK_STREAM, "doInBackground");
         switch (dataSource) {
             case MICROPHONE:
-                StreamAudio streamAudio = new StreamAudio(iTransmitter, Integer.parseInt(params[0]));
+                final StreamAudio streamAudio = new StreamAudio(iTransmitter, Integer.parseInt(params[0]));
                 publishProgress(streamAudio.start());
-                streamAudio.run();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        streamAudio.run();
+                    }
+                }).start();
                 break;
             case BLUETOOTH:
                 final StreamBluetooth streamBluetooth = new StreamBluetooth(iTransmitter, Settings.bufferSize, storageBtToNet);
@@ -47,18 +52,12 @@ public class StreamTask extends AsyncTask<String, IStream, Void> {
                 }).start();
                 break;
         }
-
         return null;
     }
 
     @Override
-    protected void onProgressUpdate(IStream... iStream) {
-        Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate");
-        if (iStream[0] != null) {
-            iStreamOn.setStream(iStream[0]);
-            Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate iStream is not null");
-        } else {
-            Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate iStream is null");
-        }
+    protected void onProgressUpdate(IStreamCtrl... iStreamCtrl) {
+        if (Settings.debug) Log.i(Tags.NET_TASK_STREAM, "onProgressUpdate");
+        iStreamCtrlRegister.registerStreamCtrl(iStreamCtrl[0]);
     }
 }

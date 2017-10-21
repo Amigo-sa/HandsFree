@@ -25,4 +25,6 @@ public class Tags {
     public static final String NET_STORE_NET2BT     = "WSD_NET_STORE_NET2BT";
 
     public static final String BLE_WRITETRANS       = "WSD_BLE_WRITETRANS";
+
+    public static final String DECODE               = "WSD_DECODE";
 }

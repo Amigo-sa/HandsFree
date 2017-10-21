@@ -84,7 +84,9 @@ public class WriterTransmitter extends Thread {
 
     public void cancel() {
         isRunning = false;
-         //   storageNetToBt.notify();
+//        synchronized (storageNetToBt) {
+//           storageNetToBt.notify();
+//        }
     }
 
     private boolean isAllSendData(){

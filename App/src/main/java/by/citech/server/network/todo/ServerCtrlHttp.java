@@ -1,4 +1,4 @@
 package by.citech.server.network.todo;
 
-public class HttpServerCtrl {
+public class ServerCtrlHttp {
 }

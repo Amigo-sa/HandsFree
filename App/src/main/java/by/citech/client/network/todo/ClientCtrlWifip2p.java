@@ -1,4 +1,4 @@
 package by.citech.client.network.todo;
 
-public class UdpClientCtrl {
+public class ClientCtrlWifip2p {
 }

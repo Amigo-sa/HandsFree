@@ -45,24 +45,28 @@ import java.util.HashMap;
 import java.util.List;
 
 import by.citech.bluetoothlegatt.BluetoothLeService;
-import by.citech.client.asynctask.ConnectTask;
-import by.citech.connection.StreamTask;
+import by.citech.client.asynctask.TaskConnect;
+import by.citech.client.asynctask.TaskDisconnect;
+import by.citech.client.network.IClientOff;
+import by.citech.connection.IStreamCtrl;
+import by.citech.connection.TaskStream;
 import by.citech.client.network.IClientCtrl;
-import by.citech.client.network.IClientOn;
+import by.citech.client.network.IClientCtrlRegister;
 import by.citech.connection.IMessage;
-import by.citech.connection.IStream;
-import by.citech.connection.IStreamOn;
+import by.citech.connection.IStreamCtrlRegister;
+import by.citech.connection.TaskRedirect;
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
-import by.citech.connection.RedirectTask;
-import by.citech.server.asynctask.ServerOnTask;
+import by.citech.server.asynctask.TaskServerOff;
+import by.citech.server.asynctask.TaskServerOn;
 import by.citech.connection.IRedirectCtrl;
-import by.citech.connection.IRedirectOn;
+import by.citech.connection.IRedirectCtrlRegister;
 import by.citech.server.network.IServerCtrl;
-import by.citech.server.network.IServerOn;
+import by.citech.server.network.IServerCtrlRegister;
+import by.citech.server.network.IServerOff;
 
 import static by.citech.util.NetworkInfo.getIPAddress;
 
@@ -72,7 +76,8 @@ import static by.citech.util.NetworkInfo.getIPAddress;
  * communicates with {@code BluetoothLeService}, which in turn interacts with the
  * Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity implements IServerOn, IRedirectOn, IStreamOn, IClientOn, IMessage {
+public class DeviceControlActivity extends Activity
+        implements IServerCtrlRegister, IRedirectCtrlRegister, IStreamCtrlRegister, IClientCtrlRegister, IMessage, IServerOff, IClientOff {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
@@ -107,7 +112,7 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
     private IRedirectCtrl iRedirectCtrl;
-    private IStream iStream;
+    private IStreamCtrl iStreamCtrl;
 
     // хранилища данных
     private StorageData storageBtToNet;
@@ -256,77 +261,7 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         storageBtToNet = new StorageData(Tags.NET_STORE_BT2NET);
         storageNetToBt = new StorageData(Tags.NET_STORE_NET2BT);
 
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case StatusMessages.SRV_ONMESSAGE:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONMESSAGE");
-                        //if (Settings.debug) Log.i(Tags.ACT_DPL, String.format("handleMessage SRV_ONMESSAGE %s", ((WebSocketFrame) msg.obj).getTextPayload()));
-                        break;
-                    case StatusMessages.SRV_ONCLOSE:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONCLOSE");
-                        btnCallOut.setEnabled(true);
-                        break;
-                    case StatusMessages.SRV_ONOPEN:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
-                        callIn();
-//                      if (Settings.testSendOneOnCall) {
-//                          new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
-//                                  editTextSrvRemAddr.getText().toString(),
-//                                  editTextSrvRemPort.getText().toString()));
-//                          new SendMessageTask(DeviceControlActivity.this, iClientCtrl).execute("FUCK YOU ASSHOLE");
-//                      } else {
-//                          btnCallIn.setEnabled(true);
-//                      }
-                        break;
-                    case StatusMessages.SRV_ONPONG:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONPONG");
-                        break;
-                    case StatusMessages.SRV_ONEXCEPTION:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONEXCEPTION");
-                        break;
-                    case StatusMessages.SRV_ONDEBUGFRAMERX:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONDEBUGFRAMERX");
-                        break;
-                    case StatusMessages.SRV_ONDEBUGFRAMETX:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONDEBUGFRAMETX");
-                        break;
-
-                    case StatusMessages.CLT_ONOPEN:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN");
-                        new StreamTask(DeviceControlActivity.this, iClientCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new StreamTask");
-                        new RedirectTask(DeviceControlActivity.this, iClientCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new RedirectTask");
-//                      new RedirectTask(DeviceControlActivity.this, (IReceiverRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
-//                      new StreamTask(DeviceControlActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-                        break;
-                    case StatusMessages.CLT_ONMESSAGE_BYTES:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_BYTES");
-                        break;
-                    case StatusMessages.CLT_ONMESSAGE_TEXT:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_TEXT");
-                        break;
-                    case StatusMessages.CLT_ONCLOSING:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONCLOSING");
-                        break;
-                    case StatusMessages.CLT_ONCLOSED:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONCLOSED");
-                        break;
-                    case StatusMessages.CLT_ONFAILURE:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONFAILURE");
-                        Toast.makeText(DeviceControlActivity.this, "SUBSCRIBER NOT ONLINE", Toast.LENGTH_SHORT).show();
-                        break;
-                    case StatusMessages.CLT_CANCEL:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_CANCEL");
-                        break;
-                    default:
-                        if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage DEFAULT");
-                        break;
-                }
-            }
-        };
+        handler = new HandlerExtended();
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -361,7 +296,7 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
-        new ServerOnTask(this, handler).execute(editTextSrvLocPort.getText().toString());
+        new TaskServerOn(this, handler).execute(editTextSrvLocPort.getText().toString());
 
         // устанавливаем только одно нажатие клавиши Call
         callOutOneClick = true;
@@ -389,40 +324,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         });
     }
 
-    private void callIn() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn");
-        enableTransmitData();
-        btnCallOut.setEnabled(false);
-//      new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
-//              editTextSrvRemAddr.getText().toString(),
-//              editTextSrvRemPort.getText().toString()));
-//      if (iClientCtrl == null) {
-//          if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn iClientCtrl is null");
-//          return;
-//      }
-        new StreamTask(DeviceControlActivity.this, iServerCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn post new StreamTask");
-        new RedirectTask(DeviceControlActivity.this, iServerCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn post new RedirectTask");
-    }
-
-    private void callOut() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut");
-        new ConnectTask(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
-                editTextSrvRemAddr.getText().toString(),
-                editTextSrvRemPort.getText().toString()));
-//      if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut post new ConnectTask");
-//      if (iClientCtrl == null) {
-//          if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut iClientCtrl is null");
-//          return;
-//      }
-
-//      new StreamTask(DeviceControlActivity.this, iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-//      if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut post new StreamTask");
-//      new RedirectTask(DeviceControlActivity.this, iServerCtrl, Settings.dataSource, storageNetToBt).execute();
-//      if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut post new RedirectTask");
-    }
-
     // процедура стирания списка характеристик и данных на дисплее
     private void clearUI() {
         mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
@@ -446,9 +347,15 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
+        new ThreadNetStop().start();
     }
 
-    //  в случае переворачивания экрана или отключения программы отвязываем сервис и отключаем его
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    // в случае переворачивания экрана или отключения программы отвязываем сервис и отключаем его
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -456,7 +363,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         if(mBluetoothLeService.getWriteThread() != null)
             mBluetoothLeService.stopWriteThread();
         mBluetoothLeService = null;
-
     }
 
     // создаём меню в котором указываем кнопку соединения устройства
@@ -482,10 +388,11 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.menu_connect:
+                //TODO: доработать
                 mBluetoothLeService.connect(mDeviceAddress);
                 return true;
             case R.id.menu_disconnect:
-
+                //TODO: доработать
                 mBluetoothLeService.disconnect();
                 return true;
             case android.R.id.home:
@@ -523,7 +430,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     // In this sample, we populate the data structure that is bound to the ExpandableListView
     // on the UI.
     // процедура обработки и отображения доступных сервисов и характеристик на дисплее
-
     private void enableTransmitData() {
         mBluetoothLeService.initStore();
         if (!mGattCharacteristics.isEmpty()) {
@@ -534,8 +440,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         } else{
             Toast.makeText(this, "Device not connected", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
     private void displayGattServices(List<BluetoothGattService> gattServices) {
@@ -547,12 +451,10 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>(); // список доступных данных сервисов периферийного устройства
         ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData = new ArrayList<ArrayList<HashMap<String, String>>>(); // список доступных данных характеристик периферийного устройства
         mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
-
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {  // прогоняем список всех сервисов устройства
             HashMap<String, String> currentServiceData = new HashMap<String, String>();
             uuid = gattService.getUuid().toString(); // получаем идентификатор каждого сервиса
-
             // По таблице соответствия uuid имени сервиса на дисплей выводим именно имя из таблицы
             // если соответствия в таблице нет то выводим на дисплей unknown_service
             currentServiceData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
@@ -565,7 +467,6 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
             List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
             // создаём новый список характеристик
             ArrayList<BluetoothGattCharacteristic> charas =  new ArrayList<BluetoothGattCharacteristic>();
-
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                 //добавляем характеристики в новый список
@@ -609,38 +510,37 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
         return intentFilter;
     }
 
+    //--------------------- Network
+
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStarted");
-        btnCallOut.setEnabled(true);
-        this.iServerCtrl = iServerCtrl;
+        if (iServerCtrl == null) {
+            btnCallOut.setEnabled(false);
+            Toast.makeText(this, "CANT START SERVER", Toast.LENGTH_SHORT).show();
+        } else {
+            btnCallOut.setEnabled(true);
+            this.iServerCtrl = iServerCtrl;
+        }
     }
 
     @Override
-    public void serverCantStart() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverCantStart");
-        final DeviceControlActivity activity = this;
-        btnCallOut.setEnabled(false);
-        Toast.makeText(activity, "CANT START SERVER", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void setRedirect(IRedirectCtrl iRedirectCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "setRedirect");
+    public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerRedirectCtrl");
         this.iRedirectCtrl = iRedirectCtrl;
     }
 
     @Override
-    public void setStream(IStream iStream) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "setStream");
-        this.iStream = iStream;
+    public void registerStreamCtrl(IStreamCtrl iStreamCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerStreamCtrl");
+        this.iStreamCtrl = iStreamCtrl;
     }
 
     @Override
-    public void clientStarted(IClientCtrl iClientCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "clientStarted");
+    public void registerClientCtrl(IClientCtrl iClientCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerClientCtrl");
         if (iClientCtrl == null) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "clientStarted iClientCtrl is null");
+            if (Settings.debug) Log.i(Tags.ACT_DPL, "registerClientCtrl iClientCtrl is null");
         }
         this.iClientCtrl = iClientCtrl;
     }
@@ -653,5 +553,125 @@ public class DeviceControlActivity extends Activity implements IServerOn, IRedir
     @Override
     public void messageCantSend() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "messageCantSend");
+    }
+
+
+    private void callIn() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn");
+        enableTransmitData();
+        btnCallOut.setEnabled(false);
+//      new TaskConnect(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
+//              editTextSrvRemAddr.getText().toString(),
+//              editTextSrvRemPort.getText().toString()));
+//      if (iClientCtrl == null) {
+//          if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn iClientCtrl is null");
+//          return;
+//      }
+        new TaskStream(DeviceControlActivity.this, iServerCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn post new TaskStream");
+        new TaskRedirect(DeviceControlActivity.this, iServerCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIn post new TaskRedirect");
+    }
+
+    private void callOut() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOut");
+        new TaskConnect(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
+                editTextSrvRemAddr.getText().toString(),
+                editTextSrvRemPort.getText().toString()));
+    }
+
+    private class HandlerExtended extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case StatusMessages.SRV_ONMESSAGE:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONMESSAGE");
+                    //if (Settings.debug) Log.i(Tags.ACT_DPL, String.format("handleMessage SRV_ONMESSAGE %s", ((WebSocketFrame) msg.obj).getTextPayload()));
+                    break;
+                case StatusMessages.SRV_ONCLOSE:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONCLOSE");
+                    btnCallOut.setEnabled(true);
+                    break;
+                case StatusMessages.SRV_ONOPEN:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
+                    callIn();
+                    break;
+                case StatusMessages.SRV_ONPONG:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONPONG");
+                    break;
+                case StatusMessages.SRV_ONEXCEPTION:
+                    if (Settings.debug) Log.e(Tags.ACT_DPL, "handleMessage SRV_ONEXCEPTION");
+                    break;
+                case StatusMessages.SRV_ONDEBUGFRAMERX:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONDEBUGFRAMERX");
+                    break;
+                case StatusMessages.SRV_ONDEBUGFRAMETX:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONDEBUGFRAMETX");
+                    break;
+                case StatusMessages.CLT_ONOPEN:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN");
+                    new TaskStream(DeviceControlActivity.this, iClientCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new TaskStream");
+                    new TaskRedirect(DeviceControlActivity.this, iClientCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN post new TaskRedirect");
+                    break;
+                case StatusMessages.CLT_ONMESSAGE_BYTES:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_BYTES");
+                    break;
+                case StatusMessages.CLT_ONMESSAGE_TEXT:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_TEXT");
+                    break;
+                case StatusMessages.CLT_ONCLOSING:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONCLOSING");
+                    break;
+                case StatusMessages.CLT_ONCLOSED:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONCLOSED");
+                    break;
+                case StatusMessages.CLT_ONFAILURE:
+                    if (Settings.debug) Log.e(Tags.ACT_DPL, "handleMessage CLT_ONFAILURE");
+                    Toast.makeText(DeviceControlActivity.this, "SUBSCRIBER NOT ONLINE", Toast.LENGTH_SHORT).show();
+                    break;
+                case StatusMessages.CLT_CANCEL:
+                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_CANCEL");
+                    break;
+                default:
+                    if (Settings.debug) Log.e(Tags.ACT_DPL, "handleMessage DEFAULT");
+                    break;
+            }
+        }
+    };
+
+    private class ThreadNetStop extends Thread {
+        @Override
+        public void run() {
+            if (iStreamCtrl != null) {
+                iStreamCtrl.streamOff();
+                iStreamCtrl = null;
+                if (Settings.debug) Log.e(Tags.ACT_DPL, "ThreadNetStop iStreamCtrl.streamOff() done");
+            }
+            if (iRedirectCtrl != null) {
+                iRedirectCtrl.redirectOff();
+                iRedirectCtrl = null;
+                if (Settings.debug) Log.e(Tags.ACT_DPL, "ThreadNetStop iRedirectCtrl.redirectOff() done");
+            }
+            if (iServerCtrl != null) {
+                new TaskServerOff(DeviceControlActivity.this).execute(iServerCtrl);
+                iStreamCtrl = null;
+            }
+            if (iClientCtrl != null) {
+                new TaskDisconnect(DeviceControlActivity.this).execute(iClientCtrl);
+                iClientCtrl = null;
+            }
+        }
+    }
+
+    @Override
+    public void serverStopped() {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStopped");
+    }
+
+    @Override
+    public void clientStopped(String reason) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "clientStopped");
     }
 }

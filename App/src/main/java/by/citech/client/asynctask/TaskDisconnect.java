@@ -2,20 +2,18 @@ package by.citech.client.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 
 import by.citech.client.network.IClientOff;
-import by.citech.client.network.OkWebSocketClientCtrl;
 import by.citech.client.network.IClientCtrl;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
-public class DisconnectTask extends AsyncTask<IClientCtrl, String, Void> {
-    private static final int TIMEOUT_PERIOD = 500;
-    private static final int TIMEOUT_CYCLES = 20;
+public class TaskDisconnect extends AsyncTask<IClientCtrl, String, Void> {
+    private static final int TIMEOUT_PERIOD = 250;
+    private static final int TIMEOUT_CYCLES = 10;
     private IClientOff iClientOff;
 
-    public DisconnectTask (IClientOff iClientOff) {
+    public TaskDisconnect(IClientOff iClientOff) {
         this.iClientOff = iClientOff;
     }
 
@@ -24,12 +22,12 @@ public class DisconnectTask extends AsyncTask<IClientCtrl, String, Void> {
         Log.i(Tags.CLT_TASK_DISC, "doInBackground");
 
         if (clientCtrl[0] == null) {
-            Log.i(Tags.CLT_TASK_DISC, "doInBackground iClientCtrl is null");
+            Log.e(Tags.CLT_TASK_DISC, "doInBackground iClientCtrl is null");
             publishProgress(StatusMessages.WEBSOCKET_CLOSED);
             return null;
         }
 
-        clientCtrl[0].stop("User manually closed connection.");
+        clientCtrl[0].stop("user manually closed connection");
         int i = 0;
 
         while (i < TIMEOUT_CYCLES) {
@@ -56,14 +54,6 @@ public class DisconnectTask extends AsyncTask<IClientCtrl, String, Void> {
     @Override
     protected void onProgressUpdate(String... status) {
         Log.i(Tags.CLT_TASK_DISC, "onProgressUpdate");
-        Log.i(Tags.CLT_TASK_DISC, status[0]);
-        switch (status[0]) {
-            case StatusMessages.WEBSOCKET_CLOSED:
-                iClientOff.clientStopped("соединение завершено корректно");
-                break;
-            case StatusMessages.WEBSOCKET_CANCEL:
-                iClientOff.clientStopped("соединение завершено принудительно");
-                break;
-        }
+        iClientOff.clientStopped(status[0]);
     }
 }

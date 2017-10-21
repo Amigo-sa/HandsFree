@@ -5,16 +5,16 @@ import android.util.Log;
 
 import by.citech.param.Settings;
 import by.citech.param.Tags;
-import static by.citech.util.Decode.bytesToHex;
+import static by.citech.util.Decode.bytesToHexMark1;
 
-public class StreamAudio implements IStream {
+class StreamAudio implements IStreamCtrl {
     private byte[] buffer;
     private int bufferSize;
     private AudioRecord recorder;
     private boolean isStreaming = false;
     private ITransmitter iTransmitter;
 
-    public StreamAudio(ITransmitter iTransmitter, int bufferSize) {
+    StreamAudio(ITransmitter iTransmitter, int bufferSize) {
         this.iTransmitter = iTransmitter;
         this.bufferSize = bufferSize;
     }
@@ -34,7 +34,7 @@ public class StreamAudio implements IStream {
         }
     }
 
-    public IStream start() {
+    public IStreamCtrl start() {
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "start");
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("start audioOutBuffersize is %d", bufferSize));
         streamOff();
@@ -64,7 +64,7 @@ public class StreamAudio implements IStream {
         while (isStreaming) {
             if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run buffer length is %d", buffer.length));
             fillBuffer(buffer, 0, buffer.length);
-            if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run %s: %s", "sendBytes", bytesToHex(buffer)));
+            if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run %s: %s", "sendBytes", bytesToHexMark1(buffer)));
             iTransmitter.sendBytes(buffer);
         }
 

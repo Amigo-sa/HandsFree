@@ -10,29 +10,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import by.citech.client.asynctask.ConnectTask;
-import by.citech.connection.StreamTask;
+import by.citech.client.asynctask.TaskConnect;
+import by.citech.connection.IStreamCtrl;
+import by.citech.connection.TaskStream;
 import by.citech.client.network.IClientCtrl;
-import by.citech.client.network.IClientOn;
+import by.citech.client.network.IClientCtrlRegister;
 import by.citech.connection.IMessage;
-import by.citech.connection.IStream;
-import by.citech.connection.IStreamOn;
-import by.citech.connection.IReceiverRegister;
+import by.citech.connection.IStreamCtrlRegister;
+import by.citech.connection.IReceiverListenerRegister;
 import by.citech.connection.ITransmitter;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
-import by.citech.connection.RedirectTask;
-import by.citech.server.asynctask.ServerOnTask;
+import by.citech.connection.TaskRedirect;
+import by.citech.server.asynctask.TaskServerOn;
 import by.citech.connection.IRedirectCtrl;
-import by.citech.connection.IRedirectOn;
-import by.citech.server.network.IServerOn;
+import by.citech.connection.IRedirectCtrlRegister;
+import by.citech.server.network.IServerCtrlRegister;
 import by.citech.server.network.IServerCtrl;
 import by.citech.server.network.websockets.WebSocketFrame;
 import static by.citech.util.NetworkInfo.getIPAddress;
 
-public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, IStreamOn, IClientOn, IMessage {
+public class DuplexActivity extends Activity implements IServerCtrlRegister, IRedirectCtrlRegister, IStreamCtrlRegister, IClientCtrlRegister, IMessage {
     private EditText editTextSrvLocPortDpl;
     private EditText editTextSrvLocAddrDpl;
     private EditText editTextSrvRemPortDpl;
@@ -45,7 +45,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
     private IRedirectCtrl iRedirectCtrl;
-    private IStream iStream;
+    private IStreamCtrl iStreamCtrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +68,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
                     case StatusMessages.SRV_ONOPEN:
                         if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
                         if (Settings.testSendOneOnCall) {
-                            new ConnectTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
+                            new TaskConnect(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
                                     editTextSrvRemAddrDpl.getText().toString(),
                                     editTextSrvRemPortDpl.getText().toString()));
                         } else {
@@ -104,7 +104,7 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
         editTextSrvRemPortDpl.setText(String.format("%d", Settings.serverRemotePortNumber));
         editTextSrvRemAddrDpl.setText(Settings.serverRemoteIpAddress);
 
-        new ServerOnTask(this, handler).execute(editTextSrvLocPortDpl.getText().toString());
+        new TaskServerOn(this, handler).execute(editTextSrvLocPortDpl.getText().toString());
 
         btnCallOutDpl.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,47 +130,44 @@ public class DuplexActivity extends Activity implements IServerOn, IRedirectOn, 
 
     private void callOut() {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "call");
-        new ConnectTask(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
+        new TaskConnect(DuplexActivity.this, handler).execute(String.format("ws://%s:%s",
                 editTextSrvRemAddrDpl.getText().toString(),
                 editTextSrvRemPortDpl.getText().toString()));
         if (iClientCtrl == null) {
             if (Settings.debug) Log.i(Tags.ACT_DPL, "call iClientCtrl is null");
             return;
         }
-        new StreamTask(DuplexActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-        new RedirectTask(DuplexActivity.this, (IReceiverRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+        new TaskStream(DuplexActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
+        new TaskRedirect(DuplexActivity.this, (IReceiverListenerRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
     }
 
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
         if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStarted");
         btnCallOutDpl.setEnabled(true);
-        this.iServerCtrl = iServerCtrl;
+        if (iServerCtrl == null) {
+            btnCallOutDpl.setEnabled(false);
+            Toast.makeText(this, "CANT START SERVER", Toast.LENGTH_SHORT).show();
+        } else {
+            this.iServerCtrl = iServerCtrl;
+        }
     }
 
     @Override
-    public void serverCantStart() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverCantStart");
-        final DuplexActivity activity = this;
-        btnCallOutDpl.setEnabled(false);
-        Toast.makeText(activity, "CANT START SERVER", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void setRedirect(IRedirectCtrl iRedirectCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "setRedirect");
+    public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerRedirectCtrl");
         this.iRedirectCtrl = iRedirectCtrl;
     }
 
     @Override
-    public void setStream(IStream iStream) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "setStream");
-        this.iStream = iStream;
+    public void registerStreamCtrl(IStreamCtrl iStreamCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerStreamCtrl");
+        this.iStreamCtrl = iStreamCtrl;
     }
 
     @Override
-    public void clientStarted(IClientCtrl iClientCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "clientStarted");
+    public void registerClientCtrl(IClientCtrl iClientCtrl) {
+        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerClientCtrl");
         this.iClientCtrl = iClientCtrl;
     }
 

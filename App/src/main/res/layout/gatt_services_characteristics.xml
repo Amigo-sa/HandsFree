@@ -34,7 +34,7 @@
             android:id="@+id/editTextSrvLocAddr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Local IP address"
+            android:hint="Local IP"
             android:visibility="visible" />
         <Space
             android:layout_width="5dp"
@@ -55,7 +55,7 @@
             android:id="@+id/editTextSrvLocPort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Введите Local Port"/>
+            android:hint="Port number"/>
         <Space
             android:layout_width="5dp"
             android:layout_height="wrap_content"/>
@@ -74,7 +74,7 @@
             android:id="@+id/editTextSrvRemAddr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Введите IP address"/>
+            android:hint="IP address"/>
         <Space
             android:layout_width="5dp"
             android:layout_height="wrap_content"/>
@@ -93,7 +93,7 @@
             android:id="@+id/editTextSrvRemPort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Введите Remote Port"/>
+            android:hint="Port number"/>
         <Space
             android:layout_width="5dp"
             android:layout_height="wrap_content"/>
