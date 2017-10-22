@@ -32,7 +32,8 @@ public class TaskStream extends AsyncTask<String, IStreamCtrl, Void> {
         if (Settings.debug) Log.i(Tags.NET_TASK_STREAM, "doInBackground");
         switch (dataSource) {
             case MICROPHONE:
-                final StreamAudio streamAudio = new StreamAudio(iTransmitter, Integer.parseInt(params[0]));
+//              final StreamAudio streamAudio = new StreamAudio(iTransmitter, Integer.parseInt(params[0]));
+                final StreamAudio streamAudio = new StreamAudio(iTransmitter, Settings.bufferSize);
                 publishProgress(streamAudio.start());
                 new Thread(new Runnable() {
                     @Override

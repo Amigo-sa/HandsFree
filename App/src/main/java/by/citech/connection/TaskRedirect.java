@@ -34,7 +34,8 @@ public class TaskRedirect extends AsyncTask<String, IRedirectCtrl, Void> {
         switch (dataSource) {
             case MICROPHONE:
                 Log.i(Tags.NET_TASK_REDIR, "doInBackground redirect to audio");
-                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverListenerRegister, Integer.parseInt(params[0]));
+//              final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverListenerRegister, Integer.parseInt(params[0]));
+                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverListenerRegister, Settings.bufferSize);
                 publishProgress(redirectToAudio.start());
                 new Thread(new Runnable() {
                     @Override
@@ -63,11 +64,6 @@ public class TaskRedirect extends AsyncTask<String, IRedirectCtrl, Void> {
     @Override
     protected void onProgressUpdate(IRedirectCtrl... iRedirectCtrl) {
         if (Settings.debug) Log.i(Tags.NET_TASK_REDIR, "onProgressUpdate");
-        if (iRedirectCtrl[0] != null) {
-            iRedirectCtrlRegister.registerRedirectCtrl(iRedirectCtrl[0]);
-            Log.i(Tags.NET_TASK_REDIR, "onProgressUpdate iRedirectCtrl is not null");
-        } else {
-            Log.i(Tags.NET_TASK_REDIR, "onProgressUpdate iRedirectCtrl is null");
-        }
+        iRedirectCtrlRegister.registerRedirectCtrl(iRedirectCtrl[0]);
     }
 }

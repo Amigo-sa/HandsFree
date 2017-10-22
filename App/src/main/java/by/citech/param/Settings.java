@@ -10,7 +10,8 @@ public class Settings {
     public static int bluetoothMessageSize = 16; // bytes in one BT message
 
     public static int minNetSendSize = bluetoothMessageSize - 1;
-    public static DataSource dataSource = DataSource.BLUETOOTH;
+//  public static DataSource dataSource = DataSource.BLUETOOTH;
+    public static DataSource dataSource = DataSource.MICROPHONE;
     public static boolean debug = true;
     public static int bufferSize = 3000;
     public static boolean testSendOneOnCall = false;
@@ -35,7 +36,7 @@ public class Settings {
     public static int audioOutBuffersize = 10000;
     public static int audioMode = AudioTrack.MODE_STREAM;
     public static int audioContentType = AudioAttributes.CONTENT_TYPE_SPEECH;
-    public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
+//  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
 //  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
     public static int audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION;  // динамик
 //  public static int audioUsage = AudioAttributes.USAGE_MEDIA;  // спикер

@@ -23,12 +23,10 @@ class StreamAudio implements IStreamCtrl {
     public void streamOff() {
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "streamOff");
         isStreaming = false;
-
         if (recorder != null) {
             if (recorder.getState() == AudioRecord.STATE_INITIALIZED) {
                 recorder.stop();
             }
-
             recorder.release();
             recorder = null;
         }
@@ -46,12 +44,10 @@ class StreamAudio implements IStreamCtrl {
                 bufferSize);
         buffer = new byte[bufferSize];
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("start buffer length is %d", buffer.length));
-
         if (recorder == null) {
             if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "start recorder is null");
             return null;
         }
-
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "start recorder started");
         return this;
     }
@@ -60,21 +56,18 @@ class StreamAudio implements IStreamCtrl {
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "run");
         recorder.startRecording();
         isStreaming = true;
-
         while (isStreaming) {
             if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run buffer length is %d", buffer.length));
             fillBuffer(buffer, 0, buffer.length);
             if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run %s: %s", "sendBytes", bytesToHexMark1(buffer)));
             iTransmitter.sendBytes(buffer);
         }
-
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "run done");
     }
 
     private void fillBuffer(byte[] buffer, int readOffset, int readLeft) {
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "fillBuffer");
         int readCount;
-
         while (isStreaming && (readLeft > 0)) {
             if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("fillBuffer readLeft-1 is %d", readLeft));
             readCount = recorder.read(buffer, readOffset, readLeft);
@@ -84,7 +77,6 @@ class StreamAudio implements IStreamCtrl {
             readOffset += readCount;
             if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("fillBuffer readOffset is %d", readOffset));
         }
-
         if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "fillBuffer done");
     }
 }

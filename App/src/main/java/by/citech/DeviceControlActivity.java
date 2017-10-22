@@ -526,14 +526,20 @@ public class DeviceControlActivity extends Activity
 
     @Override
     public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerRedirectCtrl");
-        this.iRedirectCtrl = iRedirectCtrl;
+        if (iRedirectCtrl == null) {
+            if (Settings.debug) Log.e(Tags.ACT_DPL, "registerRedirectCtrl iRedirectCtrl is null");
+        } else {
+            this.iRedirectCtrl = iRedirectCtrl;
+        }
     }
 
     @Override
     public void registerStreamCtrl(IStreamCtrl iStreamCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerStreamCtrl");
-        this.iStreamCtrl = iStreamCtrl;
+        if (iStreamCtrl == null) {
+            if (Settings.debug) Log.e(Tags.ACT_DPL, "registerStreamCtrl iStreamCtrl is null");
+        } else {
+            this.iStreamCtrl = iStreamCtrl;
+        }
     }
 
     @Override

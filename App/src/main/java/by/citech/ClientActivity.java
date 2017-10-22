@@ -168,7 +168,7 @@ public class ClientActivity extends Activity implements IClientCtrlRegister, ICl
             btnCltStreamOn.setEnabled(false);
             btnCltDiscFromSrv.setEnabled(false);
             btnCltSendMsg.setEnabled(false);
-            new TaskStream(this, (ITransmitter) iClientCtrl, Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
+            new TaskStream(this, iClientCtrl.getTransmitter(), Settings.dataSource).execute(editTextCltBuffSize.getText().toString());
             btnCltStreamOff.setEnabled(true);
         }
     }

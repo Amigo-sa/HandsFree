@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import by.citech.connection.IReceiverListenerRegister;
 import by.citech.connection.TaskRedirect;
 import by.citech.param.Settings;
 import by.citech.server.asynctask.TaskServerOff;
@@ -32,7 +31,7 @@ import static by.citech.util.Decode.bytesToHexMark1;
 import static by.citech.util.NetworkInfo.getIPAddress;
 
 public class ServerActivity extends Activity implements OnCheckedChangeListener, IServerCtrlRegister, IServerOff, IRedirectCtrlRegister {
-    public IServerCtrl serverCtrl;
+    public IServerCtrl iServerCtrl;
     public IRedirectCtrl iRedirectCtrl;
     private Handler handler;
 
@@ -134,9 +133,9 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
     public void offServer(View view) {
         Log.i(Tags.ACT_SRV, "offServer");
         try {
-            new TaskServerOff(this).execute(serverCtrl);
+            new TaskServerOff(this).execute(iServerCtrl);
         } catch (Exception e) {
-            Log.i(Tags.ACT_SRV, "offServer serverCtrl is null");
+            Log.i(Tags.ACT_SRV, "offServer iServerCtrl is null");
         }
     }
 
@@ -148,7 +147,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 
     public void sendMessage(View view) {
         Log.i(Tags.ACT_SRV, "sendMessage");
-        serverCtrl.getTransmitter().sendMessage(editTextSrvToCltText.getText().toString());
+        iServerCtrl.getTransmitter().sendMessage(editTextSrvToCltText.getText().toString());
         editTextSrvToCltText.setText("");
     }
 
@@ -163,7 +162,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 //                  Context context = getApplicationContext();
 //                  AudioManager audiomanager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 //                  audiomanager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                    new TaskRedirect(this, (IReceiverListenerRegister) serverCtrl, Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
+                    new TaskRedirect(this, iServerCtrl.getReceiverRegister(), Settings.dataSource).execute(editTextSrvBuffSize.getText().toString());
                 } else {
                     Log.i(Tags.ACT_SRV, "onCheckedChanged redirect off");
                     new Thread(new Runnable() {
@@ -196,7 +195,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
     protected void onPause() {
         Log.i(Tags.ACT_SRV, "onPause");
         super.onPause();
-        new TaskServerOff(this).execute(serverCtrl);
+        new TaskServerOff(this).execute(iServerCtrl);
     }
 
     @Override
@@ -207,6 +206,7 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
         } else {
             textViewSrvStatus.setText("Состояние: сервер включен.");
             btnSrvOff.setEnabled(true);
+            this.iServerCtrl = iServerCtrl;
         }
     }
 
@@ -219,6 +219,10 @@ public class ServerActivity extends Activity implements OnCheckedChangeListener,
 
     @Override
     public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
-        this.iRedirectCtrl = iRedirectCtrl;
+        if (iRedirectCtrl == null) {
+            if (Settings.debug) Log.e(Tags.ACT_SRV, "registerRedirectCtrl iRedirectCtrl is null");
+        } else {
+            this.iRedirectCtrl = iRedirectCtrl;
+        }
     }
 }

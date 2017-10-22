@@ -19,27 +19,8 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
         this.bufferSize = bufferSize;
     }
 
-    @Override
-    public void redirectOff() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
-        isRedirecting = false;
-        iReceiverListenerRegister.registerReceiverListener(null);
-
-        if (audioTrack != null) {
-            if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
-                audioTrack.stop();
-            }
-
-            audioTrack.release();
-            audioTrack = null;
-        }
-
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff done");
-    }
-
     public IRedirectCtrl start() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "start");
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, String.format("start audioInBuffersize is %d", bufferSize));
         redirectOff();
 
         audioTrack = new AudioTrack.Builder()
@@ -65,6 +46,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
         isRedirecting = true;
         audioTrack.play();
         iReceiverListenerRegister.registerReceiverListener(this);
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "run done");
     }
 
     @Override
@@ -73,5 +55,20 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
         if (isRedirecting) {
             audioTrack.write(data, 0, bufferSize);
         }
+    }
+
+    @Override
+    public void redirectOff() {
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
+        isRedirecting = false;
+        iReceiverListenerRegister.registerReceiverListener(null);
+        if (audioTrack != null) {
+            if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
+                audioTrack.stop();
+            }
+            audioTrack.release();
+            audioTrack = null;
+        }
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff done");
     }
 }

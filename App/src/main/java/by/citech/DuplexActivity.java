@@ -137,8 +137,8 @@ public class DuplexActivity extends Activity implements IServerCtrlRegister, IRe
             if (Settings.debug) Log.i(Tags.ACT_DPL, "call iClientCtrl is null");
             return;
         }
-        new TaskStream(DuplexActivity.this, (ITransmitter) iClientCtrl, Settings.dataSource, storageBtToNet).execute();
-        new TaskRedirect(DuplexActivity.this, (IReceiverListenerRegister) iServerCtrl, Settings.dataSource, storageNetToBt).execute();
+        new TaskStream(DuplexActivity.this, iClientCtrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
+        new TaskRedirect(DuplexActivity.this, iServerCtrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
     }
 
     @Override
@@ -155,8 +155,11 @@ public class DuplexActivity extends Activity implements IServerCtrlRegister, IRe
 
     @Override
     public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerRedirectCtrl");
-        this.iRedirectCtrl = iRedirectCtrl;
+        if (iRedirectCtrl == null) {
+            if (Settings.debug) Log.e(Tags.ACT_DPL, "registerRedirectCtrl iRedirectCtrl is null");
+        } else {
+            this.iRedirectCtrl = iRedirectCtrl;
+        }
     }
 
     @Override
