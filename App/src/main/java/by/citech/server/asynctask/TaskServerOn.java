@@ -6,18 +6,18 @@ import android.util.Log;
 import java.io.IOException;
 
 import by.citech.param.Settings;
-import by.citech.server.network.IServerCtrlRegister;
+import by.citech.server.network.IServerCtrlReg;
 import by.citech.server.network.IServerCtrl;
 import by.citech.server.network.ServerCtrlNanoWebSocket;
 import by.citech.param.Tags;
 
 public class TaskServerOn extends AsyncTask<String, IServerCtrl, Void> {
-    private IServerCtrlRegister iServerCtrlRegister;
+    private IServerCtrlReg iServerCtrlReg;
     private Handler handler;
     private IServerCtrl iServerCtrl;
 
-    public TaskServerOn(IServerCtrlRegister iServerCtrlRegister, Handler handler) {
-        this.iServerCtrlRegister = iServerCtrlRegister;
+    public TaskServerOn(IServerCtrlReg iServerCtrlReg, Handler handler) {
+        this.iServerCtrlReg = iServerCtrlReg;
         this.handler = handler;
     }
 
@@ -26,11 +26,11 @@ public class TaskServerOn extends AsyncTask<String, IServerCtrl, Void> {
         Log.i(Tags.SRV_TASK_SRVON, "doInBackground");
         int portNum = Integer.parseInt(port[0]);
         Log.i(Tags.SRV_TASK_SRVON, String.format("%d", portNum));
-        iServerCtrl = new ServerCtrlNanoWebSocket(portNum, handler);
+        ServerCtrlNanoWebSocket serverCtrlNanoWebSocket = new ServerCtrlNanoWebSocket(portNum, handler);
 
-        if (!iServerCtrl.isAliveServer()) {
+        if (!serverCtrlNanoWebSocket.isAliveServer()) {
             try {
-                iServerCtrl.startServer(Settings.serverTimeout);
+                iServerCtrl = serverCtrlNanoWebSocket.startServer(Settings.serverTimeout);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -51,6 +51,6 @@ public class TaskServerOn extends AsyncTask<String, IServerCtrl, Void> {
     @Override
     protected void onProgressUpdate(IServerCtrl... iServerCtrl) {
         Log.i(Tags.SRV_TASK_SRVON, "onProgressUpdate");
-        iServerCtrlRegister.serverStarted(iServerCtrl[0]);
+        iServerCtrlReg.serverStarted(iServerCtrl[0]);
     }
 }

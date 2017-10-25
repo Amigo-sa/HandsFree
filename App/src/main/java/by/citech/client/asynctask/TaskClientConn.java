@@ -5,25 +5,25 @@ import android.os.Handler;
 import android.util.Log;
 
 import by.citech.client.network.IClientCtrl;
-import by.citech.client.network.IClientCtrlRegister;
+import by.citech.client.network.IClientCtrlReg;
 import by.citech.client.network.ClientCtrlOkWebSocket;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class TaskConnect extends AsyncTask<String, IClientCtrl, Void> {
-    private IClientCtrlRegister iClientCtrlRegister;
+public class TaskClientConn extends AsyncTask<String, IClientCtrl, Void> {
+    private IClientCtrlReg iClientCtrlReg;
     private Handler handler;
     private IClientCtrl iClientCtrl;
 
-    public TaskConnect(IClientCtrlRegister iClientCtrlRegister, Handler handler) {
-        this.iClientCtrlRegister = iClientCtrlRegister;
+    public TaskClientConn(IClientCtrlReg iClientCtrlReg, Handler handler) {
+        this.iClientCtrlReg = iClientCtrlReg;
         this.handler = handler;
     }
 
     protected Void doInBackground(String... url) {
         Log.i(Tags.CLT_TASK_CONN, "doInBackground");
         Log.i(Tags.CLT_TASK_CONN, url[0]);
-        iClientCtrl = new ClientCtrlOkWebSocket(url[0], handler).run();
+        iClientCtrl = new ClientCtrlOkWebSocket(url[0], handler).startClient();
         publishProgress(iClientCtrl);
         if (iClientCtrl == null) {
             if (Settings.debug) Log.i(Tags.CLT_TASK_CONN, "doInBackground iClientCtrl is null");
@@ -34,6 +34,6 @@ public class TaskConnect extends AsyncTask<String, IClientCtrl, Void> {
     @Override
     protected void onProgressUpdate(IClientCtrl... iClientCtrl) {
         Log.i(Tags.CLT_TASK_CONN, "onProgressUpdate");
-        iClientCtrlRegister.registerClientCtrl(iClientCtrl[0]);
+        iClientCtrlReg.registerClientCtrl(iClientCtrl[0]);
     }
 }

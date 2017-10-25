@@ -10,12 +10,12 @@ import by.citech.param.Tags;
 
 class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
     private int bufferSize;
-    private IReceiverListenerRegister iReceiverListenerRegister;
+    private IReceiverListenerReg iReceiverListenerReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    RedirectToAudio(IReceiverListenerRegister iReceiverListenerRegister, int bufferSize) {
-        this.iReceiverListenerRegister = iReceiverListenerRegister;
+    RedirectToAudio(IReceiverListenerReg iReceiverListenerReg, int bufferSize) {
+        this.iReceiverListenerReg = iReceiverListenerReg;
         this.bufferSize = bufferSize;
     }
 
@@ -42,11 +42,11 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "run");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient");
         isRedirecting = true;
         audioTrack.play();
-        iReceiverListenerRegister.registerReceiverListener(this);
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "run done");
+        iReceiverListenerReg.registerReceiverListener(this);
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient done");
     }
 
     @Override
@@ -61,7 +61,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
         isRedirecting = false;
-        iReceiverListenerRegister.registerReceiverListener(null);
+        iReceiverListenerReg.registerReceiverListener(null);
         if (audioTrack != null) {
             if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
                 audioTrack.stop();

@@ -21,7 +21,7 @@ public class ServerRunner {
             System.exit(-1);
         }
 
-        System.out.println("Server started, Hit Enter to stop.\n");
+        System.out.println("Server started, Hit Enter to closeConnection.\n");
 
         try {
             System.in.read();

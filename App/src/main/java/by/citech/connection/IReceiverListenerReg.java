@@ -1,5 +1,5 @@
 package by.citech.connection;
 
-public interface IReceiverListenerRegister {
+public interface IReceiverListenerReg {
     void registerReceiverListener(IReceiverListener iReceiverListener);
 }

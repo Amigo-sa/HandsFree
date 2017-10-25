@@ -489,7 +489,7 @@ public abstract class NanoHTTPD {
     /**
      * This is the "master" method that delegates requests to handlers and makes
      * sure there is a response to every request. You are not supposed to call
-     * or override this method in any circumstances. But no one will stop you if
+     * or override this method in any circumstances. But no one will closeConnection you if
      * you do. I'm a Javadoc, not Code Police.
      * 
      * @param session
@@ -604,7 +604,7 @@ public abstract class NanoHTTPD {
                 this.myThread.join();
             }
         } catch (Exception e) {
-            NanoHTTPD.LOG.log(Level.SEVERE, "Could not stop all connections", e);
+            NanoHTTPD.LOG.log(Level.SEVERE, "Could not closeConnection all connections", e);
         }
     }
 

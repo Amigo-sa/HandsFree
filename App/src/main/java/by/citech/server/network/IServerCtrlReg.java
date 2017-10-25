@@ -1,5 +1,5 @@
 package by.citech.server.network;
 
-public interface IServerCtrlRegister {
+public interface IServerCtrlReg {
     void serverStarted(IServerCtrl iServerCtrl);
 }

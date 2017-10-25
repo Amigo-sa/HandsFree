@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import by.citech.connection.IReceiverListener;
-import by.citech.connection.IReceiverListenerRegister;
+import by.citech.connection.IReceiverListenerReg;
 import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.server.network.protocols.http.IHTTPSession;
@@ -20,7 +20,7 @@ import by.citech.param.Tags;
 
 import static by.citech.util.Decode.bytesToHexMark1;
 
-public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiverListenerRegister, ITransmitter {
+public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiverListenerReg, ITransmitter {
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
     private WebSocket webSocket;
     private Handler handler;
@@ -46,7 +46,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         try {
             webSocket.send(message);
         } catch (IOException e) {
-            Log.i(Tags.SRV_WSOCKETCTRL, "sendMessage cant send");
+            e.printStackTrace();
         }
     }
 
@@ -56,11 +56,11 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         try {
             webSocket.send(bytes);
         } catch (IOException e) {
-            Log.i(Tags.SRV_WSOCKETCTRL, "sendBytes cant send");
+            e.printStackTrace();
         }
     }
 
-    //--------------------- IServerCtrl
+    //--------------------- IExchangeCtrl
 
     @Override
     public ITransmitter getTransmitter() {
@@ -68,34 +68,21 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
     }
 
     @Override
-    public void closeSocket() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeSocket");
-        try {
-            webSocket.close(CloseCode.NormalClosure, "Its all about me, DARLING", false);
-        } catch (IOException e) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeSocket IOException");
-        }
-    }
-
-    @Override
-    public IReceiverListenerRegister getReceiverRegister() {
+    public IReceiverListenerReg getReceiverRegister() {
         return this;
     }
 
+    //--------------------- IServerCtrl
+
     @Override
-    public WebSocket getWebSocket() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getWebSocket");
-        return webSocket;
+    public IServerCtrl startServer(int serverTimeout) throws IOException {
+        start(serverTimeout);
+        return this;
     }
 
     @Override
     public String getStatus () {
         return this.status;
-    }
-
-    @Override
-    public void startServer(int serverTimeout) throws IOException {
-        start(serverTimeout);
     }
 
     @Override
@@ -108,14 +95,48 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         stop();
     }
 
-    //--------------------- IReceiverListenerRegister
+    //--------------------- IConnCtrl
+
+    @Override
+    public void closeConnection() {
+        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeConnection");
+        if (webSocket != null) {
+            try {
+                webSocket.close(CloseCode.NormalClosure, Messages.SRV2CLT_ONCLOSE, false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void closeConnectionForce() {
+        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeConnectionForce");
+        if (webSocket != null) {
+            try {
+                webSocket.close(CloseCode.AbnormalClosure, Messages.SRV2CLT_ONCLOSE, false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public boolean isAliveConnection() {
+        if (webSocket != null) {
+            return webSocket.isOpen();
+        }
+        return false;
+    }
+
+    //--------------------- IReceiverListenerReg
 
     @Override
     public void registerReceiverListener(IReceiverListener listener) {
         this.listener = listener;
     }
 
-//  private static class DebugWebSocket extends WebSocket {
+    //  private static class DebugWebSocket extends WebSocket {
     private class DebugWebSocket extends WebSocket {
         private DebugWebSocket(IHTTPSession handshakeRequest) {
             super(handshakeRequest);
@@ -124,10 +145,8 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         @Override
         protected void onOpen() {
             if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onOpen");
-
             status = StatusMessages.WEBSOCKET_OPENED;
             handler.sendEmptyMessage(StatusMessages.SRV_ONOPEN);
-
             try {
                 send(Messages.SRV2CLT_ONOPEN);
             } catch (IOException e) {
@@ -181,7 +200,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
             if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onException");
             if (Settings.debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
             status = StatusMessages.WEBSOCKET_FAILURE;
-            handler.sendEmptyMessage(StatusMessages.SRV_ONEXCEPTION);
+            handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
         }
 
         @Override

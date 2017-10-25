@@ -8,12 +8,12 @@ import by.citech.param.Tags;
 
 class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
     private int bufferSize;
-    private IReceiverListenerRegister iReceiverListenerRegister;
+    private IReceiverListenerReg iReceiverListenerReg;
     private boolean isRedirecting = false;
     private final StorageData storageNetToBt;
 
-    RedirectToBluetooth(IReceiverListenerRegister iReceiverListenerRegister, int bufferSize, StorageData storageNetToBt) {
-        this.iReceiverListenerRegister = iReceiverListenerRegister;
+    RedirectToBluetooth(IReceiverListenerReg iReceiverListenerReg, int bufferSize, StorageData storageNetToBt) {
+        this.iReceiverListenerReg = iReceiverListenerReg;
         this.bufferSize = bufferSize;
         this.storageNetToBt = storageNetToBt;
     }
@@ -25,17 +25,17 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "run");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "startClient");
         isRedirecting = true;
-        iReceiverListenerRegister.registerReceiverListener(this);
-        if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "run done");
+        iReceiverListenerReg.registerReceiverListener(this);
+        if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "startClient done");
     }
 
     @Override
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "redirectOff");
         isRedirecting = false;
-        iReceiverListenerRegister.registerReceiverListener(null);
+        iReceiverListenerReg.registerReceiverListener(null);
         synchronized (storageNetToBt) {
             storageNetToBt.notify();
         }

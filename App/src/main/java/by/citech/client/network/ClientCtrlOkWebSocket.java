@@ -5,7 +5,7 @@ import android.util.Log;
 import java.util.concurrent.TimeUnit;
 
 import by.citech.connection.IReceiverListener;
-import by.citech.connection.IReceiverListenerRegister;
+import by.citech.connection.IReceiverListenerReg;
 import by.citech.connection.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -20,7 +20,7 @@ import by.citech.param.StatusMessages;
 
 import static by.citech.util.Decode.bytesToHexMark1;
 
-public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientCtrl, ITransmitter, IReceiverListenerRegister {
+public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientCtrl, ITransmitter, IReceiverListenerReg {
     private WebSocket webSocket;
     private String status = "";
     private String url = "";
@@ -32,11 +32,36 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
         this.handler = handler;
     }
 
+    //--------------------- IConnCtrl
+
+    @Override
+    public void closeConnection() {
+        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "closeConnection");
+        if (webSocket != null) {
+            webSocket.close(1000, "user manually closed connection");
+        }
+    }
+
+    @Override
+    public void closeConnectionForce() {
+        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "closeConnectionForce");
+        if (webSocket != null) {
+            webSocket.cancel();
+            handler.sendEmptyMessage(StatusMessages.CLT_CANCEL);
+        }
+    }
+
+    @Override
+    public boolean isAliveConnection() {
+        // TODO: достаточна ли такая проверка?
+        return status.equals(StatusMessages.WEBSOCKET_CLOSED);
+    }
+
     //--------------------- IClientCtrl
 
     @Override
-    public IClientCtrl run() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "run");
+    public IClientCtrl startClient() {
+        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "startClient");
         OkHttpClient client = new OkHttpClient.Builder()
                 .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
@@ -53,30 +78,13 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     }
 
     @Override
-    public void cancel() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "cancel");
-        if (webSocket != null) {
-            webSocket.cancel();
-            handler.sendEmptyMessage(StatusMessages.CLT_CANCEL);
-        }
-    }
-
-    @Override
     public ITransmitter getTransmitter() {
         return this;
     }
 
     @Override
-    public IReceiverListenerRegister getReceiverRegister() {
+    public IReceiverListenerReg getReceiverRegister() {
         return this;
-    }
-
-    @Override
-    public void stop(String reason) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "stop");
-        if (webSocket != null) {
-            webSocket.close(1000, reason);
-        }
     }
 
     @Override
@@ -85,7 +93,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
         return this.status;
     }
 
-    //--------------------- IReceiverListenerRegister
+    //--------------------- IReceiverListenerReg
 
     @Override
     public void registerReceiverListener(IReceiverListener listener) {

@@ -14,6 +14,7 @@ import static by.citech.util.Decode.bytesToHexMark1;
 
 public class StorageData {
     private String TAG;
+    // TODO: попробовать перейти на Queue<>
     private ArrayList<byte[]> databuffer;
 
     public StorageData(String TAG) {
@@ -58,14 +59,6 @@ public class StorageData {
             for (byte byteChar : dataByte)
                 stringBuilder.append(String.format("%02X ", byteChar));
             Log.i(TAG, "PUT DATA = " + stringBuilder.toString());
-            Log.i(TAG, "PUT DATA = " + bytesToHexMark1(dataByte));
-            Log.i(TAG, "PUT DATA = " + new String(dataByte));
-            Log.i(TAG, "PUT DATA = " + new String(dataByte, Charset.defaultCharset()));
-            try {
-                Log.i(TAG, "PUT DATA = " + new String(dataByte, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
         }
 
         databuffer.add(dataByte);

@@ -1,5 +1,5 @@
 package by.citech.client.network;
 
-public interface IClientCtrlRegister {
+public interface IClientCtrlReg {
     void registerClientCtrl(IClientCtrl iClientCtrl);
 }

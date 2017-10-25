@@ -10,8 +10,8 @@ public class Settings {
     public static int bluetoothMessageSize = 16; // bytes in one BT message
 
     public static int minNetSendSize = bluetoothMessageSize - 1;
-  public static DataSource dataSource = DataSource.BLUETOOTH;
-//    public static DataSource dataSource = DataSource.MICROPHONE;
+    public static DataSource dataSource = DataSource.BLUETOOTH;
+//  public static DataSource dataSource = DataSource.MICROPHONE;
     public static boolean debug = true;
     public static int bufferSize = 3000;
     public static boolean testSendOneOnCall = false;

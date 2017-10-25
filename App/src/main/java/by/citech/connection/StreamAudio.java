@@ -53,16 +53,16 @@ class StreamAudio implements IStreamCtrl {
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "run");
+        if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "startClient");
         recorder.startRecording();
         isStreaming = true;
         while (isStreaming) {
-            if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run buffer length is %d", buffer.length));
+            if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("startClient buffer length is %d", buffer.length));
             fillBuffer(buffer, 0, buffer.length);
-            if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("run %s: %s", "sendBytes", bytesToHexMark1(buffer)));
+            if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, String.format("startClient %s: %s", "sendBytes", bytesToHexMark1(buffer)));
             iTransmitter.sendBytes(buffer);
         }
-        if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "run done");
+        if (Settings.debug) Log.i(Tags.NET_STREAM_AUDIO, "startClient done");
     }
 
     private void fillBuffer(byte[] buffer, int readOffset, int readLeft) {

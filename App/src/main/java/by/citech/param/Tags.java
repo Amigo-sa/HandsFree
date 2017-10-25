@@ -11,6 +11,7 @@ public class Tags {
 
     public static final String SRV_TASK_SRVON       = "WSD_SRV_TASK_SRVON";
     public static final String SRV_TASK_SRVOFF      = "WSD_SRV_TASK_SRVOFF";
+    public static final String TASK_DISC = "WSD_SRV_TASK_SRVDISC";
     public static final String SRV_NANOHTTPD        = "WSD_SRV_NANOHTTPD";
     public static final String SRV_WSOCKETCTRL      = "WSD_SRV_WSOCKETCTRL";
 

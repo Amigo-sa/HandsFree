@@ -28,13 +28,13 @@ class StreamBluetooth implements IStreamCtrl {
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "run");
+        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient");
         isStreaming = true;
         while (isStreaming) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
                 baos.write(storageBtToNet.getData());
-                if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "run baos.write(storageBtToNet.getData())");
+                if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient baos.write(storageBtToNet.getData())");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -44,12 +44,12 @@ class StreamBluetooth implements IStreamCtrl {
             }
             if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, String.format("baos.size() is %d",baos.size()));
             if (baos.size() > Settings.minNetSendSize) {
-                if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "run baos.size() > bufferSize");
+                if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient baos.size() > bufferSize");
                 iTransmitter.sendBytes(baos.toByteArray());
                 baos.reset();
             }
         }
-        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "run done");
+        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient done");
     }
 
     @Override

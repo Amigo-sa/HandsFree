@@ -1,5 +1,5 @@
 package by.citech.connection;
 
-public interface IStreamCtrlRegister {
+public interface IStreamCtrlReg {
     void registerStreamCtrl(IStreamCtrl iStreamCtrl);
 }

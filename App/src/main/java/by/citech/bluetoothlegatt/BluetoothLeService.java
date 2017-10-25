@@ -101,10 +101,11 @@ public class BluetoothLeService extends Service {
     public void closeStore(){
         loopback = false;
     }
-
+    // Методы для работы с потоком записи
     public WriterTransmitter getWriteThread(){
         return wrt;
     }
+    public void stopDataTransfer(){wrt.cancel();}
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -354,7 +355,7 @@ public class BluetoothLeService extends Service {
     }
 
     /**
-     * Disconnects an existing connection or cancel a pending connection. The disconnection result
+     * Disconnects an existing connection or closeConnectionForce a pending connection. The disconnection result
      * is reported asynchronously through the
      * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
      * callback.

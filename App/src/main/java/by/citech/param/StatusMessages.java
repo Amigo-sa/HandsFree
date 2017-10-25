@@ -15,7 +15,7 @@ public final class StatusMessages {
     public static final int SRV_ONCLOSE = 1;
     public static final int SRV_ONOPEN = 2;
     public static final int SRV_ONPONG = 3;
-    public static final int SRV_ONEXCEPTION = 4;
+    public static final int SRV_ONFAILURE = 4;
     public static final int SRV_ONDEBUGFRAMERX = 5;
     public static final int SRV_ONDEBUGFRAMETX = 6;
 

@@ -1,5 +1,5 @@
 package by.citech.connection;
 
-public interface IRedirectCtrlRegister {
+public interface IRedirectCtrlReg {
     void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl);
 }
