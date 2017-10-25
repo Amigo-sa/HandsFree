@@ -2,5 +2,11 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-
+    <dimen name="addr_port_vertical_high">40dp</dimen>
+    <dimen name="vertical_space_high">20dp</dimen>
+    <dimen name="vertspace_high_text">5dp</dimen>
+    <dimen name="text_label">120dp</dimen>
+    <dimen name="horisontal_space">5dp</dimen>
+    <dimen name="ip_info_margin">4dp</dimen>
+    <dimen name="ip_info_vertical">10dp</dimen>
     </resources>

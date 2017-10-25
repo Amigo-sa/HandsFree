@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,193 +12,332 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp">
+        android:layout_margin="20dp"
+        android:orientation="vertical">
 
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-        <TextView
-            android:id="@+id/local_ip_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_local_ip_address"
-            android:textSize="18sp"/>
-
-        <EditText
-            android:id="@+id/editTextSrvLocAddr"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Local IP"
-            android:visibility="visible" />
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/ip_info_vertical">
 
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-        <TextView
-            android:id="@+id/locPort"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_local_port"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/editTextSrvLocPort"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Port number"/>
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-        <TextView
-            android:id="@+id/ip_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_ip_address"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/editTextSrvRemAddr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="IP address"/>
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-        <TextView
-            android:id="@+id/remPort"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_remote_port"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/editTextSrvRemPort"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Port number"/>
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
+            <TextView
+                android:id="@+id/local_ip_address"
+                android:layout_width="@dimen/text_label"
+                android:layout_height="wrap_content"
+                android:text="@string/label_local_ip_address"
+                android:textSize="18sp" />
 
-        <Button
-            android:id="@+id/btnCallOut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/margin_small"
-            android:text="@string/label_buttonCallOut"
-            android:textSize="24sp"/>
-
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-
-        <Button
-            android:id="@+id/btnCallIn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/margin_small"
-            android:text="@string/label_buttonCallIn"
-            android:textSize="24sp"/>
-
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_margin="10dp">
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/label_device_address"
-                  android:textSize="18sp"/>
-        <Space android:layout_width="5dp"
-               android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/device_address"
+            <EditText
+                android:id="@+id/editTextSrvLocAddr"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_margin="10dp">
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/label_state"
-                  android:textSize="18sp"/>
-        <Space android:layout_width="5dp"
-               android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/connection_state"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="@string/disconnected"
-                  android:textSize="18sp"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_margin="10dp">
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/label_data"
-                  android:textSize="18sp"/>
-        <Space android:layout_width="5dp"
-               android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/data_value"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="@string/no_data"
-                  android:textSize="18sp"/>
-    </LinearLayout>
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
-        <TextView android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_wdata"
-            android:textSize="18sp"/>
-        <Space android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/wdata_value"
+                android:hint="Local IP"
+                android:visibility="visible" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/vertical_space_high" />
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
-    </LinearLayout>
-    <ExpandableListView android:id="@+id/gatt_services_list"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/ip_info_vertical">
+
+            <TextView
+                android:id="@+id/locPort"
+                android:layout_width="@dimen/text_label"
+                android:layout_height="wrap_content"
+                android:text="@string/label_local_port"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/editTextSrvLocPort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Port number"
+                android:visibility="visible" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/vertical_space_high" />
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-</LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/ip_info_vertical">
+
+            <TextView
+                android:id="@+id/ip_address"
+                android:layout_width="@dimen/text_label"
+                android:layout_height="wrap_content"
+                android:text="@string/label_ip_address"
+                android:textSize="18sp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/editTextSrvRemAddr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorWhite"
+                    android:hint="Введите IP-адрес"
+                    android:inputType="phone|date"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/colorBlack" />
+
+                <Button
+                    android:id="@+id/btn_clear_rem_addr"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginRight="1dp"
+                    android:background="@drawable/cross_256x256"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/vertical_space_high" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/ip_info_vertical">
+
+            <TextView
+                android:id="@+id/remPort"
+                android:layout_width="@dimen/text_label"
+                android:layout_height="wrap_content"
+                android:text="@string/label_remote_port"
+                android:textSize="18sp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/editTextSrvRemPort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorWhite"
+                    android:gravity="fill_horizontal"
+                    android:hint="Port number"
+                    android:inputType="number"
+                    android:textColor="@color/colorBlack" />
+
+                <Button
+                    android:id="@+id/btn_clear_rem_port"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginRight="1dp"
+                    android:background="@drawable/cross_256x256"
+                    android:visibility="gone" />
+
+            </FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/vertical_space_high" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="15dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCallOut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_buttonCallOut"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCallIn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_buttonCallIn"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:paddingTop="15dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_device_address"
+                android:textSize="18sp" />
+
+            <Space
+                android:layout_width="@dimen/horisontal_space"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/device_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_state"
+                android:textSize="18sp" />
+
+            <Space
+                android:layout_width="@dimen/horisontal_space"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/connection_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/disconnected"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_data"
+                android:textSize="18sp" />
+
+            <Space
+                android:layout_width="@dimen/horisontal_space"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/data_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_wdata"
+                android:textSize="18sp" />
+
+            <Space
+                android:layout_width="@dimen/horisontal_space"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/wdata_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="15dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="70px"
+                    android:layout_height="70px"
+                    android:layout_marginLeft="4px"
+                    android:layout_marginRight="10px"
+                    android:layout_marginTop="4px"
+                    android:src="@drawable/ic_launcher"></ImageView>
+
+                <TextView
+                    android:id="@+id/selHandsFree"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/label_garniture"
+                    android:textSize="24sp" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btnChangeHandsFree"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="btnChangeDevice"
+                android:text="@string/label_buttonChDevice"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <ExpandableListView
+            android:id="@+id/gatt_services_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>

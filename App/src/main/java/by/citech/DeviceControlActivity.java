@@ -373,11 +373,11 @@ public class DeviceControlActivity extends Activity
             callOutOneClick = true;
             mBluetoothLeService.setStorageBtToNet(storageBtToNet);
             mBluetoothLeService.setStorageNetToBt(storageNetToBt);
-            menu.findItem(R.id.menu_connect).setVisible(false);
-            menu.findItem(R.id.menu_disconnect).setVisible(true);
+         //   menu.findItem(R.id.menu_connect).setVisible(false);
+         //   menu.findItem(R.id.menu_disconnect).setVisible(true);
         } else {
-            menu.findItem(R.id.menu_connect).setVisible(true);
-            menu.findItem(R.id.menu_disconnect).setVisible(false);
+         //   menu.findItem(R.id.menu_connect).setVisible(true);
+         //   menu.findItem(R.id.menu_disconnect).setVisible(false);
         }
         return true;
     }
@@ -386,19 +386,19 @@ public class DeviceControlActivity extends Activity
     // и сбрасываем соединение в случае нажатия disconnect
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.menu_connect:
-                //TODO: доработать
-                mBluetoothLeService.connect(mDeviceAddress);
-                return true;
-            case R.id.menu_disconnect:
-                //TODO: доработать
-                mBluetoothLeService.disconnect();
-                return true;
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
+//        switch(item.getItemId()) {
+//            case R.id.menu_connect:
+//                //TODO: доработать
+//                mBluetoothLeService.connect(mDeviceAddress);
+//                return true;
+//            case R.id.menu_disconnect:
+//                //TODO: доработать
+//                mBluetoothLeService.disconnect();
+//                return true;
+//            case android.R.id.home:
+//                onBackPressed();
+//                return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
