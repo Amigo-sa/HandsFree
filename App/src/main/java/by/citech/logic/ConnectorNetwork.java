@@ -150,7 +150,7 @@ public class ConnectorNetwork
     @Override
     public void callIncomingAccepted() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callIncomingAccepted");
-        setiConnCtrl(iClientCtrl);
+        setiConnCtrl(iServerCtrl);
         responseAccept();
         exchangeStart();
     }
@@ -259,13 +259,13 @@ public class ConnectorNetwork
                     if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText ACCEPT)");
                     if (setState(State.OutcomingConnected, State.Call))
                         for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingAccepted();
-                    setiConnCtrl(iServerCtrl);
+                    setiConnCtrl(iClientCtrl);
                     exchangeStart();
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
                     if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText REJECT)");
                     if (setState(State.OutcomingConnected, State.Idle))
                         for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
-                    disconnect(iConnCtrl);
+                    disconnect(iClientCtrl);
                 }
         }
     }
@@ -275,7 +275,7 @@ public class ConnectorNetwork
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose");
         switch (getState()) {
             case OutcomingConnected:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose OutcomingConnected || OutcomingConnected");
+                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose OutcomingConnected");
                 if (setState(State.OutcomingConnected, State.Idle))
                     for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                 break;
