@@ -1,143 +1,138 @@
 package by.citech.logic;
 
+import android.os.Handler;
 import android.util.Log;
-
-import by.citech.network.control.IConnCtrl;
-import by.citech.network.control.TaskSendMessage;
-import by.citech.param.Messages;
+import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class Caller {
 
-    //--------------------- Call
+    private volatile State state = State.Null;
+    private StorageData storageBtToNet;
+    private StorageData storageNetToBt;
+    private ICallUiListener iCallUiListener;
+    private ICallNetworkListener iCallNetworkListener;
+    private INetworkInfoListener iNetworkInfoListener;
+    private Handler handler;
 
-    private <T extends IConnCtrl> void call(T ctrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "call");
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "call ctrl is instance of iServerCtrl: " + (ctrl == iServerCtrl));
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "call ctrl is instance of iClientCtrl: " + (ctrl == iClientCtrl));
-        isOnCall = true;
-        isIncomingCall = false;
-        isOutcomingCall = false;
-        isOutcomingConnection = false;
-        btnSetEnabled(btnRed, "END CALL", RED);
-        btnSetDisabled(btnGreen, "ON CALL", GRAY);
-        callAnimStop();
-        iConnCtrl = ctrl;
-        enableTransmitData();
-        exchangeStart(ctrl);
+    //--------------------- singleton
+
+    private static volatile Caller instance = null;
+
+    private Caller() {
     }
 
-    private void callEnd(IConnCtrl iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callEnd");
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callEnd iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callEnd iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
-        isOnCall = false;
-        btnSetDisabled(btnRed, "ENDED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        disableTransmitData();
-        exchangeStop();
-        disconnect(iConnCtrl);
+    public static Caller getInstance() {
+        if (instance == null) {
+            synchronized (Caller.class) {
+                if (instance == null) {
+                    instance = new Caller();
+                }
+            }
+        }
+        return instance;
     }
 
-    private void callFailure(IConnCtrl iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callFailure");
-        isOnCall = false;
-        btnSetDisabled(btnRed, "FAIL", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        disableTransmitData();
-        exchangeStop();
-        disconnect(iConnCtrl);
+    //--------------------- getters and setters
+
+    public IUiBtnGreenRedListener getiUiBtnGreenRedListener() {
+        return CallUi.getInstance();
     }
 
-    private void callOutcoming() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcoming");
-        if (isLocalIp()) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcoming isLocalIp");
+    public INetworkListener getiNetworkListener() {
+        return ConnectorNetwork.getInstance();
+    }
+
+    public StorageData getStorageBtToNet() {
+        return storageBtToNet;
+    }
+
+    public StorageData getStorageNetToBt() {
+        return storageNetToBt;
+    }
+
+    public Caller setStorageBtToNet(StorageData storageBtToNet) {
+        this.storageBtToNet = storageBtToNet;
+        return this;
+    }
+
+    public Caller setStorageNetToBt(StorageData storageNetToBt) {
+        this.storageNetToBt = storageNetToBt;
+        return this;
+    }
+
+    public Caller setiCallUiListener(ICallUiListener listener) {
+        iCallUiListener = listener;
+        return this;
+    }
+
+    public Caller setiCallNetworkListener(ICallNetworkListener listener) {
+        iCallNetworkListener = listener;
+        return this;
+    }
+
+    public Caller setiNetworkInfoListener(INetworkInfoListener listener) {
+        iNetworkInfoListener = listener;
+        return this;
+    }
+
+    public Caller setHandler(Handler handler) {
+        this.handler = handler;
+        return this;
+    }
+
+    public synchronized State getState() {
+        if (Settings.debug) Log.i(Tags.CALLER, "getState is " + state.getName());
+        return state;
+    }
+
+    public synchronized boolean setState(State fromState, State toState) {
+        if (Settings.debug) Log.w(Tags.CALLER, String.format("setState from %s to %s", fromState.getName(), toState.getName()));
+        if (state == fromState) {
+            if (fromState.availableStates().contains(toState)) {
+                state = toState;
+                if (state == State.Error) {
+                    state = State.Idle;  // TODO: обработку ошибок? ожидание отклика?
+                } else if (state == State.Idle) {
+                    state = State.Idle;  // TODO: переводить не в Idle, а Null и ожидать готовность?
+                }
+                return true;
+            } else {
+                if (Settings.debug) Log.e(Tags.CALLER, String.format("setState: %s is not available from %s", toState.getName(), fromState.getName()));
+            }
+        } else {
+            if (Settings.debug) Log.e(Tags.CALLER, String.format("setState: current is not %s", fromState.getName()));
+        }
+        return false;
+    }
+
+    //--------------------- main
+
+    public void start() {
+        if (storageBtToNet == null
+                || storageNetToBt == null
+                || iCallUiListener == null
+                || iCallNetworkListener == null
+                || iNetworkInfoListener == null
+                || handler == null) {
+            if (Settings.debug) Log.e(Tags.CALLER, "start at least one of key parameters are null");
             return;
         }
-        isOutcomingCall = true;
-        btnSetEnabled(btnRed, "CANCEL", RED);
-        btnSetDisabled(btnGreen, "CALLING...", GRAY);
-        callAnimStart();
-        connect();
+
+        CallUi.getInstance()
+                .addiCallUiListener(iCallUiListener)
+                .addiCallUiListener(ConnectorNetwork.getInstance());
+
+        ConnectorNetwork.getInstance()
+                .addiCallNetworkListener(iCallNetworkListener)
+                .setiNetworkInfoListener(iNetworkInfoListener)
+                .setHandler(handler)
+                .start();
     }
 
-    private void callOutcomingOnline() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingOnline");
-        isOutcomingCall = false;
-        isOutcomingConnection = true;
-        btnSetEnabled(btnRed, "CANCEL", RED);
-        btnSetEnabled(btnGreen, "ONLINE...", GREEN);
-    }
-
-    private void callOutcomingRejected() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingRejected");
-        isOutcomingCall = false;
-        isOutcomingConnection = false;
-        btnSetDisabled(btnRed, "BUSY", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-    }
-
-    private void callOutcomingCancel() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingCancel");
-        isOutcomingCall = false;
-        isOutcomingConnection = false;
-        btnSetDisabled(btnRed, "CANCELED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-        disconnect(iClientCtrl);
-    }
-
-    private void callOutcomingFailure() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingFailure");
-        isOutcomingCall = false;
-        btnSetDisabled(btnRed, "OFFLINE", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-    }
-
-    private void callIncoming() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncoming");
-        isIncomingCall = true;
-        btnSetEnabled(btnRed, "REJECT", RED);
-        btnSetEnabled(btnGreen, "ACCEPT", GREEN);
-        callAnimStart();
-    }
-
-    private void callIncomingAccept() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingAccept");
-        callIncomingAcceptSignal();
-        call(iServerCtrl);
-    }
-
-    private void callIncomingReject() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingReject");
-        isIncomingCall = false;
-        btnSetDisabled(btnRed, "REJECTED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-        serverDisc();
-    }
-
-    private void callIncomingCanceled() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingCanceled");
-        isIncomingCall = false;
-        btnSetDisabled(btnRed, "OFFLINE", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-    }
-
-    private void callIncomingOnFailure() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingOnFailure");
-        isIncomingCall = false;
-        btnSetDisabled(btnRed, "INCOME FAIL", GRAY);
-        btnSetEnabled(btnGreen, "CALL", RED);
-        callAnimStop();
-    }
-
-    private void callIncomingAcceptSignal() {
-        new TaskSendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.PASSWORD);
+    public void stop() {
+        // TODO: добавить очищение хранилищ?
+        ConnectorNetwork.getInstance().stop();
     }
 }

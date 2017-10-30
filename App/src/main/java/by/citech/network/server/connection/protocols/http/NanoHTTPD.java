@@ -488,13 +488,13 @@ public abstract class NanoHTTPD {
 
     /**
      * This is the "master" method that delegates requests to handlers and makes
-     * sure there is a response to every request. You are not supposed to call
+     * sure there is a responseAccept to every request. You are not supposed to call
      * or override this method in any circumstances. But no one will closeConnection you if
      * you do. I'm a Javadoc, not Code Police.
      * 
      * @param session
      *            the incoming session
-     * @return a response to the incoming session
+     * @return a responseAccept to the incoming session
      */
     public Response handle(IHTTPSession session) {
         for (IHandler<IHTTPSession, Response> interceptor : interceptors) {
@@ -509,11 +509,11 @@ public abstract class NanoHTTPD {
      * Override this to customize the server.
      * <p/>
      * <p/>
-     * (By default, this returns a 404 "Not Found" plain text error response.)
+     * (By default, this returns a 404 "Not Found" plain text error responseAccept.)
      * 
      * @param session
      *            The HTTP session
-     * @return HTTP response, see class Response for details
+     * @return HTTP responseAccept, see class Response for details
      */
     @Deprecated
     protected Response serve(IHTTPSession session) {

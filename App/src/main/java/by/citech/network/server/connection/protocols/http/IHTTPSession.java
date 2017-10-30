@@ -10,7 +10,7 @@ import by.citech.network.server.connection.protocols.http.content.CookieHandler;
 import by.citech.network.server.connection.protocols.http.request.Method;
 
 /**
- * Handles one session, i.e. parses the HTTP request and returns the response.
+ * Handles one session, i.e. parses the HTTP request and returns the responseAccept.
  */
 public interface IHTTPSession {
 

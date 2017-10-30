@@ -1,96 +1,82 @@
 package by.citech.logic;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 public enum State {
 
-    Idle {
-        public State[] availableStates() {
-            return new State[] { Error, OutgoingCall, IncomeCall };
+    Null {
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Idle, GeneralFailure));
         }
+        public String getName() {
+            return "Null";
+        }
+    },
 
+    Idle {
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Error, OutcomingStarted, IncomingDetected, GeneralFailure));
+        }
         public String getName() {
             return "Idle";
         }
-    },           // -> Error, OutgoingCall, IncomeCall
+    },
+
+    OutcomingStarted {
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Error, Idle, OutcomingConnected));
+        }
+        public String getName() {
+            return "OutcomingStarted";
+        }
+    },
+
+    OutcomingConnected {
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Error, Idle, Call));
+        }
+        public String getName() {
+            return "OutcomingConnected";
+        }
+    },
+
+    IncomingDetected {
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Error, Idle, Call));
+        }
+        public String getName() {
+            return "IncomingDetected";
+        }
+    },
+
+    Call {
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Error, Idle));
+        }
+        public String getName() {
+            return "Call";
+        }
+    },
 
     Error {
-        public State[] availableStates() {
-            return new State[] { Idle };
+        public HashSet<State> availableStates() {
+            return new HashSet<> (Arrays.asList(Idle));
         }
-
         public String getName() {
             return "Error";
         }
-    },          // -> Idle
+    },
 
-    OutgoingCall {
-        public State[] availableStates() {
-            return new State[] { Error, NotAnswer, Connected };
+    GeneralFailure {
+        public HashSet<State> availableStates() {
+            return new HashSet<>();
         }
-
         public String getName() {
-            return "Outgoing call";
+            return "GeneralFailure";
         }
-    },   // -> Error, NotAnswer, Connected
+    };
 
-    NotAnswer {
-        public State[] availableStates() {
-            return new State[] { Error, Idle };
-        }
-
-        public String getName() {
-            return "Not answer";
-        }
-    },      // -> Error, Idle
-
-    IncomeCall {
-        public State[] availableStates() {
-            return new State[] { Error, AcceptCall };
-        }
-
-        public String getName() {
-            return "Income call";
-        }
-    },     // -> Error, AcceptCall
-
-    AcceptCall {
-        public State[] availableStates() {
-            return new State[] { Error, Connected };
-        }
-
-        public String getName() {
-            return "Accept call";
-        }
-    },     // -> Error, Connected
-
-    Connected {
-        public State[] availableStates() {
-            return new State[] { Error, HangupCall };
-        }
-
-        public String getName() {
-            return "Connected";
-        }
-    },      // -> Error, HangupCall
-
-    HangupCall {
-        public State[] availableStates() {
-            return new State[] { Error, Idle };
-        }
-
-        public String getName() {
-            return "Hangup call";
-        }
-    },     // -> Error, Idle
-
-    DeclineCall {
-        public State[] availableStates() {
-            return new State[] { Error, Idle };
-        }
-
-        public String getName() {
-            return "Decline call";
-        }
-    };    // -> Error, Idle
-
+    public abstract HashSet<State> availableStates();
     public abstract String getName();
 }

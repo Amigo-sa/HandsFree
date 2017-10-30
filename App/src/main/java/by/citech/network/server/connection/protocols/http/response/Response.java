@@ -28,7 +28,7 @@ import by.citech.network.server.connection.protocols.http.content.ContentType;
 import by.citech.network.server.connection.protocols.http.request.Method;
 
 /**
- * HTTP response. Return one of these from serve().
+ * HTTP responseAccept. Return one of these from serve().
  */
 public class Response implements Closeable {
 
@@ -43,14 +43,14 @@ public class Response implements Closeable {
     private String mimeType;
 
     /**
-     * Data of the response, may be null.
+     * Data of the responseAccept, may be null.
      */
     private InputStream data;
 
     private long contentLength;
 
     /**
-     * Headers for the HTTP response. Use addHeader() to add lines. the
+     * Headers for the HTTP responseAccept. Use addHeader() to add lines. the
      * lowercase map is automatically kept up to date.
      */
     @SuppressWarnings("serial")
@@ -68,7 +68,7 @@ public class Response implements Closeable {
     private final Map<String, String> lowerCaseHeader = new HashMap<String, String>();
 
     /**
-     * The request method that spawned this response.
+     * The request method that spawned this responseAccept.
      */
     private Method requestMethod;
 
@@ -90,7 +90,7 @@ public class Response implements Closeable {
     }
 
     /**
-     * Creates a fixed length response if totalBytes>=0, otherwise chunked.
+     * Creates a fixed length responseAccept if totalBytes>=0, otherwise chunked.
      */
     @SuppressWarnings({
         "rawtypes",
@@ -190,7 +190,7 @@ public class Response implements Closeable {
     }
 
     /**
-     * Sends given response to the socket.
+     * Sends given responseAccept to the socket.
      */
     public void send(OutputStream outputStream) {
         SimpleDateFormat gmtFrmt = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss 'GMT'", Locale.US);
@@ -236,7 +236,7 @@ public class Response implements Closeable {
             outputStream.flush();
             NanoHTTPD.safeClose(this.data);
         } catch (IOException ioe) {
-            NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+            NanoHTTPD.LOG.log(Level.SEVERE, "Could not send responseAccept to the client", ioe);
         }
     }
 
@@ -337,7 +337,7 @@ public class Response implements Closeable {
     }
 
     /**
-     * Create a response with unknown length (using HTTP 1.1 chunking).
+     * Create a responseAccept with unknown length (using HTTP 1.1 chunking).
      */
     public static Response newChunkedResponse(IStatus status, String mimeType, InputStream data) {
         return new Response(status, mimeType, data, -1);
@@ -348,14 +348,14 @@ public class Response implements Closeable {
     }
 
     /**
-     * Create a response with known length.
+     * Create a responseAccept with known length.
      */
     public static Response newFixedLengthResponse(IStatus status, String mimeType, InputStream data, long totalBytes) {
         return new Response(status, mimeType, data, totalBytes);
     }
 
     /**
-     * Create a text response with known length.
+     * Create a text responseAccept with known length.
      */
     public static Response newFixedLengthResponse(IStatus status, String mimeType, String txt) {
         ContentType contentType = new ContentType(mimeType);
@@ -378,7 +378,7 @@ public class Response implements Closeable {
     }
 
     /**
-     * Create a text response with known length.
+     * Create a text responseAccept with known length.
      */
     public static Response newFixedLengthResponse(String msg) {
         return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_HTML, msg);

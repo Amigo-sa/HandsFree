@@ -1,7 +1,7 @@
 package by.citech.network.server.connection.protocols.http.response;
 
 /**
- * Some HTTP response status codes
+ * Some HTTP responseAccept status codes
  */
 public enum Status implements IStatus {
     SWITCH_PROTOCOL(101, "Switching Protocols"),

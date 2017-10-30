@@ -6,6 +6,7 @@ import android.util.Xml;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import by.citech.BuildConfig;
 import by.citech.param.Settings;

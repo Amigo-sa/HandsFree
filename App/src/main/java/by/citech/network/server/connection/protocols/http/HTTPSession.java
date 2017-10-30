@@ -390,7 +390,7 @@ public class HTTPSession implements IHTTPSession {
             // (this.inputStream.totalRead() - pos_before_serve))
 
             if (r == null) {
-                throw new ResponseException(Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: Serve() returned a null response.");
+                throw new ResponseException(Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: Serve() returned a null responseAccept.");
             } else {
                 String acceptEncoding = this.headers.get("accept-encoding");
                 this.cookies.unloadQueue(r);

@@ -49,32 +49,19 @@ import java.util.HashMap;
 import java.util.List;
 
 import by.citech.bluetoothlegatt.BluetoothLeService;
-import by.citech.network.client.asynctask.TaskClientConn;
-import by.citech.network.client.connection.IClientCtrlReg;
-import by.citech.network.control.IConnCtrl;
-import by.citech.network.control.IDisc;
-import by.citech.network.control.IExchangeCtrl;
-import by.citech.network.control.redirect.IRedirectCtrlReg;
-import by.citech.network.control.stream.IStreamCtrl;
-import by.citech.network.control.stream.IStreamCtrlReg;
-import by.citech.network.control.TaskDisc;
-import by.citech.network.control.TaskSendMessage;
-import by.citech.network.control.stream.TaskStream;
-import by.citech.network.client.connection.IClientCtrl;
-import by.citech.network.control.IMessage;
-import by.citech.network.control.redirect.TaskRedirect;
+import by.citech.logic.CallUi;
+import by.citech.logic.Caller;
+import by.citech.logic.ConnectorNetwork;
+import by.citech.logic.ICallNetworkListener;
+import by.citech.logic.ICallUiListener;
+import by.citech.logic.IUiBtnGreenRedListener;
+import by.citech.logic.INetworkInfoListener;
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
-import by.citech.param.Messages;
+import by.citech.logic.INetworkListener;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
-import by.citech.network.server.asynctask.TaskServerOff;
-import by.citech.network.server.asynctask.TaskServerOn;
-import by.citech.network.control.redirect.IRedirectCtrl;
-import by.citech.network.server.connection.IServerCtrl;
-import by.citech.network.server.connection.IServerCtrlReg;
-import by.citech.network.server.connection.IServerOff;
 
 import static by.citech.util.NetworkInfo.getIPAddress;
 
@@ -84,8 +71,11 @@ import static by.citech.util.NetworkInfo.getIPAddress;
  * communicates with {@code BluetoothLeService}, which in turn interacts with the
  * Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity
-        implements IServerCtrlReg, IRedirectCtrlReg, IStreamCtrlReg, IClientCtrlReg, IMessage, IServerOff, IDisc {
+public class DeviceControlActivity extends Activity implements INetworkInfoListener, ICallNetworkListener, ICallUiListener {
+
+    IUiBtnGreenRedListener iUiBtnGreenRedListener;
+    INetworkListener iNetworkListener;
+
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
@@ -99,17 +89,17 @@ public class DeviceControlActivity extends Activity
     private TextView mDeviceConnect;
     private TextView mDataField;
     private TextView mwDataField;
-    private String   mDeviceName;
-    private String   mDeviceAddress;
+    private String mDeviceName;
+    private String mDeviceAddress;
     // Вьюхи для соединения с интернетом
-    private Button    btnGreen;
-    private Button    btnRed;
+    private Button btnGreen;
+    private Button btnRed;
     private Animation animCall;
-    private Button    btnChangeDevice;
-    private EditText  editTextSrvLocAddr;
-    private EditText  editTextSrvRemAddr;
-    private EditText  editTextSrvLocPort;
-    private EditText  editTextSrvRemPort;
+    private Button btnChangeDevice;
+    private EditText editTextSrvLocAddr;
+    private EditText editTextSrvRemAddr;
+    private EditText editTextSrvLocPort;
+    private EditText editTextSrvRemPort;
     // кнопка отмены записанного текста
     private Button btnClearRemPort;
     private Button btnClearRemAddr;
@@ -122,19 +112,8 @@ public class DeviceControlActivity extends Activity
     private boolean mConnected = false;
     // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
     private BluetoothGattCharacteristic mNotifyCharacteristic;
-    // логика звонка
-    private boolean isOutcomingCall   = false;
-    private boolean isIncomingCall    = false;
-    private boolean isOutcomingConnection = false;
-    private boolean isCallAnim        = false;
-    private boolean isOnCall          = false;
-    // работа с сетью
-    private Handler       handler;
-    private IServerCtrl   iServerCtrl;
-    private IClientCtrl   iClientCtrl;
-    private IRedirectCtrl iRedirectCtrl;
-    private IStreamCtrl   iStreamCtrl;
-    private IConnCtrl     iConnCtrl;
+    // условие повторения анимации
+    private boolean isCallAnim = false;
 
     // хранилища данных
     private StorageData storageBtToNet;
@@ -278,10 +257,9 @@ public class DeviceControlActivity extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
-        storageBtToNet = new StorageData(Tags.NET_STORE_BT2NET);
-        storageNetToBt = new StorageData(Tags.NET_STORE_NET2BT);
-
-        handler = new HandlerExtended();
+        storageBtToNet = new StorageData(Tags.BLE2NET_STORE);
+        storageNetToBt = new StorageData(Tags.NET2BLE_STORE);
+        HandlerExtended handler = new HandlerExtended();
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -297,23 +275,40 @@ public class DeviceControlActivity extends Activity
         mDeviceConnect =  findViewById(R.id.selHandsFree);
 
         btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
+
         editTextSrvLocAddr = findViewById(R.id.editTextSrvLocAddr);
         editTextSrvRemAddr = findViewById(R.id.editTextSrvRemAddr);
         editTextSrvLocPort = findViewById(R.id.editTextSrvLocPort);
         editTextSrvRemPort = findViewById(R.id.editTextSrvRemPort);
+        btnClearRemAddr = findViewById(R.id.btnClearRemAddr);
+        btnClearRemPort = findViewById(R.id.btnClearRemPort);
 
         editTextSrvLocAddr.setText(getIPAddress(Settings.ipv4));
-        editTextSrvLocAddr.setFocusable(false);
-
         editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
-        editTextSrvLocPort.setFocusable(false);
-        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
-        btnClearRemAddr = findViewById(R.id.btn_clear_rem_addr);
-        btnClearRemAddr.setVisibility(View.VISIBLE);
-
         editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
-        btnClearRemPort = findViewById(R.id.btn_clear_rem_port);
+        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
+        editTextSrvLocAddr.setFocusable(false);
+        editTextSrvLocPort.setFocusable(false);
+        btnClearRemAddr.setVisibility(View.VISIBLE);
         btnClearRemPort.setVisibility(View.VISIBLE);
+
+        btnGreen = findViewById(R.id.btnGreen);
+        btnRed = findViewById(R.id.btnRed);
+        animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
+        btnSetDisabled(btnGreen, "IDLE", GRAY);
+        btnSetDisabled(btnRed, "IDLE", GRAY);
+
+        iUiBtnGreenRedListener = Caller.getInstance().getiUiBtnGreenRedListener();
+        iNetworkListener = Caller.getInstance().getiNetworkListener();
+
+        Caller.getInstance()
+                .setStorageBtToNet(storageBtToNet)
+                .setStorageNetToBt(storageNetToBt)
+                .setiCallUiListener(this)
+                .setiCallNetworkListener(this)
+                .setiNetworkInfoListener(this)
+                .setHandler(handler)
+                .start();
 
         //скрываем клавиатуру
         getWindow().setSoftInputMode(
@@ -326,20 +321,13 @@ public class DeviceControlActivity extends Activity
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
-        btnGreen = findViewById(R.id.btnGreen);
-        btnRed = findViewById(R.id.btnRed);
-        btnSetDisabled(btnGreen, "IDLE", GRAY);
-        btnSetDisabled(btnRed, "IDLE", GRAY);
-
-        new TaskServerOn(this, handler).execute(editTextSrvLocPort.getText().toString());
-
         btnGreen.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {onClickBtnGreen();}});
+            public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnGreen();}});
 
         btnRed.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {onClickBtnRed();}});
+            public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnRed();}});
 
         btnClearRemAddr.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -348,8 +336,6 @@ public class DeviceControlActivity extends Activity
         btnClearRemPort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {editTextSrvRemPort.setText("");}});
-
-        animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
 
         animCall.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -389,7 +375,7 @@ public class DeviceControlActivity extends Activity
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
-        new ThreadNetStop().start();
+        Caller.getInstance().stop();
     }
 
     @Override
@@ -564,37 +550,6 @@ public class DeviceControlActivity extends Activity
 
     //--------------------- Buttons
 
-    private void onClickBtnRed() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnRed");
-        if (isOnCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnRed isOnCall");
-            callEnd(iConnCtrl);
-        } else if (isOutcomingCall || isOutcomingConnection) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnRed isOutcomingCall");
-            callOutcomingCancel();
-        } else if (isIncomingCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnRed isIncomingCall");
-            callIncomingReject();
-        } else {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnRed unknown");
-        }
-    }
-
-    private void onClickBtnGreen() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnGreen");
-        if (!isOnCall) {
-            if (!isOutcomingCall && !isIncomingCall) {
-                if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnGreen !isOutcomingCall && !isIncomingCall");
-                callOutcoming();
-            } else if (isIncomingCall) {
-                if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnGreen isIncomingCall");
-                callIncomingAccept();
-            } else {
-                if (Settings.debug) Log.i(Tags.ACT_DPL, "onClickBtnGreen unknown");
-            }
-        }
-    }
-
     private void btnSetDisabled(Button button, String label, int color) {
         button.setEnabled(false);
         btnSetColorLabel(button, label, color);
@@ -611,445 +566,227 @@ public class DeviceControlActivity extends Activity
     }
 
     private void callAnimStart() {
-        if (Settings.debug && !isCallAnim) Log.i(Tags.ACT_DPL, "callAnimStart");
+        if (Settings.debug && !isCallAnim) Log.i(Tags.ACT_DEVICECTRL, "callAnimStart");
         btnGreen.startAnimation(animCall);
         isCallAnim = true;
     }
 
     private void callAnimStop() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callAnimStop");
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callAnimStop");
         btnGreen.clearAnimation();
         isCallAnim = false;
     }
 
-    //--------------------- Call
+    //--------------------- ICallNetworkListener
 
-    private <T extends IConnCtrl> void call(T ctrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "call");
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "call ctrl is instance of iServerCtrl: " + (ctrl == iServerCtrl));
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "call ctrl is instance of iClientCtrl: " + (ctrl == iClientCtrl));
-        isOnCall = true;
-        isIncomingCall = false;
-        isOutcomingCall = false;
-        isOutcomingConnection = false;
+    @Override
+    public void callFailed() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callFailed");
+        btnSetDisabled(btnRed, "FAIL", GRAY);
+        btnSetEnabled(btnGreen, "CALL", GREEN);
+    }
+
+    @Override
+    public void callEndedExternally() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callEndedExternally");
+        btnSetDisabled(btnRed, "ENDED", GRAY);
+        btnSetEnabled(btnGreen, "CALL", GREEN);
+    }
+
+    @Override
+    public void callOutcomingConnected() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingConnected");
+        btnSetEnabled(btnRed, "CANCEL", RED);
+        btnSetEnabled(btnGreen, "CALLING...", GREEN);
+    }
+
+    @Override
+    public void callOutcomingAccepted() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingAccepted");
         btnSetEnabled(btnRed, "END CALL", RED);
         btnSetDisabled(btnGreen, "ON CALL", GRAY);
         callAnimStop();
-        iConnCtrl = ctrl;
-        enableTransmitData();
-        exchangeStart(ctrl);
     }
 
-    private void callEnd(IConnCtrl iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callEnd");
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callEnd iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callEnd iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
-        isOnCall = false;
-        btnSetDisabled(btnRed, "ENDED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        disableTransmitData();
-        exchangeStop();
-        disconnect(iConnCtrl);
-    }
-
-    private void callFailure(IConnCtrl iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callFailure");
-        isOnCall = false;
-        btnSetDisabled(btnRed, "FAIL", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        disableTransmitData();
-        exchangeStop();
-        disconnect(iConnCtrl);
-    }
-
-    private void callOutcoming() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcoming");
-        if (isLocalIp()) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcoming isLocalIp");
-            return;
-        }
-        isOutcomingCall = true;
-        btnSetEnabled(btnRed, "CANCEL", RED);
-        btnSetDisabled(btnGreen, "CALLING...", GRAY);
-        callAnimStart();
-        connect();
-    }
-
-    private void callOutcomingOnline() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingOnline");
-        isOutcomingCall = false;
-        isOutcomingConnection = true;
-        btnSetEnabled(btnRed, "CANCEL", RED);
-        btnSetEnabled(btnGreen, "ONLINE...", GREEN);
-    }
-
-    private void callOutcomingRejected() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingRejected");
-        isOutcomingCall = false;
-        isOutcomingConnection = false;
+    @Override
+    public void callOutcomingRejected() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingRejected");
         btnSetDisabled(btnRed, "BUSY", GRAY);
         btnSetEnabled(btnGreen, "CALL", GREEN);
         callAnimStop();
     }
 
-    private void callOutcomingCancel() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingCancel");
-        isOutcomingCall = false;
-        isOutcomingConnection = false;
-        btnSetDisabled(btnRed, "CANCELED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-        disconnect(iClientCtrl);
-    }
-
-    private void callOutcomingFailure() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callOutcomingFailure");
-        isOutcomingCall = false;
+    @Override
+    public void callOutcomingFailed() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingFailed");
         btnSetDisabled(btnRed, "OFFLINE", GRAY);
         btnSetEnabled(btnGreen, "CALL", GREEN);
         callAnimStop();
     }
 
-    private void callIncoming() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncoming");
-        isIncomingCall = true;
+    @Override
+    public void callOutcomingLocal() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingLocal");
+        btnSetDisabled(btnRed, "LOCAL", GRAY);
+        btnSetEnabled(btnGreen, "CALL", GREEN);
+    }
+
+    @Override
+    public void callIncomingDetected() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingDetected");
         btnSetEnabled(btnRed, "REJECT", RED);
-        btnSetEnabled(btnGreen, "ACCEPT", GREEN);
+        btnSetEnabled(btnGreen, "INCOMING...", GREEN);
         callAnimStart();
     }
 
-    private void callIncomingAccept() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingAccept");
-        callIncomingAcceptSignal();
-        call(iServerCtrl);
-    }
-
-    private void callIncomingReject() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingReject");
-        isIncomingCall = false;
-        btnSetDisabled(btnRed, "REJECTED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-        serverDisc();
-    }
-
-    private void callIncomingCanceled() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingCanceled");
-        isIncomingCall = false;
-        btnSetDisabled(btnRed, "OFFLINE", GRAY);
+    @Override
+    public void callIncomingCanceled() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingCanceled");
+        btnSetDisabled(btnRed, "CANCELED", GRAY);
         btnSetEnabled(btnGreen, "CALL", GREEN);
         callAnimStop();
     }
 
-    private void callIncomingOnFailure() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "callIncomingOnFailure");
-        isIncomingCall = false;
+    @Override
+    public void callIncomingFailed() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingFailed");
         btnSetDisabled(btnRed, "INCOME FAIL", GRAY);
         btnSetEnabled(btnGreen, "CALL", RED);
         callAnimStop();
     }
 
-    private void callIncomingAcceptSignal() {
-        new TaskSendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.PASSWORD);
+    @Override
+    public void connectorFailure() {
+        if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "connectorFailure");
+        btnSetDisabled(btnRed, "ERROR", GRAY);
+        btnSetDisabled(btnGreen, "ERROR", GRAY);
     }
 
-    //--------------------- Network
-
-    boolean isLocalIp() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "isLocalIp");
-        return (editTextSrvRemAddr.getText().toString().equals(getIPAddress(Settings.ipv4)) ||
-                editTextSrvRemAddr.getText().toString().equals("127.0.0.1") ||
-                editTextSrvRemAddr.getText().toString().equals("localhost"));
+    @Override
+    public void connectorReady() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "connectorReady");
+        btnSetEnabled(btnGreen, "CALL", GREEN);
+        btnSetDisabled(btnRed, "IDLE", GRAY);
     }
 
-    private void srvOnOpen() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnOpen");
-        if (!isOutcomingCall && !isIncomingCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnOpen !isOutcomingCall && !isIncomingCall");
-            callIncoming();
-        } else {
-            if (Settings.debug) Log.e(Tags.ACT_DPL, "srvOnOpen isOutcomingCall || isIncomingCall");
-            serverDisc();
-        }
+    //--------------------- ICallUiListener
+
+    @Override
+    public void callEndedInternally() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callEndedInternally");
+        btnSetDisabled(btnRed, "ENDED", GRAY);
+        btnSetEnabled(btnGreen, "CALL", GREEN);
     }
 
-    private void srvOnFailure() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnFailure");
-        if (isIncomingCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnFailure isIncomingCall");
-            callIncomingOnFailure();
-        } else if (isOnCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnFailure isOnCall");
-            callFailure(iServerCtrl);
-        }
+    @Override
+    public void callOutcomingCanceled() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingCanceled");
+        btnSetDisabled(btnRed, "CANCELED", GRAY);
+        btnSetEnabled(btnGreen, "CALL", GREEN);
+        callAnimStop();
     }
 
-    private void srvOnClose() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnClose");
-        if (isIncomingCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnClose isIncomingCall");
-            callIncomingCanceled();
-        } else if (isOnCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "srvOnClose isOnCall");
-            callEnd(iServerCtrl);
-        }
+    @Override
+    public void callOutcomingStarted() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingStarted");
+        btnSetEnabled(btnRed, "CANCEL", RED);
+        btnSetDisabled(btnGreen, "CALLING...", GRAY);
+        callAnimStart();
     }
 
-    private void cltOnOpen() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnOpen");
-        if (isOutcomingCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnOpen isOutcomingCall");
-            callOutcomingOnline();
-        } else {
-            if (Settings.debug) Log.e(Tags.ACT_DPL, "cltOnOpen !isOutcomingCall");
-            clientDisc();
-        }
+    @Override
+    public void callIncomingRejected() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingRejected");
+        btnSetDisabled(btnRed, "REJECTED", GRAY);
+        btnSetEnabled(btnGreen, "CALL", GREEN);
+        callAnimStop();
     }
 
-    private void cltOnFailure() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnFailure");
-        if (isOutcomingCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnFailure isOutcomingCall");
-            callOutcomingFailure();
-        } else if (isOnCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnFailure isOnCall");
-            callFailure(iClientCtrl);
-        }
+    @Override
+    public void callIncomingAccepted() {
+        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingAccepted");
+        btnSetEnabled(btnRed, "END CALL", RED);
+        btnSetDisabled(btnGreen, "ON CALL", GRAY);
+        callAnimStop();
     }
 
-    private void cltOnMessageText(String message) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnMessageText");
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnMessageText message is: " + message);
-        if (isOutcomingConnection) {
-            if (message.equals(Messages.PASSWORD)) {
-                call(iClientCtrl);
-            }
-        }
+    //--------------------- INetworkInfoListener
+
+    @Override
+    public String getRemAddr() {
+        return editTextSrvRemAddr.getText().toString();
     }
 
-    private void cltOnClose() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnClose");
-        if (isOutcomingCall || isOutcomingConnection) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnClose isOutcomingCall");
-            callOutcomingRejected();
-        } else if (isOnCall) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "cltOnClose isOnCall");
-            callEnd(iClientCtrl);
-        }
+    @Override
+    public String getRemPort() {
+        return editTextSrvRemPort.getText().toString();
     }
+
+    @Override
+    public String getLocPort() {
+        return editTextSrvLocPort.getText().toString();
+    }
+
+    //---------------------- HandlerExtended
 
     private class HandlerExtended extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case StatusMessages.SRV_ONMESSAGE:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONMESSAGE");
-                    //if (Settings.debug) Log.i(Tags.ACT_DPL, String.format("handleMessage SRV_ONMESSAGE %s", ((WebSocketFrame) msg.obj).getTextPayload()));
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONMESSAGE");
+                    //if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, String.format("handleMessage SRV_ONMESSAGE %s", ((WebSocketFrame) msg.obj).getTextPayload()));
                     break;
                 case StatusMessages.SRV_ONCLOSE:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONCLOSE");
-                    srvOnClose();
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONCLOSE");
+                    iNetworkListener.srvOnClose();
                     break;
                 case StatusMessages.SRV_ONOPEN:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONOPEN");
-                    srvOnOpen();
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONOPEN");
+                    iNetworkListener.srvOnOpen();
                     break;
                 case StatusMessages.SRV_ONPONG:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONPONG");
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONPONG");
                     break;
                 case StatusMessages.SRV_ONFAILURE:
-                    if (Settings.debug) Log.e(Tags.ACT_DPL, "handleMessage SRV_ONFAILURE");
-                    srvOnFailure();
+                    if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONFAILURE");
+                    iNetworkListener.srvOnFailure();
                     break;
                 case StatusMessages.SRV_ONDEBUGFRAMERX:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONDEBUGFRAMERX");
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONDEBUGFRAMERX");
                     break;
                 case StatusMessages.SRV_ONDEBUGFRAMETX:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage SRV_ONDEBUGFRAMETX");
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONDEBUGFRAMETX");
                     break;
                 case StatusMessages.CLT_ONOPEN:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONOPEN");
-                    cltOnOpen();
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONOPEN");
+                    iNetworkListener.cltOnOpen();
                     break;
                 case StatusMessages.CLT_ONMESSAGE_BYTES:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_BYTES");
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONMESSAGE_BYTES");
                     break;
                 case StatusMessages.CLT_ONMESSAGE_TEXT:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONMESSAGE_TEXT");
-                    cltOnMessageText((String) msg.obj);
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONMESSAGE_TEXT");
+                    iNetworkListener.cltOnMessageText((String) msg.obj);
                     break;
                 case StatusMessages.CLT_ONCLOSING:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONCLOSING");
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONCLOSING");
                     break;
                 case StatusMessages.CLT_ONCLOSED:
-                    cltOnClose();
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_ONCLOSED");
+                    iNetworkListener.cltOnClose();
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONCLOSED");
                     break;
                 case StatusMessages.CLT_ONFAILURE:
-                    cltOnFailure();
-                    if (Settings.debug) Log.e(Tags.ACT_DPL, "handleMessage CLT_ONFAILURE");
+                    iNetworkListener.cltOnFailure();
+                    if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONFAILURE");
                     break;
                 case StatusMessages.CLT_CANCEL:
-                    if (Settings.debug) Log.i(Tags.ACT_DPL, "handleMessage CLT_CANCEL");
+                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_CANCEL");
                     break;
                 default:
-                    if (Settings.debug) Log.e(Tags.ACT_DPL, "handleMessage DEFAULT");
+                    if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "handleMessage DEFAULT");
                     break;
             }
         }
-    }
-
-    private void connect() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "connect");
-        new TaskClientConn(DeviceControlActivity.this, handler).execute(String.format("ws://%s:%s",
-                editTextSrvRemAddr.getText().toString(),
-                editTextSrvRemPort.getText().toString()));
-    }
-
-    private void disconnect(IConnCtrl iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "disconnect");
-        new TaskDisc(this).execute(iConnCtrl);
-    }
-
-    private void exchangeStart(IExchangeCtrl ctrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "exchangeStart");
-        new TaskStream(DeviceControlActivity.this, ctrl.getTransmitter(), Settings.dataSource, storageBtToNet).execute();
-        new TaskRedirect(DeviceControlActivity.this, ctrl.getReceiverRegister(), Settings.dataSource, storageNetToBt).execute();
-    }
-
-    private void exchangeStop() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "exchangeStop");
-        new DeviceControlActivity.ThreadExchangeStop().start();
-    }
-
-    private class ThreadExchangeStop extends Thread {
-        @Override
-        public void run() {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "ThreadExchangeStop");
-            streamOff();
-            redirectOff();
-        }
-    }
-
-    private class ThreadDisc extends Thread {
-        @Override
-        public void run() {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "ThreadDisc");
-            clientDisc();
-            serverDisc();
-        }
-    }
-
-    private class ThreadNetStop extends Thread {
-        @Override
-        public void run() {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "ThreadNetStop");
-            streamOff();
-            redirectOff();
-            clientDisc();
-            serverDisc();
-            serverOff();
-        }
-    }
-
-    private void serverDisc() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverDisc");
-        if (iServerCtrl != null) {
-            new TaskDisc(DeviceControlActivity.this).execute(iServerCtrl);
-        }
-    }
-
-    private void serverOff() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverOff");
-        if (iServerCtrl != null) {
-            new TaskServerOff(DeviceControlActivity.this).execute(iServerCtrl);
-            iServerCtrl = null;
-        }
-    }
-
-    private void clientDisc() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "clientDisc");
-        if (iClientCtrl != null) {
-            new TaskDisc(DeviceControlActivity.this).execute(iClientCtrl);
-            iClientCtrl = null;
-        }
-    }
-
-    private void redirectOff() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "redirectOff");
-        if (iRedirectCtrl != null) {
-            iRedirectCtrl.redirectOff();
-            iRedirectCtrl = null;
-        }
-    }
-
-    private void streamOff() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "streamOff");
-        if (iStreamCtrl != null) {
-            iStreamCtrl.streamOff();
-            iStreamCtrl = null;
-        }
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "ThreadNetStop iStreamCtrl.streamOff() done");
-    }
-
-    @Override
-    public void serverStopped() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStopped");
-    }
-
-    @Override
-    public void serverStarted(IServerCtrl iServerCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "serverStarted");
-        if (iServerCtrl == null) {
-            btnSetDisabled(btnGreen, "IDLE", GRAY);
-        } else {
-            btnSetEnabled(btnGreen, "CALL", GREEN);
-            this.iServerCtrl = iServerCtrl;
-        }
-    }
-
-    @Override
-    public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerRedirectCtrl");
-        if (iRedirectCtrl == null) {
-            if (Settings.debug) Log.e(Tags.ACT_DPL, "registerRedirectCtrl iRedirectCtrl is null");
-        } else {
-            this.iRedirectCtrl = iRedirectCtrl;
-        }
-    }
-
-    @Override
-    public void registerStreamCtrl(IStreamCtrl iStreamCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerStreamCtrl");
-        if (iStreamCtrl == null) {
-            if (Settings.debug) Log.e(Tags.ACT_DPL, "registerStreamCtrl iStreamCtrl is null");
-        } else {
-            this.iStreamCtrl = iStreamCtrl;
-        }
-    }
-
-    @Override
-    public void registerClientCtrl(IClientCtrl iClientCtrl) {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "registerClientCtrl");
-        if (iClientCtrl == null) {
-            if (Settings.debug) Log.i(Tags.ACT_DPL, "registerClientCtrl iClientCtrl is null");
-        } else {
-            this.iClientCtrl = iClientCtrl;
-        }
-    }
-
-    @Override
-    public void messageSended() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "messageSended");
-    }
-
-    @Override
-    public void messageCantSend() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "messageCantSend");
-    }
-
-    @Override
-    public void disconnected() {
-        if (Settings.debug) Log.i(Tags.ACT_DPL, "disconnected");
     }
 }
