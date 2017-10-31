@@ -27,9 +27,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,9 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import by.citech.bluetoothlegatt.BluetoothLeService;
-import by.citech.logic.CallUi;
 import by.citech.logic.Caller;
-import by.citech.logic.ConnectorNetwork;
 import by.citech.logic.ICallNetworkListener;
 import by.citech.logic.ICallUiListener;
 import by.citech.logic.IUiBtnGreenRedListener;
@@ -259,7 +255,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         setContentView(R.layout.gatt_services_characteristics);
         storageBtToNet = new StorageData(Tags.BLE2NET_STORE);
         storageNetToBt = new StorageData(Tags.NET2BLE_STORE);
-        HandlerExtended handler = new HandlerExtended();
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -307,7 +302,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 .setiCallUiListener(this)
                 .setiCallNetworkListener(this)
                 .setiNetworkInfoListener(this)
-                .setHandler(handler)
                 .start();
 
         //скрываем клавиатуру
@@ -324,19 +318,15 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         btnGreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnGreen();}});
-
         btnRed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnRed();}});
-
         btnClearRemAddr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {editTextSrvRemAddr.setText("");}});
-
         btnClearRemPort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {editTextSrvRemPort.setText("");}});
-
         animCall.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {}
@@ -727,66 +717,4 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         return editTextSrvLocPort.getText().toString();
     }
 
-    //---------------------- HandlerExtended
-
-    private class HandlerExtended extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case StatusMessages.SRV_ONMESSAGE:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONMESSAGE");
-                    //if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, String.format("handleMessage SRV_ONMESSAGE %s", ((WebSocketFrame) msg.obj).getTextPayload()));
-                    break;
-                case StatusMessages.SRV_ONCLOSE:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONCLOSE");
-                    iNetworkListener.srvOnClose();
-                    break;
-                case StatusMessages.SRV_ONOPEN:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONOPEN");
-                    iNetworkListener.srvOnOpen();
-                    break;
-                case StatusMessages.SRV_ONPONG:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONPONG");
-                    break;
-                case StatusMessages.SRV_ONFAILURE:
-                    if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONFAILURE");
-                    iNetworkListener.srvOnFailure();
-                    break;
-                case StatusMessages.SRV_ONDEBUGFRAMERX:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONDEBUGFRAMERX");
-                    break;
-                case StatusMessages.SRV_ONDEBUGFRAMETX:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage SRV_ONDEBUGFRAMETX");
-                    break;
-                case StatusMessages.CLT_ONOPEN:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONOPEN");
-                    iNetworkListener.cltOnOpen();
-                    break;
-                case StatusMessages.CLT_ONMESSAGE_BYTES:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONMESSAGE_BYTES");
-                    break;
-                case StatusMessages.CLT_ONMESSAGE_TEXT:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONMESSAGE_TEXT");
-                    iNetworkListener.cltOnMessageText((String) msg.obj);
-                    break;
-                case StatusMessages.CLT_ONCLOSING:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONCLOSING");
-                    break;
-                case StatusMessages.CLT_ONCLOSED:
-                    iNetworkListener.cltOnClose();
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONCLOSED");
-                    break;
-                case StatusMessages.CLT_ONFAILURE:
-                    iNetworkListener.cltOnFailure();
-                    if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "handleMessage CLT_ONFAILURE");
-                    break;
-                case StatusMessages.CLT_CANCEL:
-                    if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "handleMessage CLT_CANCEL");
-                    break;
-                default:
-                    if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "handleMessage DEFAULT");
-                    break;
-            }
-        }
-    }
 }

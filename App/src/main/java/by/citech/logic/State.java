@@ -16,7 +16,7 @@ public enum State {
 
     Idle {
         public HashSet<State> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, OutcomingStarted, IncomingDetected, GeneralFailure));
+            return new HashSet<> (Arrays.asList(Error, OutcomingStarted, IncomingDetected));
         }
         public String getName() {
             return "Idle";

@@ -1,6 +1,5 @@
 package by.citech.logic;
 
-import android.os.Handler;
 import android.util.Log;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
@@ -14,7 +13,6 @@ public class Caller {
     private ICallUiListener iCallUiListener;
     private ICallNetworkListener iCallNetworkListener;
     private INetworkInfoListener iNetworkInfoListener;
-    private Handler handler;
 
     //--------------------- singleton
 
@@ -77,10 +75,7 @@ public class Caller {
         return this;
     }
 
-    public Caller setHandler(Handler handler) {
-        this.handler = handler;
-        return this;
-    }
+    //--------------------- work with fsm
 
     public synchronized State getState() {
         if (Settings.debug) Log.i(Tags.CALLER, "getState is " + state.getName());
@@ -114,8 +109,7 @@ public class Caller {
                 || storageNetToBt == null
                 || iCallUiListener == null
                 || iCallNetworkListener == null
-                || iNetworkInfoListener == null
-                || handler == null) {
+                || iNetworkInfoListener == null) {
             if (Settings.debug) Log.e(Tags.CALLER, "start at least one of key parameters are null");
             return;
         }
@@ -127,7 +121,7 @@ public class Caller {
         ConnectorNetwork.getInstance()
                 .addiCallNetworkListener(iCallNetworkListener)
                 .setiNetworkInfoListener(iNetworkInfoListener)
-                .setHandler(handler)
+                .setHandler(new HandlerExtended(getiNetworkListener()))
                 .start();
     }
 
