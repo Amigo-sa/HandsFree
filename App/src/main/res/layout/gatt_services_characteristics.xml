@@ -12,15 +12,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/MainView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -204,8 +206,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/ip_info_margin"
-            android:paddingTop="15dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -299,8 +301,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="15dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="15dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -344,4 +346,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
-</ScrollView>
+
+    <LinearLayout
+        android:id="@+id/ScanList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_list_devices"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/returnToMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="returnToMain"
+            android:text="@string/label_buttonReturn"
+            android:textSize="24sp" />
+
+        <ListView
+            android:id="@+id/ListDevices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></ListView>
+
+    </LinearLayout>
+
+
+</FrameLayout>

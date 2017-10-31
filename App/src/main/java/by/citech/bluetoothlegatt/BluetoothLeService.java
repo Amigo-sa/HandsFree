@@ -117,7 +117,7 @@ public class BluetoothLeService extends Service {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
-                Log.i(TAG, "Call to GATT server.");
+                Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -341,6 +341,7 @@ public class BluetoothLeService extends Service {
         }
 
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        Log.i(TAG, "Get remote Device " + device);
         if (device == null) {
             Log.w(TAG, "Device not found.  Unable to connect.");
             return false;
@@ -348,11 +349,16 @@ public class BluetoothLeService extends Service {
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        Log.d(TAG, "Trying to create a new connection.");
+        Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
+       // Log.i(TAG, "mConnectionState = " + STATE_CONNECTING);
         return true;
     }
+
+     public String getConnectDeviceAddress(){
+         return mBluetoothDeviceAddress;
+     }
 
     /**
      * Disconnects an existing connection or closeConnectionForce a pending connection. The disconnection result

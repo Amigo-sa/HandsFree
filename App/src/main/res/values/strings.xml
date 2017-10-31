@@ -24,6 +24,8 @@
     <string name="label_buttonCallOut">Call Out</string>
     <string name="label_buttonCallIn">Call In</string>
     <string name="label_buttonChDevice">Change</string>
+    <string name="label_buttonReturn">Return</string>
+    <string name="label_list_devices">Доступные устройства</string>
     <string name="label_device_address">Device address:</string>
     <string name="label_device_name">Device name:</string>
     <string name="label_state">State:</string>
@@ -42,4 +44,20 @@
     <string name="menu_disconnect">Disconnect</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
+    <!-- Dialog message -->
+    <string name="connect_message">Устанавливается BT-соединение ...</string>
+    <string name="connected_message">BT-соединение с устройтвом установлено.</string>
+    <string name="click_connected_device_message">Это BT-устройство в настоящий момент подключено к Вашему
+        смартфону. Нажмите Отключить, чтобы завершить BT-соединение, или Отменить, чтобы продолжить
+        работу с устройством.</string>
+    <string name="click_other_device_message"> В настоящий момент к Вашему смартфону подключено другое
+    устройство. Нажмите Подключить, чтобы установить новое BT-соединение, или Отменить, чтобы продолжить
+    работу с прежним устройством.</string>
+    <string name="disconnected_message">Соединение с устройством разорвано !!!</string>
+
+    <!-- Dialog buttons -->
+    <string name="cancel">Отменить</string>
+    <string name="disconnect">Отключить</string>
+    <string name="connect">Подключить</string>
+
 </resources>

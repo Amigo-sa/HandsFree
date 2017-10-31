@@ -36,8 +36,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
-
-import by.citech.bluetoothlegatt.Resource;
 /**
  *  В отличие от классического Bluetooth, BLE призван обеспечить существенно меньшее
  *  энергопотребление. Это позволяет приложениям для Android общаться с BLE-устройствами,
@@ -335,7 +333,7 @@ public class DeviceScanActivity extends ListActivity {
             ViewHolder viewHolder;
             // General ListView optimization code.
             if (view == null) {
-                view = mInflator.inflate(R.layout.listitem_device, null);
+                view = mInflator.inflate(R.layout.lineitem_device, null);
                 viewHolder = new ViewHolder();
                 viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
                 viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
