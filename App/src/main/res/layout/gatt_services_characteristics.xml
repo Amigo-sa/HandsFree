@@ -324,7 +324,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/label_garniture"
-                    android:textSize="24sp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <Space
@@ -355,26 +355,39 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/label_list_devices"
-            android:textAlignment="center"
-            android:textSize="24sp" />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/returnToMain"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_list_devices"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/returnToMain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="returnToMain"
+                android:text="@string/label_buttonReturn"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="returnToMain"
-            android:text="@string/label_buttonReturn"
-            android:textSize="24sp" />
+            android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/ListDevices"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"></ListView>
+            <ListView
+                android:id="@+id/ListDevices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></ListView>
+        </LinearLayout>
+
 
     </LinearLayout>
 

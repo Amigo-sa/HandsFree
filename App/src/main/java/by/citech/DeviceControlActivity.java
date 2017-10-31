@@ -93,7 +93,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     private static final int THIS_CONNECTED_DEVICE = 4;
     private static final int OTHER_CONNECTED_DEVICE = 5;
 
-    private boolean dialogCancel = false;
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
@@ -154,6 +153,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     private final String LIST_UUID = "UUID";
 
     private Intent gattServiceIntent;
+    private AlertDialog alertDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -221,6 +221,8 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         //getActionBar().setDisplayHomeAsUpEnabled(true); - стрелочка в меню для перехода в другое активити
         // инициализируем сервис
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        // привязываем сервис
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
         btnGreen = findViewById(R.id.btnGreen);
         btnRed = findViewById(R.id.btnRed);
@@ -302,6 +304,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 Log.w("WSD_BroadcastReceiver", " CONNECTED");
                 mConnected = true;
                 updateConnectionState(R.string.connected);
+               // alertDialog.dismiss();
                 onCreateDialogIsConnected(mBTDevice);
                 setStorages();
                 setUIData();
@@ -312,6 +315,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 Log.w("WSD_DCActivity", " DISCONNECTED");
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
+                //alertDialog.dismiss();
                 onCreateDialogIsDisconnected(mBTDevice);
                 mBTDeviceConn = null;
                 clearUI();
@@ -378,35 +382,21 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
 
     private void onCreateDialog(int id, BluetoothDevice device) {
         AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
+
         switch (id) {
             case DEVICE_CONNECT: {
+                onConnectBTDevice(mBTDevice);
                 adb.setTitle(device.getName())
                         .setMessage(R.string.connect_message)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setCancelable(true)
-                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                            @Override
-                            public void onDismiss(DialogInterface dialog) {
-                                if (!dialogCancel)
-                                    onConnectBTDevice(mBTDevice);
-                                dialogCancel = false;
-                            }
-                        })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                dialogCancel = true;
+                                disconnectBTDevice();
                                 dialog.cancel();
                             }
                         });
-                final AlertDialog alertDialog = adb.create();
-                alertDialog.show();
-                final Timer t = new Timer();
-                t.schedule(new TimerTask() {
-                    public void run() {
-                        alertDialog.dismiss(); // when the task active then close the dialog
-                        t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
-                    }
-                }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
+                alertDialog = adb.create();
                 break;
             }
             case THIS_CONNECTED_DEVICE: {
@@ -425,7 +415,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                         dialog.dismiss();
                     }
                 });
-                adb.show();
+                alertDialog = adb.create();
                 break;
             }
             case OTHER_CONNECTED_DEVICE: {
@@ -445,13 +435,16 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                         dialog.dismiss();
                     }
                 });
-                adb.show();
+                alertDialog = adb.create();
                 break;
             }
         }
+        alertDialog.show();
+
     }
     //Окно когда устройство успешно подключилось
     private void onCreateDialogIsConnected(BluetoothDevice device) {
+        alertDialog.dismiss();
         Log.i("WSD_DIALOG","onCreateDialogConnected");
         AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
         adb.setTitle(device.getName())
@@ -473,6 +466,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     }
     // Окно когда устройство не может быть подсоединено или произошло разъединение
     private void onCreateDialogIsDisconnected(BluetoothDevice device) {
+        alertDialog.dismiss();
         Log.i("WSD_DIALOG","onCreateDialogConnected");
         AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
         adb.setTitle(device.getName())
@@ -497,7 +491,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
 
     private void disconnectBTDevice(){
         //отвязываем сервис
-        unbindService(mServiceConnection);
+        //unbindService(mServiceConnection);
         // производим отклчение от устройства
         mBluetoothLeService.disconnect();
     }
@@ -509,9 +503,8 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         mDeviceAddress = device.getAddress();
         // останавливаем сканирование
         stopScanBluetoothDevice();
-        // привязываем сервис
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         // если сервис привязан производим соединение
+        Log.i("WSD_DIALOG","mBluetoothLeService = " + mBluetoothLeService);
         if (mBluetoothLeService != null)
             mBluetoothLeService.connect(mDeviceAddress);
         // ответ ждём в Callback(BroadcastReceiver)
@@ -639,9 +632,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
 
 
 
-
-
-
     // по запуску регистрируем наш BroadcastReceiver
     @Override
     protected void onResume() {
@@ -667,6 +657,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i("WSD_onDESTROY", " befor unbind");
         unbindService(mServiceConnection);
         if(mBluetoothLeService.getWriteThread() != null)
             mBluetoothLeService.stopWriteThread();

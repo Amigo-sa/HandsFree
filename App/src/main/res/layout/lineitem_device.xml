@@ -36,25 +36,25 @@
             android:id="@+id/device_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="24dp" />
+            android:textSize="16dp" />
 
         <TextView
             android:id="@+id/device_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12dp" />
+            android:textSize="10dp" />
 
         <TextView
             android:id="@+id/bluetooth_class"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12dp" />
+            android:textSize="10dp" />
 
         <TextView
             android:id="@+id/device_rssi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12dp" />
+            android:textSize="10dp" />
     </LinearLayout>
 
 
