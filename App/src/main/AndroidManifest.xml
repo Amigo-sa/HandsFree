@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
+<?xml version="1.0" encoding="utf-8"?><!--
  Copyright 2013 The Android Open Source Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="by.citech"
     android:versionCode="1"
@@ -21,10 +20,12 @@
 
     <!-- Min/target SDK versions (<uses-sdk>) managed by build.gradle -->
 
-    <!-- Declare this required feature if you want to make the app available to BLE-capable
+    <!--
+    Declare this required feature if you want to make the app available to BLE-capable
     devices only.  If you want to make your app available to devices that don't support BLE,
     you should omit this in the manifest.  Instead, determine BLE capability by using
-    PackageManager.hasSystemFeature(FEATURE_BLUETOOTH_LE) -->
+    PackageManager.hasSystemFeature(FEATURE_BLUETOOTH_LE)
+    -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
@@ -46,15 +47,14 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".DeviceScanActivity"
-            android:screenOrientation="portrait"
-            android:exported="true" />
-
+            android:exported="true"
+            android:screenOrientation="portrait" />
         <!-- <activity android:name=".DeviceControlActivity" android:exported="true"/> -->
         <service
             android:name=".bluetoothlegatt.BluetoothLeService"
@@ -101,4 +101,5 @@
 
     </application>
     -->
+
 </manifest>
