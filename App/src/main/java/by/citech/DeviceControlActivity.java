@@ -544,6 +544,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                invalidateOptionsMenu();
                 setVisiblityMain(true);
                 MainView.setVisibility(View.VISIBLE);
                 ScanView.setVisibility(View.GONE);
@@ -555,6 +556,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                invalidateOptionsMenu();
                 setVisiblityMain(false);
                 MainView.setVisibility(View.GONE);
                 ScanView.setVisibility(View.VISIBLE);
@@ -675,22 +677,52 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     // создаём меню в котором указываем кнопку соединения устройства
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.gatt_services, menu);
-        if (mConnected) {
-            menu.findItem(R.id.menu_connect).setVisible(false);
-            menu.findItem(R.id.menu_refresh).setVisible(true);
-        } else {
-            menu.findItem(R.id.menu_connect).setVisible(true);
-            menu.findItem(R.id.menu_refresh).setVisible(false);
+        if (getVisiblityMain()) {
+            getMenuInflater().inflate(R.menu.gatt_services, menu);
+            if (mConnected) {
+                menu.findItem(R.id.menu_connect).setVisible(false);
+                menu.findItem(R.id.menu_refresh).setVisible(true);
+            } else {
+                menu.findItem(R.id.menu_connect).setVisible(true);
+                menu.findItem(R.id.menu_refresh).setVisible(false);
+            }
+        }else {
+            getMenuInflater().inflate(R.menu.main, menu);
+            if (!mScanning) {
+                menu.findItem(R.id.menu_stop).setVisible(false);
+                menu.findItem(R.id.menu_scan).setVisible(true);
+                menu.findItem(R.id.menu_refresh).setActionView(null);
+            } else {
+                menu.findItem(R.id.menu_stop).setVisible(true);
+                menu.findItem(R.id.menu_scan).setVisible(false);
+                menu.findItem(R.id.menu_refresh).setActionView(
+                        R.layout.actionbar_indeterminate_progress);
+            }
         }
         return true;
     }
 
-    // устанавливаем принудетельное соединение с выбранным из списка устройством при нажатии connect
-    // и сбрасываем соединение в случае нажатия disconnect
+    // включаем/выключаем сканирование в зависимости от того нажата клавиша SCAN или нет
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_scan:
+                mLeDeviceListAdapter.clear();
+                scanLeDevice(true);
+                break;
+            case R.id.menu_stop:
+                scanLeDevice(false);
+                break;
+        }
+        return true;
+    }
 
+
+    // устанавливаем принудетельное соединение с выбранным из списка устройством при нажатии connect
+    // и сбрасываем соединение в случае нажатия disconnect
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//
 //        switch(item.getItemId()) {
 //            case R.id.menu_connect:
 //                //TODO: доработать
@@ -704,9 +736,14 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
 //                onBackPressed();
 //                return true;
 //        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
-        return super.onOptionsItemSelected(item);
-    }
+
+
+
+
 
     // процедура обновления данных на экране об соединении
     private void updateConnectionState(final int resourceId) {

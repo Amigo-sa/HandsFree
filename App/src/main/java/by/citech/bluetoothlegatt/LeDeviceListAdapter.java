@@ -100,16 +100,14 @@ public class LeDeviceListAdapter extends BaseAdapter {
         final String deviceName = device.getName();
         if (deviceName != null && deviceName.length() > 0) {
             viewHolder.deviceName.setText(deviceName);
-            //Log.i("WSD_HOLD", "before substring name = " + deviceName);
-            //Log.i("WSD_HOLD", "before substring substring = " + deviceName.substring(0,3));
-            if(deviceName.substring(0,13).equals("CIT HandsFree")) {
-                viewHolder.deviceIcon.setVisibility(View.GONE);
-                viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
-            }else{
-                viewHolder.deviceIcon.setVisibility(View.VISIBLE);
-                viewHolder.deviceHeadSet.setVisibility(View.GONE);
-            }
-
+            if (deviceName.length() > 13)
+                if(deviceName.substring(0,13).equals("CIT HandsFree")) {
+                    viewHolder.deviceIcon.setVisibility(View.GONE);
+                    viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
+                }else{
+                    viewHolder.deviceIcon.setVisibility(View.VISIBLE);
+                    viewHolder.deviceHeadSet.setVisibility(View.GONE);
+                }
             if(mLeRssi.get(i).equals("200")) {
                 Log.i("WSD_HOLD", "after substring");
                 viewHolder.checkIcon.setVisibility(View.VISIBLE);
