@@ -1,10 +1,12 @@
 package by.citech.bluetoothlegatt;
 
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import by.citech.R;
@@ -29,10 +31,13 @@ public class LeDeviceListAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        TextView deviceName;
-        TextView deviceAddress;
-        TextView bluetoothClass;
-        TextView deviceRssi;
+        ImageView deviceIcon;
+        ImageView deviceHeadSet;
+        TextView  deviceName;
+        TextView  deviceAddress;
+        TextView  bluetoothClass;
+        TextView  deviceRssi;
+        ImageView checkIcon;
     }
 
     public void addDevice(BluetoothDevice device, int rssi) {
@@ -77,22 +82,49 @@ public class LeDeviceListAdapter extends BaseAdapter {
         if (view == null) {
             view = mInflator.inflate(R.layout.lineitem_device, null);
             viewHolder = new LeDeviceListAdapter.ViewHolder();
+            viewHolder.deviceIcon = (ImageView) view.findViewById(R.id.icon);
+            viewHolder.deviceIcon.setVisibility(View.VISIBLE);
+            viewHolder.deviceHeadSet = (ImageView) view.findViewById(R.id.iconhead);
+            viewHolder.deviceHeadSet.setVisibility(View.GONE);
             viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
             viewHolder.bluetoothClass = (TextView) view.findViewById(R.id.bluetooth_class);
             viewHolder.deviceRssi = (TextView) view.findViewById(R.id.device_rssi);
+            viewHolder.checkIcon = (ImageView) view.findViewById(R.id.iconcheck);
             view.setTag(viewHolder);
         } else {
             viewHolder = (LeDeviceListAdapter.ViewHolder) view.getTag();
         }
 
-
         BluetoothDevice device = mLeDevices.get(i);
         final String deviceName = device.getName();
-        if (deviceName != null && deviceName.length() > 0)
+        if (deviceName != null && deviceName.length() > 0) {
             viewHolder.deviceName.setText(deviceName);
-        else
+            //Log.i("WSD_HOLD", "before substring name = " + deviceName);
+            //Log.i("WSD_HOLD", "before substring substring = " + deviceName.substring(0,3));
+            if(deviceName.substring(0,13).equals("CIT HandsFree")) {
+                viewHolder.deviceIcon.setVisibility(View.GONE);
+                viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
+            }else{
+                viewHolder.deviceIcon.setVisibility(View.VISIBLE);
+                viewHolder.deviceHeadSet.setVisibility(View.GONE);
+            }
+
+            if(mLeRssi.get(i).equals("200")) {
+                Log.i("WSD_HOLD", "after substring");
+                viewHolder.checkIcon.setVisibility(View.VISIBLE);
+            }
+            else
+                viewHolder.checkIcon.setVisibility(View.GONE);
+
+        }
+        else{
             viewHolder.deviceName.setText(R.string.unknown_device);
+            viewHolder.deviceIcon.setVisibility(View.VISIBLE);
+            viewHolder.deviceHeadSet.setVisibility(View.GONE);
+            viewHolder.checkIcon.setVisibility(View.GONE);
+        }
+
         viewHolder.deviceAddress.setText(device.getAddress());
         viewHolder.bluetoothClass.setText("Device Class: " + device.getBluetoothClass().toString());
         viewHolder.deviceRssi.setText("RSSI: " + mLeRssi.get(i) + " dbm");

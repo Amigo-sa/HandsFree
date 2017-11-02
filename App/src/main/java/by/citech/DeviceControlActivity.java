@@ -48,7 +48,6 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,9 +69,7 @@ import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.logic.INetworkListener;
 import by.citech.param.Settings;
-import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
-
 import static by.citech.util.NetworkInfo.getIPAddress;
 
 /**
@@ -100,10 +97,12 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     private static final int GREEN = Color.rgb(0x00, 0x66, 0x33);
     private static final int GRAY = Color.GRAY;
     private static final int RED = Color.rgb(0xCC, 0x00, 0x00);
+    private static final int DARKCYAN = Color.rgb(0, 139, 139);
+    private static final int DARKKHAKI = Color.rgb(189, 183, 107);
+
     // выводим на дисплей состояние соединения
     private TextView mConnectionState;
     //выводим на дисплей принимаемые данные
-    private TextView mDeviceConnect;
     private TextView mDataField;
     private TextView mwDataField;
     private String mDeviceName;
@@ -112,7 +111,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     private Button btnGreen;
     private Button btnRed;
     private Animation animCall;
-    private Button   btnreturnToMain;
     private Button   btnChangeDevice;
     private EditText editTextSrvLocAddr;
     private EditText editTextSrvRemAddr;
@@ -154,6 +152,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
 
     private Intent gattServiceIntent;
     private AlertDialog alertDialog;
+    private boolean visiblityMain = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -188,10 +187,11 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         mConnectionState = findViewById(R.id.connection_state);
         mDataField = findViewById(R.id.data_value);
         mwDataField = findViewById(R.id.wdata_value);
-        mDeviceConnect =  findViewById(R.id.selHandsFree);
+        //mDeviceConnect =  findViewById(R.id.selHandsFree);
 
-        btnreturnToMain = findViewById(R.id.returnToMain);
         btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
+        btnChangeDevice.setText(R.string.connect_device);
+        btnChangeDevice.setBackgroundColor(DARKKHAKI);
 
         editTextSrvLocAddr = findViewById(R.id.editTextSrvLocAddr);
         editTextSrvRemAddr = findViewById(R.id.editTextSrvRemAddr);
@@ -215,8 +215,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         );
-
-        mDeviceConnect.setText("Гарнитура " + ((mDeviceName == null) ? "не подключена": mDeviceName));
         getActionBar().setTitle("SecTel");
         //getActionBar().setDisplayHomeAsUpEnabled(true); - стрелочка в меню для перехода в другое активити
         // инициализируем сервис
@@ -268,8 +266,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         });
     }
 
-
-
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -304,10 +300,11 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 Log.w("WSD_BroadcastReceiver", " CONNECTED");
                 mConnected = true;
                 updateConnectionState(R.string.connected);
-               // alertDialog.dismiss();
                 onCreateDialogIsConnected(mBTDevice);
                 setStorages();
                 setUIData();
+                btnChangeDevice.setText(R.string.change_device);
+                btnChangeDevice.setBackgroundColor(DARKCYAN);
                 invalidateOptionsMenu();
                 mBTDeviceConn = mBTDevice;
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
@@ -315,10 +312,11 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 Log.w("WSD_DCActivity", " DISCONNECTED");
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
-                //alertDialog.dismiss();
                 onCreateDialogIsDisconnected(mBTDevice);
                 mBTDeviceConn = null;
                 clearUI();
+                btnChangeDevice.setText(R.string.connect_device);
+                btnChangeDevice.setBackgroundColor(DARKKHAKI);
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 // Show all the supported services and characteristics on the user interface.
 
@@ -342,9 +340,21 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         }
     }
 
-    public void returnToMain (View view) {
-        setVisibleMain();
+    public void onBackPressed(){
+        if(getVisiblityMain())
+            super.onBackPressed();
+        else
+            setVisibleMain();
     }
+
+    private boolean getVisiblityMain(){
+        return visiblityMain;
+    }
+
+    private void setVisiblityMain(boolean visiblityMain){
+        this.visiblityMain = visiblityMain;
+    }
+
 
     public void btnChangeDevice(View view){
         setVisibleList();
@@ -406,6 +416,8 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 adb.setPositiveButton(R.string.disconnect, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        mLeDeviceListAdapter.clear();
+                        startScanBluetoothDevice();
                         disconnectBTDevice();
                         dialog.dismiss();
                     }
@@ -442,6 +454,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         alertDialog.show();
 
     }
+
     //Окно когда устройство успешно подключилось
     private void onCreateDialogIsConnected(BluetoothDevice device) {
         alertDialog.dismiss();
@@ -490,8 +503,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     //--------------------------Connection methods-----------------------------------
 
     private void disconnectBTDevice(){
-        //отвязываем сервис
-        //unbindService(mServiceConnection);
         // производим отклчение от устройства
         mBluetoothLeService.disconnect();
     }
@@ -516,7 +527,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
             @Override
             public void run() {
                 Log.i("WSD_DIALOG","setUIData");
-                mDeviceConnect.setText("Гарнитура " + ((mDeviceName == null) ? "не подключена": mDeviceName));
                 ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
             }
         });
@@ -525,7 +535,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     // процедура стирания списка характеристик и данных на дисплее
     private void clearUI() {
         mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
-        mDeviceConnect.setText("Гарнитура не подключена");
         ((TextView) findViewById(R.id.device_address)).setText(null);
         mDataField.setText(R.string.no_data);
         mwDataField.setText(R.string.no_data);
@@ -535,6 +544,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                setVisiblityMain(true);
                 MainView.setVisibility(View.VISIBLE);
                 ScanView.setVisibility(View.GONE);
             }
@@ -545,6 +555,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                setVisiblityMain(false);
                 MainView.setVisibility(View.GONE);
                 ScanView.setVisibility(View.VISIBLE);
             }
@@ -574,7 +585,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
             Log.i("WSD_CHANGE", "ADD DEVICE TO LIST " + mBTDevice + "\n");
             Log.i("WSD_CHANGE", "mLeDeviceListAdapter = " + mLeDeviceListAdapter + "\n");
             if ((mBTDevice != null) && mLeDeviceListAdapter != null)
-                mLeDeviceListAdapter.addDevice(mBTDevice, 0);
+                mLeDeviceListAdapter.addDevice(mBTDevice, 200);
         }
     }
 
@@ -628,9 +639,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                     });
                 }
             };
-
-
-
 
     // по запуску регистрируем наш BroadcastReceiver
     @Override

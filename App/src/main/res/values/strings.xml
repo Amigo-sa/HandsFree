@@ -44,6 +44,10 @@
     <string name="menu_disconnect">Disconnect</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
+    <!-- Button chnage device names -->
+    <string name="connect_device">ПОДКЛЮЧИТЬ ГАРНИТУРУ</string>
+    <string name="change_device">СМЕНИТЬ ГАРНИТУРУ</string>
+
     <!-- Dialog message -->
     <string name="connect_message">Устанавливается BT-соединение ...</string>
     <string name="connected_message">BT-соединение с устройтвом установлено.</string>
@@ -59,5 +63,7 @@
     <string name="cancel">Отменить</string>
     <string name="disconnect">Отключить</string>
     <string name="connect">Подключить</string>
+    <!-- Names of HeadSet -->
+    <string name="CIT">CIT</string>
 
 </resources>

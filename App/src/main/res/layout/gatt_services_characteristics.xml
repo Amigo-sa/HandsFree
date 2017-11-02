@@ -304,28 +304,28 @@
             android:orientation="vertical"
             android:paddingTop="15dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal">-->
 
-                <ImageView
-                    android:id="@+id/icon"
-                    android:layout_width="70px"
-                    android:layout_height="70px"
-                    android:layout_marginLeft="4px"
-                    android:layout_marginRight="10px"
-                    android:layout_marginTop="4px"
-                    android:src="@drawable/ic_launcher"></ImageView>
+                <!--<ImageView-->
+                    <!--android:id="@+id/icon"-->
+                    <!--android:layout_width="70px"-->
+                    <!--android:layout_height="70px"-->
+                    <!--android:layout_marginLeft="4px"-->
+                    <!--android:layout_marginRight="10px"-->
+                    <!--android:layout_marginTop="4px"-->
+                    <!--android:src="@drawable/ic_launcher"></ImageView>-->
 
-                <TextView
-                    android:id="@+id/selHandsFree"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/label_garniture"
-                    android:textSize="18sp" />
-            </LinearLayout>
+                <!--<TextView-->
+                    <!--android:id="@+id/selHandsFree"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="center"-->
+                    <!--android:text="@string/label_garniture"-->
+                    <!--android:textSize="18sp" />-->
+            <!--</LinearLayout>-->
 
             <Space
                 android:layout_width="match_parent"
@@ -338,7 +338,7 @@
                 android:layout_weight="1"
                 android:onClick="btnChangeDevice"
                 android:text="@string/label_buttonChDevice"
-                android:textSize="24sp" />
+                android:textSize="18sp" />
         </LinearLayout>
 
         <ExpandableListView
@@ -364,17 +364,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/label_list_devices"
-                android:textAlignment="center"
-                android:textSize="18sp" />
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="18dp"
+                android:textColor="@color/colorWhite"
+                android:background="#008080"/>
 
-            <Button
-                android:id="@+id/returnToMain"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="returnToMain"
-                android:text="@string/label_buttonReturn"
-                android:textSize="18sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -385,7 +380,8 @@
             <ListView
                 android:id="@+id/ListDevices"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"></ListView>
+                android:layout_height="wrap_content">
+            </ListView>
         </LinearLayout>
 
 
