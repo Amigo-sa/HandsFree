@@ -108,20 +108,19 @@ public class LeDeviceListAdapter extends BaseAdapter {
                     viewHolder.deviceIcon.setVisibility(View.VISIBLE);
                     viewHolder.deviceHeadSet.setVisibility(View.GONE);
                 }
-            if(mLeRssi.get(i).equals("200")) {
-                Log.i("WSD_HOLD", "after substring");
-                viewHolder.checkIcon.setVisibility(View.VISIBLE);
-            }
-            else
-                viewHolder.checkIcon.setVisibility(View.GONE);
-
         }
         else{
             viewHolder.deviceName.setText(R.string.unknown_device);
             viewHolder.deviceIcon.setVisibility(View.VISIBLE);
             viewHolder.deviceHeadSet.setVisibility(View.GONE);
-            viewHolder.checkIcon.setVisibility(View.GONE);
         }
+
+        if(mLeRssi.get(i).equals("200")) {
+            Log.i("WSD_HOLD", "after substring");
+            viewHolder.checkIcon.setVisibility(View.VISIBLE);
+        }
+        else
+            viewHolder.checkIcon.setVisibility(View.GONE);
 
         viewHolder.deviceAddress.setText(device.getAddress());
         viewHolder.bluetoothClass.setText("Device Class: " + device.getBluetoothClass().toString());

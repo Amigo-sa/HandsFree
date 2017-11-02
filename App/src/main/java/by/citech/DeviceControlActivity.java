@@ -187,7 +187,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         mConnectionState = findViewById(R.id.connection_state);
         mDataField = findViewById(R.id.data_value);
         mwDataField = findViewById(R.id.wdata_value);
-        //mDeviceConnect =  findViewById(R.id.selHandsFree);
 
         btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
         btnChangeDevice.setText(R.string.connect_device);
@@ -285,6 +284,16 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         }
     };
 
+    //---------------------------------Bluetooth -----------------------------
+    private boolean getBluetoothAdapter(BluetoothManager bluetoothManager) {
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        if (mBluetoothAdapter == null)
+            return false;
+        else
+            return true;
+    }
+
+
     // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
     // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
@@ -315,18 +324,17 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 onCreateDialogIsDisconnected(mBTDevice);
                 mBTDeviceConn = null;
                 clearUI();
+                clearAllDevicesFromList();
+                startScanBluetoothDevice();
                 btnChangeDevice.setText(R.string.connect_device);
                 btnChangeDevice.setBackgroundColor(DARKKHAKI);
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 // Show all the supported services and characteristics on the user interface.
-
                 displayGattServices(mBluetoothLeService.getSupportedGattServices());
-                //enableTransmitData();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
                 displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));
-                //Log.w(TAG,"write data to dispaly");
             }
         }
     };
@@ -340,25 +348,16 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         }
     }
 
+    // кнопка на телефоне
     public void onBackPressed(){
         if(getVisiblityMain())
             super.onBackPressed();
         else
             setVisibleMain();
     }
-
-    private boolean getVisiblityMain(){
-        return visiblityMain;
-    }
-
-    private void setVisiblityMain(boolean visiblityMain){
-        this.visiblityMain = visiblityMain;
-    }
-
-
+    // кнопка подключения/изменения гарнитуры
     public void btnChangeDevice(View view){
         setVisibleList();
-
         myListDevices = (ListView) findViewById(R.id.ListDevices);
         initializeListBluetoothDevice();
         stopScanBluetoothDevice();
@@ -386,7 +385,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
             }
         });
     }
-
 
     //------------------------Dialogs-----------------------------------------
 
@@ -416,7 +414,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 adb.setPositiveButton(R.string.disconnect, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mLeDeviceListAdapter.clear();
+                        clearAllDevicesFromList();
                         startScanBluetoothDevice();
                         disconnectBTDevice();
                         dialog.dismiss();
@@ -452,7 +450,6 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
             }
         }
         alertDialog.show();
-
     }
 
     //Окно когда устройство успешно подключилось
@@ -522,6 +519,14 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     }
 
     //-----------------------------------UI update------------------------------------
+    private boolean getVisiblityMain(){
+        return visiblityMain;
+    }
+
+    private void setVisiblityMain(boolean visiblityMain){
+        this.visiblityMain = visiblityMain;
+    }
+
     private void setUIData() {
         runOnUiThread(new Runnable() {
             @Override
@@ -564,25 +569,18 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         });
     }
 
-    //---------------------------------Bluetooth -----------------------------
-    private boolean getBluetoothAdapter(BluetoothManager bluetoothManager) {
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null)
-            return false;
-        else
-            return true;
-    }
+    //-----------------------------List BT Devices ------------------------
 
     private void initializeListBluetoothDevice() {
         if (mLeDeviceListAdapter == null) {
             mLeDeviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
         } else
-            mLeDeviceListAdapter.clear();
+            clearAllDevicesFromList();
         if (mConnected)
-            addConnectDevice();
+            addConnectDeviceToList();
     }
 
-    private void addConnectDevice(){
+    private void addConnectDeviceToList(){
         if (mConnected) {
             Log.i("WSD_CHANGE", "ADD DEVICE TO LIST " + mBTDevice + "\n");
             Log.i("WSD_CHANGE", "mLeDeviceListAdapter = " + mLeDeviceListAdapter + "\n");
@@ -591,10 +589,12 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         }
     }
 
-    private void setStorages(){
-        mBluetoothLeService.setStorageBtToNet(storageBtToNet);
-        mBluetoothLeService.setStorageNetToBt(storageNetToBt);
+    private void clearAllDevicesFromList(){
+        if (mLeDeviceListAdapter != null)
+            mLeDeviceListAdapter.clear();
     }
+
+    //-----------------------------Scanning-------------------------------------
 
     private void startScanBluetoothDevice(){
         scanLeDevice(true);
@@ -642,6 +642,9 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 }
             };
 
+
+    //--------------------------Other Activity Methods-------------------------
+
     // по запуску регистрируем наш BroadcastReceiver
     @Override
     protected void onResume() {
@@ -674,9 +677,10 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         mBluetoothLeService = null;
     }
 
-    // создаём меню в котором указываем кнопку соединения устройства
+    // создаём меню
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+       // в меню окна вызова указываем флажок подключенного устройства
         if (getVisiblityMain()) {
             getMenuInflater().inflate(R.menu.gatt_services, menu);
             if (mConnected) {
@@ -687,6 +691,7 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
                 menu.findItem(R.id.menu_refresh).setVisible(false);
             }
         }else {
+            // в меню окна поиска устанавливаем кнопку сканирования
             getMenuInflater().inflate(R.menu.main, menu);
             if (!mScanning) {
                 menu.findItem(R.id.menu_stop).setVisible(false);
@@ -707,43 +712,16 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                mLeDeviceListAdapter.clear();
-                scanLeDevice(true);
+                clearAllDevicesFromList();
+                addConnectDeviceToList();
+                startScanBluetoothDevice();
                 break;
             case R.id.menu_stop:
-                scanLeDevice(false);
+                stopScanBluetoothDevice();
                 break;
         }
         return true;
     }
-
-
-    // устанавливаем принудетельное соединение с выбранным из списка устройством при нажатии connect
-    // и сбрасываем соединение в случае нажатия disconnect
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//
-//        switch(item.getItemId()) {
-//            case R.id.menu_connect:
-//                //TODO: доработать
-//                mBluetoothLeService.connect(mDeviceAddress);
-//                return true;
-//            case R.id.menu_disconnect:
-//                //TODO: доработать
-//                mBluetoothLeService.disconnect();
-//                return true;
-//            case android.R.id.home:
-//                onBackPressed();
-//                return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-
-
-
-
-
 
     // процедура обновления данных на экране об соединении
     private void updateConnectionState(final int resourceId) {
@@ -767,6 +745,11 @@ public class DeviceControlActivity extends Activity implements INetworkInfoListe
         if (data != null) {
             mwDataField.setText(data);
         }
+    }
+
+    private void setStorages(){
+        mBluetoothLeService.setStorageBtToNet(storageBtToNet);
+        mBluetoothLeService.setStorageNetToBt(storageNetToBt);
     }
 
     // Demonstrates how to iterate through the supported GATT Services/Characteristics.
