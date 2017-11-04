@@ -59,7 +59,10 @@ public class LeDeviceListAdapter extends BaseAdapter {
         mLeDevices.clear();
         mLeRssi.clear();
     }
-
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+    }
     @Override
     public int getCount() {
         return mLeDevices.size();
