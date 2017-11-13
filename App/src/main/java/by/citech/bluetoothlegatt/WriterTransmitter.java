@@ -50,7 +50,7 @@ public class WriterTransmitter extends Thread {
                 characteristic.setValue(dataByte);
                 characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                 mBluetoothGatt.writeCharacteristic(characteristic);
-                mBluetoothGatt.executeReliableWrite();
+                //mBluetoothGatt.executeReliableWrite();
 
                 /**
                  *
@@ -68,7 +68,7 @@ public class WriterTransmitter extends Thread {
                 final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
                 for (byte byteChar : dataByte)
                     stringBuilder.append(String.format("%02X ", byteChar));
-                Log.w(Tags.BLE_WRITETRANS, stringBuilder.toString());
+                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, stringBuilder.toString());
             }
             try {
                 Thread.sleep(10);

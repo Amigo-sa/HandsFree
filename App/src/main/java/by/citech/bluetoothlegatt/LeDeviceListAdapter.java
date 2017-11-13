@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import by.citech.R;
+import by.citech.param.Settings;
 
 /**
  * Created by tretyak on 26.10.2017.
@@ -17,7 +18,7 @@ import by.citech.R;
 // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
 // останавливаем сканирование и запускаем новое Activity
 public class LeDeviceListAdapter extends BaseAdapter {
-
+    private final static String TAG = "WSD_LeListAdapter";
     // View, которые будут содержаться в списке
     private ArrayList<BluetoothDevice> mLeDevices;
     private ArrayList<String> mLeRssi;
@@ -119,7 +120,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
         }
 
         if(mLeRssi.get(i).equals("200")) {
-            Log.i("WSD_HOLD", "after substring");
+            if (Settings.debug) Log.i(TAG, "Set Icon to List");
             viewHolder.checkIcon.setVisibility(View.VISIBLE);
         }
         else

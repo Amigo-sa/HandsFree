@@ -438,7 +438,6 @@ public class BluetoothLeService extends Service {
 //            mBluetoothGatt.writeCharacteristic(characteristic);
 
 
-
         }
     }
 

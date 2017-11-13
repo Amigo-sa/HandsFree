@@ -1,5 +1,6 @@
 package by.citech.logic;
 
+import android.os.Handler;
 import android.util.Log;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
@@ -13,6 +14,7 @@ public class Caller {
     private ICallUiListener iCallUiListener;
     private ICallNetworkListener iCallNetworkListener;
     private INetworkInfoListener iNetworkInfoListener;
+    private IBluetoothListener iBluetoothListener;
 
     //--------------------- singleton
 
@@ -50,16 +52,6 @@ public class Caller {
         return storageNetToBt;
     }
 
-    public Caller setStorageBtToNet(StorageData storageBtToNet) {
-        this.storageBtToNet = storageBtToNet;
-        return this;
-    }
-
-    public Caller setStorageNetToBt(StorageData storageNetToBt) {
-        this.storageNetToBt = storageNetToBt;
-        return this;
-    }
-
     public Caller setiCallUiListener(ICallUiListener listener) {
         iCallUiListener = listener;
         return this;
@@ -74,6 +66,14 @@ public class Caller {
         iNetworkInfoListener = listener;
         return this;
     }
+
+    public Caller setiBluetoothListener(IBluetoothListener listener) {
+        iBluetoothListener = listener;
+        return this;
+    }
+
+
+
 
     //--------------------- work with fsm
 
@@ -105,14 +105,17 @@ public class Caller {
     //--------------------- main
 
     public void start() {
-        if (storageBtToNet == null
-                || storageNetToBt == null
-                || iCallUiListener == null
+        if (iCallUiListener == null
                 || iCallNetworkListener == null
-                || iNetworkInfoListener == null) {
+                || iNetworkInfoListener == null
+                || iBluetoothListener == null) {
             if (Settings.debug) Log.e(Tags.CALLER, "start at least one of key parameters are null");
             return;
         }
+
+        // хранилища данных
+        storageBtToNet = new StorageData(Tags.BLE2NET_STORE);
+        storageNetToBt = new StorageData(Tags.NET2BLE_STORE);
 
         CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
@@ -123,6 +126,12 @@ public class Caller {
                 .setiNetworkInfoListener(iNetworkInfoListener)
                 .setHandler(new HandlerExtended(getiNetworkListener()))
                 .start();
+
+        ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(new Handler())
+                .setStorageBtToNet(storageBtToNet)
+                .setStorageNetToBt(storageNetToBt);
     }
 
     public void stop() {
