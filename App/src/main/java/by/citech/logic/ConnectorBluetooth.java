@@ -25,7 +25,7 @@ import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 
-public class ConnectorBluetooth {
+public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUiExchangeListener{
 
     private final static String TAG = "WSD_ConnectorBluetooth";
     private static final long SCAN_PERIOD = 10000;
@@ -372,7 +372,7 @@ public class ConnectorBluetooth {
     }
 
     //запускаем запись и нотификацию с устройства
-    public void enableTransmitData() {
+    private void enableTransmitData() {
         if (Settings.debug) Log.i(TAG, "enableTransmitData()");
         mBluetoothLeService.initStore();
         if (!mGattCharacteristics.isEmpty()) {
@@ -386,7 +386,7 @@ public class ConnectorBluetooth {
         }
     }
     //отключаем поток записи и нотификации
-    public void disableTransmitData() {
+    private void disableTransmitData() {
         if (Settings.debug) Log.i(TAG, "disableTransmitData()");
         if (mBluetoothLeService != null ){
             if( mBluetoothLeService.getWriteThread() != null){
@@ -396,5 +396,28 @@ public class ConnectorBluetooth {
         }
     }
 
+    @Override
+    public void callEndedInternally() {
+        disableTransmitData();
+    }
 
+    @Override
+    public void callIncomingAccepted() {
+        enableTransmitData();
+    }
+
+    @Override
+    public void callOutcomingAccepted() {
+        enableTransmitData();
+    }
+
+    @Override
+    public void callFailed() {
+        disableTransmitData();
+    }
+
+    @Override
+    public void callEndedExternally() {
+        disableTransmitData();
+    }
 }
