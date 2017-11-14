@@ -12,6 +12,7 @@ import java.util.Deque;
 
 import by.citech.BuildConfig;
 import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 import static by.citech.util.Decode.bytesToHexMark1;
 
@@ -72,16 +73,12 @@ public class StorageData {
 
     public StorageData(String TAG) {
         this.TAG = TAG;
-        databuffer = new ArrayDeque<byte[]>() {
-        };
+        databuffer = new ArrayDeque<>();
     }
 
-    byte[] tmpbyte;
-
     public boolean isEmpty(){
-        if(databuffer.size() == 0)
-            return true;
-        return false;
+        if (Settings.debug) Log.i(TAG, "isEmpty");
+        return (databuffer.size() == 0);
     }
 
 //    public static byte[] concatByteArrays(byte[]... inputs) { //TODO доделать для больших пакетов
@@ -98,12 +95,13 @@ public class StorageData {
 //        return r;
 //    }
 
-    public  byte[] getData() {
-        tmpbyte = databuffer.poll();
-        return tmpbyte;
+    public byte[] getData() {
+        if (Settings.debug) Log.i(TAG, "getData");
+        return databuffer.poll();
     }
 
-    public  void putData(byte[] dataByte) {
+    public void putData(byte[] dataByte) {
+        if (Settings.debug) Log.i(TAG, "putData");
         databuffer.push(dataByte);
     }
 

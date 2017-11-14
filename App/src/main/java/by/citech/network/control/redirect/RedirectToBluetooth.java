@@ -38,9 +38,10 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
         if (Settings.debug) Log.i(Tags.NET_REDIR_BLUETOOTH, "redirectOff");
         isRedirecting = false;
         iReceiverListenerReg.registerReceiverListener(null);
-        synchronized (storageNetToBt) {
-            storageNetToBt.notify();
-        }
+        //TODO: разобраться с синхронайзом
+//        synchronized (storageNetToBt) {
+//            storageNetToBt.notify();
+//        }
     }
 
     @Override

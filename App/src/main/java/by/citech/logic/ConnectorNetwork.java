@@ -332,6 +332,7 @@ public class ConnectorNetwork
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
         if (Settings.dataSource == DataSource.BLUETOOTH) {
+            //TODO: поправить на сеттер
             new TaskStream(this, iConnCtrl.getTransmitter(), Settings.dataSource, Caller.getInstance().getStorageBtToNet()).execute();
             new TaskRedirect(this, iConnCtrl.getReceiverRegister(), Settings.dataSource, Caller.getInstance().getStorageNetToBt()).execute();
         } else if (Settings.dataSource == DataSource.MICROPHONE) {
