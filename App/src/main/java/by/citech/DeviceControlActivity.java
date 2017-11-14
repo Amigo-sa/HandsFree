@@ -57,6 +57,7 @@ import by.citech.logic.INetworkInfoListener;
 import by.citech.logic.INetworkListener;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
+
 import static by.citech.util.NetworkInfo.getIPAddress;
 
 /**
@@ -66,7 +67,7 @@ import static by.citech.util.NetworkInfo.getIPAddress;
  * Bluetooth LE API.
  */
 public class DeviceControlActivity extends Activity
-        implements INetworkInfoListener, ICallNetworkListener, ICallUiListener, IBluetoothListener {
+ implements INetworkInfoListener, ICallNetworkListener, ICallUiListener, IBluetoothListener {
 
     IUiBtnGreenRedListener iUiBtnGreenRedListener;
     INetworkListener iNetworkListener;
@@ -86,29 +87,39 @@ public class DeviceControlActivity extends Activity
     private Button btnGreen;
     private Button btnRed;
     private Animation animCall;
-    private Button   btnChangeDevice;
-    private EditText editTextSrvLocAddr;
-    private EditText editTextSrvRemAddr;
-    private EditText editTextSrvLocPort;
-    private EditText editTextSrvRemPort;
-    // кнопка отмены записанного текста
-    private Button btnClearRemPort;
-    private Button btnClearRemAddr;
+        private Button   btnChangeDevice;
+    private EditText editTextSrvLocAddr, editTextSrvRemAddr, editTextSrvLocPort, editTextSrvRemPort;
+
     // условие повторения анимации
     private boolean isCallAnim = false;
+
     // список найденных устройств
     private ListView myListDevices;
     private LinearLayout MainView;
-    private LinearLayout ScanView;
-
+    private LinearLayout ScanView;  
+    
     private Intent gattServiceIntent;
     private AlertDialog alertDialog;
     private boolean visiblityMain = true;
+
+    private Caller caller;
+    private ConnectorBluetooth connectorBluetooth;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
+
+        caller = Caller.getInstance()
+                .setiCallUiListener(this)
+                .setiCallNetworkListener(this)
+                .setiNetworkInfoListener(this)
+                .setiBluetoothListener(this);
+
+        connectorBluetooth = caller.getConnectorBluetooth();
+        iUiBtnGreenRedListener = caller.getiUiBtnGreenRedListener();
+        iNetworkListener = caller.getiNetworkListener();
+
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -119,7 +130,7 @@ public class DeviceControlActivity extends Activity
         // BluetoothAdapter through BluetoothManager.
         // And Checks if Bluetooth is supported on the device.
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        if (!ConnectorBluetooth.getInstance().getBluetoothAdapter(bluetoothManager)) {
+        if (!connectorBluetooth.getBluetoothAdapter(bluetoothManager)) {
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
             return;
@@ -137,68 +148,43 @@ public class DeviceControlActivity extends Activity
         editTextSrvLocPort = findViewById(R.id.editTextSrvLocPort);
         editTextSrvRemPort = findViewById(R.id.editTextSrvRemPort);
 
-        btnClearRemAddr = findViewById(R.id.btnClearRemAddr);
-        btnClearRemPort = findViewById(R.id.btnClearRemPort);
-        btnClearRemAddr.setVisibility(View.VISIBLE);
-        btnClearRemPort.setVisibility(View.VISIBLE);
-
-        editTextSrvLocAddr.setText(getIPAddress(Settings.ipv4));
-        editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
-        editTextSrvLocAddr.setFocusable(false);
-        editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
-        editTextSrvLocPort.setFocusable(false);
-
-        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
-        getActionBar().setTitle("SecTel");
-        //getActionBar().setDisplayHomeAsUpEnabled(true); - стрелочка в меню для перехода в другое активити
-        // инициализируем сервис
-        gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        // привязываем сервис
-        bindService(gattServiceIntent, ConnectorBluetooth.getInstance().mServiceConnection, BIND_AUTO_CREATE);
-
         btnGreen = findViewById(R.id.btnGreen);
         btnRed = findViewById(R.id.btnRed);
         animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
         btnSetDisabled(btnGreen, "IDLE", GRAY);
         btnSetDisabled(btnRed, "IDLE", GRAY);
 
-        iUiBtnGreenRedListener = Caller.getInstance().getiUiBtnGreenRedListener();
-        iNetworkListener = Caller.getInstance().getiNetworkListener();
+        editTextSrvLocAddr.setText(getIPAddress(Settings.ipv4));
+        editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
+        editTextSrvLocAddr.setFocusable(false);
+        editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
+        editTextSrvLocPort.setFocusable(false);
+        editTextSrvRemAddr.setText(Settings.serverRemoteIpAddress);
 
-        Caller.getInstance()
-                .setiCallUiListener(this)
-                .setiCallNetworkListener(this)
-                .setiNetworkInfoListener(this)
-                .setiBluetoothListener(this)
-                .start();
+        getActionBar().setTitle("SecTel");
+        
+        // скрываем клавиатуру
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        //скрываем клавиатуру
-        getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-        );
+        // инициализируем сервис
+        gattServiceIntent = new Intent(this, BluetoothLeService.class);
 
-        btnGreen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnGreen();}});
-        btnRed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnRed();}});
-        btnClearRemAddr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {editTextSrvRemAddr.setText("");}});
-        btnClearRemPort.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {editTextSrvRemPort.setText("");}});
+        // привязываем сервис
+        bindService(gattServiceIntent, caller.getServiceConnection(), BIND_AUTO_CREATE);
+
+        btnGreen.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnGreen();}});
+        btnRed.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnRed();}});
+        findViewById(R.id.btnClearRemAddr).setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {editTextSrvRemAddr.setText("");}});
+        findViewById(R.id.btnClearRemPort).setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {editTextSrvRemPort.setText("");}});
         animCall.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {}
-            @Override
-            public void onAnimationEnd(Animation animation) {if (isCallAnim) {callAnimStart();}}
-            @Override
-            public void onAnimationRepeat(Animation animation) {}
+            @Override public void onAnimationStart(Animation animation) {}
+            @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {callAnimStart();}}
+            @Override public void onAnimationRepeat(Animation animation) {}
         });
-    }
 
+        caller.start();
+    }
+    
     private boolean getVisiblityMain(){
         return visiblityMain;
     }
@@ -206,7 +192,7 @@ public class DeviceControlActivity extends Activity
     private void setVisiblityMain(boolean visiblityMain){
         this.visiblityMain = visiblityMain;
     }
-
+    
     private void setVisibleMain() {
         runOnUiThread(new Runnable() {
             @Override
@@ -230,13 +216,13 @@ public class DeviceControlActivity extends Activity
             }
         });
     }
-
+    
     private void changeMainGUI(int color, int buttonName){
         btnChangeDevice.setText(buttonName);
         btnChangeDevice.setBackgroundColor(color);
         invalidateOptionsMenu();
     }
-
+    
     //------------------------BT-Buttons---------------------
 
     // кнопка на телефоне
@@ -246,35 +232,37 @@ public class DeviceControlActivity extends Activity
         else
             setVisibleMain();
     }
+    
     // кнопка подключения/изменения гарнитуры
     public void btnChangeDevice(View view){
         setVisibleList();
         myListDevices = (ListView) findViewById(R.id.ListDevices);
-        ConnectorBluetooth.getInstance().initializeListBluetoothDevice();
-        myListDevices.setAdapter(ConnectorBluetooth.getInstance().getmLeDeviceListAdapter());
+        connectorBluetooth.initializeListBluetoothDevice();
+        myListDevices.setAdapter(connectorBluetooth.getmLeDeviceListAdapter());
         myListDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
             // останавливаем сканирование и запускаем новое Activity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final BluetoothDevice device = ConnectorBluetooth.getInstance().getmLeDeviceListAdapter().getDevice(position);
+                final BluetoothDevice device = connectorBluetooth.getmLeDeviceListAdapter().getDevice(position);
                 if (device == null) return;
-                ConnectorBluetooth.getInstance().setmBTDevice(device);
+                connectorBluetooth.setmBTDevice(device);
                 //выкидываем соответствующее диалоговое окно о подключении устройства
                 if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
-                if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + ConnectorBluetooth.getInstance().getmBTDeviceConn());
-                if (ConnectorBluetooth.getInstance().getmBTDevice().equals(ConnectorBluetooth.getInstance().getmBTDeviceConn())) {
-                    onCreateDialog(THIS_CONNECTED_DEVICE, ConnectorBluetooth.getInstance().getmBTDevice());
-                } else if (ConnectorBluetooth.getInstance().getmBTDeviceConn() != null) {
-                    onCreateDialog(OTHER_CONNECTED_DEVICE, ConnectorBluetooth.getInstance().getmBTDevice());
+                if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + connectorBluetooth.getmBTDeviceConn());
+                if (connectorBluetooth.getmBTDevice().equals(connectorBluetooth.getmBTDeviceConn())) {
+                    onCreateDialog(THIS_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
+                } else if (connectorBluetooth.getmBTDeviceConn() != null) {
+                    onCreateDialog(OTHER_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
                 } else {
-                    onCreateDialog(DEVICE_CONNECT, ConnectorBluetooth.getInstance().getmBTDevice());
+                    onCreateDialog(DEVICE_CONNECT, connectorBluetooth.getmBTDevice());
                 }
             }
         });
-        ConnectorBluetooth.getInstance().stopScanBluetoothDevice();
-        ConnectorBluetooth.getInstance().startScanBluetoothDevice();
+        connectorBluetooth.stopScanBluetoothDevice();
+        connectorBluetooth.startScanBluetoothDevice();
     }
+
 
     //------------------------Dialogs-----------------------------------------
 
@@ -283,14 +271,14 @@ public class DeviceControlActivity extends Activity
 
         switch (id) {
             case DEVICE_CONNECT: {
-                ConnectorBluetooth.getInstance().onConnectBTDevice();
+                connectorBluetooth.onConnectBTDevice();
                 adb.setTitle(device.getName())
                         .setMessage(R.string.connect_message)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setCancelable(true)
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                ConnectorBluetooth.getInstance().disconnectBTDevice();
+                                connectorBluetooth.disconnectBTDevice();
                                 dialog.cancel();
                             }
                         });
@@ -304,9 +292,9 @@ public class DeviceControlActivity extends Activity
                 adb.setPositiveButton(R.string.disconnect, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ConnectorBluetooth.getInstance().clearAllDevicesFromList();
-                        ConnectorBluetooth.getInstance().startScanBluetoothDevice();
-                        ConnectorBluetooth.getInstance().disconnectBTDevice();
+                        connectorBluetooth.clearAllDevicesFromList();
+                        connectorBluetooth.startScanBluetoothDevice();
+                        connectorBluetooth.disconnectBTDevice();
                         dialog.dismiss();
                     }
                 });
@@ -325,8 +313,8 @@ public class DeviceControlActivity extends Activity
                 adb.setPositiveButton(R.string.connect, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ConnectorBluetooth.getInstance().disconnectBTDevice();
-                        ConnectorBluetooth.getInstance().onConnectBTDevice();
+                        connectorBluetooth.disconnectBTDevice();
+                        connectorBluetooth.onConnectBTDevice();
                         dialog.dismiss();
                     }
                 });
@@ -394,15 +382,15 @@ public class DeviceControlActivity extends Activity
     protected void onResume() {
         super.onResume();
         // по запуску регистрируем наш BroadcastReceiver
-        ConnectorBluetooth.getInstance().updateBroadcastReceiveData();
+        connectorBluetooth.updateBroadcastReceiveData();
     }
 
     // в случае засыпания активности сбрасываем регистрацию BroadcastReceiver
     @Override
     protected void onPause() {
         super.onPause();
-        ConnectorBluetooth.getInstance().unregisterReceiver();
-        Caller.getInstance().stop();
+        connectorBluetooth.unregisterReceiver();
+        caller.stop();
     }
 
     @Override
@@ -414,7 +402,7 @@ public class DeviceControlActivity extends Activity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ConnectorBluetooth.getInstance().closeLeService();
+        connectorBluetooth.closeLeService();
     }
 
     // создаём меню
@@ -423,7 +411,7 @@ public class DeviceControlActivity extends Activity
        // в меню окна вызова указываем флажок подключенного устройства
         if (getVisiblityMain()) {
             getMenuInflater().inflate(R.menu.gatt_services, menu);
-            if (ConnectorBluetooth.getInstance().ismConnected()) {
+            if (connectorBluetooth.ismConnected()) {
                 menu.findItem(R.id.menu_connect).setVisible(false);
                 menu.findItem(R.id.menu_refresh).setVisible(true);
             } else {
@@ -433,7 +421,7 @@ public class DeviceControlActivity extends Activity
         }else {
             // в меню окна поиска устанавливаем кнопку сканирования
             getMenuInflater().inflate(R.menu.main, menu);
-            if (!ConnectorBluetooth.getInstance().ismScanning()) {
+            if (!connectorBluetooth.ismScanning()) {
                 menu.findItem(R.id.menu_stop).setVisible(false);
                 menu.findItem(R.id.menu_scan).setVisible(true);
                 menu.findItem(R.id.menu_refresh).setActionView(null);
@@ -452,18 +440,18 @@ public class DeviceControlActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                ConnectorBluetooth.getInstance().clearAllDevicesFromList();
-                ConnectorBluetooth.getInstance().addConnectDeviceToList();
-                ConnectorBluetooth.getInstance().startScanBluetoothDevice();
+                connectorBluetooth.clearAllDevicesFromList();
+                connectorBluetooth.addConnectDeviceToList();
+                connectorBluetooth.startScanBluetoothDevice();
                 break;
             case R.id.menu_stop:
-                ConnectorBluetooth.getInstance().stopScanBluetoothDevice();
+                connectorBluetooth.stopScanBluetoothDevice();
                 break;
         }
         return true;
     }
 
-    //--------------------- Buttons
+    //--------------------- Network Buttons
 
     private void btnSetDisabled(Button button, String label, int color) {
         button.setEnabled(false);
@@ -642,7 +630,7 @@ public class DeviceControlActivity extends Activity
         return editTextSrvLocPort.getText().toString();
     }
 
-    //--------------------- IBluetoothListener
+        //--------------------- IBluetoothListener
 
     @Override
     public void changeOptionMenu() {
@@ -706,5 +694,5 @@ public class DeviceControlActivity extends Activity
     public String unknownCharaString() {
         return  getResources().getString(R.string.unknown_characteristic);
     }
-
+    
 }

@@ -1,5 +1,6 @@
 package by.citech.logic;
 
+import android.content.ServiceConnection;
 import android.os.Handler;
 import android.util.Log;
 import by.citech.data.StorageData;
@@ -44,6 +45,14 @@ public class Caller {
         return ConnectorNetwork.getInstance();
     }
 
+    public ConnectorBluetooth getConnectorBluetooth() {
+        return ConnectorBluetooth.getInstance();
+    }
+
+    public ServiceConnection getServiceConnection() {
+        return ConnectorBluetooth.getInstance().mServiceConnection;
+    }
+
     public StorageData getStorageBtToNet() {
         return storageBtToNet;
     }
@@ -71,9 +80,6 @@ public class Caller {
         iBluetoothListener = listener;
         return this;
     }
-
-
-
 
     //--------------------- work with fsm
 
@@ -138,4 +144,5 @@ public class Caller {
         // TODO: добавить очищение хранилищ?
         ConnectorNetwork.getInstance().stop();
     }
+
 }

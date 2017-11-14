@@ -61,7 +61,7 @@ public enum State {
 
     Error {
         public HashSet<State> availableStates() {
-            return new HashSet<> (Arrays.asList(Idle));
+            return new HashSet<>(Arrays.asList(Idle));
         }
         public String getName() {
             return "Error";

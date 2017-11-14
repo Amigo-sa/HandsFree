@@ -6,10 +6,6 @@ import android.content.IntentFilter;
 
 import by.citech.bluetoothlegatt.LeDeviceListAdapter;
 
-/**
- * Created by tretyak on 13.11.2017.
- */
-
 public interface IBluetoothListener {
     void changeOptionMenu();
     void addDeviceToList(LeDeviceListAdapter leDeviceListAdapter, final BluetoothDevice device, final int rssi);

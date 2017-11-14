@@ -38,7 +38,7 @@ import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
-import by.citech.param.Tags;
+import by.citech.logic.Resource;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

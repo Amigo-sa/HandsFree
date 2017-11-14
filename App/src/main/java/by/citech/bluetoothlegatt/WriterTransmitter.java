@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
 import by.citech.data.StorageData;
+import by.citech.logic.Resource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 

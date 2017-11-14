@@ -1,10 +1,6 @@
-package by.citech.bluetoothlegatt;
+package by.citech.logic;
 
 import java.io.Serializable;
-
-/**
- * Created by tretyak on 05.10.2017.
- */
 
 public class Resource implements Serializable{
     private boolean loopback;
@@ -17,6 +13,7 @@ public class Resource implements Serializable{
     public boolean isLoopback() {
         return loopback;
     }
+
     public void setLoopback(boolean loopback) {
         this.loopback = loopback;
     }
