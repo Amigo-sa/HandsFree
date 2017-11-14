@@ -8,6 +8,7 @@ import by.citech.param.Tags;
 public class CallUi implements IUiBtnGreenRedListener {
 
     private ArrayList<ICallUiListener> iCallUiListeners;
+    private ArrayList<ICallUiExchangeListener> iCallUiExchangeListeners;
 
     //--------------------- singleton
 
@@ -15,6 +16,7 @@ public class CallUi implements IUiBtnGreenRedListener {
 
     private CallUi() {
         iCallUiListeners = new ArrayList<>();
+        iCallUiExchangeListeners = new ArrayList<>();
     }
 
     public static CallUi getInstance() {
@@ -32,6 +34,12 @@ public class CallUi implements IUiBtnGreenRedListener {
 
     public CallUi addiCallUiListener(ICallUiListener iCallUiListener) {
         iCallUiListeners.add(iCallUiListener);
+        iCallUiExchangeListeners.add(iCallUiListener);
+        return this;
+    }
+
+    public CallUi addiCallUiExchangeListener(ICallUiExchangeListener iCallUiExchangeListener) {
+        iCallUiExchangeListeners.add(iCallUiExchangeListener);
         return this;
     }
 
@@ -63,7 +71,7 @@ public class CallUi implements IUiBtnGreenRedListener {
             case IncomingDetected:
                 if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnGreen IncomingDetected");
                 if (setState(State.IncomingDetected, State.Call))
-                    for (ICallUiListener listener : iCallUiListeners) listener.callIncomingAccepted();
+                    for (ICallUiExchangeListener listener : iCallUiExchangeListeners) listener.callIncomingAccepted();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.CALL_UI, "onClickBtnGreen " + getStateName());
@@ -77,7 +85,7 @@ public class CallUi implements IUiBtnGreenRedListener {
             case Call:
                 if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed Call");
                 if (setState(State.Call, State.Idle))
-                    for (ICallUiListener listener : iCallUiListeners) listener.callEndedInternally();
+                    for (ICallUiExchangeListener listener : iCallUiExchangeListeners) listener.callEndedInternally();
                 break;
             case OutcomingStarted:
                 if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed OutcomingStarted");

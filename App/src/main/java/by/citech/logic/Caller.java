@@ -125,10 +125,12 @@ public class Caller {
 
         CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
+                .addiCallUiExchangeListener(ConnectorBluetooth.getInstance())
                 .addiCallUiListener(ConnectorNetwork.getInstance());
 
         ConnectorNetwork.getInstance()
                 .addiCallNetworkListener(iCallNetworkListener)
+                .addiCallNetworkExchangeListener(ConnectorBluetooth.getInstance())
                 .setiNetworkInfoListener(iNetworkInfoListener)
                 .setHandler(new HandlerExtended(getiNetworkListener()))
                 .start();

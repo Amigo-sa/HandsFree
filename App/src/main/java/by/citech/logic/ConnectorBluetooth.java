@@ -224,7 +224,7 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
 
     //---------------------------------Bluetooth -----------------------------
     public boolean getBluetoothAdapter(BluetoothManager bluetoothManager) {
-        if (Settings.debug) Log.e(TAG, "getBluetoothAdapter()");
+        if (Settings.debug) Log.i(TAG, "getBluetoothAdapter()");
         mBluetoothAdapter = bluetoothManager.getAdapter();
         if (mBluetoothAdapter == null)
             return false;

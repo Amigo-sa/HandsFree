@@ -43,6 +43,7 @@ public class ConnectorNetwork
     private Handler handler;
     private INetworkInfoListener iNetworkInfoListener;
     private ArrayList<ICallNetworkListener> iCallNetworkListeners;
+    private ArrayList<ICallNetworkExchangeListener> iCallNetworkExchangeListeners;
 
     //--------------------- singleton
 
@@ -50,6 +51,7 @@ public class ConnectorNetwork
 
     private ConnectorNetwork() {
         iCallNetworkListeners = new ArrayList<>();
+        iCallNetworkExchangeListeners = new ArrayList<>();
     }
 
     public static ConnectorNetwork getInstance() {
@@ -75,8 +77,14 @@ public class ConnectorNetwork
         return this;
     }
 
+    public ConnectorNetwork addiCallNetworkExchangeListener(ICallNetworkExchangeListener iCallNetworkExchangeListener) {
+        iCallNetworkExchangeListeners.add(iCallNetworkExchangeListener);
+        return this;
+    }
+
     public ConnectorNetwork addiCallNetworkListener(ICallNetworkListener iCallNetworkListener) {
         iCallNetworkListeners.add(iCallNetworkListener);
+        iCallNetworkExchangeListeners.add(iCallNetworkListener);
         return this;
     }
 
@@ -184,7 +192,7 @@ public class ConnectorNetwork
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnFailure Call");
                 if (setState(State.Call, State.Error))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callFailed();
+                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callFailed();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "srvOnFailure " + getStateName());
@@ -203,7 +211,7 @@ public class ConnectorNetwork
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnClose Call");
                 if (setState(State.Call, State.Idle))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callEndedExternally();
+                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callEndedExternally();
                 exchangeStop();
                 break;
             default:
@@ -243,7 +251,7 @@ public class ConnectorNetwork
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure Call");
                 if (setState(State.Call, State.Error))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callFailed();
+                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callFailed();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnFailure " + getStateName());
@@ -258,7 +266,7 @@ public class ConnectorNetwork
                 if (message.equals(Messages.RESPONSE_ACCEPT)) {
                     if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText ACCEPT)");
                     if (setState(State.OutcomingConnected, State.Call))
-                        for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingAccepted();
+                        for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callOutcomingAccepted();
                     setiConnCtrl(iClientCtrl);
                     exchangeStart();
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
@@ -282,7 +290,7 @@ public class ConnectorNetwork
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose Call");
                 if (setState(State.Call, State.Idle))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callEndedExternally();
+                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callEndedExternally();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnClose " + getStateName());
@@ -433,6 +441,7 @@ public class ConnectorNetwork
         }
     }
 
+    //TODO: нафиг это здесь?
     @Override
     public void messageSended() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "messageSended");
