@@ -78,19 +78,25 @@ public class StorageData {
 
     byte[] tmpbyte;
 
-    public static byte[] concatByteArrays(byte[]... inputs) {
-        int i = 0;
-        for (byte[] b : inputs) {
-            i += b.length;
-        }
-        byte[] r = new byte[i];
-        i = 0;
-        for (byte[] b : inputs) {
-            System.arraycopy(b, 0, r, i, b.length);
-            i += b.length;
-        }
-        return r;
+    public boolean isEmpty(){
+        if(databuffer.size() == 0)
+            return true;
+        return false;
     }
+
+//    public static byte[] concatByteArrays(byte[]... inputs) { //TODO доделать для больших пакетов
+//        int i = 0;
+//        for (byte[] b : inputs) {
+//            i += b.length;
+//        }
+//        byte[] r = new byte[i];
+//        i = 0;
+//        for (byte[] b : inputs) {
+//            System.arraycopy(b, 0, r, i, b.length);
+//            i += b.length;
+//        }
+//        return r;
+//    }
 
     public  byte[] getData() {
         tmpbyte = databuffer.poll();

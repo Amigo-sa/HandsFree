@@ -41,7 +41,7 @@ public class WriterTransmitter extends Thread {
         int timecounter = 0;
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-            if (res.isCallback() || timeOver) {
+            if (!storageNetToBt.isEmpty() && (res.isCallback() || timeOver)) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 characteristic.setValue(storageNetToBt.getData());
                 mBluetoothGatt.writeCharacteristic(characteristic);
