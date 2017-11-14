@@ -5,8 +5,10 @@ import android.util.Xml;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 
 import by.citech.BuildConfig;
 import by.citech.param.Settings;
@@ -15,7 +17,8 @@ import static by.citech.util.Decode.bytesToHexMark1;
 
 public class StorageData {
     private String TAG;
-    // TODO: попробовать перейти на Queue<>
+    private Deque<byte[]> databuffer;
+   /* // TODO: попробовать перейти на Queue<>
     private ArrayList<byte[]> databuffer;
 
     public StorageData(String TAG) {
@@ -65,5 +68,50 @@ public class StorageData {
         databuffer.add(dataByte);
         notify();
         if (Settings.debug) Log.i(TAG, "putData done");
+    }*/
+
+    public StorageData(String TAG) {
+        this.TAG = TAG;
+        databuffer = new ArrayDeque<byte[]>() {
+        };
     }
+
+    byte[] tmpbyte;
+
+    public static byte[] concatByteArrays(byte[]... inputs) {
+        int i = 0;
+        for (byte[] b : inputs) {
+            i += b.length;
+        }
+        byte[] r = new byte[i];
+        i = 0;
+        for (byte[] b : inputs) {
+            System.arraycopy(b, 0, r, i, b.length);
+            i += b.length;
+        }
+        return r;
+    }
+
+    public  byte[] getData() {
+        tmpbyte = databuffer.poll();
+        return tmpbyte;
+    }
+
+    public  void putData(byte[] dataByte) {
+        databuffer.push(dataByte);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

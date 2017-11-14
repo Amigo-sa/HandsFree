@@ -3,26 +3,27 @@ package by.citech.logic;
 import java.io.Serializable;
 
 public class Resource implements Serializable{
-    private boolean loopback;
-    private boolean write;
+    private boolean callback;
+    private int supportedMTU;
 
-    public Resource(boolean write) {
-        this.write = write;
+    public Resource(boolean callback, int supportedMTU) {
+        this.callback = callback;
+        this.supportedMTU = supportedMTU;
     }
 
-    public boolean isLoopback() {
-        return loopback;
+    public boolean isCallback() {
+        return callback;
     }
 
-    public void setLoopback(boolean loopback) {
-        this.loopback = loopback;
+    public void setCallback(boolean callback) {
+        this.callback = callback;
     }
 
-    public boolean isWrite() {
-        return write;
+    public int getSupportedMTU() {
+        return supportedMTU;
     }
 
-    public void setWrite(boolean write) {
-        this.write = write;
+    public void setSupportedMTU(int supportedMTU) {
+        this.supportedMTU = supportedMTU;
     }
 }

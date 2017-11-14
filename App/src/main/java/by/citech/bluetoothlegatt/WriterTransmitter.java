@@ -20,10 +20,7 @@ public class WriterTransmitter extends Thread {
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
     private WriterTransmitterCallbackListener listener;
-    int cnt = 0;
     private boolean isRunning;
-    // колличество отправляемых на запись пакетов данных
-    final int sends = 100;
 
     public WriterTransmitter(String name, Resource res, StorageData storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
@@ -39,40 +36,32 @@ public class WriterTransmitter extends Thread {
 
     @Override
     public void run() {
-        byte[] dataByte;
         isRunning = true;
+        boolean timeOver = false;
+        int timecounter = 0;
+        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-
-           // dataByte[0]++;
-           //
-            if (isAllSendData()) {
+            if (res.isCallback() || timeOver) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
-                dataByte = storageNetToBt.getData();
-                characteristic.setValue(dataByte);
-                characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                characteristic.setValue(storageNetToBt.getData());
                 mBluetoothGatt.writeCharacteristic(characteristic);
-                //mBluetoothGatt.executeReliableWrite();
-
-                /**
-                 *
-                 *   когда использую mBluetoothGatt.beginReliableWrite();  происходит
-                 *   зависание на удалённом устройстве, в логе выдаётся ошибка:
-                 *   E/bt_att: value resp op_code = ATT_RSP_PREPARE_WRITE len = 20
-                 *   снимается зависание методом mBluetoothGatt.abortReliableWrite()
-                 *
-                 * */
-//                mBluetoothGatt.beginReliableWrite();
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//                    mBluetoothGatt.abortReliableWrite();
-//                }
-
-                final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
-                for (byte byteChar : dataByte)
-                    stringBuilder.append(String.format("%02X ", byteChar));
-                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, stringBuilder.toString());
+//                final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
+//                for (byte byteChar : dataByte)
+//                    stringBuilder.append(String.format("%02X ", byteChar));
+                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write");
+                res.setCallback(false);
+                timeOver = false;
+                timecounter = 0;
             }
             try {
-                Thread.sleep(10);
+                Thread.sleep(1);
+                if (!res.isCallback()) {
+                    timecounter++;
+                }
+
+                if (timecounter == 10) {
+                    timeOver = true;
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -85,14 +74,5 @@ public class WriterTransmitter extends Thread {
 
     public void cancel() {
         isRunning = false;
-//        synchronized (storageNetToBt) {
-//           storageNetToBt.notify();
-//        }
     }
-
-    private boolean isAllSendData(){
-        return true;
-                //(sends - cnt++) <= 0;
-    }
-
 }

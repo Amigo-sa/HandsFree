@@ -93,7 +93,7 @@ public class BluetoothLeService extends Service {
     }
 
     public void initStore(){
-        res = new Resource(true);
+        res = new Resource(true,20);
         loopback = true;
         // storageNetToBt = new StorageData();
     }
@@ -149,13 +149,16 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            final StringBuilder stringBuilder = new StringBuilder(characteristic.getValue().length);
-            for(byte byteChar : characteristic.getValue())
-                stringBuilder.append(String.format("%02X ", byteChar));
-             wrData = stringBuilder.toString();
+
+//            final StringBuilder stringBuilder = new StringBuilder(characteristic.getValue().length);
+//            for(byte byteChar : characteristic.getValue())
+//                stringBuilder.append(String.format("%02X ", byteChar));
+//             wrData = stringBuilder.toString();
+
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
-                Log.i("test","GATT SUCCESS " + "DATA :" + wrData);
+                Log.i("test","GATT SUCCESS " + "DATA :");
+                res.setCallback(true);
 
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
@@ -203,17 +206,36 @@ public class BluetoothLeService extends Service {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
 
+
+
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
-            boolean priority = true;
-            if (Build.VERSION.SDK_INT >= 21)
-                priority = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
 
-            Log.d(TAG, "MTU changed (mtu/status) / Priority : (" + mtu + "/" + status + ") / " + priority);
-
-          //  broadcastUpdate(ACTION_GATT_CONNECTED);
+            Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
+//            if (status == BluetoothGatt.GATT_SUCCESS) {
+//                res = new Resource(true, mtu);
+//                Log.w("WSD_MTU", "status = GATT_SUCCESS");
+//                if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
+//                    Log.w("WSD_MTU", "attribute WRITE_BYTES");
+//                    WriterTransmitter wrt = new WriterTransmitter("Write", mBluetoothGatt,
+//                            characteristic, 1, STData, Res);
+//                    Log.w("WSD_MTU", "object WriterTransmitter is done");
+//                    wrt.addWriteListener(new WriterTransmitterCallbackListener() {
+//                        @Override
+//                        public void doWriteCharacteristic(String str) {
+//                            System.out.println(str);
+//                        }
+//                    });
+//                    Log.w("WSD_MTU", "add WriteListener");
+//                    wrt.start();
+//                    Log.w("WSD_MTU", "Write Thread START");
+//                }
+//            }
         }
+
+
+
 
 
 
