@@ -11,15 +11,12 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 class StreamBluetooth implements IStreamCtrl {
-//  private byte[] buffer;
-    private int bufferSize;
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
-    private final StorageData storageBtToNet;
+    private StorageData storageBtToNet;
 
-    public StreamBluetooth(ITransmitter iTransmitter, int bufferSize, StorageData storageBtToNet) {
+    public StreamBluetooth(ITransmitter iTransmitter, StorageData storageBtToNet) {
         this.iTransmitter = iTransmitter;
-        this.bufferSize = bufferSize;
         this.storageBtToNet = storageBtToNet;
     }
 

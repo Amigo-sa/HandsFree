@@ -44,7 +44,7 @@ public class TaskStream extends AsyncTask<String, IStreamCtrl, Void> {
                 }).start();
                 break;
             case BLUETOOTH:
-                final StreamBluetooth streamBluetooth = new StreamBluetooth(iTransmitter, Settings.bufferSize, storageBtToNet);
+                final StreamBluetooth streamBluetooth = new StreamBluetooth(iTransmitter, storageBtToNet);
                 publishProgress(streamBluetooth.start());
                 new Thread(new Runnable() {
                     @Override

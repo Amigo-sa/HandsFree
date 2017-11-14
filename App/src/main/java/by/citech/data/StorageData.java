@@ -77,7 +77,6 @@ public class StorageData {
     }
 
     public boolean isEmpty(){
-        if (Settings.debug) Log.i(TAG, "isEmpty");
         return (databuffer.size() == 0);
     }
 
