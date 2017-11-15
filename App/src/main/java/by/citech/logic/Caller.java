@@ -9,6 +9,8 @@ import by.citech.param.Tags;
 
 public class Caller {
 
+    private static final String TAG = Tags.CALLER;
+    private static final boolean debug = Settings.debug;
     private volatile State state = State.Null;
     private StorageData storageBtToNet;
     private StorageData storageNetToBt;
@@ -84,12 +86,12 @@ public class Caller {
     //--------------------- work with fsm
 
     public synchronized State getState() {
-        if (Settings.debug) Log.i(Tags.CALLER, "getState is " + state.getName());
+        if (debug) Log.i(TAG, "getState is " + state.getName());
         return state;
     }
 
     public synchronized boolean setState(State fromState, State toState) {
-        if (Settings.debug) Log.w(Tags.CALLER, String.format("setState from %s to %s", fromState.getName(), toState.getName()));
+        if (debug) Log.w(TAG, String.format("setState from %s to %s", fromState.getName(), toState.getName()));
         if (state == fromState) {
             if (fromState.availableStates().contains(toState)) {
                 state = toState;
@@ -100,22 +102,22 @@ public class Caller {
                 }
                 return true;
             } else {
-                if (Settings.debug) Log.e(Tags.CALLER, String.format("setState: %s is not available from %s", toState.getName(), fromState.getName()));
+                if (debug) Log.e(TAG, String.format("setState: %s is not available from %s", toState.getName(), fromState.getName()));
             }
         } else {
-            if (Settings.debug) Log.e(Tags.CALLER, String.format("setState: current is not %s", fromState.getName()));
+            if (debug) Log.e(TAG, String.format("setState: current is not %s", fromState.getName()));
         }
         return false;
     }
 
     //--------------------- main
 
-    public void start() {
+    public void build() {
         if (iCallUiListener == null
                 || iCallNetworkListener == null
                 || iNetworkInfoListener == null
                 || iBluetoothListener == null) {
-            if (Settings.debug) Log.e(Tags.CALLER, "start at least one of key parameters are null");
+            if (debug) Log.e(TAG, "build at least one of key parameters are null");
             return;
         }
 
@@ -129,17 +131,24 @@ public class Caller {
                 .addiCallUiListener(ConnectorNetwork.getInstance());
 
         ConnectorNetwork.getInstance()
+                .setStorageBtToNet(storageBtToNet)
+                .setStorageNetToBt(storageNetToBt)
                 .addiCallNetworkListener(iCallNetworkListener)
                 .addiCallNetworkExchangeListener(ConnectorBluetooth.getInstance())
                 .setiNetworkInfoListener(iNetworkInfoListener)
-                .setHandler(new HandlerExtended(getiNetworkListener()))
-                .start();
+                .setHandler(new HandlerExtended(getiNetworkListener()));
 
         ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
                 .setStorageBtToNet(storageBtToNet)
                 .setStorageNetToBt(storageNetToBt);
+
+        startConnectorNetwork();
+    }
+
+    private void startConnectorNetwork() {
+        ConnectorNetwork.getInstance().start();
     }
 
     public void stop() {

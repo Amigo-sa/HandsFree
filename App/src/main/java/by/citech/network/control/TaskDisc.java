@@ -16,7 +16,7 @@ public class TaskDisc extends AsyncTask<IConnCtrl, Void, Void> {
 
     @Override
     protected Void doInBackground(IConnCtrl... iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_TASK_DISC, "doInBackground");
+        if (Settings.debug) Log.i(Tags.NET_DISC, "doInBackground");
         if (iConnCtrl[0].isAliveConnection()) {
             iConnCtrl[0].closeConnection();
             try {
@@ -35,19 +35,19 @@ public class TaskDisc extends AsyncTask<IConnCtrl, Void, Void> {
                 }
             }
             if (!iConnCtrl[0].isAliveConnection()) {
-                if (Settings.debug) Log.i(Tags.NET_TASK_DISC, "doInBackground connection closed");
+                if (Settings.debug) Log.i(Tags.NET_DISC, "doInBackground connection closed");
                 return null;
             }
             iConnCtrl[0].closeConnectionForce();
-            if (Settings.debug) Log.e(Tags.NET_TASK_DISC, "doInBackground connection closed force");
+            if (Settings.debug) Log.e(Tags.NET_DISC, "doInBackground connection closed force");
         }
-        if (Settings.debug) Log.i(Tags.NET_TASK_DISC, "doInBackground connection already closed");
+        if (Settings.debug) Log.i(Tags.NET_DISC, "doInBackground connection already closed");
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        Log.i(Tags.NET_TASK_DISC, "onPostExecute");
+        Log.i(Tags.NET_DISC, "onPostExecute");
         iDisc.disconnected();
     }
 }

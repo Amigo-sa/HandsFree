@@ -21,6 +21,8 @@ import by.citech.param.StatusMessages;
 import static by.citech.util.Decode.bytesToHexMark1;
 
 public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientCtrl, ITransmitter, IReceiverListenerReg {
+    private static final String TAG = Tags.CLT_WSOCKETCTRL;
+    private static final boolean debug = Settings.debug;
     private WebSocket webSocket;
     private String status = "";
     private String url = "";
@@ -36,7 +38,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void closeConnection() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "closeConnection");
+        if (debug) Log.i(TAG, "closeConnection");
         if (webSocket != null) {
             webSocket.close(1000, "user manually closed connection");
         }
@@ -44,7 +46,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void closeConnectionForce() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "closeConnectionForce");
+        if (debug) Log.i(TAG, "closeConnectionForce");
         if (webSocket != null) {
             webSocket.cancel();
             handler.sendEmptyMessage(StatusMessages.CLT_CANCEL);
@@ -53,7 +55,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public boolean isAliveConnection() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "isAliveConnection");
+        if (debug) Log.i(TAG, "isAliveConnection");
         // TODO: достаточна ли такая проверка?
         return status.equals(StatusMessages.WEBSOCKET_OPENED);
     }
@@ -62,7 +64,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public IClientCtrl startClient() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "startClient");
+        if (debug) Log.i(TAG, "startClient");
         OkHttpClient client = new OkHttpClient.Builder()
                 .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
@@ -90,7 +92,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public String getStatus() {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "getStatus");
+        if (debug) Log.i(TAG, "getStatus");
         return this.status;
     }
 
@@ -98,7 +100,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void registerReceiverListener(IReceiverListener listener) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "registerReceiverListener");
+        if (debug) Log.i(TAG, "registerReceiverListener");
         this.listener = listener;
     }
 
@@ -106,16 +108,20 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void sendBytes(byte... bytes) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "sendBytes");
-        Log.i(Tags.CLT_WSOCKETCTRL, String.format("sendBytes: bytes is <%s>", bytesToHexMark1(bytes)));
-        ByteString byteString = ByteString.of(bytes);
-        Log.i(Tags.CLT_WSOCKETCTRL, String.format("sendBytes: byteString is <%s>", bytesToHexMark1(byteString.toByteArray())));
-        webSocket.send(byteString);
+        if (debug) Log.i(TAG, "sendBytes");
+        if (debug) {
+            ByteString byteString = ByteString.of(bytes);
+            Log.i(TAG, String.format("sendBytes: bytes is <%s>", bytesToHexMark1(bytes)));
+            Log.i(TAG, String.format("sendBytes: byteString is <%s>", bytesToHexMark1(byteString.toByteArray())));
+            webSocket.send(byteString);
+        } else {
+            webSocket.send(ByteString.of(bytes));
+        }
     }
 
     @Override
     public void sendMessage(String string) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "sendMessage");
+        if (debug) Log.i(TAG, "sendMessage");
         webSocket.send(string);
 
         /*-------------------------- TEST --------------------------->>
@@ -135,21 +141,21 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onOpen");
+        if (debug) Log.i(TAG, "onOpen");
         this.webSocket = webSocket;
         status = StatusMessages.WEBSOCKET_OPENED;
         webSocket.send(Messages.CLT2SRV_ONOPEN);
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onOpen message sended");
+        if (debug) Log.i(TAG, "onOpen message sended");
         handler.sendEmptyMessage(StatusMessages.CLT_ONOPEN);
     }
 
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onReceiveMessage bytes");
+        if (debug) Log.i(TAG, "onMessage bytes");
         if (listener == null) {
-            if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onReceiveMessage listener is null");
+            if (debug) Log.i(TAG, "onMessage listener is null");
         } else {
-            if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onReceiveMessage listener is not null");
+            if (debug) Log.i(TAG, "onMessage listener is not null");
             listener.onReceiveMessage(bytes.toByteArray());
         }
 //      handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_BYTES, bytes).sendToTarget();
@@ -158,12 +164,12 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void onMessage(WebSocket webSocket, String text) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onReceiveMessage text");
+        if (debug) Log.i(TAG, "onMessage text");
         handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_TEXT, text).sendToTarget();
     }
 
     @Override public void onClosing(WebSocket webSocket, int code, String reason) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onClosing");
+        if (debug) Log.i(TAG, "onClosing");
         webSocket.close(1000, Messages.CLT2SRV_ONCLOSE);
         status = StatusMessages.WEBSOCKET_CLOSING;
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSING);
@@ -171,14 +177,14 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onClosed");
+        if (debug) Log.i(TAG, "onClosed");
         status = StatusMessages.WEBSOCKET_CLOSED;
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSED);
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        if (Settings.debug) Log.i(Tags.CLT_WSOCKETCTRL, "onFailure");
+        if (debug) Log.i(TAG, "onFailure");
         handler.sendEmptyMessage(StatusMessages.CLT_ONFAILURE);
     }
 }

@@ -1,83 +1,33 @@
 package by.citech.data;
 
 import android.util.Log;
-import android.util.Xml;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 
-import by.citech.BuildConfig;
 import by.citech.param.Settings;
-import by.citech.param.Tags;
-
-import static by.citech.util.Decode.bytesToHexMark1;
 
 public class StorageData {
+    private static final boolean debug = Settings.debug;
+    private boolean debugGetSession, debugPutSession = false;
     private String TAG;
-    private Deque<byte[]> databuffer;
-   /* // TODO: попробовать перейти на Queue<>
-    private ArrayList<byte[]> databuffer;
+    private Deque<byte[]> фифошка;
 
     public StorageData(String TAG) {
         this.TAG = TAG;
-        databuffer = new ArrayList<>();
-    }
-
-    public synchronized byte[] getData() {
-        if (Settings.debug) Log.i(TAG, "getData");
-        byte[] tmpData;
-        if (Settings.debug) Log.i(TAG, "isEmpty = " + databuffer.isEmpty());
-
-        while (databuffer.isEmpty()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        tmpData = databuffer.get(0);
-        databuffer.remove(0);
-        notify();
-        if (Settings.debug) Log.i(TAG, "getData done");
-        return tmpData;
-    }
-
-    public synchronized void putData(byte[] dataByte) {
-        if (Settings.debug) Log.i(TAG, "putData");
-
-        while (databuffer.size() > Settings.storageMaxSize) {
-            if (Settings.debug) Log.e(TAG, "putData overflow");
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (Settings.debug) {
-            final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
-            for (byte byteChar : dataByte)
-                stringBuilder.append(String.format("%02X ", byteChar));
-            Log.i(TAG, "PUT DATA = " + stringBuilder.toString());
-        }
-
-        databuffer.add(dataByte);
-        notify();
-        if (Settings.debug) Log.i(TAG, "putData done");
-    }*/
-
-    public StorageData(String TAG) {
-        this.TAG = TAG;
-        databuffer = new ArrayDeque<>();
+        фифошка = new ArrayDeque<>();
     }
 
     public boolean isEmpty(){
-        return (databuffer.size() == 0);
+        if (!debugGetSession && debug) {
+         boolean isEmpty = фифошка.isEmpty();
+         if (!isEmpty) {
+             Log.w(TAG, "isEmpty not empty");
+         }
+         return isEmpty;
+        } else {
+            return фифошка.isEmpty();
+        }
     }
 
 //    public static byte[] concatByteArrays(byte[]... inputs) { //TODO доделать для больших пакетов
@@ -95,26 +45,37 @@ public class StorageData {
 //    }
 
     public byte[] getData() {
-        if (Settings.debug) Log.i(TAG, "getData");
-        return databuffer.poll();
+        if (!debugGetSession && debug) {
+            Log.w(TAG, "getData");
+            debugGetSession = true;
+        }
+        if (debug) {
+            byte[] data = фифошка.poll();
+            if (data == null) {
+                Log.e(TAG, "getData is null");
+            }
+            return data;
+        } else {
+            return фифошка.poll();
+        }
     }
 
-    public void putData(byte[] dataByte) {
-        if (Settings.debug) Log.i(TAG, "putData");
-        databuffer.push(dataByte);
+    public void putData(byte[] bytes) {
+        if (!debugPutSession && debug) {
+            Log.w(TAG, "putData");
+            debugPutSession = true;
+        }
+        фифошка.offer(bytes);
+//      фифошка.push(dataByte); //TODO: уточнить: не тот метод?
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
+    public void clear() {
+        if (debug) {
+            Log.w(TAG, "clear");
+            debugGetSession = false;
+            debugPutSession = false;
+        }
+        фифошка.clear();
+    }
 
 }

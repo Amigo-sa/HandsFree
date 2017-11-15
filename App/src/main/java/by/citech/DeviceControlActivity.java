@@ -58,7 +58,7 @@ import by.citech.logic.INetworkListener;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-import static by.citech.util.NetworkInfo.getIPAddress;
+import static by.citech.util.NetworkInfo.getIpAddr;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -154,7 +154,7 @@ public class DeviceControlActivity extends Activity
         btnSetDisabled(btnGreen, "IDLE", GRAY);
         btnSetDisabled(btnRed, "IDLE", GRAY);
 
-        editTextSrvLocAddr.setText(getIPAddress(Settings.ipv4));
+        editTextSrvLocAddr.setText(getIpAddr(Settings.ipv4));
         editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
         editTextSrvLocAddr.setFocusable(false);
         editTextSrvRemPort.setText(String.format("%d", Settings.serverRemotePortNumber));
@@ -182,7 +182,7 @@ public class DeviceControlActivity extends Activity
             @Override public void onAnimationRepeat(Animation animation) {}
         });
 
-        caller.start();
+        caller.build();
     }
     
     private boolean getVisiblityMain(){
@@ -262,7 +262,6 @@ public class DeviceControlActivity extends Activity
         connectorBluetooth.stopScanBluetoothDevice();
         connectorBluetooth.startScanBluetoothDevice();
     }
-
 
     //------------------------Dialogs-----------------------------------------
 

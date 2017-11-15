@@ -18,13 +18,13 @@ public class TaskSendMessage extends AsyncTask<String, String, Void> {
 
     @Override
     protected Void doInBackground(String... message) {
-        if (Settings.debug) Log.i(Tags.NET_TASK_SEND, "doInBackground");
-        if (Settings.debug) Log.i(Tags.NET_TASK_SEND, String.format("doInBackground message is <%s>", message[0]));
+        if (Settings.debug) Log.i(Tags.NET_SEND, "doInBackground");
+        if (Settings.debug) Log.i(Tags.NET_SEND, String.format("doInBackground message is <%s>", message[0]));
         if (iTransmitter != null) {
             iTransmitter.sendMessage(message[0]);
             publishProgress(StatusMessages.CLT_MESSAGE_SENDED);
         } else {
-            if (Settings.debug) Log.i(Tags.NET_TASK_SEND, "doInBackground iClientCtrl is null");
+            if (Settings.debug) Log.i(Tags.NET_SEND, "doInBackground iClientCtrl is null");
             publishProgress(StatusMessages.CLT_MESSAGE_CANT);
         }
         return null;
@@ -32,7 +32,7 @@ public class TaskSendMessage extends AsyncTask<String, String, Void> {
 
     @Override
     protected void onProgressUpdate(String... status) {
-        if (Settings.debug) Log.i(Tags.NET_TASK_SEND, "onProgressUpdate");
+        if (Settings.debug) Log.i(Tags.NET_SEND, "onProgressUpdate");
         switch (status[0]) {
             case StatusMessages.CLT_MESSAGE_CANT:
                 iMessage.messageCantSend();

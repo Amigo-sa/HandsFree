@@ -9,20 +9,21 @@ public class Tags {
     public static final String CLT_TASK_CONN        = "WSD_CLT_TASK_CONN";
     public static final String CLT_WSOCKETCTRL      = "WSD_CLT_WSOCKETCTRL";
 
-    public static final String SRV_TASK_SRVON       = "WSD_SRV_TASK_SRVON";
-    public static final String SRV_TASK_SRVOFF      = "WSD_SRV_TASK_SRVOFF";
+    public static final String SRV_SRVON            = "WSD_SRV_TASK_SRVON";
+    public static final String SRV_SRVOFF           = "WSD_SRV_TASK_SRVOFF";
     public static final String SRV_NANOHTTPD        = "WSD_SRV_NANOHTTPD";
     public static final String SRV_WSOCKETCTRL      = "WSD_SRV_WSOCKETCTRL";
 
-    public static final String NET_TASK_DISC        = "WSD_NET_TASK_DISC";
-    public static final String NET_TASK_STREAM      = "WSD_NET_TASK_STREAM";
-    public static final String NET_TASK_SEND        = "WSD_NET_TASK_SEND";
-    public static final String NET_TASK_REDIR       = "WSD_NET_TASK_REDIR";
+    public static final String NET_DISC             = "WSD_NET_DISC";
+    public static final String NET_STREAM           = "WSD_NET_STREAM";
+    public static final String NET_SEND             = "WSD_NET_SEND";
+    public static final String NET_REDIR            = "WSD_NET_REDIR";
     public static final String NET_REDIR_AUDIO      = "WSD_NET_REDIR_AUDIO";
     public static final String NET_REDIR_BLUETOOTH  = "WSD_NET_REDIR_BT";
     public static final String NET_STREAM_AUDIO     = "WSD_NET_STREAM_AUDIO";
     public static final String NET_STREAM_BLUETOOTH = "WSD_NET_STREAM_BT";
     public static final String NET_CONNECTOR        = "WSD_NET_CONNECTOR";
+    public static final String NET_INFO             = "WSD_NET_INFO";
     public static final String NET2BLE_STORE        = "WSD_NET2BLE_STORE";
 
     public static final String BLE2NET_STORE        = "WSD_BLE2NET_STORE";

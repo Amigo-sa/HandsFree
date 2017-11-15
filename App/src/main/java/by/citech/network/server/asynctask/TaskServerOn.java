@@ -23,9 +23,9 @@ public class TaskServerOn extends AsyncTask<String, IServerCtrl, Void> {
 
     @Override
     protected Void doInBackground(String... port) {
-        Log.i(Tags.SRV_TASK_SRVON, "doInBackground");
+        Log.i(Tags.SRV_SRVON, "doInBackground");
         int portNum = Integer.parseInt(port[0]);
-        Log.i(Tags.SRV_TASK_SRVON, String.format("%d", portNum));
+        Log.i(Tags.SRV_SRVON, String.format("%d", portNum));
         ServerCtrlNanoWebSocket serverCtrlNanoWebSocket = new ServerCtrlNanoWebSocket(portNum, handler);
 
         if (!serverCtrlNanoWebSocket.isAliveServer()) {
@@ -50,7 +50,7 @@ public class TaskServerOn extends AsyncTask<String, IServerCtrl, Void> {
 
     @Override
     protected void onProgressUpdate(IServerCtrl... iServerCtrl) {
-        Log.i(Tags.SRV_TASK_SRVON, "onProgressUpdate");
+        Log.i(Tags.SRV_SRVON, "onProgressUpdate");
         iServerCtrlReg.serverStarted(iServerCtrl[0]);
     }
 }

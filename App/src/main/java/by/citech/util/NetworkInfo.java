@@ -1,17 +1,24 @@
 package by.citech.util;
 
+import android.util.Log;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+
 public class NetworkInfo {
 
+    private static final String TAG = Tags.NET_INFO;
+    private static final boolean debug = Settings.debug;
     /**
      * Returns MAC address of the given interface name.
      * @param interfaceName eth0, wlan0 or NULL=use first interface
      * @return  mac address or empty string
      */
-    public static String getMACAddress(String interfaceName) {
+    public static String getMacAddr(String interfaceName) {
         try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface intf : interfaces) {
@@ -26,14 +33,11 @@ public class NetworkInfo {
                 if (buf.length()>0) buf.deleteCharAt(buf.length()-1);
                 return buf.toString();
             }
-        } catch (Exception ex) { } // for now eat exceptions
+        } catch (Exception e) {
+            if (debug) Log.i(TAG, "getMacAddr exception");
+        } // for now eat exceptions
+        if (debug) Log.e(TAG, "getMacAddr empty address");
         return "";
-        /*try {
-            // this is so Linux hack
-            return loadFileAsString("/sys/class/net/" +interfaceName + "/address").toUpperCase().trim();
-        } catch (IOException ex) {
-            return null;
-        }*/
     }
 
     /**
@@ -41,7 +45,7 @@ public class NetworkInfo {
      * @param useIPv4  true=return ipv4, false=return ipv6
      * @return  address or empty string
      */
-    public static String getIPAddress(boolean useIPv4) {
+    public static String getIpAddr(boolean useIPv4) {
         try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface intf : interfaces) {
@@ -49,22 +53,23 @@ public class NetworkInfo {
                 for (InetAddress addr : addrs) {
                     if (!addr.isLoopbackAddress()) {
                         String sAddr = addr.getHostAddress();
-                        //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
-                        boolean isIPv4 = sAddr.indexOf(':')<0;
-
+                        boolean isIPv4 = sAddr.indexOf(':') < 0;
                         if (useIPv4) {
                             if (isIPv4)
                                 return sAddr;
                         } else {
                             if (!isIPv4) {
                                 int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
-                                return delim<0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
+                                return (delim < 0) ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
                             }
                         }
                     }
                 }
             }
-        } catch (Exception ex) { } // for now eat exceptions
+        } catch (Exception e) {
+            if (debug) Log.e(TAG, "getIpAddr exception");
+        } // for now eat exceptions
+        if (debug) Log.e(TAG, "getIpAddr empty address");
         return "";
     }
 

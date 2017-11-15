@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import by.citech.data.StorageData;
 import by.citech.network.client.asynctask.TaskClientConn;
 import by.citech.network.client.connection.IClientCtrl;
 import by.citech.network.client.connection.IClientCtrlReg;
@@ -15,21 +16,20 @@ import by.citech.network.control.TaskDisc;
 import by.citech.network.control.TaskSendMessage;
 import by.citech.network.control.redirect.IRedirectCtrl;
 import by.citech.network.control.redirect.IRedirectCtrlReg;
-import by.citech.network.control.redirect.TaskRedirect;
+import by.citech.network.control.redirect.Redirect;
 import by.citech.network.control.stream.IStreamCtrl;
 import by.citech.network.control.stream.IStreamCtrlReg;
-import by.citech.network.control.stream.TaskStream;
+import by.citech.network.control.stream.Stream;
 import by.citech.network.server.asynctask.TaskServerOff;
 import by.citech.network.server.asynctask.TaskServerOn;
 import by.citech.network.server.connection.IServerCtrl;
 import by.citech.network.server.connection.IServerCtrlReg;
 import by.citech.network.server.connection.IServerOff;
-import by.citech.param.DataSource;
 import by.citech.param.Messages;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-import static by.citech.util.NetworkInfo.getIPAddress;
+import static by.citech.util.NetworkInfo.getIpAddr;
 
 public class ConnectorNetwork
         implements IServerCtrlReg, IRedirectCtrlReg, IStreamCtrlReg, IClientCtrlReg,
@@ -44,6 +44,8 @@ public class ConnectorNetwork
     private INetworkInfoListener iNetworkInfoListener;
     private ArrayList<ICallNetworkListener> iCallNetworkListeners;
     private ArrayList<ICallNetworkExchangeListener> iCallNetworkExchangeListeners;
+    private StorageData storageBtToNet;
+    private StorageData storageNetToBt;
 
     //--------------------- singleton
 
@@ -85,6 +87,16 @@ public class ConnectorNetwork
     public ConnectorNetwork addiCallNetworkListener(ICallNetworkListener iCallNetworkListener) {
         iCallNetworkListeners.add(iCallNetworkListener);
         iCallNetworkExchangeListeners.add(iCallNetworkListener);
+        return this;
+    }
+
+    public ConnectorNetwork setStorageBtToNet(StorageData storageBtToNet) {
+        this.storageBtToNet = storageBtToNet;
+        return this;
+    }
+
+    public ConnectorNetwork setStorageNetToBt(StorageData storageNetToBt) {
+        this.storageNetToBt = storageNetToBt;
         return this;
     }
 
@@ -264,13 +276,13 @@ public class ConnectorNetwork
             case OutcomingConnected:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText OutcomingConnected");
                 if (message.equals(Messages.RESPONSE_ACCEPT)) {
-                    if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText ACCEPT)");
+                    if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText ACCEPT");
                     if (setState(State.OutcomingConnected, State.Call))
                         for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callOutcomingAccepted();
                     setiConnCtrl(iClientCtrl);
                     exchangeStart();
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
-                    if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText REJECT)");
+                    if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText REJECT");
                     if (setState(State.OutcomingConnected, State.Idle))
                         for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                     disconnect(iClientCtrl);
@@ -306,9 +318,10 @@ public class ConnectorNetwork
 
     private boolean isLocalIp() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "isLocalIp");
-        return (iNetworkInfoListener.getRemAddr().equals(getIPAddress(Settings.ipv4)) ||
-                iNetworkInfoListener.getRemAddr().equals("127.0.0.1") ||
-                iNetworkInfoListener.getRemAddr().equals("localhost"));
+        String remAddr = iNetworkInfoListener.getRemAddr();
+        return (remAddr.equals(getIpAddr(Settings.ipv4)) ||
+                remAddr.equals("127.0.0.1") ||
+                remAddr.equals("localhost"));
     }
 
     private void connect() {
@@ -331,14 +344,8 @@ public class ConnectorNetwork
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart");
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
-        if (Settings.dataSource == DataSource.BLUETOOTH) {
-            //TODO: поправить на сеттер
-            new TaskStream(this, iConnCtrl.getTransmitter(), Settings.dataSource, Caller.getInstance().getStorageBtToNet()).execute();
-            new TaskRedirect(this, iConnCtrl.getReceiverRegister(), Settings.dataSource, Caller.getInstance().getStorageNetToBt()).execute();
-        } else if (Settings.dataSource == DataSource.MICROPHONE) {
-            new TaskStream(this, iConnCtrl.getTransmitter(), Settings.dataSource).execute();
-            new TaskRedirect(this, iConnCtrl.getReceiverRegister(), Settings.dataSource).execute();
-        }
+        new Stream(this, iConnCtrl.getTransmitter(), storageBtToNet).execute();
+        new Redirect(this, iConnCtrl.getReceiverRegister(), storageNetToBt).execute();
     }
 
     private void exchangeStop() {

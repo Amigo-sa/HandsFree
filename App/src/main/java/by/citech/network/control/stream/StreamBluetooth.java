@@ -11,6 +11,8 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 class StreamBluetooth implements IStreamCtrl {
+    private static final String TAG = Tags.NET_STREAM_BLUETOOTH;
+    private static final boolean debug = Settings.debug;
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
     private StorageData storageBtToNet;
@@ -21,13 +23,15 @@ class StreamBluetooth implements IStreamCtrl {
     }
 
     public IStreamCtrl start() {
-        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "start");
+        if (debug) Log.i(TAG, "start");
         return this;
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient");
+        if (debug) Log.i(TAG, "run");
         isStreaming = true;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int bufferedDataSize;
         while (isStreaming) {
             while (storageBtToNet.isEmpty()) {
                 try {
@@ -39,36 +43,35 @@ class StreamBluetooth implements IStreamCtrl {
                     return;
                 }
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             while (!storageBtToNet.isEmpty()) {
                 try {
                     baos.write(storageBtToNet.getData());
-                    if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient baos.write(storageBtToNet.getData())");
+                    if (debug) Log.i(TAG, "run got data from storage");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 if (!isStreaming) {
-                    baos.reset();
                     return;
                 }
-                if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, String.format("baos.size() is %d", baos.size()));
-                if (baos.size() > Settings.minNetSendSize) {
-                    if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient baos.size() > bufferSize");
+                bufferedDataSize = baos.size();
+                if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
+                //TODO: добавить логику обрезки на случай вычитки большего количества данных
+                if (bufferedDataSize == Settings.netSendSize) {
+                    if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                     iTransmitter.sendBytes(baos.toByteArray());
                     baos.reset();
+                } else if (bufferedDataSize > Settings.netSendSize) {
+                    if (debug) Log.e(TAG, "run too much data in network output buffer");
+                    return;
                 }
             }
         }
-        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "startClient done");
+        if (debug) Log.i(TAG, "run done");
     }
 
     @Override
     public void streamOff() {
-        if (Settings.debug) Log.i(Tags.NET_STREAM_BLUETOOTH, "streamOff");
+        if (debug) Log.i(TAG, "streamOff");
         isStreaming = false;
-        //TODO: разобраться с синхронайзом
-//        synchronized (storageBtToNet) {
-//            storageBtToNet.notify();
-//        }
     }
 }

@@ -15,7 +15,7 @@ public class TaskServerOff extends AsyncTask<IServerCtrl, Void, Void> {
 
     @Override
     protected Void doInBackground(IServerCtrl... iServerCtrl) {
-        Log.i(Tags.SRV_TASK_SRVOFF, "doInBackground");
+        Log.i(Tags.SRV_SRVOFF, "doInBackground");
         if (iServerCtrl[0].isAliveServer()) {
             iServerCtrl[0].stopServer();
             while (iServerCtrl[0].isAliveServer()) {
@@ -25,9 +25,9 @@ public class TaskServerOff extends AsyncTask<IServerCtrl, Void, Void> {
                     e.printStackTrace();
                 }
             }
-            Log.i(Tags.SRV_TASK_SRVOFF, "doInBackground server stopped");
+            Log.i(Tags.SRV_SRVOFF, "doInBackground server stopped");
         } else {
-            Log.i(Tags.SRV_TASK_SRVOFF, "doInBackground server already stopped");
+            Log.i(Tags.SRV_SRVOFF, "doInBackground server already stopped");
         }
 
         return null;
@@ -35,7 +35,7 @@ public class TaskServerOff extends AsyncTask<IServerCtrl, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        Log.i(Tags.SRV_TASK_SRVOFF, "onPostExecute");
+        Log.i(Tags.SRV_SRVOFF, "onPostExecute");
         iServerOff.serverStopped();
     }
 }

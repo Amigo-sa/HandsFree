@@ -11,18 +11,17 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
-    private int bufferSize;
+    private int bufferSize = Settings.bufferSize;
     private IReceiverListenerReg iReceiverListenerReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    RedirectToAudio(IReceiverListenerReg iReceiverListenerReg, int bufferSize) {
+    RedirectToAudio(IReceiverListenerReg iReceiverListenerReg) {
         this.iReceiverListenerReg = iReceiverListenerReg;
-        this.bufferSize = bufferSize;
     }
 
     public IRedirectCtrl start() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "start");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build");
         redirectOff();
 
         audioTrack = new AudioTrack.Builder()
@@ -39,7 +38,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
                 .setTransferMode(Settings.audioMode)
                 .build();
 
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "start done");
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build done");
         return this;
     }
 

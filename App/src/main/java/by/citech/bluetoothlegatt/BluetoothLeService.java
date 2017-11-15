@@ -119,7 +119,7 @@ public class BluetoothLeService extends Service {
                 broadcastUpdate(intentAction);
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
-                Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
+                Log.i(TAG, "Attempting to build service discovery:" + mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
@@ -228,7 +228,7 @@ public class BluetoothLeService extends Service {
 //                        }
 //                    });
 //                    Log.w("WSD_MTU", "add WriteListener");
-//                    wrt.start();
+//                    wrt.build();
 //                    Log.w("WSD_MTU", "Write Thread START");
 //                }
 //            }
