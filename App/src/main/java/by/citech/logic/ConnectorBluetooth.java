@@ -184,7 +184,6 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
 
 
     public void closeLeService(){
-        unregisterReceiver();
         if (Settings.debug) Log.i(TAG, "closeLeService()");
         if(mBluetoothLeService.getWriteThread() != null)
             mBluetoothLeService.stopWriteThread();
