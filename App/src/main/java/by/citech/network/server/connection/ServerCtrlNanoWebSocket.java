@@ -177,13 +177,13 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
         @Override
         protected void onMessage(WebSocketFrame message) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onReceiveMessage");
+            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage");
 
             if (listener != null) {
-                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onReceiveMessage to redirect");
+                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage to redirect");
                 listener.onReceiveMessage(message.getBinaryPayload());
             } else {
-                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onReceiveMessage to activity");
+                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage to activity");
                 handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message).sendToTarget();
             }
 //          handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message.getTextPayload()).sendToTarget();

@@ -15,7 +15,7 @@ public class Settings {
     public static final int netSendSize = bluetoothMessageSize * netToBtDivider;
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
-    public static final boolean debug = true;
+    public static final boolean debug = false;
     public static final int bufferSize = 3000;
     public static final boolean testSendOneOnCall = false;
 
