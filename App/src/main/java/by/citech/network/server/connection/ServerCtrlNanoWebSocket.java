@@ -5,8 +5,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import by.citech.network.control.IReceiverListener;
-import by.citech.network.control.IReceiverListenerReg;
+import by.citech.network.control.IReceiveListener;
+import by.citech.network.control.IReceiveListenerReg;
 import by.citech.network.control.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.network.server.connection.protocols.http.IHTTPSession;
@@ -20,11 +20,11 @@ import by.citech.param.Tags;
 
 import static by.citech.util.Decode.bytesToHexMark1;
 
-public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiverListenerReg, ITransmitter {
+public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiveListenerReg, ITransmitter {
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
     private WebSocket webSocket;
     private Handler handler;
-    private IReceiverListener listener;
+    private IReceiveListener listener;
     private String status = "";
 
     public ServerCtrlNanoWebSocket(int port, Handler handler) {
@@ -69,7 +69,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
     }
 
     @Override
-    public IReceiverListenerReg getReceiverRegister() {
+    public IReceiveListenerReg getReceiverRegister() {
         if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getReceiverRegister");
         return this;
     }
@@ -137,10 +137,10 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         return false;
     }
 
-    //--------------------- IReceiverListenerReg
+    //--------------------- IReceiveListenerReg
 
     @Override
-    public void registerReceiverListener(IReceiverListener listener) {
+    public void registerReceiverListener(IReceiveListener listener) {
         if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "registerReceiverListener");
         this.listener = listener;
     }

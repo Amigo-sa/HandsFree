@@ -4,8 +4,8 @@ import android.os.Handler;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
 
-import by.citech.network.control.IReceiverListener;
-import by.citech.network.control.IReceiverListenerReg;
+import by.citech.network.control.IReceiveListener;
+import by.citech.network.control.IReceiveListenerReg;
 import by.citech.network.control.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -20,14 +20,14 @@ import by.citech.param.StatusMessages;
 
 import static by.citech.util.Decode.bytesToHexMark1;
 
-public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientCtrl, ITransmitter, IReceiverListenerReg {
+public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientCtrl, ITransmitter, IReceiveListenerReg {
     private static final String TAG = Tags.CLT_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
     private WebSocket webSocket;
     private String status = "";
     private String url = "";
     private Handler handler;
-    private IReceiverListener listener;
+    private IReceiveListener listener;
 
     public ClientCtrlOkWebSocket(String url, Handler handler) {
         this.url = url;
@@ -86,7 +86,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     }
 
     @Override
-    public IReceiverListenerReg getReceiverRegister() {
+    public IReceiveListenerReg getReceiverRegister() {
         return this;
     }
 
@@ -96,10 +96,10 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
         return this.status;
     }
 
-    //--------------------- IReceiverListenerReg
+    //--------------------- IReceiveListenerReg
 
     @Override
-    public void registerReceiverListener(IReceiverListener listener) {
+    public void registerReceiverListener(IReceiveListener listener) {
         if (debug) Log.i(TAG, "registerReceiverListener");
         this.listener = listener;
     }

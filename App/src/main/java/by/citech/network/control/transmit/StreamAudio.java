@@ -1,4 +1,4 @@
-package by.citech.network.control.stream;
+package by.citech.network.control.transmit;
 
 import android.media.AudioRecord;
 import android.util.Log;

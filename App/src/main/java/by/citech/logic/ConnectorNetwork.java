@@ -12,14 +12,14 @@ import by.citech.network.client.connection.IClientCtrlReg;
 import by.citech.network.control.IConnCtrl;
 import by.citech.network.control.IDisc;
 import by.citech.network.control.IMessage;
-import by.citech.network.control.TaskDisc;
-import by.citech.network.control.TaskSendMessage;
-import by.citech.network.control.redirect.IRedirectCtrl;
-import by.citech.network.control.redirect.IRedirectCtrlReg;
-import by.citech.network.control.redirect.Redirect;
-import by.citech.network.control.stream.IStreamCtrl;
-import by.citech.network.control.stream.IStreamCtrlReg;
-import by.citech.network.control.stream.Stream;
+import by.citech.network.control.Disc;
+import by.citech.network.control.transmit.SendMessage;
+import by.citech.network.control.receive.IRedirectCtrl;
+import by.citech.network.control.receive.IRedirectCtrlReg;
+import by.citech.network.control.receive.Redirect;
+import by.citech.network.control.transmit.IStreamCtrl;
+import by.citech.network.control.transmit.IStreamCtrlReg;
+import by.citech.network.control.transmit.Stream;
 import by.citech.network.server.asynctask.TaskServerOff;
 import by.citech.network.server.asynctask.TaskServerOn;
 import by.citech.network.server.connection.IServerCtrl;
@@ -313,7 +313,7 @@ public class ConnectorNetwork
 
     private void responseAccept() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "responseAccept");
-        new TaskSendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_ACCEPT);
+        new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_ACCEPT);
     }
 
     private boolean isLocalIp() {
@@ -334,7 +334,7 @@ public class ConnectorNetwork
     private void disconnect(IConnCtrl iConnCtrl) {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "disconnect");
         if (iConnCtrl != null) {
-            new TaskDisc(this).execute(iConnCtrl);
+            new Disc(this).execute(iConnCtrl);
         } else {
             if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "disconnect iConnCtrl is null");
         }

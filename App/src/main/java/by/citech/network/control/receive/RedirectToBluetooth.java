@@ -1,22 +1,22 @@
-package by.citech.network.control.redirect;
+package by.citech.network.control.receive;
 
 import android.util.Log;
 
 import by.citech.data.StorageData;
-import by.citech.network.control.IReceiverListener;
-import by.citech.network.control.IReceiverListenerReg;
+import by.citech.network.control.IReceiveListener;
+import by.citech.network.control.IReceiveListenerReg;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
+class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     private static final String TAG = Tags.NET_REDIR_BLUETOOTH;
     private static final boolean debug = Settings.debug;
-    private IReceiverListenerReg iReceiverListenerReg;
+    private IReceiveListenerReg iReceiveListenerReg;
     private boolean isRedirecting = false;
     private final StorageData storageNetToBt;
 
-    RedirectToBluetooth(IReceiverListenerReg iReceiverListenerReg, StorageData storageNetToBt) {
-        this.iReceiverListenerReg = iReceiverListenerReg;
+    RedirectToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData storageNetToBt) {
+        this.iReceiveListenerReg = iReceiveListenerReg;
         this.storageNetToBt = storageNetToBt;
     }
 
@@ -29,7 +29,7 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
     public void run() {
         if (debug) Log.i(TAG, "run");
         isRedirecting = true;
-        iReceiverListenerReg.registerReceiverListener(this);
+        iReceiveListenerReg.registerReceiverListener(this);
         if (Settings.debug) Log.i(TAG, "run done");
     }
 
@@ -38,7 +38,7 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiverListener {
         if (debug) Log.i(TAG, "redirectOff");
         isRedirecting = false;
         storageNetToBt.clear();
-        iReceiverListenerReg.registerReceiverListener(null);
+        iReceiveListenerReg.registerReceiverListener(null);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package by.citech.network.control.stream;
+package by.citech.network.control.transmit;
 
 import android.util.Log;
 

@@ -1,23 +1,23 @@
-package by.citech.network.control.redirect;
+package by.citech.network.control.receive;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import by.citech.network.control.IReceiverListener;
-import by.citech.network.control.IReceiverListenerReg;
+import by.citech.network.control.IReceiveListener;
+import by.citech.network.control.IReceiveListenerReg;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
+class RedirectToAudio implements IRedirectCtrl, IReceiveListener {
     private int bufferSize = Settings.bufferSize;
-    private IReceiverListenerReg iReceiverListenerReg;
+    private IReceiveListenerReg iReceiveListenerReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    RedirectToAudio(IReceiverListenerReg iReceiverListenerReg) {
-        this.iReceiverListenerReg = iReceiverListenerReg;
+    RedirectToAudio(IReceiveListenerReg iReceiveListenerReg) {
+        this.iReceiveListenerReg = iReceiveListenerReg;
     }
 
     public IRedirectCtrl start() {
@@ -46,7 +46,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient");
         isRedirecting = true;
         audioTrack.play();
-        iReceiverListenerReg.registerReceiverListener(this);
+        iReceiveListenerReg.registerReceiverListener(this);
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient done");
     }
 
@@ -62,7 +62,7 @@ class RedirectToAudio implements IRedirectCtrl, IReceiverListener {
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
         isRedirecting = false;
-        iReceiverListenerReg.registerReceiverListener(null);
+        iReceiveListenerReg.registerReceiverListener(null);
         if (audioTrack != null) {
             if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
                 audioTrack.stop();

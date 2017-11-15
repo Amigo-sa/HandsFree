@@ -1,10 +1,10 @@
-package by.citech.network.control.redirect;
+package by.citech.network.control.receive;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.data.StorageData;
-import by.citech.network.control.IReceiverListenerReg;
+import by.citech.network.control.IReceiveListenerReg;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -12,13 +12,13 @@ public class Redirect extends AsyncTask<String, IRedirectCtrl, Void> {
     private static final String TAG = Tags.NET_REDIR;
     private static final boolean debug = Settings.debug;
     private IRedirectCtrlReg iRedirectCtrlReg;
-    private IReceiverListenerReg iReceiverListenerReg;
+    private IReceiveListenerReg iReceiveListenerReg;
     private StorageData storageNetToBt;
 
-    public Redirect(IRedirectCtrlReg iRedirectCtrlReg, IReceiverListenerReg iReceiverListenerReg, StorageData storageNetToBt) {
+    public Redirect(IRedirectCtrlReg iRedirectCtrlReg, IReceiveListenerReg iReceiveListenerReg, StorageData storageNetToBt) {
         if (debug) Log.i(TAG, "Redirect");
         this.iRedirectCtrlReg = iRedirectCtrlReg;
-        this.iReceiverListenerReg = iReceiverListenerReg;
+        this.iReceiveListenerReg = iReceiveListenerReg;
         this.storageNetToBt = storageNetToBt;
     }
 
@@ -28,7 +28,7 @@ public class Redirect extends AsyncTask<String, IRedirectCtrl, Void> {
         switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
-                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiverListenerReg);
+                final RedirectToAudio redirectToAudio = new RedirectToAudio(iReceiveListenerReg);
                 publishProgress(redirectToAudio.start());
                 new Thread(new Runnable() {
                     @Override
@@ -44,7 +44,7 @@ public class Redirect extends AsyncTask<String, IRedirectCtrl, Void> {
                     if (debug) Log.e(TAG, "doInBackground bluetooth storage is null");
                     return null;
                 }
-                final RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iReceiverListenerReg, storageNetToBt);
+                final RedirectToBluetooth redirectToBluetooth = new RedirectToBluetooth(iReceiveListenerReg, storageNetToBt);
                 publishProgress(redirectToBluetooth.start());
                 new Thread(new Runnable() {
                     @Override

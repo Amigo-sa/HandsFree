@@ -1,4 +1,4 @@
-package by.citech.network.control.redirect;
+package by.citech.network.control.receive;
 
 public interface IRedirectCtrlReg {
     void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl);

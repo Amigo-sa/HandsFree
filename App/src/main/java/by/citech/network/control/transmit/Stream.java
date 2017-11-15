@@ -1,11 +1,10 @@
-package by.citech.network.control.stream;
+package by.citech.network.control.transmit;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.data.StorageData;
 import by.citech.network.control.ITransmitter;
-import by.citech.param.DataSource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
