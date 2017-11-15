@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
+import java.util.Queue;
+
 import by.citech.data.StorageData;
 import by.citech.logic.Resource;
 import by.citech.param.Settings;
@@ -21,6 +23,7 @@ public class WriterTransmitter extends Thread {
     private BluetoothGattCharacteristic characteristic;
     private WriterTransmitterCallbackListener listener;
     private boolean isRunning;
+    private byte[] arrayData;
 
     public WriterTransmitter(String name, Resource res, StorageData storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
@@ -34,21 +37,56 @@ public class WriterTransmitter extends Thread {
         this.listener = listener;
     }
 
+    private byte[] getBytesMessageSize(int numBTPackage, int messageSize ) {
+
+        byte[] singleBTPackage = new byte[messageSize];
+        for (int i = 0; i < messageSize; i++) {
+            singleBTPackage[i] = arrayData[i*numBTPackage];
+        }
+
+        return singleBTPackage;
+    }
+
+
+
     @Override
     public void run() {
+        int numBTpackage = 1;
+        int allBTPackages = 0;
+        byte[] dataWrite;
+        boolean isArrayDataEmpty = true;
         isRunning = true;
         boolean timeOver = false;
         int timecounter = 0;
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-            if (!storageNetToBt.isEmpty() && (res.isCallback() || timeOver)) {
+            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (res.isCallback() || timeOver)) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
-                characteristic.setValue(storageNetToBt.getData());
-                mBluetoothGatt.writeCharacteristic(characteristic);
+                if(isArrayDataEmpty) {
+                    arrayData = storageNetToBt.getData();
+
+                    if (arrayData.length > 0){
+                        isArrayDataEmpty = false;
+                        allBTPackages = (arrayData.length/Settings.bluetoothMessageSize);
+                    }
+                }
+
+                if (numBTpackage < allBTPackages) {
+                    dataWrite = getBytesMessageSize(numBTpackage, Settings.bluetoothMessageSize);
+                    numBTpackage++;
+                    characteristic.setValue(dataWrite);
+                    mBluetoothGatt.writeCharacteristic(characteristic);
+                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
+                }else{
+                    numBTpackage = 1;
+                    allBTPackages = 0;
+                    isArrayDataEmpty = true;
+                }
+
 //                final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
 //                for (byte byteChar : dataByte)
 //                    stringBuilder.append(String.format("%02X ", byteChar));
-                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write");
+                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "before set callback");
                 res.setCallback(false);
                 timeOver = false;
                 timecounter = 0;
