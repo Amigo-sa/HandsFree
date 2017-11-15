@@ -51,8 +51,7 @@ public class WriterTransmitter extends Thread {
 
     @Override
     public void run() {
-        int numBTpackage = 1;
-        int allBTPackages = 0;
+        int numBTpackage = 0;
         byte[] dataWrite;
         boolean isArrayDataEmpty = true;
         isRunning = true;
@@ -64,22 +63,17 @@ public class WriterTransmitter extends Thread {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 if(isArrayDataEmpty) {
                     arrayData = storageNetToBt.getData();
-
-                    if (arrayData.length > 0){
-                        isArrayDataEmpty = false;
-                        allBTPackages = (arrayData.length/Settings.bluetoothMessageSize);
-                    }
+                    isArrayDataEmpty = false;
                 }
 
-                if (numBTpackage < allBTPackages) {
+                if (numBTpackage < Settings.netToBtDivider) {
                     dataWrite = getBytesMessageSize(numBTpackage, Settings.bluetoothMessageSize);
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
                     mBluetoothGatt.writeCharacteristic(characteristic);
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
                 }else{
-                    numBTpackage = 1;
-                    allBTPackages = 0;
+                    numBTpackage = 0;
                     isArrayDataEmpty = true;
                 }
 

@@ -11,7 +11,8 @@ public class Settings {
     //---------------- COMMON
 
     public static final int bluetoothMessageSize = 16; // bytes in one BT message
-    public static final int netSendSize = bluetoothMessageSize * 40;
+    public static final int netToBtDivider = 40;
+    public static final int netSendSize = bluetoothMessageSize * netToBtDivider;
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
     public static final boolean debug = true;
