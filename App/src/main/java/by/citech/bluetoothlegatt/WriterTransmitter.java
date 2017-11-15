@@ -4,12 +4,11 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
-import java.util.Queue;
-
 import by.citech.data.StorageData;
 import by.citech.logic.Resource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
+import by.citech.util.Decode;
 
 /**
  * Created by tretyak on 02.10.2017.
@@ -23,7 +22,7 @@ public class WriterTransmitter extends Thread {
     private BluetoothGattCharacteristic characteristic;
     private WriterTransmitterCallbackListener listener;
     private boolean isRunning;
-    private byte[] arrayData;
+    private byte[] arrayData = new byte[Settings.netSendSize];
 
     public WriterTransmitter(String name, Resource res, StorageData storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
@@ -37,11 +36,11 @@ public class WriterTransmitter extends Thread {
         this.listener = listener;
     }
 
-    private byte[] getBytesMessageSize(int numBTPackage, int messageSize ) {
+    private byte[] getBTpackage(int numBTPackage) {
 
-        byte[] singleBTPackage = new byte[messageSize];
-        for (int i = 0; i < messageSize; i++) {
-            singleBTPackage[i] = arrayData[i*numBTPackage];
+        byte[] singleBTPackage = new byte[Settings.bluetoothMessageSize];
+        for (int i = 0; i < Settings.bluetoothMessageSize; i++) {
+            singleBTPackage[i] = arrayData[i + (numBTPackage * Settings.bluetoothMessageSize)];
         }
 
         return singleBTPackage;
@@ -63,11 +62,13 @@ public class WriterTransmitter extends Thread {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 if(isArrayDataEmpty) {
                     arrayData = storageNetToBt.getData();
+                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from storageNetToBt" + Decode.bytesToHexMark1(arrayData));
                     isArrayDataEmpty = false;
                 }
 
                 if (numBTpackage < Settings.netToBtDivider) {
-                    dataWrite = getBytesMessageSize(numBTpackage, Settings.bluetoothMessageSize);
+                    dataWrite = getBTpackage(numBTpackage);
+                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite" + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
                     mBluetoothGatt.writeCharacteristic(characteristic);
