@@ -39,31 +39,25 @@ class StreamBluetooth implements IStreamCtrl {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if (!isStreaming) {
-                    return;
-                }
+                if (!isStreaming) return;
             }
-            while (!storageBtToNet.isEmpty()) {
-                try {
-                    baos.write(storageBtToNet.getData());
-                    if (debug) Log.i(TAG, "run got data from storage");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (!isStreaming) {
-                    return;
-                }
-                bufferedDataSize = baos.size();
-                if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
-                //TODO: добавить логику обрезки на случай вычитки большего количества данных
-                if (bufferedDataSize == Settings.netSendSize) {
-                    if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
-                    iTransmitter.sendBytes(baos.toByteArray());
-                    baos.reset();
-                } else if (bufferedDataSize > Settings.netSendSize) {
-                    if (debug) Log.e(TAG, "run too much data in network output buffer");
-                    return;
-                }
+            try {
+                baos.write(storageBtToNet.getData());
+                if (debug) Log.i(TAG, "run got data from storage");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (!isStreaming) return;
+            bufferedDataSize = baos.size();
+            if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
+            //TODO: добавить логику обрезки на случай вычитки большего количества данных
+            if (bufferedDataSize == Settings.netSendSize) {
+                if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
+                iTransmitter.sendBytes(baos.toByteArray());
+                baos.reset();
+            } else if (bufferedDataSize > Settings.netSendSize) {
+                if (debug) Log.e(TAG, "run too much data in network output buffer");
+                return;
             }
         }
         if (debug) Log.i(TAG, "run done");

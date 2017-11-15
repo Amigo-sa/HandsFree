@@ -149,7 +149,7 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
         if (enable) {
-            if (Settings.debug) Log.i(TAG, "build scanLeDevice()");
+            if (Settings.debug) Log.i(TAG, "start scanLeDevice()");
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -241,7 +241,7 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
                 if (Settings.debug) Log.e(TAG, "Unable to initialize Bluetooth");
                 mIBluetoothListener.finishConnection();
             }
-            // Automatically connects to the device upon successful build-up initialization.
+            // Automatically connects to the device upon successful start-up initialization.
             mBluetoothLeService.connect(mDeviceAddress);
         }
 
