@@ -45,7 +45,11 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     public void onReceiveMessage(byte[] data) {
         if (debug) Log.i(TAG, "onReceiveMessage");
         if (isRedirecting) {
-            storageNetToBt.putData(data);
+            if (data.length == Settings.netSendSize) {
+                storageNetToBt.putData(data);
+            } else {
+                if (debug) Log.i(TAG, "onReceiveMessage received bytes: " + data.length);
+            }
         }
     }
 
