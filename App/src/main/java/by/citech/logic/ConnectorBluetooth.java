@@ -284,6 +284,7 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
                 displayGattServices(mBluetoothLeService.getSupportedGattServices());
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
+
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");

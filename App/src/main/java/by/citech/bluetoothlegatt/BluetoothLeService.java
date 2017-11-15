@@ -39,6 +39,7 @@ import java.util.UUID;
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.logic.Resource;
+import by.citech.param.Settings;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -158,7 +159,7 @@ public class BluetoothLeService extends Service {
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
                 Log.i("test","GATT SUCCESS " + "DATA :");
-                res.setCallback(true);
+                //res.setCallback(true);
 
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
@@ -273,6 +274,7 @@ public class BluetoothLeService extends Service {
             final byte[] data = characteristic.getValue();
             //if (loopback)
             storageBtToNet.putData(data);
+            res.setCallback(true);
 
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
@@ -281,7 +283,7 @@ public class BluetoothLeService extends Service {
                 //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
                 intent.putExtra(EXTRA_DATA, stringBuilder.toString());
 
-                Log.w("WSD_BLE_DATA ","storageBtToNet.putData = " + stringBuilder.toString());
+                if (Settings.debug) Log.w("WSD_BLE_DATA ","storageBtToNet.putData = " + stringBuilder.toString());
             }
         }
         sendBroadcast(intent);
@@ -441,6 +443,7 @@ public class BluetoothLeService extends Service {
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
 // потоковая запись данных в периферийное устройство
             wrt = new WriterTransmitter("Write_one", res, storageNetToBt, mBluetoothGatt, characteristic);
+            wrt.setPriority(Thread.MAX_PRIORITY);
             wrt.addWriteListener(new WriterTransmitterCallbackListener() {
                 @Override
                 public void doWriteCharacteristic(String str) {
