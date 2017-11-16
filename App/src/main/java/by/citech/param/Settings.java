@@ -9,10 +9,12 @@ public class Settings {
 
     //---------------- COMMON
 
+    public static final int btMsPerBtToBtSendSize = 10;
     public static final int btToBtSendSize = 16; // bytes in one BT message
     public static final int btSignificantBytes = 10;
     public static final int btRsvdBytesOffset = 10;
     public static final int btToNetFactor = 100;
+    public static final int btMsPerNetSendSize = btMsPerBtToBtSendSize * btToNetFactor;
     public static final int btnNetToNetSendSize = btSignificantBytes * btToNetFactor;
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;

@@ -3,7 +3,6 @@ package by.citech.network.server.connection;
 import android.os.Handler;
 import android.util.Log;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import by.citech.network.control.receive.IReceiveListener;
