@@ -48,7 +48,7 @@ import by.citech.util.Decode;
  * given Bluetooth LE device.
  */
 public class BluetoothLeService extends Service {
-    private final static String TAG = BluetoothLeService.class.getSimpleName();
+    private final static String TAG = "WSD_BluetoothLeService";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -152,7 +152,7 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-
+            Log.i(TAG,"onCharacteristicWrite");
 //            final StringBuilder stringBuilder = new StringBuilder(characteristic.getValue().length);
 //            for(byte byteChar : characteristic.getValue())
 //                stringBuilder.append(String.format("%02X ", byteChar));
@@ -160,37 +160,37 @@ public class BluetoothLeService extends Service {
 
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
-                Log.i("test","GATT SUCCESS " + "DATA :");
+                Log.i(TAG,"GATT SUCCESS " + "DATA :");
                 res.setCallback(true);
 
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
             {
-                Log.i("test","GATT WRITE connection congested");
+                Log.i(TAG,"GATT WRITE connection congested");
             }
             if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED)
             {
-                Log.i("test","GATT WRITE not permitted");
+                Log.i(TAG,"GATT WRITE not permitted");
             }
             if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH)
             {
-                Log.i("test","GATT invalid attribute lenght");
+                Log.i(TAG,"GATT invalid attribute lenght");
             }
             if(status==BluetoothGatt.GATT_FAILURE)
             {
-                Log.i("test","GATT WRITE other errors");
+                Log.i(TAG,"GATT WRITE other errors");
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
             {
-                Log.i("test","GATT WRITE congested");
+                Log.i(TAG,"GATT WRITE congested");
             }
             if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION)
             {
-                Log.i("test","GATT WRITE authentication");
+                Log.i(TAG,"GATT WRITE authentication");
             }
             else
             {
-                Log.i("test","GATT WRITE :"+status);
+                Log.i(TAG,"GATT WRITE :"+status);
             }
 
             broadcastUpdate(ACTION_DATA_WRITE);

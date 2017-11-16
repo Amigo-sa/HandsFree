@@ -48,14 +48,14 @@ public class WriterTransmitter extends Thread {
         return arrayData[numBTPackage];
     }
 
-    
+
     @Override
     public void run() {
         int numBTpackage = 0;
         byte[] dataWrite;
         boolean isArrayDataEmpty = true;
         isRunning = true;
-        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+
         while (isRunning){
             if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && res.isCallback()) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
@@ -68,6 +68,7 @@ public class WriterTransmitter extends Thread {
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
+                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                     mBluetoothGatt.writeCharacteristic(characteristic);
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
                 }else{
@@ -79,7 +80,7 @@ public class WriterTransmitter extends Thread {
                 res.setCallback(false);
             }
             try {
-                Thread.sleep(9);
+                Thread.sleep(5);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
