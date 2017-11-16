@@ -48,19 +48,16 @@ public class WriterTransmitter extends Thread {
         return arrayData[numBTPackage];
     }
 
-
-
+    
     @Override
     public void run() {
         int numBTpackage = 0;
         byte[] dataWrite;
         boolean isArrayDataEmpty = true;
         isRunning = true;
-        boolean timeOver = false;
-        int timecounter = 0;
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (res.isCallback() || timeOver)) {
+            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && res.isCallback()) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 if(isArrayDataEmpty) {
                     arrayData = storageNetToBt.getData();
@@ -78,23 +75,12 @@ public class WriterTransmitter extends Thread {
                     isArrayDataEmpty = true;
                 }
 
-//                final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
-//                for (byte byteChar : dataByte)
-//                    stringBuilder.append(String.format("%02X ", byteChar));
-                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "before set callback");
+                //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "before set callback");
                 res.setCallback(false);
-                timeOver = false;
-                timecounter = 0;
             }
             try {
-                Thread.sleep(5);
-                if (!res.isCallback()) {
-                    timecounter++;
-                }
+                Thread.sleep(9);
 
-                if (timecounter == 10) {
-                    timeOver = true;
-                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

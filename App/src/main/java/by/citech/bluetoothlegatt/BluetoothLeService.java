@@ -161,7 +161,7 @@ public class BluetoothLeService extends Service {
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
                 Log.i("test","GATT SUCCESS " + "DATA :");
-                //res.setCallback(true);
+                res.setCallback(true);
 
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
@@ -276,10 +276,11 @@ public class BluetoothLeService extends Service {
             final byte[] data = characteristic.getValue();
             //if (loopback)
             storageBtToNet.putData(data);
-            res.setCallback(true);
+            //res.setCallback(true);
 
             if (data != null && data.length > 0) {
-                if (Settings.debug) Log.w("WSD_BLE_DATA","storageBtToNet.putData " + Decode.bytesToHexMark1(data));
+                if (Settings.debug)
+                    Log.w("WSD_BLE_DATA","storageBtToNet.putData " + Decode.bytesToHexMark1(data));
             }
         }
         sendBroadcast(intent);
