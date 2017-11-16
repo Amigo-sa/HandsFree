@@ -153,6 +153,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
         if (debug) Log.i(TAG, "onMessage bytes");
+        if (debug) Log.i(TAG, "debugFrameReceived " + bytesToHexMark1(bytes.toByteArray()));
         if (listener != null) {
             if (debug) Log.i(TAG, "onMessage redirecting");
             listener.onReceiveData(bytes.toByteArray());
@@ -166,6 +167,7 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         if (debug) Log.i(TAG, "onMessage text");
+        if (debug) Log.i(TAG, "onMessage " + text);
         handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_TEXT, text).sendToTarget();
     }
 
@@ -188,4 +190,6 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
         if (debug) Log.i(TAG, "onFailure");
         handler.sendEmptyMessage(StatusMessages.CLT_ONFAILURE);
     }
+
+
 }

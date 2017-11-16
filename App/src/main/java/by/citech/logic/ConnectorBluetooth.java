@@ -46,8 +46,8 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     // хранилища данных
-    private StorageData storageBtToNet;
-    private StorageData storageNetToBt;
+    private StorageData<byte[]> storageBtToNet;
+    private StorageData<byte[][]> storageNetToBt;
     // список характеристик устройства
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
@@ -104,12 +104,12 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
         return this;
     }
 
-    public ConnectorBluetooth setStorageBtToNet(StorageData storageBtToNet){
+    public ConnectorBluetooth setStorageBtToNet(StorageData<byte[]> storageBtToNet){
         this.storageBtToNet = storageBtToNet;
         return this;
     }
 
-    public ConnectorBluetooth setStorageNetToBt(StorageData storageNetToBt){
+    public ConnectorBluetooth setStorageNetToBt(StorageData<byte[][]> storageNetToBt){
         this.storageNetToBt = storageNetToBt;
         return this;
     }

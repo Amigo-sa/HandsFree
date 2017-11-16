@@ -40,6 +40,8 @@ import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.logic.Resource;
 import by.citech.param.Settings;
+import by.citech.param.Tags;
+import by.citech.util.Decode;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -78,18 +80,18 @@ public class BluetoothLeService extends Service {
     public final static UUID READ_BYTES =
             UUID.fromString(SampleGattAttributes.READ_BYTES);
 
-    private StorageData storageBtToNet;
-    private StorageData storageNetToBt;
+    private StorageData<byte[]> storageBtToNet;
+    private StorageData<byte[][]> storageNetToBt;
 
     private boolean loopback = true;
     public Resource res;
     private String wrData;
 
-    public void setStorageBtToNet(StorageData storageBtToNet) {
+    public void setStorageBtToNet(StorageData<byte[]> storageBtToNet) {
         this.storageBtToNet = storageBtToNet;
     }
 
-    public void setStorageNetToBt(StorageData storageNetToBt) {
+    public void setStorageNetToBt(StorageData<byte[][]> storageNetToBt) {
         this.storageNetToBt = storageNetToBt;
     }
 
@@ -277,13 +279,7 @@ public class BluetoothLeService extends Service {
             res.setCallback(true);
 
             if (data != null && data.length > 0) {
-                final StringBuilder stringBuilder = new StringBuilder(data.length);
-                for(byte byteChar : data)
-                    stringBuilder.append(String.format("%02X ", byteChar));
-                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-                intent.putExtra(EXTRA_DATA, stringBuilder.toString());
-
-                if (Settings.debug) Log.w("WSD_BLE_DATA ","storageBtToNet.putData = " + stringBuilder.toString());
+                if (Settings.debug) Log.w("WSD_BLE_DATA","storageBtToNet.putData " + Decode.bytesToHexMark1(data));
             }
         }
         sendBroadcast(intent);

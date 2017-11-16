@@ -68,7 +68,7 @@ public class WriterTransmitter extends Thread {
                 }
                 if (numBTpackage < Settings.btToNetFactor) {
                     dataWrite = getBTpackage(numBTpackage);
-                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite" + Decode.bytesToHexMark1(dataWrite));
+                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
                     mBluetoothGatt.writeCharacteristic(characteristic);

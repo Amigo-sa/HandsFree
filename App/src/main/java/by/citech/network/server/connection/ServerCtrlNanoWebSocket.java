@@ -217,15 +217,16 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         @Override
         protected void debugFrameReceived(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameReceived");
-            if (debug) Log.i(TAG, String.format("debugFrameReceived: <%s>", bytesToHexMark1(frame.getBinaryPayload())));
-            if (debug) Log.i(TAG, "Received: " + "<" + frame + ">");
+            if (debug) Log.i(TAG, "debugFrameReceived " + bytesToHexMark1(frame.getBinaryPayload()));
+            if (debug) Log.i(TAG, "debugFrameReceived " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }
 
         @Override
         protected void debugFrameSent(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameSent");
-            if (debug) Log.i(TAG, "Sended: " + "<" + frame + ">");
+            if (debug) Log.i(TAG, "debugFrameSent " + bytesToHexMark1(frame.getBinaryPayload()));
+            if (debug) Log.i(TAG, "debugFrameSent " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMETX);
         }
     }
