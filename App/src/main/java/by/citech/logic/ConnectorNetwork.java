@@ -44,8 +44,8 @@ public class ConnectorNetwork
     private INetworkInfoListener iNetworkInfoListener;
     private ArrayList<ICallNetworkListener> iCallNetworkListeners;
     private ArrayList<ICallNetworkExchangeListener> iCallNetworkExchangeListeners;
-    private StorageData storageBtToNet;
-    private StorageData storageNetToBt;
+    private StorageData<byte[]> storageBtToNet;
+    private StorageData<byte[][]> storageNetToBt;
 
     //--------------------- singleton
 
@@ -90,12 +90,12 @@ public class ConnectorNetwork
         return this;
     }
 
-    public ConnectorNetwork setStorageBtToNet(StorageData storageBtToNet) {
+    public ConnectorNetwork setStorageBtToNet(StorageData<byte[]> storageBtToNet) {
         this.storageBtToNet = storageBtToNet;
         return this;
     }
 
-    public ConnectorNetwork setStorageNetToBt(StorageData storageNetToBt) {
+    public ConnectorNetwork setStorageNetToBt(StorageData<byte[][]> storageNetToBt) {
         this.storageNetToBt = storageNetToBt;
         return this;
     }
