@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.data.StorageData;
-import by.citech.network.control.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -13,9 +12,9 @@ public class Stream extends AsyncTask<String, IStreamCtrl, Void> {
     private static final boolean debug = Settings.debug;
     private IStreamCtrlReg iStreamCtrlReg;
     private ITransmitter iTransmitter;
-    private StorageData storageBtToNet;
+    private StorageData<byte[]> storageBtToNet;
 
-    public Stream(IStreamCtrlReg iStreamCtrlReg, ITransmitter iTransmitter, StorageData storageBtToNet) {
+    public Stream(IStreamCtrlReg iStreamCtrlReg, ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
         this.iStreamCtrlReg = iStreamCtrlReg;
         this.iTransmitter = iTransmitter;
         this.storageBtToNet = storageBtToNet;

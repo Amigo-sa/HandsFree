@@ -5,8 +5,6 @@ import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import by.citech.network.control.IReceiveListener;
-import by.citech.network.control.IReceiveListenerReg;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -51,8 +49,8 @@ class RedirectToAudio implements IRedirectCtrl, IReceiveListener {
     }
 
     @Override
-    public void onReceiveMessage(byte[] data) {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "onReceiveMessage");
+    public void onReceiveData(byte[] data) {
+        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "onReceiveData");
         if (isRedirecting) {
             audioTrack.write(data, 0, bufferSize);
         }

@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.data.StorageData;
-import by.citech.network.control.IReceiveListenerReg;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -13,9 +12,9 @@ public class Redirect extends AsyncTask<String, IRedirectCtrl, Void> {
     private static final boolean debug = Settings.debug;
     private IRedirectCtrlReg iRedirectCtrlReg;
     private IReceiveListenerReg iReceiveListenerReg;
-    private StorageData storageNetToBt;
+    private StorageData<byte[][]> storageNetToBt;
 
-    public Redirect(IRedirectCtrlReg iRedirectCtrlReg, IReceiveListenerReg iReceiveListenerReg, StorageData storageNetToBt) {
+    public Redirect(IRedirectCtrlReg iRedirectCtrlReg, IReceiveListenerReg iReceiveListenerReg, StorageData<byte[][]> storageNetToBt) {
         if (debug) Log.i(TAG, "Redirect");
         this.iRedirectCtrlReg = iRedirectCtrlReg;
         this.iReceiveListenerReg = iReceiveListenerReg;

@@ -2,9 +2,9 @@ package by.citech.network.control.receive;
 
 import android.util.Log;
 
+import java.util.Arrays;
+
 import by.citech.data.StorageData;
-import by.citech.network.control.IReceiveListener;
-import by.citech.network.control.IReceiveListenerReg;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -13,11 +13,15 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     private static final boolean debug = Settings.debug;
     private IReceiveListenerReg iReceiveListenerReg;
     private boolean isRedirecting = false;
-    private final StorageData storageNetToBt;
+    private StorageData<byte[][]> storageNetToBt;
+    private byte[][] byteArrayX2;
+    private byte[] tempArray;
 
-    RedirectToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData storageNetToBt) {
+    RedirectToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData<byte[][]> storageNetToBt) {
         this.iReceiveListenerReg = iReceiveListenerReg;
         this.storageNetToBt = storageNetToBt;
+        byteArrayX2 = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
+        tempArray = new byte[Settings.btSignificantBytes];
     }
 
     public IRedirectCtrl start() {
@@ -42,14 +46,18 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     }
 
     @Override
-    public void onReceiveMessage(byte[] data) {
-        if (debug) Log.i(TAG, "onReceiveMessage");
+    public void onReceiveData(byte[] data) {
+        if (debug) Log.i(TAG, "onReceiveData");
+        if (data.length != Settings.btnNetToNetSendSize) {
+            if (debug) Log.i(TAG, "onReceiveData received bytes: " + data.length);
+            return;
+        }
         if (isRedirecting) {
-            if (data.length == Settings.netSendSize) {
-                storageNetToBt.putData(data);
-            } else {
-                if (debug) Log.i(TAG, "onReceiveMessage received bytes: " + data.length);
+            for (int i = 0; i < Settings.btToNetFactor; i++) {
+                tempArray = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, (i + 1) * Settings.btSignificantBytes);
+                byteArrayX2[i] = Arrays.copyOf(tempArray, Settings.btToBtSendSize);
             }
+            storageNetToBt.putData(byteArrayX2);
         }
     }
 

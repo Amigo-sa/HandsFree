@@ -2,11 +2,12 @@ package by.citech.network.client.connection;
 
 import android.os.Handler;
 import android.util.Log;
+
 import java.util.concurrent.TimeUnit;
 
-import by.citech.network.control.IReceiveListener;
-import by.citech.network.control.IReceiveListenerReg;
-import by.citech.network.control.ITransmitter;
+import by.citech.network.control.receive.IReceiveListener;
+import by.citech.network.control.receive.IReceiveListenerReg;
+import by.citech.network.control.transmit.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import okhttp3.OkHttpClient;
@@ -107,15 +108,15 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     //--------------------- ITransmitter
 
     @Override
-    public void sendBytes(byte... bytes) {
-        if (debug) Log.i(TAG, "sendBytes");
+    public void sendData(byte[] data) {
+        if (debug) Log.i(TAG, "sendData");
         if (debug) {
-            ByteString byteString = ByteString.of(bytes);
-            Log.i(TAG, String.format("sendBytes: bytes is <%s>", bytesToHexMark1(bytes)));
-            Log.i(TAG, String.format("sendBytes: byteString is <%s>", bytesToHexMark1(byteString.toByteArray())));
+            ByteString byteString = ByteString.of(data);
+            Log.i(TAG, String.format("sendData: bytes is <%s>", bytesToHexMark1(data)));
+            Log.i(TAG, String.format("sendData: byteString is <%s>", bytesToHexMark1(byteString.toByteArray())));
             webSocket.send(byteString);
         } else {
-            webSocket.send(ByteString.of(bytes));
+            webSocket.send(ByteString.of(data));
         }
     }
 
@@ -152,11 +153,11 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
         if (debug) Log.i(TAG, "onMessage bytes");
-        if (listener == null) {
-            if (debug) Log.i(TAG, "onMessage listener is null");
+        if (listener != null) {
+            if (debug) Log.i(TAG, "onMessage redirecting");
+            listener.onReceiveData(bytes.toByteArray());
         } else {
-            if (debug) Log.i(TAG, "onMessage listener is not null");
-            listener.onReceiveMessage(bytes.toByteArray());
+            if (debug) Log.i(TAG, "onMessage not redirecting");
         }
 //      handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_BYTES, bytes).sendToTarget();
         handler.sendEmptyMessage(StatusMessages.CLT_ONMESSAGE_BYTES);

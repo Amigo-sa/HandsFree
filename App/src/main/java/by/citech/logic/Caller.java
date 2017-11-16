@@ -12,8 +12,6 @@ public class Caller {
     private static final String TAG = Tags.CALLER;
     private static final boolean debug = Settings.debug;
     private volatile State state = State.Null;
-    private StorageData storageBtToNet;
-    private StorageData storageNetToBt;
     private ICallUiListener iCallUiListener;
     private ICallNetworkListener iCallNetworkListener;
     private INetworkInfoListener iNetworkInfoListener;
@@ -53,14 +51,6 @@ public class Caller {
 
     public ServiceConnection getServiceConnection() {
         return ConnectorBluetooth.getInstance().mServiceConnection;
-    }
-
-    public StorageData getStorageBtToNet() {
-        return storageBtToNet;
-    }
-
-    public StorageData getStorageNetToBt() {
-        return storageNetToBt;
     }
 
     public Caller setiCallUiListener(ICallUiListener listener) {
@@ -122,8 +112,8 @@ public class Caller {
         }
 
         // хранилища данных
-        storageBtToNet = new StorageData(Tags.BLE2NET_STORE);
-        storageNetToBt = new StorageData(Tags.NET2BLE_STORE);
+        StorageData storageBtToNet = new StorageData<byte[]>(Tags.BLE2NET_STORE);
+        StorageData storageNetToBt = new StorageData<byte[][]>(Tags.NET2BLE_STORE);
 
         CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)

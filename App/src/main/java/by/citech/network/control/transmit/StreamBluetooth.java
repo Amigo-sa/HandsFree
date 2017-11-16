@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import by.citech.data.StorageData;
-import by.citech.network.control.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -15,9 +14,9 @@ class StreamBluetooth implements IStreamCtrl {
     private static final boolean debug = Settings.debug;
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
-    private StorageData storageBtToNet;
+    private StorageData<byte[]> storageBtToNet;
 
-    public StreamBluetooth(ITransmitter iTransmitter, StorageData storageBtToNet) {
+    public StreamBluetooth(ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
         this.iTransmitter = iTransmitter;
         this.storageBtToNet = storageBtToNet;
     }
@@ -51,11 +50,11 @@ class StreamBluetooth implements IStreamCtrl {
             bufferedDataSize = baos.size();
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
             //TODO: добавить логику обрезки на случай вычитки большего количества данных
-            if (bufferedDataSize == Settings.netSendSize) {
+            if (bufferedDataSize == Settings.btnNetToNetSendSize) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
-                iTransmitter.sendBytes(baos.toByteArray());
+                iTransmitter.sendData(baos.toByteArray());
                 baos.reset();
-            } else if (bufferedDataSize > Settings.netSendSize) {
+            } else if (bufferedDataSize > Settings.btnNetToNetSendSize) {
                 if (debug) Log.e(TAG, "run too much data in network output buffer");
                 return;
             }

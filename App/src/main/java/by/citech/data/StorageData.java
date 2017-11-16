@@ -7,24 +7,24 @@ import java.util.Deque;
 
 import by.citech.param.Settings;
 
-public class StorageData {
+public class StorageData<T> {
     private static final boolean debug = Settings.debug;
     private boolean debugGetSession, debugPutSession = false;
     private String TAG;
-    private Deque<byte[]> фифошка;
+    private Deque<T> фифошка;
 
     public StorageData(String TAG) {
         this.TAG = TAG;
         фифошка = new ArrayDeque<>();
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         if (!debugGetSession && debug) {
-         boolean isEmpty = фифошка.isEmpty();
-         if (!isEmpty) {
-             Log.w(TAG, "isEmpty not empty");
-         }
-         return isEmpty;
+            boolean isEmpty = фифошка.isEmpty();
+            if (!isEmpty) {
+                Log.w(TAG, "isEmpty not empty");
+            }
+            return isEmpty;
         } else {
             return фифошка.isEmpty();
         }
@@ -44,29 +44,28 @@ public class StorageData {
 //        return r;
 //    }
 
-    public byte[] getData() {
+    public T getData() {
         if (!debugGetSession && debug) {
             Log.w(TAG, "getData");
             debugGetSession = true;
         }
         if (debug) {
-            byte[] data = фифошка.poll();
-            if (data == null) {
+            T dataOut = фифошка.poll();
+            if (dataOut == null) {
                 Log.e(TAG, "getData is null");
             }
-            return data;
+            return dataOut;
         } else {
             return фифошка.poll();
         }
     }
 
-    public void putData(byte[] bytes) {
+    public void putData(T dataIn) {
         if (!debugPutSession && debug) {
             Log.w(TAG, "putData");
             debugPutSession = true;
         }
-        фифошка.offer(bytes);
-//      фифошка.push(dataByte); //TODO: уточнить: не тот метод?
+        фифошка.offer(dataIn);
     }
 
     public void clear() {

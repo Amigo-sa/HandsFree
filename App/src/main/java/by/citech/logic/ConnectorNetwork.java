@@ -11,7 +11,7 @@ import by.citech.network.client.connection.IClientCtrl;
 import by.citech.network.client.connection.IClientCtrlReg;
 import by.citech.network.control.IConnCtrl;
 import by.citech.network.control.IDisc;
-import by.citech.network.control.IMessage;
+import by.citech.network.control.transmit.IMessage;
 import by.citech.network.control.Disc;
 import by.citech.network.control.transmit.SendMessage;
 import by.citech.network.control.receive.IRedirectCtrl;
@@ -102,10 +102,6 @@ public class ConnectorNetwork
 
     private void setiConnCtrl(IConnCtrl iConnCtrl) {
         this.iConnCtrl = iConnCtrl;
-    }
-
-    private void resetiConnCtrl() {
-        this.iConnCtrl = null;
     }
 
     //--------------------- main

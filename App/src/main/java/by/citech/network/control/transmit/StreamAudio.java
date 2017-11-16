@@ -3,7 +3,6 @@ package by.citech.network.control.transmit;
 import android.media.AudioRecord;
 import android.util.Log;
 
-import by.citech.network.control.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import static by.citech.util.Decode.bytesToHexMark1;
@@ -61,8 +60,8 @@ class StreamAudio implements IStreamCtrl {
         while (isStreaming) {
             if (debug) Log.i(TAG, String.format("run buffer length is %d", buffer.length));
             fillBuffer(buffer, 0, buffer.length);
-            if (debug) Log.i(TAG, String.format("startClient %s: %s", "sendBytes", bytesToHexMark1(buffer)));
-            iTransmitter.sendBytes(buffer);
+            if (debug) Log.i(TAG, String.format("startClient %s: %s", "sendData", bytesToHexMark1(buffer)));
+            iTransmitter.sendData(buffer);
         }
         if (debug) Log.i(TAG, "run done");
     }

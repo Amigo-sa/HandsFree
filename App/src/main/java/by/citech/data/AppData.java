@@ -5,9 +5,12 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 
 
+import by.citech.logic.Caller;
+import by.citech.param.Tags;
+
 import static android.content.Context.MODE_PRIVATE;
 
-public class AppData {
+public final class AppData {
     private static String bluetoothDeviceId;
     private static String remoteIP;
     private static int remotePort;

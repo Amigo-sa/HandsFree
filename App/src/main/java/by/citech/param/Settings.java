@@ -1,7 +1,6 @@
 package by.citech.param;
 
 import android.media.AudioAttributes;
-import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
@@ -10,12 +9,14 @@ public class Settings {
 
     //---------------- COMMON
 
-    public static final int bluetoothMessageSize = 16; // bytes in one BT message
-    public static final int netToBtDivider = 50;
-    public static final int netSendSize = bluetoothMessageSize * netToBtDivider;
+    public static final int btToBtSendSize = 16; // bytes in one BT message
+    public static final int btSignificantBytes = 10;
+    public static final int btRsvdBytesOffset = 10;
+    public static final int btToNetFactor = 50;
+    public static final int btnNetToNetSendSize = btToBtSendSize * btToNetFactor;
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
-    public static final boolean debug = false;
+    public static final boolean debug = true;
     public static final int bufferSize = 3000;
     public static final boolean testSendOneOnCall = false;
 

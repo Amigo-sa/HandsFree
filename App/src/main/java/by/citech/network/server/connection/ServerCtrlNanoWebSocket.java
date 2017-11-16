@@ -3,11 +3,12 @@ package by.citech.network.server.connection;
 import android.os.Handler;
 import android.util.Log;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import by.citech.network.control.IReceiveListener;
-import by.citech.network.control.IReceiveListenerReg;
-import by.citech.network.control.ITransmitter;
+import by.citech.network.control.receive.IReceiveListener;
+import by.citech.network.control.receive.IReceiveListenerReg;
+import by.citech.network.control.transmit.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.network.server.connection.protocols.http.IHTTPSession;
 import by.citech.network.server.connection.websockets.CloseCode;
@@ -22,6 +23,8 @@ import static by.citech.util.Decode.bytesToHexMark1;
 
 public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiveListenerReg, ITransmitter {
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
+    private static final String TAG = Tags.CLT_WSOCKETCTRL;
+    private static final boolean debug = Settings.debug;
     private WebSocket webSocket;
     private Handler handler;
     private IReceiveListener listener;
@@ -42,7 +45,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public void sendMessage(String message) {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "sendMessage");
+        if (debug) Log.i(TAG, "sendMessage");
         try {
             webSocket.send(message);
         } catch (IOException e) {
@@ -51,8 +54,8 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
     }
 
     @Override
-    public void sendBytes(byte... bytes) {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "sendBytes");
+    public void sendData(byte[] bytes) {
+        if (debug) Log.i(TAG, "sendData");
         try {
             webSocket.send(bytes);
         } catch (IOException e) {
@@ -64,13 +67,13 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public ITransmitter getTransmitter() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getTransmitter");
+        if (debug) Log.i(TAG, "getTransmitter");
         return this;
     }
 
     @Override
     public IReceiveListenerReg getReceiverRegister() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getReceiverRegister");
+        if (debug) Log.i(TAG, "getReceiverRegister");
         return this;
     }
 
@@ -78,26 +81,26 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public IServerCtrl startServer(int serverTimeout) throws IOException {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "startServer");
+        if (debug) Log.i(TAG, "startServer");
         start(serverTimeout);
         return this;
     }
 
     @Override
     public String getStatus () {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "getStatus");
+        if (debug) Log.i(TAG, "getStatus");
         return this.status;
     }
 
     @Override
     public boolean isAliveServer() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "isAliveServer");
+        if (debug) Log.i(TAG, "isAliveServer");
         return isAlive();
     }
 
     @Override
     public void stopServer() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "stopServer");
+        if (debug) Log.i(TAG, "stopServer");
         stop();
     }
 
@@ -105,7 +108,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public void closeConnection() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeConnection");
+        if (debug) Log.i(TAG, "closeConnection");
         if (webSocket != null) {
             try {
                 webSocket.close(CloseCode.NormalClosure, Messages.SRV2CLT_ONCLOSE, false);
@@ -117,7 +120,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public void closeConnectionForce() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "closeConnectionForce");
+        if (debug) Log.i(TAG, "closeConnectionForce");
         if (webSocket != null) {
             try {
                 webSocket.close(CloseCode.AbnormalClosure, Messages.SRV2CLT_ONCLOSE, false);
@@ -129,11 +132,11 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public boolean isAliveConnection() {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "isAliveConnection");
+        if (debug) Log.i(TAG, "isAliveConnection");
         if (webSocket != null) {
             return webSocket.isOpen();
         }
-        if (Settings.debug) Log.e(Tags.SRV_WSOCKETCTRL, "isAliveConnection webSocket is null");
+        if (debug) Log.e(TAG, "isAliveConnection webSocket is null");
         return false;
     }
 
@@ -141,7 +144,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
     @Override
     public void registerReceiverListener(IReceiveListener listener) {
-        if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "registerReceiverListener");
+        if (debug) Log.i(TAG, "registerReceiverListener");
         this.listener = listener;
     }
 
@@ -153,7 +156,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
         @Override
         protected void onOpen() {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onOpen");
+            if (debug) Log.i(TAG, "onOpen");
             status = StatusMessages.WEBSOCKET_OPENED;
             handler.sendEmptyMessage(StatusMessages.SRV_ONOPEN);
             try {
@@ -165,8 +168,8 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
         @Override
         protected void onClose(CloseCode code, String reason, boolean initiatedByRemote) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onClose");
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL,
+            if (debug) Log.i(TAG, "onClose");
+            if (debug) Log.i(TAG,
                     "Initiated by " + (initiatedByRemote ? "remote. " : "self. ") +
                     "Close code is <" + code + ">. " +
                     "Reason is <" + reason + ">.");
@@ -177,13 +180,12 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
         @Override
         protected void onMessage(WebSocketFrame message) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage");
-
+            if (debug) Log.i(TAG, "onMessage");
             if (listener != null) {
-                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage to redirect");
-                listener.onReceiveMessage(message.getBinaryPayload());
+                if (debug) Log.i(TAG, "onMessage redirecting");
+                listener.onReceiveData(message.getBinaryPayload());
             } else {
-                if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onMessage to activity");
+                if (debug) Log.i(TAG, "onMessage not redirecting");
                 handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message).sendToTarget();
             }
 //          handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message.getTextPayload()).sendToTarget();
@@ -199,31 +201,31 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
 
         @Override
         protected void onPong(WebSocketFrame pong) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onPong");
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "Ponged: " + "<" + pong + ">");
+            if (debug) Log.i(TAG, "onPong");
+            if (debug) Log.i(TAG, "Ponged: " + "<" + pong + ">");
             handler.sendEmptyMessage(StatusMessages.SRV_ONPONG);
         }
 
         @Override
         protected void onException(IOException exception) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "onException");
-            if (Settings.debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
+            if (debug) Log.i(TAG, "onException");
+            if (debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
             status = StatusMessages.WEBSOCKET_FAILURE;
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
         }
 
         @Override
         protected void debugFrameReceived(WebSocketFrame frame) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "debugFrameReceived");
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, String.format("debugFrameReceived: <%s>", bytesToHexMark1(frame.getBinaryPayload())));
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "Received: " + "<" + frame + ">");
+            if (debug) Log.i(TAG, "debugFrameReceived");
+            if (debug) Log.i(TAG, String.format("debugFrameReceived: <%s>", bytesToHexMark1(frame.getBinaryPayload())));
+            if (debug) Log.i(TAG, "Received: " + "<" + frame + ">");
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }
 
         @Override
         protected void debugFrameSent(WebSocketFrame frame) {
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "debugFrameSent");
-            if (Settings.debug) Log.i(Tags.SRV_WSOCKETCTRL, "Sended: " + "<" + frame + ">");
+            if (debug) Log.i(TAG, "debugFrameSent");
+            if (debug) Log.i(TAG, "Sended: " + "<" + frame + ">");
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMETX);
         }
     }
