@@ -7,6 +7,7 @@ import java.util.Arrays;
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
+import by.citech.util.Decode;
 
 class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     private static final String TAG = Tags.NET_REDIR_BLUETOOTH;
@@ -55,11 +56,10 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
         if (isRedirecting) {
             for (int i = 0; i < Settings.btToNetFactor; i++) {
                 if (debug) Log.i(TAG, String.format("chunk %d from %d", (i - 1), data.length));
-                dataChunk = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, ((i + 1) * Settings.btSignificantBytes) - 1);
-                //dataChunk = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, (i + 1) * Settings.btSignificantBytes);
-                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Arrays.toString(dataChunk)));
+                dataChunk = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, (i + 1) * Settings.btSignificantBytes);
+                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Decode.bytesToHexMark1(dataChunk)));
                 dataAssembled[i] = Arrays.copyOf(dataChunk, Settings.btToBtSendSize);
-                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Arrays.toString(dataAssembled[i])));
+                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Decode.bytesToHexMark1(dataAssembled[i])));
             }
             storageNetToBt.putData(dataAssembled);
         }

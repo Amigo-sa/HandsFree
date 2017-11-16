@@ -40,12 +40,8 @@ class StreamBluetooth implements IStreamCtrl {
                 }
                 if (!isStreaming) return;
             }
-            try {
-                baos.write(storageBtToNet.getData());
-                if (debug) Log.i(TAG, "run got data from storage");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            baos.write(storageBtToNet.getData(), 0, Settings.btSignificantBytes);
+            if (debug) Log.i(TAG, "run got data from storage");
             if (!isStreaming) return;
             bufferedDataSize = baos.size();
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));

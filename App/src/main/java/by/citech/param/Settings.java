@@ -13,7 +13,7 @@ public class Settings {
     public static final int btSignificantBytes = 10;
     public static final int btRsvdBytesOffset = 10;
     public static final int btToNetFactor = 50;
-    public static final int btnNetToNetSendSize = btToBtSendSize * btToNetFactor;
+    public static final int btnNetToNetSendSize = btSignificantBytes * btToNetFactor;
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
     public static final boolean debug = true;
