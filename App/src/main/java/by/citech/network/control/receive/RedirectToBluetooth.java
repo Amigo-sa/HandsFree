@@ -14,14 +14,14 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     private IReceiveListenerReg iReceiveListenerReg;
     private boolean isRedirecting = false;
     private StorageData<byte[][]> storageNetToBt;
-    private byte[][] byteArrayX2;
-    private byte[] tempArray;
+    private byte[][] dataAssembled;
+    private byte[] dataChunk;
 
     RedirectToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData<byte[][]> storageNetToBt) {
         this.iReceiveListenerReg = iReceiveListenerReg;
         this.storageNetToBt = storageNetToBt;
-        byteArrayX2 = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
-        tempArray = new byte[Settings.btSignificantBytes];
+        dataAssembled = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
+        dataChunk = new byte[Settings.btSignificantBytes];
     }
 
     public IRedirectCtrl start() {
@@ -46,18 +46,22 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     }
 
     @Override
-    public void onReceiveData(byte[] data) {
+    public void onReceiveData(final byte[] data) {
         if (debug) Log.i(TAG, "onReceiveData");
+        if (debug) Log.i(TAG, "onReceiveData received bytes: " + data.length);
         if (data.length != Settings.btnNetToNetSendSize) {
-            if (debug) Log.i(TAG, "onReceiveData received bytes: " + data.length);
             return;
         }
         if (isRedirecting) {
             for (int i = 0; i < Settings.btToNetFactor; i++) {
-                tempArray = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, (i + 1) * Settings.btSignificantBytes);
-                byteArrayX2[i] = Arrays.copyOf(tempArray, Settings.btToBtSendSize);
+                if (debug) Log.i(TAG, String.format("chunk %d from %d", (i - 1), data.length));
+                dataChunk = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, ((i + 1) * Settings.btSignificantBytes) - 1);
+                //dataChunk = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, (i + 1) * Settings.btSignificantBytes);
+                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Arrays.toString(dataChunk)));
+                dataAssembled[i] = Arrays.copyOf(dataChunk, Settings.btToBtSendSize);
+                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Arrays.toString(dataAssembled[i])));
             }
-            storageNetToBt.putData(byteArrayX2);
+            storageNetToBt.putData(dataAssembled);
         }
     }
 
