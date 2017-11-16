@@ -12,11 +12,12 @@ public class Settings {
     public static final int btToBtSendSize = 16; // bytes in one BT message
     public static final int btSignificantBytes = 10;
     public static final int btRsvdBytesOffset = 10;
-    public static final int btToNetFactor = 50;
+    public static final int btToNetFactor = 100;
     public static final int btnNetToNetSendSize = btSignificantBytes * btToNetFactor;
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
     public static final boolean debug = true;
+//  public static final boolean debug = false;
     public static final int bufferSize = 3000;
     public static final boolean testSendOneOnCall = false;
 

@@ -32,7 +32,7 @@ public class Redirect extends AsyncTask<String, IRedirectCtrl, Void> {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (debug) Log.i(TAG, "doInBackground audio startClient in new thread");
+                        if (debug) Log.i(TAG, "doInBackground audio in new thread");
                         redirectToAudio.run();
                     }
                 }).start();
@@ -48,7 +48,7 @@ public class Redirect extends AsyncTask<String, IRedirectCtrl, Void> {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (debug) Log.i(TAG, "doInBackground bluetooth startClient in new thread");
+                        if (debug) Log.i(TAG, "doInBackground bluetooth in new thread");
                         redirectToBluetooth.run();
                     }
                 }).start();

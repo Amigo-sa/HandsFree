@@ -87,7 +87,7 @@ public class WriterTransmitter extends Thread {
                 timecounter = 0;
             }
             try {
-                Thread.sleep(8);
+                Thread.sleep(5);
                 if (!res.isCallback()) {
                     timecounter++;
                 }

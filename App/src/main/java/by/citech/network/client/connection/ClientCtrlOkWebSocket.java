@@ -110,14 +110,8 @@ public class ClientCtrlOkWebSocket extends WebSocketListener implements IClientC
     @Override
     public void sendData(byte[] data) {
         if (debug) Log.i(TAG, "sendData");
-        if (debug) {
-            ByteString byteString = ByteString.of(data);
-            Log.i(TAG, String.format("sendData: bytes is <%s>", bytesToHexMark1(data)));
-            Log.i(TAG, String.format("sendData: byteString is <%s>", bytesToHexMark1(byteString.toByteArray())));
-            webSocket.send(byteString);
-        } else {
-            webSocket.send(ByteString.of(data));
-        }
+        if (debug) Log.i(TAG, "sendData " + bytesToHexMark1(data));
+        webSocket.send(ByteString.of(data));
     }
 
     @Override

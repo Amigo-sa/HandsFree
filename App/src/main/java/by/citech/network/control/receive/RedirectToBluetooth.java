@@ -49,17 +49,18 @@ class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
     @Override
     public void onReceiveData(final byte[] data) {
         if (debug) Log.i(TAG, "onReceiveData");
-        if (debug) Log.i(TAG, "onReceiveData received bytes: " + data.length);
+//        if (debug) Log.i(TAG, "onReceiveData received bytes: " + data.length);
         if (data.length != Settings.btnNetToNetSendSize) {
             return;
         }
+        if (debug) Log.i(TAG, "onReceiveData received correct amount of bytes");
         if (isRedirecting) {
             for (int i = 0; i < Settings.btToNetFactor; i++) {
-                if (debug) Log.i(TAG, String.format("chunk %d from %d", (i - 1), data.length));
+//                if (debug) Log.i(TAG, String.format("chunk %d from %d", (i - 1), data.length));
                 dataChunk = Arrays.copyOfRange(data, i * Settings.btSignificantBytes, (i + 1) * Settings.btSignificantBytes);
-                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Decode.bytesToHexMark1(dataChunk)));
+//                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Decode.bytesToHexMark1(dataChunk)));
                 dataAssembled[i] = Arrays.copyOf(dataChunk, Settings.btToBtSendSize);
-                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Decode.bytesToHexMark1(dataAssembled[i])));
+//                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Decode.bytesToHexMark1(dataAssembled[i])));
             }
             storageNetToBt.putData(dataAssembled);
         }

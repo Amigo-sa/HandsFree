@@ -23,7 +23,7 @@ import static by.citech.util.Decode.bytesToHexMark1;
 
 public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IReceiveListenerReg, ITransmitter {
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
-    private static final String TAG = Tags.CLT_WSOCKETCTRL;
+    private static final String TAG = Tags.SRV_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
     private WebSocket webSocket;
     private Handler handler;
@@ -148,7 +148,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         this.listener = listener;
     }
 
-    //  private static class DebugWebSocket extends WebSocket {
+//    private static class DebugWebSocket extends WebSocket {
     private class DebugWebSocket extends WebSocket {
         private DebugWebSocket(IHTTPSession handshakeRequest) {
             super(handshakeRequest);
@@ -173,7 +173,6 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
                     "Initiated by " + (initiatedByRemote ? "remote. " : "self. ") +
                     "Close code is <" + code + ">. " +
                     "Reason is <" + reason + ">.");
-
             status = StatusMessages.WEBSOCKET_CLOSED;
             handler.sendEmptyMessage(StatusMessages.SRV_ONCLOSE);
         }
@@ -202,7 +201,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         @Override
         protected void onPong(WebSocketFrame pong) {
             if (debug) Log.i(TAG, "onPong");
-            if (debug) Log.i(TAG, "Ponged: " + "<" + pong + ">");
+            if (debug) Log.i(TAG, "onPong " + pong);
             handler.sendEmptyMessage(StatusMessages.SRV_ONPONG);
         }
 
@@ -218,7 +217,7 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         protected void debugFrameReceived(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameReceived");
             if (debug) Log.i(TAG, "debugFrameReceived " + bytesToHexMark1(frame.getBinaryPayload()));
-            if (debug) Log.i(TAG, "debugFrameReceived " + frame);
+//            if (debug) Log.i(TAG, "debugFrameReceived " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }
 
@@ -226,8 +225,9 @@ public class ServerCtrlNanoWebSocket extends NanoWSD implements IServerCtrl, IRe
         protected void debugFrameSent(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameSent");
             if (debug) Log.i(TAG, "debugFrameSent " + bytesToHexMark1(frame.getBinaryPayload()));
-            if (debug) Log.i(TAG, "debugFrameSent " + frame);
+//            if (debug) Log.i(TAG, "debugFrameSent " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMETX);
         }
     }
+
 }
