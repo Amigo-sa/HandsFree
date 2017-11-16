@@ -58,7 +58,7 @@ public class WriterTransmitter extends Thread {
         isRunning = true;
         boolean timeOver = false;
         int timecounter = 0;
-
+        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
         while (isRunning){
             if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (res.isCallback() || timeOver)) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
@@ -71,7 +71,6 @@ public class WriterTransmitter extends Thread {
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
-                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
                     mBluetoothGatt.writeCharacteristic(characteristic);
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
                 }else{
@@ -90,7 +89,7 @@ public class WriterTransmitter extends Thread {
             try {
                 Thread.sleep(5);
                 if (!res.isCallback()) {
-                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, " timecounter = " + timecounter);
+                    //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, " timecounter = " + timecounter);
                     timecounter++;
                 }
 
