@@ -71,7 +71,7 @@ public class WriterTransmitter extends Thread {
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
-                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
                     mBluetoothGatt.writeCharacteristic(characteristic);
                     if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
                 }else{

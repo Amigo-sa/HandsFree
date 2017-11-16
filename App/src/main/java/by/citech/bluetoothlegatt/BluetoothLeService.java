@@ -153,6 +153,7 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
             Log.i(TAG,"onCharacteristicWrite");
+            res.setCallback(true);
 //            final StringBuilder stringBuilder = new StringBuilder(characteristic.getValue().length);
 //            for(byte byteChar : characteristic.getValue())
 //                stringBuilder.append(String.format("%02X ", byteChar));
@@ -161,7 +162,6 @@ public class BluetoothLeService extends Service {
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
                 Log.i(TAG,"GATT SUCCESS " + "DATA :");
-                res.setCallback(true);
 
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
