@@ -7,16 +7,14 @@ import android.util.Log;
 import java.util.Arrays;
 
 import by.citech.data.StorageData;
+import by.citech.debug.IDebugListener;
+import by.citech.debug.IDebugTraffic;
 import by.citech.logic.Resource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.util.Decode;
 
-/**
- * Created by tretyak on 02.10.2017.
- */
-
-public class WriterTransmitter extends Thread {
+public class WriterTransmitter extends Thread implements IDebugTraffic {
 
     private Resource res;
     private StorageData<byte[][]> storageNetToBt;
@@ -47,8 +45,6 @@ public class WriterTransmitter extends Thread {
 
         return arrayData[numBTPackage];
     }
-
-
 
     @Override
     public void run() {
@@ -110,4 +106,12 @@ public class WriterTransmitter extends Thread {
     public void cancel() {
         isRunning = false;
     }
+
+    //--------------------- debug
+
+    @Override
+    public byte[] getRecentTraffic() {
+        return new byte[0];
+    }
+
 }

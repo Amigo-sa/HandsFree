@@ -23,11 +23,14 @@ import by.citech.bluetoothlegatt.BluetoothLeService;
 import by.citech.bluetoothlegatt.LeDeviceListAdapter;
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
+import by.citech.debug.IDebugListener;
+import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 
-public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUiExchangeListener{
+public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUiExchangeListener, IDebugListener {
 
     private final static String TAG = "WSD_ConnectorBluetooth";
+    private final static DebugMode debugMode = Settings.debugMode;
     private static final long SCAN_PERIOD = 10000;
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -56,6 +59,7 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
     private IBluetoothListener mIBluetoothListener;
 
     //--------------------- singleton
+
     private static volatile ConnectorBluetooth instance = null;
 
     public static ConnectorBluetooth getInstance() {
@@ -70,9 +74,20 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
     }
 
     //--------------------- getters and setters
+
     public ConnectorBluetooth setmHandler(Handler mHandler) {
         this.mHandler = mHandler;
         return this;
+    }
+
+    //TODO: добавить
+    public IDebugListener getiDebugBtToNetListener() {
+        return null;
+    }
+
+    //TODO: добавить
+    public IDebugListener getiDebugNetToBtListener() {
+        return null;
     }
 
     public boolean ismConnected() {
@@ -421,4 +436,39 @@ public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUi
     public void callEndedExternally() {
         disableTransmitData();
     }
+
+    //--------------------- debug
+
+    @Override
+    public void startDebug() {
+        if (Settings.debug) Log.i(TAG, "startDebug");
+        CallerState currentState = getCallerState();
+        if (Settings.debug) Log.i(TAG, currentState.getName());
+        switch (debugMode) {
+            case Record:
+                if (currentState == CallerState.DebugRecord) {
+                    enableTransmitData();
+                }
+                break;
+            default:
+                enableTransmitData();
+                break;
+        }
+    }
+
+    @Override
+    public void stopDebug() {
+        if (debugMode != DebugMode.Record) {
+            disableTransmitData();
+        }
+    }
+
+    private String getCallerStateName() {
+        return Caller.getInstance().getCallerState().getName();
+    }
+
+    private CallerState getCallerState() {
+        return Caller.getInstance().getCallerState();
+    }
+
 }

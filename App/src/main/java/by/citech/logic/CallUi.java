@@ -2,13 +2,21 @@ package by.citech.logic;
 
 import android.util.Log;
 import java.util.ArrayList;
+
+import by.citech.debug.IDebugListener;
+import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class CallUi implements IUiBtnGreenRedListener {
 
+    private static final String TAG = Tags.CALL_UI;
+    private static final boolean debug = Settings.debug;
+    private static final DebugMode debugMode = Settings.debugMode;
+
     private ArrayList<ICallUiListener> iCallUiListeners;
     private ArrayList<ICallUiExchangeListener> iCallUiExchangeListeners;
+    private ArrayList<IDebugListener> iDebugListeners;
 
     //--------------------- singleton
 
@@ -17,6 +25,7 @@ public class CallUi implements IUiBtnGreenRedListener {
     private CallUi() {
         iCallUiListeners = new ArrayList<>();
         iCallUiExchangeListeners = new ArrayList<>();
+        iDebugListeners = new ArrayList<>();
     }
 
     public static CallUi getInstance() {
@@ -32,6 +41,11 @@ public class CallUi implements IUiBtnGreenRedListener {
 
     //--------------------- getters and setters
 
+    public CallUi addiDebugListener(IDebugListener iDebugListener) {
+        iDebugListeners.add(iDebugListener);
+        return this;
+    }
+
     public CallUi addiCallUiListener(ICallUiListener iCallUiListener) {
         iCallUiListeners.add(iCallUiListener);
         iCallUiExchangeListeners.add(iCallUiListener);
@@ -45,66 +59,139 @@ public class CallUi implements IUiBtnGreenRedListener {
 
     //--------------------- common
 
-    private String getStateName() {
-        return Caller.getInstance().getState().getName();
+    private String getCallerStateName() {
+        return Caller.getInstance().getCallerState().getName();
     }
 
-    private State getState() {
-        return Caller.getInstance().getState();
+    private CallerState getCallerState() {
+        return Caller.getInstance().getCallerState();
     }
 
-    private boolean setState(State fromState, State toState) {
-         return Caller.getInstance().setState(fromState, toState);
+    private boolean setCallerState(CallerState fromCallerState, CallerState toCallerState) {
+         return Caller.getInstance().setState(fromCallerState, toCallerState);
     }
 
     //--------------------- main
 
     @Override
     public void onClickBtnGreen() {
-        if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnGreen");
-        switch (getState()) {
-            case Idle:
-                if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnGreen Idle");
-                if (setState(State.Idle, State.OutcomingStarted))
-                    for (ICallUiListener listener : iCallUiListeners) listener.callOutcomingStarted();
+        if (debug) Log.i(TAG, "onClickBtnGreen");
+        switch (debugMode) {
+            case LoopbackBtToBt:
+                switch (getCallerState()) {
+                    case Null:
+                        if (setCallerState(CallerState.Null, CallerState.DebugLoopBack))
+                            for (IDebugListener listener : iDebugListeners)
+                                listener.startDebug();
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "onClickBtnGreen " + getCallerStateName());
+                        break;
+                }
                 break;
-            case IncomingDetected:
-                if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnGreen IncomingDetected");
-                if (setState(State.IncomingDetected, State.Call))
-                    for (ICallUiExchangeListener listener : iCallUiExchangeListeners) listener.callIncomingAccepted();
+            case Record:
+                switch (getCallerState()) {
+                    case DebugRecorded:
+                        if (setCallerState(CallerState.DebugRecorded, CallerState.DebugPlay))
+                            for (IDebugListener listener : iDebugListeners)
+                                listener.startDebug();
+                        break;
+                    case Null:
+                        if (setCallerState(CallerState.Null, CallerState.DebugRecord))
+                            for (IDebugListener listener : iDebugListeners)
+                                listener.startDebug();
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "onClickBtnGreen " + getCallerStateName());
+                        break;
+                }
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.CALL_UI, "onClickBtnGreen " + getStateName());
+                switch (getCallerState()) {
+                    case Idle:
+                        if (debug) Log.i(TAG, "onClickBtnGreen Idle");
+                        if (setCallerState(CallerState.Idle, CallerState.OutcomingStarted))
+                            for (ICallUiListener listener : iCallUiListeners)
+                                listener.callOutcomingStarted();
+                        break;
+                    case IncomingDetected:
+                        if (debug) Log.i(TAG, "onClickBtnGreen IncomingDetected");
+                        if (setCallerState(CallerState.IncomingDetected, CallerState.Call))
+                            for (ICallUiExchangeListener listener : iCallUiExchangeListeners)
+                                listener.callIncomingAccepted();
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "onClickBtnGreen " + getCallerStateName());
+                        break;
+                }
+                break;
         }
     }
 
     @Override
     public void onClickBtnRed() {
-        if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed");
-        switch (getState()) {
-            case Call:
-                if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed Call");
-                if (setState(State.Call, State.Idle))
-                    for (ICallUiExchangeListener listener : iCallUiExchangeListeners) listener.callEndedInternally();
+        if (debug) Log.i(TAG, "onClickBtnRed");
+        switch (debugMode) {
+            case LoopbackBtToBt:
+                switch (getCallerState()) {
+                    case DebugLoopBack:
+                        if (setCallerState(CallerState.DebugLoopBack, CallerState.Null))
+                            for (IDebugListener listener : iDebugListeners)
+                                listener.stopDebug();
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "onClickBtnRed " + getCallerStateName());
+                        break;
+                }
                 break;
-            case OutcomingStarted:
-                if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed OutcomingStarted");
-                if (setState(State.OutcomingStarted, State.Idle))
-                    for (ICallUiListener listener : iCallUiListeners) listener.callOutcomingCanceled();
+            case Record:
+                switch (getCallerState()) {
+                    case DebugPlay:
+                        if (setCallerState(CallerState.DebugPlay, CallerState.DebugRecorded))
+                            for (IDebugListener listener : iDebugListeners)
+                                listener.stopDebug();
+                        break;
+                    case DebugRecord:
+                        if (setCallerState(CallerState.DebugRecord, CallerState.DebugRecorded))
+                            for (IDebugListener listener : iDebugListeners)
+                                listener.stopDebug();
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "onClickBtnRed " + getCallerStateName());
+                        break;
+                }
                 break;
-            case OutcomingConnected:
-                if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed OutcomingConnected");
-                if (setState(State.OutcomingConnected, State.Idle))
-                    for (ICallUiListener listener : iCallUiListeners) listener.callOutcomingCanceled();
+            case Normal:
+                switch (getCallerState()) {
+                    case Call:
+                        if (debug) Log.i(TAG, "onClickBtnRed Call");
+                        if (setCallerState(CallerState.Call, CallerState.Idle))
+                            for (ICallUiExchangeListener listener : iCallUiExchangeListeners)
+                                listener.callEndedInternally();
+                        break;
+                    case OutcomingStarted:
+                        if (debug) Log.i(TAG, "onClickBtnRed OutcomingStarted");
+                        if (setCallerState(CallerState.OutcomingStarted, CallerState.Idle))
+                            for (ICallUiListener listener : iCallUiListeners)
+                                listener.callOutcomingCanceled();
+                        break;
+                    case OutcomingConnected:
+                        if (debug) Log.i(TAG, "onClickBtnRed OutcomingConnected");
+                        if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle))
+                            for (ICallUiListener listener : iCallUiListeners)
+                                listener.callOutcomingCanceled();
+                        break;
+                    case IncomingDetected:
+                        if (debug) Log.i(TAG, "onClickBtnRed IncomingDetected");
+                        if (setCallerState(CallerState.IncomingDetected, CallerState.Idle))
+                            for (ICallUiListener listener : iCallUiListeners)
+                                listener.callIncomingRejected();
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "onClickBtnRed " + getCallerStateName());
+                        break;
+                }
                 break;
-            case IncomingDetected:
-                if (Settings.debug) Log.i(Tags.CALL_UI, "onClickBtnRed IncomingDetected");
-                if (setState(State.IncomingDetected, State.Idle))
-                    for (ICallUiListener listener : iCallUiListeners) listener.callIncomingRejected();
-                break;
-            default:
-                if (Settings.debug) Log.e(Tags.CALL_UI, "onClickBtnRed " + getStateName());
-
         }
     }
 }

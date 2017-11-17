@@ -33,4 +33,7 @@ public class Tags {
     public static final String DECODE               = "WSD_DECODE";
     public static final String CALLER               = "WSD_CALLER";
     public static final String CALL_UI              = "WSD_CALL_UI";
+    public static final String BT2BT_LOOPER         = "WSD_BT2BT_LOOPER";
+    public static final String NET2NET_LOOPER       = "WSD_NET2NET_LOOPER";
+    public static final String BT2BT_RECORDER       = "WSD_BT2BT_RECORDER";
 }

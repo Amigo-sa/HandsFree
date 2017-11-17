@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package by.citech;
 
 import android.app.Activity;
@@ -52,22 +36,23 @@ import by.citech.logic.ConnectorBluetooth;
 import by.citech.logic.IBluetoothListener;
 import by.citech.logic.ICallNetworkListener;
 import by.citech.logic.ICallUiListener;
+import by.citech.debug.IDebugListener;
 import by.citech.logic.IUiBtnGreenRedListener;
 import by.citech.logic.INetworkInfoListener;
 import by.citech.logic.INetworkListener;
+import by.citech.logic.CallerState;
+import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 import static by.citech.util.NetworkInfo.getIpAddr;
 
-/**
- * For a given BLE device, this Activity provides the user interface to connect, display data,
- * and display GATT services and characteristics supported by the device.  The Activity
- * communicates with {@code BluetoothLeService}, which in turn interacts with the
- * Bluetooth LE API.
- */
 public class DeviceControlActivity extends Activity
- implements INetworkInfoListener, ICallNetworkListener, ICallUiListener, IBluetoothListener {
+        implements INetworkInfoListener, ICallNetworkListener, ICallUiListener, IBluetoothListener, IDebugListener {
+
+    private static final String TAG = Tags.ACT_DEVICECTRL;
+    private static final boolean debug = Settings.debug;
+    private static final DebugMode debugMode = Settings.debugMode;
 
     IUiBtnGreenRedListener iUiBtnGreenRedListener;
     INetworkListener iNetworkListener;
@@ -76,7 +61,6 @@ public class DeviceControlActivity extends Activity
     private static final int THIS_CONNECTED_DEVICE = 4;
     private static final int OTHER_CONNECTED_DEVICE = 5;
 
-    private final static String TAG = "WSD_DCActivity";
     // цвета кнопок
     private static final int GREEN = Color.rgb(0x00, 0x66, 0x33);
     private static final int GRAY = Color.GRAY;
@@ -84,10 +68,8 @@ public class DeviceControlActivity extends Activity
     private static final int DARKCYAN = Color.rgb(0, 139, 139);
     private static final int DARKKHAKI = Color.rgb(189, 183, 107);
     // Вьюхи для соединения с интернетом
-    private Button btnGreen;
-    private Button btnRed;
     private Animation animCall;
-        private Button   btnChangeDevice;
+    private Button btnGreen, btnRed, btnChangeDevice;
     private EditText editTextSrvLocAddr, editTextSrvRemAddr, editTextSrvLocPort, editTextSrvRemPort;
 
     // условие повторения анимации
@@ -112,6 +94,7 @@ public class DeviceControlActivity extends Activity
 
         caller = Caller.getInstance()
                 .setiCallUiListener(this)
+                .setiDebugListener(this)
                 .setiCallNetworkListener(this)
                 .setiNetworkInfoListener(this)
                 .setiBluetoothListener(this);
@@ -151,8 +134,24 @@ public class DeviceControlActivity extends Activity
         btnGreen = findViewById(R.id.btnGreen);
         btnRed = findViewById(R.id.btnRed);
         animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
-        btnSetDisabled(btnGreen, "IDLE", GRAY);
-        btnSetDisabled(btnRed, "IDLE", GRAY);
+
+        switch (debugMode) {
+            case LoopbackBtToBt:
+                btnSetEnabled(btnGreen, "LBACK ON");
+                btnSetDisabled(btnRed, "LBACK OFF");
+                break;
+            case Record:
+                btnSetEnabled(btnGreen, "RECORD");
+                btnSetDisabled(btnRed, "PLAY");
+                break;
+            case Normal:
+                btnSetDisabled(btnGreen, "IDLE");
+                btnSetDisabled(btnRed, "IDLE");
+            case LoopbackNetToNet:
+                break;
+            default:
+                break;
+        }
 
         editTextSrvLocAddr.setText(getIpAddr(Settings.ipv4));
         editTextSrvLocPort.setText(String.format("%d", Settings.serverLocalPortNumber));
@@ -248,8 +247,8 @@ public class DeviceControlActivity extends Activity
                 if (device == null) return;
                 connectorBluetooth.setmBTDevice(device);
                 //выкидываем соответствующее диалоговое окно о подключении устройства
-                if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
-                if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + connectorBluetooth.getmBTDeviceConn());
+                if (debug) Log.i(TAG, "mBTDevice = " + device);
+                if (debug) Log.i(TAG, "mBTDeviceConn = " + connectorBluetooth.getmBTDeviceConn());
                 if (connectorBluetooth.getmBTDevice().equals(connectorBluetooth.getmBTDeviceConn())) {
                     onCreateDialog(THIS_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
                 } else if (connectorBluetooth.getmBTDeviceConn() != null) {
@@ -354,7 +353,7 @@ public class DeviceControlActivity extends Activity
     // Окно когда устройство не может быть подсоединено или произошло разъединение
     private void onCreateDialogIsDisconnected(BluetoothDevice device) {
         alertDialog.dismiss();
-        if (Settings.debug) Log.i(TAG,"onCreateDialogConnected");
+        if (debug) Log.i(TAG,"onCreateDialogConnected");
         AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
         adb.setTitle(device.getName())
                 .setMessage(R.string.disconnected_message)
@@ -403,6 +402,7 @@ public class DeviceControlActivity extends Activity
         super.onDestroy();
         unbindService(connectorBluetooth.mServiceConnection);
         connectorBluetooth.closeLeService();
+        caller.stop();
     }
 
     // создаём меню
@@ -453,13 +453,22 @@ public class DeviceControlActivity extends Activity
 
     //--------------------- Network Buttons
 
-    private void btnSetDisabled(Button button, String label, int color) {
+    private void btnSetDisabled(Button button, String label) {
         button.setEnabled(false);
-        btnSetColorLabel(button, label, color);
+        btnSetColorLabel(button, label, GRAY);
     }
 
-    private void btnSetEnabled(Button button, String label, int color) {
+    private void btnSetEnabled(Button button, String label) {
         button.setEnabled(true);
+        int color;
+        if (button == btnGreen) {
+            color = GREEN;
+        } else if (button == btnRed) {
+            color = RED;
+        } else {
+            color = GRAY;
+            if (debug) Log.e(TAG, "btnSetEnabled color not defined");
+        }
         btnSetColorLabel(button, label, color);
     }
 
@@ -469,13 +478,13 @@ public class DeviceControlActivity extends Activity
     }
 
     private void callAnimStart() {
-        if (Settings.debug && !isCallAnim) Log.i(Tags.ACT_DEVICECTRL, "callAnimStart");
+        if (debug && !isCallAnim) Log.i(TAG, "callAnimStart");
         btnGreen.startAnimation(animCall);
         isCallAnim = true;
     }
 
     private void callAnimStop() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callAnimStop");
+        if (debug) Log.i(TAG, "callAnimStop");
         btnGreen.clearAnimation();
         isCallAnim = false;
     }
@@ -484,132 +493,132 @@ public class DeviceControlActivity extends Activity
 
     @Override
     public void callFailed() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callFailed");
-        btnSetDisabled(btnRed, "FAIL", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callFailed");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "FAIL");
     }
 
     @Override
     public void callEndedExternally() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callEndedExternally");
-        btnSetDisabled(btnRed, "ENDED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callEndedExternally");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "ENDED");
     }
 
     @Override
     public void callOutcomingConnected() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingConnected");
-        btnSetEnabled(btnRed, "CANCEL", RED);
-        btnSetEnabled(btnGreen, "CALLING...", GREEN);
+        if (debug) Log.i(TAG, "callOutcomingConnected");
+        btnSetEnabled(btnGreen, "CALLING...");
+        btnSetEnabled(btnRed, "CANCEL");
     }
 
     @Override
     public void callOutcomingAccepted() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingAccepted");
-        btnSetEnabled(btnRed, "END CALL", RED);
-        btnSetDisabled(btnGreen, "ON CALL", GRAY);
+        if (debug) Log.i(TAG, "callOutcomingAccepted");
+        btnSetDisabled(btnGreen, "ON CALL");
+        btnSetEnabled(btnRed, "END CALL");
         callAnimStop();
     }
 
     @Override
     public void callOutcomingRejected() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingRejected");
-        btnSetDisabled(btnRed, "BUSY", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callOutcomingRejected");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "BUSY");
         callAnimStop();
     }
 
     @Override
     public void callOutcomingFailed() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingFailed");
-        btnSetDisabled(btnRed, "OFFLINE", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callOutcomingFailed");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "OFFLINE");
         callAnimStop();
     }
 
     @Override
     public void callOutcomingLocal() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingLocal");
-        btnSetDisabled(btnRed, "LOCAL", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callOutcomingLocal");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "LOCAL");
     }
 
     @Override
     public void callIncomingDetected() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingDetected");
-        btnSetEnabled(btnRed, "REJECT", RED);
-        btnSetEnabled(btnGreen, "INCOMING...", GREEN);
+        if (debug) Log.i(TAG, "callIncomingDetected");
+        btnSetEnabled(btnGreen, "INCOMING...");
+        btnSetEnabled(btnRed, "REJECT");
         callAnimStart();
     }
 
     @Override
     public void callIncomingCanceled() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingCanceled");
-        btnSetDisabled(btnRed, "CANCELED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callIncomingCanceled");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "CANCELED");
         callAnimStop();
     }
 
     @Override
     public void callIncomingFailed() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingFailed");
-        btnSetDisabled(btnRed, "INCOME FAIL", GRAY);
-        btnSetEnabled(btnGreen, "CALL", RED);
+        if (debug) Log.i(TAG, "callIncomingFailed");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "INCOME FAIL");
         callAnimStop();
     }
 
     @Override
     public void connectorFailure() {
-        if (Settings.debug) Log.e(Tags.ACT_DEVICECTRL, "connectorFailure");
-        btnSetDisabled(btnRed, "ERROR", GRAY);
-        btnSetDisabled(btnGreen, "ERROR", GRAY);
+        if (debug) Log.e(TAG, "connectorFailure");
+        btnSetDisabled(btnGreen, "ERROR");
+        btnSetDisabled(btnRed, "ERROR");
     }
 
     @Override
     public void connectorReady() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "connectorReady");
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        btnSetDisabled(btnRed, "IDLE", GRAY);
+        if (debug) Log.i(TAG, "connectorReady");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "IDLE");
     }
 
     //--------------------- ICallUiListener
 
     @Override
-    public void callEndedInternally() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callEndedInternally");
-        btnSetDisabled(btnRed, "ENDED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-    }
-
-    @Override
-    public void callOutcomingCanceled() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingCanceled");
-        btnSetDisabled(btnRed, "CANCELED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
-        callAnimStop();
-    }
-
-    @Override
     public void callOutcomingStarted() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callOutcomingStarted");
-        btnSetEnabled(btnRed, "CANCEL", RED);
-        btnSetDisabled(btnGreen, "CALLING...", GRAY);
+        if (debug) Log.i(TAG, "callOutcomingStarted");
+        btnSetDisabled(btnGreen, "CALLING...");
+        btnSetEnabled(btnRed, "CANCEL");
         callAnimStart();
     }
 
     @Override
+    public void callEndedInternally() {
+        if (debug) Log.i(TAG, "callEndedInternally");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "ENDED");
+    }
+
+    @Override
+    public void callOutcomingCanceled() {
+        if (debug) Log.i(TAG, "callOutcomingCanceled");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "CANCELED");
+        callAnimStop();
+    }
+
+    @Override
     public void callIncomingRejected() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingRejected");
-        btnSetDisabled(btnRed, "REJECTED", GRAY);
-        btnSetEnabled(btnGreen, "CALL", GREEN);
+        if (debug) Log.i(TAG, "callIncomingRejected");
+        btnSetEnabled(btnGreen, "CALL");
+        btnSetDisabled(btnRed, "REJECTED");
         callAnimStop();
     }
 
     @Override
     public void callIncomingAccepted() {
-        if (Settings.debug) Log.i(Tags.ACT_DEVICECTRL, "callIncomingAccepted");
-        btnSetEnabled(btnRed, "END CALL", RED);
-        btnSetDisabled(btnGreen, "ON CALL", GRAY);
+        if (debug) Log.i(TAG, "callIncomingAccepted");
+        btnSetDisabled(btnGreen, "ON CALL");
+        btnSetEnabled(btnRed, "END CALL");
         callAnimStop();
     }
 
@@ -630,7 +639,7 @@ public class DeviceControlActivity extends Activity
         return editTextSrvLocPort.getText().toString();
     }
 
-        //--------------------- IBluetoothListener
+    //--------------------- IBluetoothListener
 
     @Override
     public void changeOptionMenu() {
@@ -694,5 +703,65 @@ public class DeviceControlActivity extends Activity
     public String unknownCharaString() {
         return  getResources().getString(R.string.unknown_characteristic);
     }
-    
+
+    //--------------------- debug
+
+    private CallerState getCallerState() {
+        return Caller.getInstance().getCallerState();
+    }
+
+    private String getCallerStateName() {
+        return Caller.getInstance().getCallerState().getName();
+    }
+
+    @Override
+    public void startDebug() {
+        switch (debugMode) {
+            case LoopbackBtToBt:
+                btnSetDisabled(btnGreen, "LBACK ON");
+                btnSetEnabled(btnRed, "LBACK OFF");
+                break;
+            case Record:
+                switch (getCallerState()) {
+                    case DebugPlay:
+                        btnSetDisabled(btnGreen, "PLAYING");
+                        btnSetEnabled(btnRed, "STOP");
+                        break;
+                    case DebugRecord:
+                        btnSetDisabled(btnGreen, "RECORDING");
+                        btnSetEnabled(btnRed, "STOP");
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
+                        break;
+                }
+                break;
+            case LoopbackNetToNet:
+                break;
+            case Normal:
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void stopDebug() {
+        switch (debugMode) {
+            case LoopbackBtToBt:
+                btnSetEnabled(btnGreen, "LBACK ON");
+                btnSetDisabled(btnRed, "LBACK OFF");
+                break;
+            case Record:
+                btnSetEnabled(btnGreen, "PLAY");
+                btnSetDisabled(btnRed, "RECORDED");
+                break;
+            case LoopbackNetToNet:
+                break;
+            case Normal:
+                break;
+            default:
+                break;
+        }
+    }
 }

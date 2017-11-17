@@ -4,6 +4,10 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.util.Log;
 import by.citech.data.StorageData;
+import by.citech.debug.DebugBtToBtLooper;
+import by.citech.debug.DebugBtToBtRecorder;
+import by.citech.debug.IDebugListener;
+import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -11,11 +15,21 @@ public class Caller {
 
     private static final String TAG = Tags.CALLER;
     private static final boolean debug = Settings.debug;
-    private volatile State state = State.Null;
+    private static final DebugMode debugMode = Settings.debugMode;
+    private volatile CallerState callerState = CallerState.Null;
     private ICallUiListener iCallUiListener;
     private ICallNetworkListener iCallNetworkListener;
     private INetworkInfoListener iNetworkInfoListener;
     private IBluetoothListener iBluetoothListener;
+    private IDebugListener iDebugListener;
+    private HandlerExtended handlerExtended;
+    private DebugBtToBtLooper debugBtToBtLooper;
+    private DebugBtToBtRecorder debugBtToBtRecorder;
+    private ConnectorBluetooth connectorBluetooth;
+    private ConnectorNetwork connectorNetwork;
+    private CallUi callUi;
+    StorageData<byte[]> storageBtToNet;
+    StorageData<byte[][]> storageNetToBt;
 
     //--------------------- singleton
 
@@ -73,29 +87,34 @@ public class Caller {
         return this;
     }
 
-    //--------------------- work with fsm
-
-    public synchronized State getState() {
-        if (debug) Log.i(TAG, "getState is " + state.getName());
-        return state;
+    public Caller setiDebugListener(IDebugListener iDebugListener) {
+        this.iDebugListener = iDebugListener;
+        return this;
     }
 
-    public synchronized boolean setState(State fromState, State toState) {
-        if (debug) Log.w(TAG, String.format("setState from %s to %s", fromState.getName(), toState.getName()));
-        if (state == fromState) {
-            if (fromState.availableStates().contains(toState)) {
-                state = toState;
-                if (state == State.Error) {
-                    state = State.Idle;  // TODO: обработку ошибок? ожидание отклика?
-                } else if (state == State.Idle) {
-                    state = State.Idle;  // TODO: переводить не в Idle, а Null и ожидать готовность?
+    //--------------------- work with fsm
+
+    public synchronized CallerState getCallerState() {
+        if (debug) Log.i(TAG, "getCallerState is " + callerState.getName());
+        return callerState;
+    }
+
+    public synchronized boolean setState(CallerState fromCallerState, CallerState toCallerState) {
+        if (debug) Log.w(TAG, String.format("setState from %s to %s", fromCallerState.getName(), toCallerState.getName()));
+        if (callerState == fromCallerState) {
+            if (fromCallerState.availableStates().contains(toCallerState)) {
+                callerState = toCallerState;
+                if (callerState == CallerState.Error) {
+                    callerState = CallerState.Idle;  // TODO: обработку ошибок? ожидание отклика?
+                } else if (callerState == CallerState.Idle) {
+                    callerState = CallerState.Idle;  // TODO: переводить не в Idle, а Null и ожидать готовность?
                 }
                 return true;
             } else {
-                if (debug) Log.e(TAG, String.format("setState: %s is not available from %s", toState.getName(), fromState.getName()));
+                if (debug) Log.e(TAG, String.format("setState: %s is not available from %s", toCallerState.getName(), fromCallerState.getName()));
             }
         } else {
-            if (debug) Log.e(TAG, String.format("setState: current is not %s", fromState.getName()));
+            if (debug) Log.e(TAG, String.format("setState: current is not %s", fromCallerState.getName()));
         }
         return false;
     }
@@ -111,28 +130,106 @@ public class Caller {
             return;
         }
 
-        // хранилища данных
-        StorageData storageBtToNet = new StorageData<byte[]>(Tags.BLE2NET_STORE);
-        StorageData storageNetToBt = new StorageData<byte[][]>(Tags.NET2BLE_STORE);
+        switch (debugMode) {
+            case LoopbackBtToBt:
+                buildDebugLoopbackBtToBt();
+                break;
+            case LoopbackNetToNet:
+                buildDebugLoopbackNetToNet();
+                break;
+            case Record:
+                buildDebugRecord();
+                break;
+            case Normal:
+                buildNormal();
+        }
+    }
 
-        CallUi.getInstance()
+    private void buildDebugLoopbackBtToBt() {
+        if (iDebugListener == null) {
+            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt at least one of key parameters are null");
+            return;
+        }
+
+        storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
+        storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+
+        debugBtToBtLooper = new DebugBtToBtLooper(storageBtToNet, storageNetToBt);
+
+        connectorBluetooth = ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(new Handler())
+                .setStorageBtToNet(storageBtToNet)
+                .setStorageNetToBt(storageNetToBt);
+
+        callUi = CallUi.getInstance()
+                .addiDebugListener(debugBtToBtLooper)
+                .addiDebugListener(iDebugListener)
+                .addiDebugListener(connectorBluetooth)
+                .addiCallUiListener(iCallUiListener)
+                .addiCallUiExchangeListener(connectorBluetooth);
+
+        debugBtToBtLooper.start();
+    }
+
+    private void buildDebugRecord() {
+        if (iDebugListener == null) {
+            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt at least one of key parameters are null");
+            return;
+        }
+
+        storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
+        storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+
+        debugBtToBtRecorder = new DebugBtToBtRecorder(storageBtToNet, storageNetToBt);
+
+        connectorBluetooth = ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(new Handler())
+                .setStorageBtToNet(storageBtToNet)
+                .setStorageNetToBt(storageNetToBt);
+
+        callUi = CallUi.getInstance()
+                .addiDebugListener(debugBtToBtRecorder)
+                .addiDebugListener(iDebugListener)
+                .addiDebugListener(connectorBluetooth)
+                .addiCallUiListener(iCallUiListener)
+                .addiCallUiExchangeListener(connectorBluetooth);
+
+        debugBtToBtRecorder.start();
+    }
+
+    private void buildDebugLoopbackNetToNet() {
+        if (iDebugListener == null) {
+            if (debug) Log.e(TAG, "buildDebugLoopbackNetToNet at least one of key parameters are null");
+            return;
+        }
+    }
+
+    private void buildNormal() {
+        storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
+        storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+
+        handlerExtended = new HandlerExtended(getiNetworkListener());
+
+        connectorBluetooth = ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(handlerExtended)
+                .setStorageBtToNet(storageBtToNet)
+                .setStorageNetToBt(storageNetToBt);
+
+        callUi = CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(ConnectorBluetooth.getInstance())
                 .addiCallUiListener(ConnectorNetwork.getInstance());
 
-        ConnectorNetwork.getInstance()
+        connectorNetwork = ConnectorNetwork.getInstance()
                 .setStorageBtToNet(storageBtToNet)
                 .setStorageNetToBt(storageNetToBt)
                 .addiCallNetworkListener(iCallNetworkListener)
                 .addiCallNetworkExchangeListener(ConnectorBluetooth.getInstance())
                 .setiNetworkInfoListener(iNetworkInfoListener)
-                .setHandler(new HandlerExtended(getiNetworkListener()));
-
-        ConnectorBluetooth.getInstance()
-                .setiBluetoothListener(iBluetoothListener)
-                .setmHandler(new Handler())
-                .setStorageBtToNet(storageBtToNet)
-                .setStorageNetToBt(storageNetToBt);
+                .setHandler(handlerExtended);
 
         startConnectorNetwork();
     }
@@ -142,8 +239,32 @@ public class Caller {
     }
 
     public void stop() {
-        // TODO: добавить очищение хранилищ?
-        ConnectorNetwork.getInstance().stop();
+        if (debugBtToBtLooper != null) {
+            debugBtToBtLooper.deactivate();
+            debugBtToBtLooper = null;
+        }
+        if (debugBtToBtRecorder != null) {
+            debugBtToBtRecorder.deactivate();
+            debugBtToBtRecorder = null;
+        }
+        if (connectorBluetooth != null) {
+            connectorBluetooth = null;
+        }
+        if (callUi != null) {
+            callUi = null;
+        }
+        if (connectorNetwork != null) {
+            connectorNetwork.stop();
+            connectorNetwork = null;
+        }
+        if (storageNetToBt != null) {
+            storageNetToBt.clear();
+            storageNetToBt = null;
+        }
+        if (storageBtToNet != null) {
+            storageBtToNet.clear();
+            storageBtToNet = null;
+        }
     }
 
 }

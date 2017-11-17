@@ -3,19 +3,27 @@ package by.citech.data;
 import android.util.Log;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Queue;
 
 import by.citech.param.Settings;
 
 public class StorageData<T> {
     private static final boolean debug = Settings.debug;
-    private boolean debugGetSession, debugPutSession = false;
+    private boolean debugGetSession, debugPutSession;
     private String TAG;
-    private Deque<T> фифошка;
+    private Queue<T> фифошка;
+    private boolean isWriteLocked;
 
     public StorageData(String TAG) {
         this.TAG = TAG;
         фифошка = new ArrayDeque<>();
+        debugGetSession = false;
+        debugPutSession = false;
+        isWriteLocked = false;
+    }
+
+    public void setWriteLocked(boolean writeLocked) {
+        isWriteLocked = writeLocked;
     }
 
     public boolean isEmpty() {
@@ -61,6 +69,7 @@ public class StorageData<T> {
     }
 
     public void putData(T dataIn) {
+        if (isWriteLocked) return;
         if (!debugPutSession && debug) {
             Log.w(TAG, "putData");
             debugPutSession = true;
