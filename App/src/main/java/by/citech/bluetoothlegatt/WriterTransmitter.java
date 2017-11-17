@@ -14,7 +14,9 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.util.Decode;
 
-public class WriterTransmitter extends Thread implements IDebugTraffic {
+public class WriterTransmitter extends Thread implements IDebugTraffic, CallbackWriteListener {
+
+    public static final String TAG = "WRS_WRT";
 
     private Resource res;
     private StorageData<byte[][]> storageNetToBt;
@@ -22,6 +24,10 @@ public class WriterTransmitter extends Thread implements IDebugTraffic {
     private BluetoothGattCharacteristic characteristic;
     private WriterTransmitterCallbackListener listener;
     private boolean isRunning;
+    private boolean Callback = true;
+    private boolean Notify = false;
+    int callbackCnt = 0;
+    int rcvCnt = 0;
     private byte[][] arrayData = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
 
     public WriterTransmitter(String name, Resource res, StorageData<byte[][]> storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
@@ -46,17 +52,76 @@ public class WriterTransmitter extends Thread implements IDebugTraffic {
         return arrayData[numBTPackage];
     }
 
+//    @Override
+//    public void run() {
+//        int numBTpackage = 0;
+//        byte[] dataWrite;
+//        boolean isArrayDataEmpty = true;
+//        isRunning = true;
+//        boolean timeOver = false;
+//        int timecounter = 0;
+//        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+//        while (isRunning){
+//            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (res.isCallback() || timeOver)) {
+//                if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
+//                if(isArrayDataEmpty) {
+//                    arrayData = storageNetToBt.getData();
+//                    isArrayDataEmpty = false;
+//                }
+//                if (numBTpackage < Settings.btToNetFactor) {
+//                    dataWrite = getBTpackage(numBTpackage);
+//                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
+//                    numBTpackage++;
+//                    characteristic.setValue(dataWrite);
+//                    mBluetoothGatt.writeCharacteristic(characteristic);
+//                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
+//                }else{
+//                    numBTpackage = 0;
+//                    isArrayDataEmpty = true;
+//                }
+//
+////                final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
+////                for (byte byteChar : dataByte)
+////                    stringBuilder.append(String.format("%02X ", byteChar));
+//                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "before set callback");
+//                res.setCallback(false);
+//                timeOver = false;
+//                timecounter = 0;
+//            }
+//            try {
+//                Thread.sleep(5);
+//                if (!res.isCallback()) {
+//                    //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, " timecounter = " + timecounter);
+//                    timecounter++;
+//                }
+//
+//                if (timecounter == 10) {
+//                    timeOver = true;
+//                    timecounter = 0;
+//                }
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//
+//        if (listener != null)
+//            listener.doWriteCharacteristic("");
+//    }
+//
+//    public void cancel() {
+//        isRunning = false;
+//    }
+
     @Override
     public void run() {
         int numBTpackage = 0;
         byte[] dataWrite;
         boolean isArrayDataEmpty = true;
         isRunning = true;
-        boolean timeOver = false;
-        int timecounter = 0;
-        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (res.isCallback() || timeOver)) {
+            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (Callback || Notify)) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 if(isArrayDataEmpty) {
                     arrayData = storageNetToBt.getData();
@@ -64,35 +129,22 @@ public class WriterTransmitter extends Thread implements IDebugTraffic {
                 }
                 if (numBTpackage < Settings.btToNetFactor) {
                     dataWrite = getBTpackage(numBTpackage);
-                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
+                   // if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
                     mBluetoothGatt.writeCharacteristic(characteristic);
-                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
+                    //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
                 }else{
                     numBTpackage = 0;
                     isArrayDataEmpty = true;
                 }
 
-//                final StringBuilder stringBuilder = new StringBuilder(dataByte.length);
-//                for (byte byteChar : dataByte)
-//                    stringBuilder.append(String.format("%02X ", byteChar));
-                if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "before set callback");
-                res.setCallback(false);
-                timeOver = false;
-                timecounter = 0;
+                if (Settings.debug) Log.i(TAG, "writeCharacteristic() ");
+                Callback = false;
+                Notify = false;
             }
             try {
                 Thread.sleep(5);
-                if (!res.isCallback()) {
-                    //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, " timecounter = " + timecounter);
-                    timecounter++;
-                }
-
-                if (timecounter == 10) {
-                    timeOver = true;
-                    timecounter = 0;
-                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -100,12 +152,13 @@ public class WriterTransmitter extends Thread implements IDebugTraffic {
         }
 
         if (listener != null)
-            listener.doWriteCharacteristic("");
+            listener.doWriteCharacteristic("Write Characteristic ended");
     }
 
     public void cancel() {
         isRunning = false;
     }
+
 
     //--------------------- debug
 
@@ -114,4 +167,15 @@ public class WriterTransmitter extends Thread implements IDebugTraffic {
         return new byte[0];
     }
 
+    @Override
+    public void callbackIsDone() {
+        Callback = true;
+        if (Settings.debug) Log.i(TAG, "callbackIsDone() " + callbackCnt++ );
+    }
+
+    @Override
+    public void rcvBtPktIsDone() {
+        Notify = true;
+        if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone() " + rcvCnt++);
+    }
 }

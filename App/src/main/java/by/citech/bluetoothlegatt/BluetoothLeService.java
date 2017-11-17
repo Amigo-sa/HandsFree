@@ -41,7 +41,8 @@ public class BluetoothLeService extends Service implements IDebugTraffic {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
-    private  WriterTransmitter wrt;
+    private WriterTransmitter wrt;
+    private CallbackWriteListener mCallbackWriteListener;
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -139,11 +140,10 @@ public class BluetoothLeService extends Service implements IDebugTraffic {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
             Log.i(TAG,"onCharacteristicWrite");
-            res.setCallback(true);
-//            final StringBuilder stringBuilder = new StringBuilder(characteristic.getValue().length);
-//            for(byte byteChar : characteristic.getValue())
-//                stringBuilder.append(String.format("%02X ", byteChar));
-//             wrData = stringBuilder.toString();
+            if (mCallbackWriteListener != null)
+                mCallbackWriteListener.callbackIsDone();
+//            res.setCallback(true);
+
 
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
@@ -193,6 +193,8 @@ public class BluetoothLeService extends Service implements IDebugTraffic {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            if (mCallbackWriteListener != null)
+                mCallbackWriteListener.rcvBtPktIsDone();
         }
 
 
@@ -427,6 +429,7 @@ public class BluetoothLeService extends Service implements IDebugTraffic {
 // потоковая запись данных в периферийное устройство
             wrt = new WriterTransmitter("Write_one", res, storageNetToBt, mBluetoothGatt, characteristic);
             wrt.setPriority(Thread.MAX_PRIORITY);
+            mCallbackWriteListener = wrt;
             wrt.addWriteListener(new WriterTransmitterCallbackListener() {
                 @Override
                 public void doWriteCharacteristic(String str) {
@@ -434,20 +437,27 @@ public class BluetoothLeService extends Service implements IDebugTraffic {
                 }
             });
             wrt.start();
-// одноразовая запись данных в периферийное устройство
-
-//            StringBuilder data = new StringBuilder();
-//            // посылаем на запись 16 байт данных
-//            data.append("FFFF0000FFFF0000");
-//            byte[] dataByte = data.toString().getBytes();
-//            //byte[] dataByte = new byte[16];
-//            characteristic.setValue(dataByte);
-//            Log.w(TAG, "characteristic = " + characteristic);
-//            mBluetoothGatt.writeCharacteristic(characteristic);
-
-
         }
     }
+
+//    private void enableWriteData(BluetoothGattCharacteristic characteristic, int mtu){//16
+//        res = new Resource(true, mtu);
+//        if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
+//            if (Settings.debug) Log.w(TAG, "object WriterTransmitter is done");
+//            wrt = new WriterTransmitter("Write_one", res, storageNetToBt, mBluetoothGatt, characteristic);
+//            wrt.setPriority(Thread.MAX_PRIORITY);
+//            mCallbackWriteListener = wrt;
+//            wrt.addWriteListener(new WriterTransmitterCallbackListener() {
+//                @Override
+//                public void doWriteCharacteristic(String str) {
+//                    System.out.println(str);
+//                }
+//            });
+//            if (Settings.debug) Log.w(TAG, "add WriteListener");
+//            wrt.start();
+//            if (Settings.debug) Log.w(TAG, "Write Thread START");
+//        }
+//    }
 
     /**
      * Stop the Write Thread
