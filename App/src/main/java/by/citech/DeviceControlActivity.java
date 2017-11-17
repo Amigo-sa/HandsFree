@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Timer;
@@ -71,6 +72,8 @@ public class DeviceControlActivity extends Activity
     private Animation animCall;
     private Button btnGreen, btnRed, btnChangeDevice;
     private EditText editTextSrvLocAddr, editTextSrvRemAddr, editTextSrvLocPort, editTextSrvRemPort;
+    // Отображение траффика для дебага
+    TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
     // условие повторения анимации
     private boolean isCallAnim = false;

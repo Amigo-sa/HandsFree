@@ -9,8 +9,10 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 class RedirectToBluetooth implements IRedirectCtrl, IReceiveListener {
-    private static final String TAG = Tags.NET_REDIR_BLUETOOTH;
+
+    private static final String TAG = Tags.NET_REDIR_BT;
     private static final boolean debug = Settings.debug;
+
     private IReceiveListenerReg iReceiveListenerReg;
     private boolean isRedirecting = false;
     private StorageData<byte[][]> storageNetToBt;

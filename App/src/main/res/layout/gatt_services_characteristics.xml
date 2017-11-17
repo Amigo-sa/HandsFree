@@ -206,6 +206,35 @@
                 android:onClick="btnChangeDevice"
                 android:text="@string/label_buttonChDevice"
                 android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/textViewBtInTraffic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/textViewBtOutTraffic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/textViewNetInTraffic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/textViewNetOutTraffic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:visibility="gone"/>
+
         </LinearLayout>
 
         <ExpandableListView

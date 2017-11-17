@@ -11,10 +11,11 @@ public class Settings {
 
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
-  public static final DebugMode debugMode = DebugMode.Normal;
+    public static final DebugMode debugMode = DebugMode.Normal;
 //  public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
 //  public static final DebugMode debugMode = DebugMode.LoopbackNetToNet;
-//    public static final DebugMode debugMode = DebugMode.Record;
+//  public static final DebugMode debugMode = DebugMode.Record;
+    public static final boolean showTraffic = true;
     public static final boolean debug = true;
 //  public static final boolean debug = false;
     public static final int bufferSize = 3000;

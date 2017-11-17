@@ -9,7 +9,7 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 class StreamBluetooth implements IStreamCtrl {
-    private static final String TAG = Tags.NET_STREAM_BLUETOOTH;
+    private static final String TAG = Tags.NET_STREAM_BT;
     private static final boolean debug = Settings.debug;
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;

@@ -28,8 +28,8 @@ public class Caller {
     private ConnectorBluetooth connectorBluetooth;
     private ConnectorNetwork connectorNetwork;
     private CallUi callUi;
-    StorageData<byte[]> storageBtToNet;
-    StorageData<byte[][]> storageNetToBt;
+    private StorageData<byte[]> storageBtToNet;
+    private StorageData<byte[][]> storageNetToBt;
 
     //--------------------- singleton
 
@@ -142,6 +142,9 @@ public class Caller {
                 break;
             case Normal:
                 buildNormal();
+                break;
+            default:
+                break;
         }
     }
 
