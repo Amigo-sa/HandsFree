@@ -127,6 +127,7 @@ public class Caller {
     //--------------------- main
 
     public void build() {
+        if (debug) Log.i(TAG, "build");
         if (iCallUiListener == null
                 || iCallNetworkListener == null
                 || iNetworkInfoListener == null
@@ -154,6 +155,7 @@ public class Caller {
     }
 
     private void buildDebugLoopbackBtToBt() {
+        if (debug) Log.i(TAG, "buildDebugLoopbackBtToBt");
         if (iDebugListener == null) {
             if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt at least one of key parameters are null");
             return;
@@ -181,6 +183,7 @@ public class Caller {
     }
 
     private void buildDebugRecord() {
+        if (debug) Log.i(TAG, "buildDebugRecord");
         if (iDebugListener == null) {
             if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt at least one of key parameters are null");
             return;
@@ -208,6 +211,7 @@ public class Caller {
     }
 
     private void buildDebugLoopbackNetToNet() {
+        if (debug) Log.i(TAG, "buildDebugLoopbackNetToNet");
         if (iDebugListener == null) {
             if (debug) Log.e(TAG, "buildDebugLoopbackNetToNet at least one of key parameters are null");
             return;
@@ -215,9 +219,9 @@ public class Caller {
     }
 
     private void buildNormal() {
+        if (debug) Log.i(TAG, "buildNormal");
         storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
         storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
-
         handlerExtended = new HandlerExtended(getiNetworkListener());
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
@@ -243,10 +247,12 @@ public class Caller {
     }
 
     private void startConnectorNetwork() {
+        if (debug) Log.i(TAG, "startConnectorNetwork");
         ConnectorNetwork.getInstance().start();
     }
 
     public void stop() {
+        if (debug) Log.i(TAG, "stop");
         if (debugBtToBtLooper != null) {
             debugBtToBtLooper.deactivate();
             debugBtToBtLooper = null;
