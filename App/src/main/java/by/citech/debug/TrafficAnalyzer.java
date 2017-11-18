@@ -47,7 +47,9 @@ public class TrafficAnalyzer extends Thread {
 
     public void addTrafficInfo(TrafficInfo trafficInfo) {
         trafficInfos.add(trafficInfo);
-        iTrafficReporter.publishTrafficInfo(trafficInfo);
+        if (iTrafficReporter != null) {
+            iTrafficReporter.publishTrafficInfo(trafficInfo);
+        }
     }
 
     public void setiTrafficReporter(ITrafficReporter iTrafficReporter) {

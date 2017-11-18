@@ -154,10 +154,6 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
         isRunning = false;
     }
 
-
-    //--------------------- debug
-
-
     @Override
     public void callbackIsDone() {
         Callback = true;
@@ -169,6 +165,8 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
         Notify = true;
         if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone() " + rcvCnt++);
     }
+
+    //--------------------- debug
 
     @Override
     public long getBytesDelta() {
