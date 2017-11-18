@@ -1,4 +1,4 @@
-package by.citech.logic;
+package by.citech.gui;
 
 public interface ICallUiListener extends ICallUiExchangeListener {
     void callOutcomingCanceled();

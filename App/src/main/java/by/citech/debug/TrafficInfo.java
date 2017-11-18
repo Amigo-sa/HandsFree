@@ -1,35 +1,72 @@
 package by.citech.debug;
 
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+
 public class TrafficInfo {
 
-    private long averageBytesPerSec;
-    private long averageMsPerSec;
-    private long tenSecBytesPerSec;
-    private long tenSecMsPerSec;
-    private TrafficNodes node;
+    private static final String TAG = Tags.TRAFFIC_INFO;
+    private static final boolean debug = Settings.debug;
+    private static final long customPeriod = 2000;
+    private static final long msToSFactor = 1000;
 
-    public TrafficInfo(TrafficNodes node) {
+    private long averageBytesPerSec;
+    private long averageParamPerSec;
+    private long customIntervalBytesPerSec;
+    private long customIntervalParamPerSec;
+    private long overallMs;
+    private long overallBytes;
+    private TrafficNodes node;
+    private ITrafficUpdate iTrafficUpdate;
+    private boolean isInitiated;
+
+    public TrafficInfo(TrafficNodes node, ITrafficUpdate iTrafficUpdate) {
+        if (node == null || iTrafficUpdate == null) {
+            return;
+        }
         this.node = node;
+        this.iTrafficUpdate = iTrafficUpdate;
+        averageBytesPerSec = 0;
+        averageParamPerSec = 0;
+        customIntervalBytesPerSec = 0;
+        customIntervalParamPerSec = 0;
+        overallMs = 0;
+        isInitiated = false;
+    }
+
+    public long getCustomBytesPerSec() {
+        return customIntervalBytesPerSec;
     }
 
     public long getAverageBytesPerSec() {
         return averageBytesPerSec;
     }
 
-    public long getAverageMsPerSec() {
-        return averageMsPerSec;
+    public long getCustomIntervalParamPerSec() {
+        return customIntervalParamPerSec;
     }
 
-    public long getTenSecBytesPerSec() {
-        return tenSecBytesPerSec;
-    }
-
-    public long getTenSecMsPerSec() {
-        return tenSecMsPerSec;
+    public long getAverageParamPerSec() {
+        return averageParamPerSec;
     }
 
     public TrafficNodes getNode() {
         return node;
+    }
+
+    public void updateInfo(long timeDelta) {
+        if (!isInitiated) {
+            isInitiated = true;
+            iTrafficUpdate.getBytesDelta();
+            return;
+        }
+        long bytesDelta = iTrafficUpdate.getBytesDelta();
+        overallBytes = overallBytes + bytesDelta;
+        overallMs = overallMs + timeDelta;
+        averageBytesPerSec = (overallBytes * msToSFactor) / overallMs;
+        customIntervalBytesPerSec = (bytesDelta * customPeriod) / timeDelta;
+        //TODO: доделать
+        averageParamPerSec = averageBytesPerSec;
     }
 
 }

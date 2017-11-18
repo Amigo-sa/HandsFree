@@ -1,4 +1,4 @@
-package by.citech.logic;
+package by.citech.gui;
 
 public interface IUiBtnGreenRedListener {
     void onClickBtnRed();

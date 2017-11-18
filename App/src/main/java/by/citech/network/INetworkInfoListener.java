@@ -1,4 +1,4 @@
-package by.citech.logic;
+package by.citech.network;
 
 public interface INetworkInfoListener {
     String getRemAddr();

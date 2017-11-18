@@ -7,6 +7,10 @@ import by.citech.data.StorageData;
 import by.citech.debug.DebugBtToBtLooper;
 import by.citech.debug.DebugBtToBtRecorder;
 import by.citech.debug.IDebugListener;
+import by.citech.gui.ICallUiListener;
+import by.citech.gui.IUiBtnGreenRedListener;
+import by.citech.network.INetworkInfoListener;
+import by.citech.network.INetworkListener;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -16,6 +20,7 @@ public class Caller {
     private static final String TAG = Tags.CALLER;
     private static final boolean debug = Settings.debug;
     private static final DebugMode debugMode = Settings.debugMode;
+
     private volatile CallerState callerState = CallerState.Null;
     private ICallUiListener iCallUiListener;
     private ICallNetworkListener iCallNetworkListener;

@@ -6,6 +6,9 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.data.StorageData;
+import by.citech.gui.ICallUiListener;
+import by.citech.network.INetworkInfoListener;
+import by.citech.network.INetworkListener;
 import by.citech.network.client.asynctask.TaskClientConn;
 import by.citech.network.client.connection.IClientCtrl;
 import by.citech.network.client.connection.IClientCtrlReg;

@@ -4,17 +4,13 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
-import java.util.Arrays;
-
 import by.citech.data.StorageData;
-import by.citech.debug.IDebugListener;
-import by.citech.debug.IDebugTraffic;
+import by.citech.debug.ITrafficUpdate;
 import by.citech.logic.Resource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
-import by.citech.util.Decode;
 
-public class WriterTransmitter extends Thread implements IDebugTraffic, CallbackWriteListener {
+public class WriterTransmitter extends Thread implements ITrafficUpdate, CallbackWriteListener {
 
     public static final String TAG = "WRS_WRT";
 
@@ -144,7 +140,7 @@ public class WriterTransmitter extends Thread implements IDebugTraffic, Callback
                 Notify = false;
             }
             try {
-                Thread.sleep(5);
+                Thread.sleep(8);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -162,10 +158,6 @@ public class WriterTransmitter extends Thread implements IDebugTraffic, Callback
 
     //--------------------- debug
 
-    @Override
-    public byte[] getRecentTraffic() {
-        return new byte[0];
-    }
 
     @Override
     public void callbackIsDone() {
@@ -178,4 +170,10 @@ public class WriterTransmitter extends Thread implements IDebugTraffic, Callback
         Notify = true;
         if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone() " + rcvCnt++);
     }
+
+    @Override
+    public long getBytesDelta() {
+        return 0;
+    }
+
 }

@@ -13,7 +13,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -22,18 +21,17 @@ import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
-import by.citech.debug.IDebugListener;
-import by.citech.debug.IDebugTraffic;
+import by.citech.debug.ITrafficUpdate;
 import by.citech.logic.Resource;
 import by.citech.param.Settings;
-import by.citech.param.Tags;
 import by.citech.util.Decode;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
-public class BluetoothLeService extends Service implements IDebugTraffic {
+
+public class BluetoothLeService extends Service implements ITrafficUpdate {
     private final static String TAG = "WSD_BluetoothLeService";
 
     private BluetoothManager mBluetoothManager;
@@ -516,8 +514,8 @@ public class BluetoothLeService extends Service implements IDebugTraffic {
     //--------------------- debug
 
     @Override
-    public byte[] getRecentTraffic() {
-        return new byte[0];
+    public long getBytesDelta() {
+        return 0;
     }
 
 }

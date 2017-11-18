@@ -32,6 +32,7 @@ public class Tags {
     public static final String BT2BT_LOOPER     = "WSD_BT2BT_LOOPER";
     public static final String NET2NET_LOOPER   = "WSD_NET2NET_LOOPER";
     public static final String BT2BT_RECORDER   = "WSD_BT2BT_RECORDER";
-    public static final String TRAFFIC_STAT     = "WSD_TRAFFIC_STAT";
+    public static final String TRAFFIC_ANAL     = "WSD_TRAFFIC_STAT";
+    public static final String TRAFFIC_INFO     = "WSD_TRAFFIC_INFO";
 
 }

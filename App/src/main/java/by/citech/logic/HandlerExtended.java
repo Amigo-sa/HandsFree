@@ -3,6 +3,8 @@ package by.citech.logic;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
+import by.citech.network.INetworkListener;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
