@@ -10,7 +10,9 @@ import by.citech.logic.Resource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class WriterTransmitter extends Thread implements ITrafficUpdate, CallbackWriteListener {
+public class WriterTransmitter
+        extends Thread
+        implements ITrafficUpdate, CallbackWriteListener {
 
     public static final String TAG = "WRS_WRT";
 

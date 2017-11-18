@@ -11,10 +11,10 @@ import by.citech.param.Tags;
 import static android.content.Context.MODE_PRIVATE;
 
 public final class AppData {
+
     private static String bluetoothDeviceId;
     private static String remoteIP;
     private static int remotePort;
-
     private static SharedPreferences preferences;
 
     public static void init(Context context) {
@@ -71,4 +71,5 @@ public final class AppData {
         remotePort = 0;
         save();
     }
+
 }

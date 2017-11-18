@@ -48,15 +48,16 @@ import by.citech.param.Tags;
 
 import static by.citech.util.NetworkInfo.getIpAddr;
 
-public class DeviceControlActivity extends Activity
+public class DeviceControlActivity
+        extends Activity
         implements INetworkInfoListener, ICallNetworkListener, ICallUiListener, IBluetoothListener, IDebugListener {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
     private static final DebugMode debugMode = Settings.debugMode;
 
-    IUiBtnGreenRedListener iUiBtnGreenRedListener;
-    INetworkListener iNetworkListener;
+    private IUiBtnGreenRedListener iUiBtnGreenRedListener;
+    private INetworkListener iNetworkListener;
 
     private static final int DEVICE_CONNECT = 1;
     private static final int THIS_CONNECTED_DEVICE = 4;
@@ -767,4 +768,5 @@ public class DeviceControlActivity extends Activity
                 break;
         }
     }
+
 }

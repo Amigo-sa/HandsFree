@@ -9,7 +9,8 @@ import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
-public class HandlerExtended extends Handler {
+public class HandlerExtended
+        extends Handler {
 
     private INetworkListener iNetworkListener;
 
@@ -76,4 +77,5 @@ public class HandlerExtended extends Handler {
                 break;
         }
     }
+
 }

@@ -5,7 +5,9 @@ import android.util.Log;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class Disc extends AsyncTask<IConnCtrl, Void, Void> {
+public class Disc
+        extends AsyncTask<IConnCtrl, Void, Void> {
+
     private static final int TIMEOUT_PERIOD = 500;
     private static final int TIMEOUT_CYCLES = 10;
     private IDisc iDisc;
@@ -50,4 +52,5 @@ public class Disc extends AsyncTask<IConnCtrl, Void, Void> {
         Log.i(Tags.NET_DISC, "onPostExecute");
         iDisc.disconnected();
     }
+
 }

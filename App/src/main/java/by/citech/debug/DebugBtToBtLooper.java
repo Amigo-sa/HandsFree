@@ -5,7 +5,10 @@ import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugBtToBtLooper extends Thread implements IDebugListener {
+public class DebugBtToBtLooper
+        extends Thread
+        implements IDebugListener {
+
     private static final String TAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
 
@@ -16,6 +19,7 @@ public class DebugBtToBtLooper extends Thread implements IDebugListener {
     private boolean isActive;
 
     public DebugBtToBtLooper(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
+
         this.storageBtToNet = storageBtToNet;
         this.storageNetToBt = storageNetToBt;
         dataAssembled = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
@@ -75,4 +79,5 @@ public class DebugBtToBtLooper extends Thread implements IDebugListener {
     public void stopDebug() {
         isRunning = false;
     }
+
 }

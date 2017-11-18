@@ -11,7 +11,8 @@ import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class CallUi implements IUiBtnGreenRedListener {
+public class CallUi
+        implements IUiBtnGreenRedListener {
 
     private static final String TAG = Tags.CALL_UI;
     private static final boolean debug = Settings.debug;
@@ -197,4 +198,5 @@ public class CallUi implements IUiBtnGreenRedListener {
                 break;
         }
     }
+
 }

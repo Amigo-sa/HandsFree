@@ -16,8 +16,8 @@ public class Settings {
 //  public static final DebugMode debugMode = DebugMode.LoopbackNetToNet; //TODO: реализовать
 //  public static final DebugMode debugMode = DebugMode.Record;
     public static final boolean showTraffic = true;
-    public static final boolean debug = true;
-//  public static final boolean debug = false;
+//  public static final boolean debug = true;
+    public static final boolean debug = false;
     public static final int bufferSize = 3000;
     public static final boolean testSendOneOnCall = false;
 

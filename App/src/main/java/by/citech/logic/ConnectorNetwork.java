@@ -9,25 +9,25 @@ import by.citech.data.StorageData;
 import by.citech.gui.ICallUiListener;
 import by.citech.network.INetworkInfoListener;
 import by.citech.network.INetworkListener;
-import by.citech.network.client.asynctask.TaskClientConn;
-import by.citech.network.client.connection.IClientCtrl;
-import by.citech.network.client.connection.IClientCtrlReg;
+import by.citech.network.client.ClientConn;
+import by.citech.network.client.IClientCtrl;
+import by.citech.network.client.IClientCtrlReg;
 import by.citech.network.control.IConnCtrl;
 import by.citech.network.control.IDisc;
-import by.citech.network.control.transmit.IMessage;
+import by.citech.network.transmit.IMessage;
 import by.citech.network.control.Disc;
-import by.citech.network.control.transmit.SendMessage;
-import by.citech.network.control.receive.IRedirectCtrl;
-import by.citech.network.control.receive.IRedirectCtrlReg;
-import by.citech.network.control.receive.Redirect;
-import by.citech.network.control.transmit.IStreamCtrl;
-import by.citech.network.control.transmit.IStreamCtrlReg;
-import by.citech.network.control.transmit.Stream;
-import by.citech.network.server.asynctask.TaskServerOff;
-import by.citech.network.server.asynctask.TaskServerOn;
-import by.citech.network.server.connection.IServerCtrl;
-import by.citech.network.server.connection.IServerCtrlReg;
-import by.citech.network.server.connection.IServerOff;
+import by.citech.network.transmit.SendMessage;
+import by.citech.network.receive.IRedirectCtrl;
+import by.citech.network.receive.IRedirectCtrlReg;
+import by.citech.network.receive.Redirect;
+import by.citech.network.transmit.IStreamCtrl;
+import by.citech.network.transmit.IStreamCtrlReg;
+import by.citech.network.transmit.Stream;
+import by.citech.network.server.ServerOff;
+import by.citech.network.server.ServerOn;
+import by.citech.network.server.IServerCtrl;
+import by.citech.network.server.IServerCtrlReg;
+import by.citech.network.server.IServerOff;
 import by.citech.param.Messages;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -110,7 +110,7 @@ public class ConnectorNetwork
     //--------------------- main
 
     public void start() {
-        new TaskServerOn(this, handler).execute(iNetworkInfoListener.getLocPort());
+        new ServerOn(this, handler).execute(iNetworkInfoListener.getLocPort());
     }
 
     public void stop() {
@@ -325,7 +325,7 @@ public class ConnectorNetwork
 
     private void connect() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "connect");
-        new TaskClientConn(this, handler).execute(String.format("ws://%s:%s",
+        new ClientConn(this, handler).execute(String.format("ws://%s:%s",
                 iNetworkInfoListener.getRemAddr(),
                 iNetworkInfoListener.getRemPort()));
     }
@@ -354,7 +354,8 @@ public class ConnectorNetwork
 
     //--------------------- network low level
 
-    private class ThreadExchangeStop extends Thread {
+    private class ThreadExchangeStop
+            extends Thread {
         @Override
         public void run() {
             if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadExchangeStop");
@@ -363,7 +364,8 @@ public class ConnectorNetwork
         }
     }
 
-    private class ThreadNetStop extends Thread {
+    private class ThreadNetStop
+            extends Thread {
         @Override
         public void run() {
             if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop");
@@ -378,7 +380,7 @@ public class ConnectorNetwork
     private void serverOff() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "serverOff");
         if (iServerCtrl != null) {
-            new TaskServerOff(this).execute(iServerCtrl);
+            new ServerOff(this).execute(iServerCtrl);
             iServerCtrl = null;
         }
     }
@@ -463,4 +465,5 @@ public class ConnectorNetwork
     public void disconnected() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "disconnected");
     }
+
 }

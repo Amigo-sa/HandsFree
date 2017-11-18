@@ -7,7 +7,9 @@ import by.citech.logic.CallerState;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugBtToBtRecorder extends Thread implements IDebugListener {
+public class DebugBtToBtRecorder
+        extends Thread implements IDebugListener {
+
     private static final String TAG = Tags.BT2BT_RECORDER;
     private static final boolean debug = Settings.debug;
     private static final int initialSize = 100;
@@ -123,4 +125,5 @@ public class DebugBtToBtRecorder extends Thread implements IDebugListener {
     private CallerState getCallerState() {
         return Caller.getInstance().getCallerState();
     }
+
 }

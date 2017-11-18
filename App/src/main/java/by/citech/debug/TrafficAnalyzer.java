@@ -8,7 +8,8 @@ import java.util.List;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class TrafficAnalyzer extends Thread {
+public class TrafficAnalyzer
+        extends Thread {
 
     private static final String TAG = Tags.TRAFFIC_ANAL;
     private static final boolean debug = Settings.debug;

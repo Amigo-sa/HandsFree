@@ -8,6 +8,7 @@ import java.util.Queue;
 import by.citech.param.Settings;
 
 public class StorageData<T> {
+
     private static final boolean debug = Settings.debug;
     private boolean debugGetSession, debugPutSession;
     private String TAG;

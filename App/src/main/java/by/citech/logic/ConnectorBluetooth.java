@@ -28,7 +28,8 @@ import by.citech.gui.ICallUiExchangeListener;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 
-public class ConnectorBluetooth implements ICallNetworkExchangeListener, ICallUiExchangeListener, IDebugListener {
+public class ConnectorBluetooth
+        implements ICallNetworkExchangeListener, ICallUiExchangeListener, IDebugListener {
 
     private final static String TAG = "WSD_ConnectorBluetooth";
     private final static DebugMode debugMode = Settings.debugMode;

@@ -2,7 +2,9 @@ package by.citech.logic;
 
 import java.io.Serializable;
 
-public class Resource implements Serializable{
+public class Resource
+        implements Serializable {
+
     private boolean callback;
     private int supportedMTU;
 
@@ -26,4 +28,5 @@ public class Resource implements Serializable{
     public void setSupportedMTU(int supportedMTU) {
         this.supportedMTU = supportedMTU;
     }
+
 }
