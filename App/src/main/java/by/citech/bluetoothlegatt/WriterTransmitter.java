@@ -117,14 +117,14 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
         isRunning = true;
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-            if ( (!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (Callback || Notify)) {
+            if ((!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (Callback || Notify)) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 if(isArrayDataEmpty) {
                     arrayData = storageNetToBt.getData();
                     isArrayDataEmpty = false;
                 }
                 if (numBTpackage < Settings.btToNetFactor) {
-                    dataWrite = getBTpackage(numBTpackage);
+                    dataWrite = arrayData[numBTpackage];
                    // if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
                     characteristic.setValue(dataWrite);
@@ -139,14 +139,13 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
                 Callback = false;
                 Notify = false;
             }
-            try {
-                Thread.sleep(8);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
+            if (numBTpackage != Settings.btToNetFactor)
+                try {
+                    Thread.sleep(8);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
         }
-
         if (listener != null)
             listener.doWriteCharacteristic("Write Characteristic ended");
     }
