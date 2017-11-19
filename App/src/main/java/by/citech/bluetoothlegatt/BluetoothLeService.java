@@ -33,6 +33,7 @@ import by.citech.util.Decode;
 
 public class BluetoothLeService extends Service implements ITrafficUpdate {
     private final static String TAG = "WSD_BluetoothLeService";
+    private static final int CONNECTION_PRIORITY_HIGH = 1;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -49,7 +50,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     private int numBTpackage = 0;
     private long prevTime;
     private long deltaTime;
-    
+
     //Создаём сообщения для BroadcastReceiver-а которые будут отправляться в качестве Callback-а
     public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
@@ -140,48 +141,49 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicWrite(gatt, characteristic, status);
-            if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
-            if (mCallbackWriteListener != null)
-                mCallbackWriteListener.callbackIsDone();
+
+            synchronized(this)
+            {
+                super.onCharacteristicWrite(gatt, characteristic, status);
+                if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
+                if (mCallbackWriteListener != null)
+                    mCallbackWriteListener.callbackIsDone();
 //            res.setCallback(true);
+                if(status==BluetoothGatt.GATT_SUCCESS)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA :");
 
-
-            if(status==BluetoothGatt.GATT_SUCCESS)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA :");
-
+                }
+                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");
+                }
+                if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT WRITE not permitted");
+                }
+                if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT invalid attribute lenght");
+                }
+                if(status==BluetoothGatt.GATT_FAILURE)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT WRITE other errors");
+                }
+                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT WRITE congested");
+                }
+                if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION)
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT WRITE authentication");
+                }
+                else
+                {
+                    if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
+                }
+                broadcastUpdate(ACTION_DATA_WRITE);
             }
-            if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");
-            }
-            if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT WRITE not permitted");
-            }
-            if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT invalid attribute lenght");
-            }
-            if(status==BluetoothGatt.GATT_FAILURE)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT WRITE other errors");
-            }
-            if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT WRITE congested");
-            }
-            if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION)
-            {
-                if (Settings.debug) Log.i(TAG,"GATT WRITE authentication");
-            }
-            else
-            {
-                if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
-            }
-
-            broadcastUpdate(ACTION_DATA_WRITE);
         }
 
 
@@ -372,10 +374,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        synchronized(this)
+        {
+            mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        }
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
+        mBluetoothGatt.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
        // Log.i(TAG, "mConnectionState = " + STATE_CONNECTING);
         return true;
     }

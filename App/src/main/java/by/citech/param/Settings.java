@@ -11,8 +11,8 @@ public class Settings {
 
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
-//    public static final DebugMode debugMode = DebugMode.Normal;
-   public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
+    public static final DebugMode debugMode = DebugMode.Normal;
+//   public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
 //  public static final DebugMode debugMode = DebugMode.LoopbackNetToNet; //TODO: реализовать
 //  public static final DebugMode debugMode = DebugMode.Record;
     public static final boolean showTraffic = true;
@@ -27,7 +27,7 @@ public class Settings {
     public static final int btToBtSendSize = 16; // bytes in one BT message
     public static final int btSignificantBytes = 10;
     public static final int btRsvdBytesOffset = 10;
-    public static final int btToNetFactor = 80;
+    public static final int btToNetFactor = 100;
     public static final int btMsPerNetSendSize = btMsPerBtToBtSendSize * btToNetFactor;
     public static final int btToNetSendSize = btSignificantBytes * btToNetFactor;
     public static final int btToNetSendSizeUncut = btToBtSendSize * btToNetFactor;
