@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -111,6 +110,7 @@ public class DeviceControlActivity
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Log.e("ACTIVITY","!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE");
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -119,6 +119,7 @@ public class DeviceControlActivity
         // And Checks if Bluetooth is supported on the device.
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (!connectorBluetooth.getBluetoothAdapter(bluetoothManager)) {
+            Log.e("ACTIVITY","!connectorBluetooth.getBluetoothAdapter(bluetoothManager)");
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
             return;

@@ -77,7 +77,7 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
             }
             if (numBTpackage < Settings.btToNetFactor)
                 try {
-                    Thread.sleep(9);
+                    Thread.sleep(8);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
