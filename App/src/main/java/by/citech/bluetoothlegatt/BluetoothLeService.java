@@ -46,6 +46,10 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
+    private int numBTpackage = 0;
+    private long prevTime;
+    private long deltaTime;
+    
     //Создаём сообщения для BroadcastReceiver-а которые будут отправляться в качестве Callback-а
     public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
@@ -137,7 +141,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            Log.i(TAG,"onCharacteristicWrite");
+            if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
             if (mCallbackWriteListener != null)
                 mCallbackWriteListener.callbackIsDone();
 //            res.setCallback(true);
@@ -145,36 +149,36 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 
             if(status==BluetoothGatt.GATT_SUCCESS)
             {
-                Log.i(TAG,"GATT SUCCESS " + "DATA :");
+                if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA :");
 
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
             {
-                Log.i(TAG,"GATT WRITE connection congested");
+                if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");
             }
             if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED)
             {
-                Log.i(TAG,"GATT WRITE not permitted");
+                if (Settings.debug) Log.i(TAG,"GATT WRITE not permitted");
             }
             if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH)
             {
-                Log.i(TAG,"GATT invalid attribute lenght");
+                if (Settings.debug) Log.i(TAG,"GATT invalid attribute lenght");
             }
             if(status==BluetoothGatt.GATT_FAILURE)
             {
-                Log.i(TAG,"GATT WRITE other errors");
+                if (Settings.debug) Log.i(TAG,"GATT WRITE other errors");
             }
             if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
             {
-                Log.i(TAG,"GATT WRITE congested");
+                if (Settings.debug) Log.i(TAG,"GATT WRITE congested");
             }
             if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION)
             {
-                Log.i(TAG,"GATT WRITE authentication");
+                if (Settings.debug) Log.i(TAG,"GATT WRITE authentication");
             }
             else
             {
-                Log.i(TAG,"GATT WRITE :"+status);
+                if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
             }
 
             broadcastUpdate(ACTION_DATA_WRITE);
@@ -184,7 +188,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             super.onReadRemoteRssi(gatt, rssi, status);
-            Log.w(TAG, "RSSI " + rssi);
+            if (Settings.debug) Log.w(TAG, "RSSI " + rssi);
         }
 
         @Override
@@ -201,7 +205,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
 
-            Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
+            if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
 //            if (status == BluetoothGatt.GATT_SUCCESS) {
 //                res = new Resource(true, mtu);
 //                Log.w("WSD_MTU", "status = GATT_SUCCESS");
@@ -249,20 +253,33 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
             int format = -1;
             if ((flag & 0x01) != 0) {
                 format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
+                if (Settings.debug) Log.d(TAG, "Heart rate format UINT16.");
             } else {
                 format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
+                if (Settings.debug) Log.d(TAG, "Heart rate format UINT8.");
             }
             final int heartRate = characteristic.getIntValue(format, 1);
-            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
+            if (Settings.debug) Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             //if (loopback)
+
+
             storageBtToNet.putData(data);
             //res.setCallback(true);
+            if (Settings.debug) {
+                if (numBTpackage == 0)
+                    prevTime = System.currentTimeMillis();
+                numBTpackage++;
+                if (numBTpackage == Settings.btToNetFactor) {
+                    deltaTime = System.currentTimeMillis() - prevTime;
+                    Log.i("WRS_WRT", "PutToArray latency = " + deltaTime);
+                    numBTpackage = 0;
+                }
+            }
+
 
             if (data != null && data.length > 0) {
                 if (Settings.debug)
@@ -305,14 +322,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if (mBluetoothManager == null) {
-                Log.e(TAG, "Unable to initialize BluetoothManager.");
+                if (Settings.debug) Log.e(TAG, "Unable to initialize BluetoothManager.");
                 return false;
             }
         }
 
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+            if (Settings.debug) Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
 
@@ -331,14 +348,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
+            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
 
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+            if (Settings.debug) Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
                 mConnectionState = STATE_CONNECTING;
                 return true;
@@ -348,15 +365,15 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
 
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-        Log.i(TAG, "Get remote Device " + device);
+        if (Settings.debug) Log.i(TAG, "Get remote Device " + device);
         if (device == null) {
-            Log.w(TAG, "Device not found.  Unable to connect.");
+            if (Settings.debug) Log.w(TAG, "Device not found.  Unable to connect.");
             return false;
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        Log.i(TAG, "Trying to create a new connection.");
+        if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
        // Log.i(TAG, "mConnectionState = " + STATE_CONNECTING);
@@ -375,7 +392,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      */
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         if (getWriteThread() != null)
@@ -404,7 +421,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      */
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.readCharacteristic(characteristic);
@@ -420,7 +437,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 
     public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
@@ -471,7 +488,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      */
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
@@ -493,7 +510,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
                 mBluetoothGatt.writeDescriptor(descriptor);
             }
             else {
-                Log.w(TAG, "characteristic is null");
+                if (Settings.debug) Log.w(TAG, "characteristic is null");
             }
         }
 
