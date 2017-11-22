@@ -2,6 +2,7 @@ package by.citech.bluetoothlegatt;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +10,15 @@ import java.util.List;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.logic.IBluetoothListener;
+import by.citech.param.Settings;
 
 /**
  * Created by tretyak on 16.11.2017.
  */
 
 public class Characteristics {
+
+    private final static String TAG = "WSD_Characteristics";
     // список характеристик устройства
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private IBluetoothListener mIBluetoothListener;
@@ -25,8 +29,14 @@ public class Characteristics {
         this.mIBluetoothListener = mIBluetoothListener;
     }
 
+    public boolean isEmpty(){
+        if (mGattCharacteristics != null)
+            return true;
+        return false;
+    }
+
     //Собираем все имеющиеся характеристики устройства в коллекции
-    private void displayGattServices(List<BluetoothGattService> gattServices) {
+    public void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
         // обьявляем переменные для будущих сервисов и характеристик
         String uuid = null;  // уникальный идентификатор сервиса или характеристики
@@ -72,15 +82,16 @@ public class Characteristics {
 
     // получаем характеристику для включения нотификации на периферийном устройстве(сервере)
     public BluetoothGattCharacteristic getNotifyCharacteristic(){
-        //if (Settings.debug) Log.i("","");
-        if (mGattCharacteristics != null)
+        if (Settings.debug) Log.i(TAG,"getNotifyCharacteristic()");
+        if (mGattCharacteristics.size() == 4)
             return mGattCharacteristics.get(3).get(2);
         return null;
     };
 
     // получаем характеристику для включения записи на периферийном устройстве(сервере)
     public BluetoothGattCharacteristic getWriteCharacteristic(){
-        if (mGattCharacteristics != null)
+        if (Settings.debug) Log.i(TAG,"getWriteCharacteristic()");
+        if (mGattCharacteristics.size() == 4)
             return mGattCharacteristics.get(3).get(1);
         return null;
     };

@@ -10,7 +10,7 @@ import by.citech.logic.Resource;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class WriterTransmitter extends Thread implements ITrafficUpdate, CallbackWriteListener {
+public class WriteCharacteristicThread extends Thread implements ITrafficUpdate, CallbackWriteListener {
 
     public static final String TAG = "WRS_WRT";
 
@@ -28,7 +28,7 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
     private long prevTime = 0L;
     private long deltaTime = 0L;
 
-    public WriterTransmitter(String name, Resource res, StorageData<byte[][]> storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
+    public WriteCharacteristicThread(String name, Resource res, StorageData<byte[][]> storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
         this.res = res;
         this.storageNetToBt = storageNetToBt;
@@ -51,7 +51,7 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
             if ((!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (Callback || Notify)) {
                 if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
                 if (isArrayDataEmpty) {
-                    if (Settings.debug) prevTime = System.currentTimeMillis();
+                    if (!Settings.debug) prevTime = System.currentTimeMillis();
                     arrayData = storageNetToBt.getData();
                     isArrayDataEmpty = false;
                 }
@@ -59,7 +59,7 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
                     dataWrite = arrayData[numBTpackage];
                     //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
-                    if (Settings.debug && (numBTpackage == Settings.btToNetFactor)) {
+                    if (!Settings.debug && (numBTpackage == Settings.btToNetFactor)) {
                         deltaTime = System.currentTimeMillis() - prevTime;
                         Log.i(TAG, "getFromArray latency = " + deltaTime);
                     }
@@ -77,7 +77,7 @@ public class WriterTransmitter extends Thread implements ITrafficUpdate, Callbac
             }
             if (numBTpackage < Settings.btToNetFactor)
                 try {
-                    Thread.sleep(9);
+                    Thread.sleep(8);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

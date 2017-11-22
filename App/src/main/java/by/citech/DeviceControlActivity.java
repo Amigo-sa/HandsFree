@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -241,7 +240,8 @@ public class DeviceControlActivity
     public void btnChangeDevice(View view){
         setVisibleList();
         myListDevices = (ListView) findViewById(R.id.ListDevices);
-        connectorBluetooth.initializeListBluetoothDevice();
+
+        connectorBluetooth.initListBTDevice();
         myListDevices.setAdapter(connectorBluetooth.getmLeDeviceListAdapter());
         myListDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
@@ -263,8 +263,8 @@ public class DeviceControlActivity
                 }
             }
         });
-        connectorBluetooth.stopScanBluetoothDevice();
-        connectorBluetooth.startScanBluetoothDevice();
+        connectorBluetooth.stopScanBTDevice();
+        connectorBluetooth.startScanBTDevices();
     }
 
     //------------------------Dialogs-----------------------------------------
@@ -295,9 +295,7 @@ public class DeviceControlActivity
                 adb.setPositiveButton(R.string.disconnect, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        connectorBluetooth.clearAllDevicesFromList();
-                        connectorBluetooth.startScanBluetoothDevice();
-                        connectorBluetooth.disconnectBTDevice();
+                        connectorBluetooth.disconnectWork();
                         dialog.dismiss();
                     }
                 });
@@ -380,15 +378,15 @@ public class DeviceControlActivity
 
     //--------------------------Other Activity Methods-------------------------
 
-    // по запуску регистрируем наш BroadcastReceiver
+    // по запуску регистрируем наш LeBroadcastReceiver
     @Override
     protected void onResume() {
         super.onResume();
-        // по запуску регистрируем наш BroadcastReceiver
-        connectorBluetooth.updateBroadcastReceiveData();
+        // по запуску регистрируем наш LeBroadcastReceiver
+        connectorBluetooth.updateBCRData();
     }
 
-    // в случае засыпания активности сбрасываем регистрацию BroadcastReceiver
+    // в случае засыпания активности сбрасываем регистрацию LeBroadcastReceiver
     @Override
     protected void onPause() {
         super.onPause();
@@ -445,12 +443,10 @@ public class DeviceControlActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                connectorBluetooth.clearAllDevicesFromList();
-                connectorBluetooth.addConnectDeviceToList();
-                connectorBluetooth.startScanBluetoothDevice();
+                connectorBluetooth.scanWork();
                 break;
             case R.id.menu_stop:
-                connectorBluetooth.stopScanBluetoothDevice();
+                connectorBluetooth.stopScanBTDevice();
                 break;
         }
         return true;
