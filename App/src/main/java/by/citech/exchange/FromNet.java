@@ -12,6 +12,7 @@ public class FromNet
 
     private static final String TAG = Tags.NET_REDIR;
     private static final boolean debug = Settings.debug;
+
     private IFromNetCtrlReg iFromNetCtrlReg;
     private IReceiveListenerReg iReceiveListenerReg;
     private StorageData<byte[][]> storageNetToBt;

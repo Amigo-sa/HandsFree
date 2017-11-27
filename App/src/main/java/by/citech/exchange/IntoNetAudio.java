@@ -8,8 +8,10 @@ import by.citech.param.Tags;
 import static by.citech.util.Decode.bytesToHexMark1;
 
 class IntoNetAudio implements IIntoNetCtrl {
+
     private static final String TAG = Tags.NET_STREAM_AUDIO;
     private static final boolean debug = Settings.debug;
+
     private byte[] buffer;
     private AudioRecord recorder;
     private boolean isStreaming = false;

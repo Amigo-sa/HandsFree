@@ -212,7 +212,6 @@ public class Caller {
                 .addiCallUiExchangeListener(connectorBluetooth);
 
         debugBtToBtRecorder.start();
-
     }
 
     private void buildDebugLoopbackNetToNet() {
@@ -251,7 +250,6 @@ public class Caller {
                 .setHandler(handlerExtended);
 
         startConnectorNetwork();
-
     }
 
     private void startConnectorNetwork() {

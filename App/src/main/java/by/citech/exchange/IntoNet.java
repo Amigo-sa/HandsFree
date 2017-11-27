@@ -12,6 +12,7 @@ public class IntoNet
 
     private static final String TAG = Tags.NET_STREAM;
     private static final boolean debug = Settings.debug;
+
     private IIntoNetCtrlReg iIntoNetCtrlReg;
     private ITransmitter iTransmitter;
     private StorageData<byte[]> storageBtToNet;

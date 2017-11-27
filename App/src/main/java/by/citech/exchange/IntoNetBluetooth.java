@@ -13,6 +13,7 @@ class IntoNetBluetooth
 
     private static final String TAG = Tags.NET_STREAM_BT;
     private static final boolean debug = Settings.debug;
+
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
     private StorageData<byte[]> storageBtToNet;
