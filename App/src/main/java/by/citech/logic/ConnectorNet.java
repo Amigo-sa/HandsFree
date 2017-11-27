@@ -6,23 +6,23 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.data.StorageData;
+import by.citech.exchange.FromNet;
 import by.citech.gui.ICallUiListener;
-import by.citech.network.INetworkInfoListener;
-import by.citech.network.INetworkListener;
+import by.citech.network.INetInfoListener;
+import by.citech.network.INetListener;
 import by.citech.network.client.ClientConn;
 import by.citech.network.client.IClientCtrl;
 import by.citech.network.client.IClientCtrlReg;
 import by.citech.network.control.IConnCtrl;
 import by.citech.network.control.IDisc;
-import by.citech.network.transmit.IMessage;
+import by.citech.exchange.IFromNetCtrl;
+import by.citech.exchange.IMessage;
 import by.citech.network.control.Disc;
-import by.citech.network.transmit.SendMessage;
-import by.citech.network.receive.IRedirectCtrl;
-import by.citech.network.receive.IRedirectCtrlReg;
-import by.citech.network.receive.Redirect;
-import by.citech.network.transmit.IStreamCtrl;
-import by.citech.network.transmit.IStreamCtrlReg;
-import by.citech.network.transmit.Stream;
+import by.citech.exchange.SendMessage;
+import by.citech.exchange.IFromNetCtrlReg;
+import by.citech.exchange.IIntoNetCtrl;
+import by.citech.exchange.IIntoNetCtrlReg;
+import by.citech.exchange.IntoNet;
 import by.citech.network.server.ServerOff;
 import by.citech.network.server.ServerOn;
 import by.citech.network.server.IServerCtrl;
@@ -34,36 +34,36 @@ import by.citech.param.Tags;
 
 import static by.citech.util.NetworkInfo.getIpAddr;
 
-public class ConnectorNetwork
-        implements IServerCtrlReg, IRedirectCtrlReg, IStreamCtrlReg, IClientCtrlReg,
-        IMessage, IServerOff, IDisc, INetworkListener, ICallUiListener {
+public class ConnectorNet
+        implements IServerCtrlReg, IFromNetCtrlReg, IIntoNetCtrlReg, IClientCtrlReg,
+        IMessage, IServerOff, IDisc, INetListener, ICallUiListener {
 
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
-    private IRedirectCtrl iRedirectCtrl;
-    private IStreamCtrl iStreamCtrl;
+    private IFromNetCtrl iFromNetCtrl;
+    private IIntoNetCtrl iIntoNetCtrl;
     private IConnCtrl iConnCtrl;
     private Handler handler;
-    private INetworkInfoListener iNetworkInfoListener;
-    private ArrayList<ICallNetworkListener> iCallNetworkListeners;
-    private ArrayList<ICallNetworkExchangeListener> iCallNetworkExchangeListeners;
+    private INetInfoListener iNetInfoListener;
+    private ArrayList<ICallNetListener> iCallNetworkListeners;
+    private ArrayList<ICallNetExchangeListener> iCallNetExchangeListeners;
     private StorageData<byte[]> storageBtToNet;
     private StorageData<byte[][]> storageNetToBt;
 
     //--------------------- singleton
 
-    private static volatile ConnectorNetwork instance = null;
+    private static volatile ConnectorNet instance = null;
 
-    private ConnectorNetwork() {
+    private ConnectorNet() {
         iCallNetworkListeners = new ArrayList<>();
-        iCallNetworkExchangeListeners = new ArrayList<>();
+        iCallNetExchangeListeners = new ArrayList<>();
     }
 
-    public static ConnectorNetwork getInstance() {
+    public static ConnectorNet getInstance() {
         if (instance == null) {
-            synchronized (ConnectorNetwork.class) {
+            synchronized (ConnectorNet.class) {
                 if (instance == null) {
-                    instance = new ConnectorNetwork();
+                    instance = new ConnectorNet();
                 }
             }
         }
@@ -72,33 +72,33 @@ public class ConnectorNetwork
 
     //--------------------- getters and setters
 
-    public ConnectorNetwork setHandler(Handler handler) {
+    public ConnectorNet setHandler(Handler handler) {
         this.handler = handler;
         return this;
     }
 
-    public ConnectorNetwork setiNetworkInfoListener(INetworkInfoListener iNetworkInfoListener) {
-        this.iNetworkInfoListener = iNetworkInfoListener;
+    public ConnectorNet setiNetInfoListener(INetInfoListener iNetInfoListener) {
+        this.iNetInfoListener = iNetInfoListener;
         return this;
     }
 
-    public ConnectorNetwork addiCallNetworkExchangeListener(ICallNetworkExchangeListener iCallNetworkExchangeListener) {
-        iCallNetworkExchangeListeners.add(iCallNetworkExchangeListener);
+    public ConnectorNet addiCallNetworkExchangeListener(ICallNetExchangeListener iCallNetExchangeListener) {
+        iCallNetExchangeListeners.add(iCallNetExchangeListener);
         return this;
     }
 
-    public ConnectorNetwork addiCallNetworkListener(ICallNetworkListener iCallNetworkListener) {
+    public ConnectorNet addiCallNetworkListener(ICallNetListener iCallNetworkListener) {
         iCallNetworkListeners.add(iCallNetworkListener);
-        iCallNetworkExchangeListeners.add(iCallNetworkListener);
+        iCallNetExchangeListeners.add(iCallNetworkListener);
         return this;
     }
 
-    public ConnectorNetwork setStorageBtToNet(StorageData<byte[]> storageBtToNet) {
+    public ConnectorNet setStorageBtToNet(StorageData<byte[]> storageBtToNet) {
         this.storageBtToNet = storageBtToNet;
         return this;
     }
 
-    public ConnectorNetwork setStorageNetToBt(StorageData<byte[][]> storageNetToBt) {
+    public ConnectorNet setStorageNetToBt(StorageData<byte[][]> storageNetToBt) {
         this.storageNetToBt = storageNetToBt;
         return this;
     }
@@ -110,7 +110,7 @@ public class ConnectorNetwork
     //--------------------- main
 
     public void start() {
-        new ServerOn(this, handler).execute(iNetworkInfoListener.getLocPort());
+        new ServerOn(this, handler).execute(iNetInfoListener.getLocPort());
     }
 
     public void stop() {
@@ -154,7 +154,7 @@ public class ConnectorNetwork
         if (isLocalIp()) {
             if (Settings.debug) Log.w(Tags.NET_CONNECTOR, "callOutcomingStarted isLocalIp()");
             if (setState(CallerState.OutcomingStarted, CallerState.Idle))
-                for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingLocal();
+                for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingLocal();
             return;
         }
         connect();
@@ -174,7 +174,7 @@ public class ConnectorNetwork
         exchangeStart();
     }
 
-    //--------------------- INetworkListener
+    //--------------------- INetListener
 
     @Override
     public void srvOnOpen() {
@@ -183,7 +183,7 @@ public class ConnectorNetwork
             case Idle:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnOpen Idle");
                 if (setState(CallerState.Idle, CallerState.IncomingDetected))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callIncomingDetected();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingDetected();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "srvOnOpen " + getStateName());
@@ -198,12 +198,12 @@ public class ConnectorNetwork
             case IncomingDetected:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnFailure IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Error))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callIncomingFailed();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingFailed();
                 break;
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnFailure Call");
                 if (setState(CallerState.Call, CallerState.Error))
-                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callFailed();
+                    for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "srvOnFailure " + getStateName());
@@ -217,12 +217,12 @@ public class ConnectorNetwork
             case IncomingDetected:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnClose IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Idle))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callIncomingCanceled();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingCanceled();
                 break;
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnClose Call");
                 if (setState(CallerState.Call, CallerState.Idle))
-                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callEndedExternally();
+                    for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callEndedExternally();
                 exchangeStop();
                 break;
             default:
@@ -237,7 +237,7 @@ public class ConnectorNetwork
             case OutcomingStarted:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnOpen Call");
                 if (setState(CallerState.OutcomingStarted, CallerState.OutcomingConnected))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingConnected();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingConnected();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnOpen " + getStateName());
@@ -252,17 +252,17 @@ public class ConnectorNetwork
             case OutcomingConnected:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                 break;
             case OutcomingStarted:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure OutcomingStarted");
                 if (setState(CallerState.OutcomingStarted, CallerState.Error))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingFailed();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingFailed();
                 break;
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure Call");
                 if (setState(CallerState.Call, CallerState.Error))
-                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callFailed();
+                    for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnFailure " + getStateName());
@@ -277,13 +277,13 @@ public class ConnectorNetwork
                 if (message.equals(Messages.RESPONSE_ACCEPT)) {
                     if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText ACCEPT");
                     if (setState(CallerState.OutcomingConnected, CallerState.Call))
-                        for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callOutcomingAccepted();
+                        for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callOutcomingAccepted();
                     setiConnCtrl(iClientCtrl);
                     exchangeStart();
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
                     if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText REJECT");
                     if (setState(CallerState.OutcomingConnected, CallerState.Idle))
-                        for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
+                        for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                     disconnect(iClientCtrl);
                 }
         }
@@ -296,12 +296,12 @@ public class ConnectorNetwork
             case OutcomingConnected:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
-                    for (ICallNetworkListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
+                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                 break;
             case Call:
                 if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose Call");
                 if (setState(CallerState.Call, CallerState.Idle))
-                    for (ICallNetworkExchangeListener listener : iCallNetworkExchangeListeners) listener.callEndedExternally();
+                    for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callEndedExternally();
                 break;
             default:
                 if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnClose " + getStateName());
@@ -317,7 +317,7 @@ public class ConnectorNetwork
 
     private boolean isLocalIp() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "isLocalIp");
-        String remAddr = iNetworkInfoListener.getRemAddr();
+        String remAddr = iNetInfoListener.getRemAddr();
         return (remAddr.equals(getIpAddr(Settings.ipv4)) ||
                 remAddr.equals("127.0.0.1") ||
                 remAddr.equals("localhost"));
@@ -326,8 +326,8 @@ public class ConnectorNetwork
     private void connect() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "connect");
         new ClientConn(this, handler).execute(String.format("ws://%s:%s",
-                iNetworkInfoListener.getRemAddr(),
-                iNetworkInfoListener.getRemPort()));
+                iNetInfoListener.getRemAddr(),
+                iNetInfoListener.getRemPort()));
     }
 
     private void disconnect(IConnCtrl iConnCtrl) {
@@ -343,8 +343,8 @@ public class ConnectorNetwork
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart");
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
-        new Stream(this, iConnCtrl.getTransmitter(), storageBtToNet).execute();
-        new Redirect(this, iConnCtrl.getReceiverRegister(), storageNetToBt).execute();
+        new IntoNet(this, iConnCtrl.getTransmitter(), storageBtToNet).execute();
+        new FromNet(this, iConnCtrl.getReceiverRegister(), storageNetToBt).execute();
     }
 
     private void exchangeStop() {
@@ -387,19 +387,19 @@ public class ConnectorNetwork
 
     private void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "redirectOff");
-        if (iRedirectCtrl != null) {
-            iRedirectCtrl.redirectOff();
-            iRedirectCtrl = null;
+        if (iFromNetCtrl != null) {
+            iFromNetCtrl.redirectOff();
+            iFromNetCtrl = null;
         }
     }
 
     private void streamOff() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "streamOff");
-        if (iStreamCtrl != null) {
-            iStreamCtrl.streamOff();
-            iStreamCtrl = null;
+        if (iIntoNetCtrl != null) {
+            iIntoNetCtrl.streamOff();
+            iIntoNetCtrl = null;
         }
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop iStreamCtrl.streamOff() done");
+        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop iIntoNetCtrl.streamOff() done");
     }
 
     @Override
@@ -412,31 +412,31 @@ public class ConnectorNetwork
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "serverStarted");
         if (iServerCtrl == null) {
             if (setState(CallerState.Null, CallerState.GeneralFailure))
-                for (ICallNetworkListener listener : iCallNetworkListeners) listener.connectorFailure();
+                for (ICallNetListener listener : iCallNetworkListeners) listener.connectorFailure();
         } else {
             if (setState(CallerState.Null, CallerState.Idle))
-                for (ICallNetworkListener listener : iCallNetworkListeners) listener.connectorReady();
+                for (ICallNetListener listener : iCallNetworkListeners) listener.connectorReady();
             this.iServerCtrl = iServerCtrl;
         }
     }
 
     @Override
-    public void registerRedirectCtrl(IRedirectCtrl iRedirectCtrl) {
+    public void registerRedirectCtrl(IFromNetCtrl iFromNetCtrl) {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerRedirectCtrl");
-        if (iRedirectCtrl == null) {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerRedirectCtrl iRedirectCtrl is null");
+        if (iFromNetCtrl == null) {
+            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerRedirectCtrl iFromNetCtrl is null");
         } else {
-            this.iRedirectCtrl = iRedirectCtrl;
+            this.iFromNetCtrl = iFromNetCtrl;
         }
     }
 
     @Override
-    public void registerStreamCtrl(IStreamCtrl iStreamCtrl) {
+    public void registerStreamCtrl(IIntoNetCtrl iIntoNetCtrl) {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerStreamCtrl");
-        if (iStreamCtrl == null) {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerStreamCtrl iStreamCtrl is null");
+        if (iIntoNetCtrl == null) {
+            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerStreamCtrl iIntoNetCtrl is null");
         } else {
-            this.iStreamCtrl = iStreamCtrl;
+            this.iIntoNetCtrl = iIntoNetCtrl;
         }
     }
 

@@ -9,8 +9,8 @@ import by.citech.debug.DebugBtToBtRecorder;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
-import by.citech.network.INetworkInfoListener;
-import by.citech.network.INetworkListener;
+import by.citech.network.INetInfoListener;
+import by.citech.network.INetListener;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -23,15 +23,15 @@ public class Caller {
 
     private volatile CallerState callerState = CallerState.Null;
     private ICallUiListener iCallUiListener;
-    private ICallNetworkListener iCallNetworkListener;
-    private INetworkInfoListener iNetworkInfoListener;
+    private ICallNetListener iCallNetworkListener;
+    private INetInfoListener iNetInfoListener;
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
     private HandlerExtended handlerExtended;
     private DebugBtToBtLooper debugBtToBtLooper;
     private DebugBtToBtRecorder debugBtToBtRecorder;
     private ConnectorBluetooth connectorBluetooth;
-    private ConnectorNetwork connectorNetwork;
+    private ConnectorNet connectorNet;
     private CallUi callUi;
     private StorageData<byte[]> storageBtToNet;
     private StorageData<byte[][]> storageNetToBt;
@@ -60,8 +60,8 @@ public class Caller {
         return CallUi.getInstance();
     }
 
-    public INetworkListener getiNetworkListener() {
-        return ConnectorNetwork.getInstance();
+    public INetListener getiNetworkListener() {
+        return ConnectorNet.getInstance();
     }
 
     public ConnectorBluetooth getConnectorBluetooth() {
@@ -77,13 +77,13 @@ public class Caller {
         return this;
     }
 
-    public Caller setiCallNetworkListener(ICallNetworkListener listener) {
+    public Caller setiCallNetworkListener(ICallNetListener listener) {
         iCallNetworkListener = listener;
         return this;
     }
 
-    public Caller setiNetworkInfoListener(INetworkInfoListener listener) {
-        iNetworkInfoListener = listener;
+    public Caller setiNetInfoListener(INetInfoListener listener) {
+        iNetInfoListener = listener;
         return this;
     }
 
@@ -130,7 +130,7 @@ public class Caller {
         if (debug) Log.i(TAG, "build");
         if (iCallUiListener == null
                 || iCallNetworkListener == null
-                || iNetworkInfoListener == null
+                || iNetInfoListener == null
                 || iBluetoothListener == null) {
             if (debug) Log.e(TAG, "build at least one of key parameters are null");
             return;
@@ -240,14 +240,14 @@ public class Caller {
         callUi = CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(ConnectorBluetooth.getInstance())
-                .addiCallUiListener(ConnectorNetwork.getInstance());
+                .addiCallUiListener(ConnectorNet.getInstance());
 
-        connectorNetwork = ConnectorNetwork.getInstance()
+        connectorNet = ConnectorNet.getInstance()
                 .setStorageBtToNet(storageBtToNet)
                 .setStorageNetToBt(storageNetToBt)
                 .addiCallNetworkListener(iCallNetworkListener)
                 .addiCallNetworkExchangeListener(ConnectorBluetooth.getInstance())
-                .setiNetworkInfoListener(iNetworkInfoListener)
+                .setiNetInfoListener(iNetInfoListener)
                 .setHandler(handlerExtended);
 
         startConnectorNetwork();
@@ -256,7 +256,7 @@ public class Caller {
 
     private void startConnectorNetwork() {
         if (debug) Log.i(TAG, "startConnectorNetwork");
-        ConnectorNetwork.getInstance().start();
+        ConnectorNet.getInstance().start();
     }
 
     public void stop() {
@@ -275,9 +275,9 @@ public class Caller {
         if (callUi != null) {
             callUi = null;
         }
-        if (connectorNetwork != null) {
-            connectorNetwork.stop();
-            connectorNetwork = null;
+        if (connectorNet != null) {
+            connectorNet.stop();
+            connectorNet = null;
         }
         if (storageNetToBt != null) {
             storageNetToBt.clear();

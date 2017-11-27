@@ -1,4 +1,4 @@
-package by.citech.network.transmit;
+package by.citech.exchange;
 
 import android.os.AsyncTask;
 import android.util.Log;

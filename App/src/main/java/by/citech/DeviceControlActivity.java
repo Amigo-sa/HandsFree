@@ -35,12 +35,12 @@ import by.citech.bluetoothlegatt.LeDeviceListAdapter;
 import by.citech.logic.Caller;
 import by.citech.logic.ConnectorBluetooth;
 import by.citech.logic.IBluetoothListener;
-import by.citech.logic.ICallNetworkListener;
+import by.citech.logic.ICallNetListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.IUiBtnGreenRedListener;
-import by.citech.network.INetworkInfoListener;
-import by.citech.network.INetworkListener;
+import by.citech.network.INetInfoListener;
+import by.citech.network.INetListener;
 import by.citech.logic.CallerState;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
@@ -50,14 +50,14 @@ import static by.citech.util.NetworkInfo.getIpAddr;
 
 public class DeviceControlActivity
         extends Activity
-        implements INetworkInfoListener, ICallNetworkListener, ICallUiListener, IBluetoothListener, IDebugListener {
+        implements INetInfoListener, ICallNetListener, ICallUiListener, IBluetoothListener, IDebugListener {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
     private static final DebugMode debugMode = Settings.debugMode;
 
     private IUiBtnGreenRedListener iUiBtnGreenRedListener;
-    private INetworkListener iNetworkListener;
+    private INetListener iNetListener;
 
     private static final int DEVICE_CONNECT = 1;
     private static final int THIS_CONNECTED_DEVICE = 4;
@@ -100,12 +100,12 @@ public class DeviceControlActivity
                 .setiCallUiListener(this)
                 .setiDebugListener(this)
                 .setiCallNetworkListener(this)
-                .setiNetworkInfoListener(this)
+                .setiNetInfoListener(this)
                 .setiBluetoothListener(this);
 
         connectorBluetooth = caller.getConnectorBluetooth();
         iUiBtnGreenRedListener = caller.getiUiBtnGreenRedListener();
-        iNetworkListener = caller.getiNetworkListener();
+        iNetListener = caller.getiNetworkListener();
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -492,7 +492,7 @@ public class DeviceControlActivity
         isCallAnim = false;
     }
 
-    //--------------------- ICallNetworkListener
+    //--------------------- ICallNetListener
 
     @Override
     public void callFailed() {
@@ -625,7 +625,7 @@ public class DeviceControlActivity
         callAnimStop();
     }
 
-    //--------------------- INetworkInfoListener
+    //--------------------- INetInfoListener
 
     @Override
     public String getRemAddr() {

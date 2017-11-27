@@ -1,4 +1,4 @@
-package by.citech.network.transmit;
+package by.citech.exchange;
 
 import android.media.AudioRecord;
 import android.util.Log;
@@ -7,7 +7,7 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 import static by.citech.util.Decode.bytesToHexMark1;
 
-class StreamAudio implements IStreamCtrl {
+class IntoNetAudio implements IIntoNetCtrl {
     private static final String TAG = Tags.NET_STREAM_AUDIO;
     private static final boolean debug = Settings.debug;
     private byte[] buffer;
@@ -15,7 +15,7 @@ class StreamAudio implements IStreamCtrl {
     private boolean isStreaming = false;
     private ITransmitter iTransmitter;
 
-    StreamAudio(ITransmitter iTransmitter) {
+    IntoNetAudio(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
     }
 
@@ -32,7 +32,7 @@ class StreamAudio implements IStreamCtrl {
         }
     }
 
-    public IStreamCtrl start() {
+    public IIntoNetCtrl start() {
         if (debug) Log.i(TAG, "start");
         int bufferSize = Settings.bufferSize;
         if (debug) Log.i(TAG, String.format("start audioOutBuffersize is %d", bufferSize));

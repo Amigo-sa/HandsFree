@@ -1,4 +1,4 @@
-package by.citech.network.transmit;
+package by.citech.exchange;
 
 import android.util.Log;
 
@@ -8,8 +8,8 @@ import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class StreamBluetooth
-        implements IStreamCtrl {
+class IntoNetBluetooth
+        implements IIntoNetCtrl {
 
     private static final String TAG = Tags.NET_STREAM_BT;
     private static final boolean debug = Settings.debug;
@@ -17,12 +17,12 @@ class StreamBluetooth
     private boolean isStreaming = false;
     private StorageData<byte[]> storageBtToNet;
 
-    public StreamBluetooth(ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
+    public IntoNetBluetooth(ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
         this.iTransmitter = iTransmitter;
         this.storageBtToNet = storageBtToNet;
     }
 
-    public IStreamCtrl start() {
+    public IIntoNetCtrl start() {
         if (debug) Log.i(TAG, "start");
         return this;
     }

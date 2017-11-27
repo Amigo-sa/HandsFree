@@ -1,4 +1,4 @@
-package by.citech.network.receive;
+package by.citech.exchange;
 
 import android.util.Log;
 
@@ -12,8 +12,8 @@ import by.citech.debug.TrafficNodes;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class RedirectToBluetooth
-        implements IRedirectCtrl, IReceiveListener, ITrafficUpdate {
+class FromNetToBluetooth
+        implements IFromNetCtrl, IReceiveListener, ITrafficUpdate {
 
     private static final String TAG = Tags.NET_REDIR_BT;
     private static final boolean debug = Settings.debug;
@@ -25,10 +25,10 @@ class RedirectToBluetooth
     private byte[][] dataAssembled;
     private byte[] dataChunk;
 
-    RedirectToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData<byte[][]> storageNetToBt) {
+    FromNetToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData<byte[][]> storageNetToBt) {
         if (iReceiveListenerReg == null
                 || storageNetToBt == null) {
-            Log.e(TAG, "RedirectToBluetooth one of key parameters are null");
+            Log.e(TAG, "FromNetToBluetooth one of key parameters are null");
             return;
         }
         this.iReceiveListenerReg = iReceiveListenerReg;
@@ -39,7 +39,7 @@ class RedirectToBluetooth
         TrafficAnalyzer.getInstance().addTrafficInfo(trafficInfo);
     }
 
-    public IRedirectCtrl start() {
+    public IFromNetCtrl start() {
         if (debug) Log.i(TAG, "start");
         redirectOff();
         return this;

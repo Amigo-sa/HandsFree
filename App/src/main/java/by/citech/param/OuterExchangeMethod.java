@@ -1,6 +1,6 @@
 package by.citech.param;
 
-public enum TransferMethod {
+public enum OuterExchangeMethod {
     HTTP,
     TCP,
     UDP,

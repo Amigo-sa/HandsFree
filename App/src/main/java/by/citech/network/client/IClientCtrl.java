@@ -1,6 +1,6 @@
 package by.citech.network.client;
 
-import by.citech.network.control.IExchangeCtrl;
+import by.citech.exchange.IExchangeCtrl;
 import by.citech.network.control.IConnCtrl;
 
 public interface IClientCtrl

@@ -5,9 +5,9 @@ import android.util.Log;
 
 import java.util.concurrent.TimeUnit;
 
-import by.citech.network.receive.IReceiveListener;
-import by.citech.network.receive.IReceiveListenerReg;
-import by.citech.network.transmit.ITransmitter;
+import by.citech.exchange.IReceiveListener;
+import by.citech.exchange.IReceiveListenerReg;
+import by.citech.exchange.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import okhttp3.OkHttpClient;

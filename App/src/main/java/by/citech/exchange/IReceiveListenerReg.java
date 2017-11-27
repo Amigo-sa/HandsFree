@@ -1,4 +1,4 @@
-package by.citech.network.receive;
+package by.citech.exchange;
 
 public interface IReceiveListenerReg {
     void registerReceiverListener(IReceiveListener iReceiveListener);

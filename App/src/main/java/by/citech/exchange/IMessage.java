@@ -1,4 +1,4 @@
-package by.citech.network.transmit;
+package by.citech.exchange;
 
 public interface IMessage {
     void messageSended();

@@ -24,7 +24,7 @@ public enum Status implements IStatus {
     FOUND(302, "Found"),
     REDIRECT_SEE_OTHER(303, "See Other"),
     NOT_MODIFIED(304, "Not Modified"),
-    TEMPORARY_REDIRECT(307, "Temporary Redirect"),
+    TEMPORARY_REDIRECT(307, "Temporary FromNet"),
 
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),

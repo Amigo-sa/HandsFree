@@ -1,6 +1,6 @@
 package by.citech.network;
 
-public interface INetworkListener {
+public interface INetListener {
     void srvOnClose();
     void srvOnOpen();
     void srvOnFailure();

@@ -1,7 +1,7 @@
 package by.citech.logic;
 
-public interface ICallNetworkListener
-        extends ICallNetworkExchangeListener {
+public interface ICallNetListener
+        extends ICallNetExchangeListener {
     void callOutcomingConnected();
     void callOutcomingRejected();
     void callOutcomingFailed();

@@ -1,4 +1,4 @@
-package by.citech.network.transmit;
+package by.citech.exchange;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -7,17 +7,17 @@ import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class Stream
-        extends AsyncTask<String, IStreamCtrl, Void> {
+public class IntoNet
+        extends AsyncTask<String, IIntoNetCtrl, Void> {
 
     private static final String TAG = Tags.NET_STREAM;
     private static final boolean debug = Settings.debug;
-    private IStreamCtrlReg iStreamCtrlReg;
+    private IIntoNetCtrlReg iIntoNetCtrlReg;
     private ITransmitter iTransmitter;
     private StorageData<byte[]> storageBtToNet;
 
-    public Stream(IStreamCtrlReg iStreamCtrlReg, ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
-        this.iStreamCtrlReg = iStreamCtrlReg;
+    public IntoNet(IIntoNetCtrlReg iIntoNetCtrlReg, ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
+        this.iIntoNetCtrlReg = iIntoNetCtrlReg;
         this.iTransmitter = iTransmitter;
         this.storageBtToNet = storageBtToNet;
     }
@@ -28,12 +28,12 @@ public class Stream
         switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
-                final StreamAudio streamAudio = new StreamAudio(iTransmitter);
-                publishProgress(streamAudio.start());
+                final IntoNetAudio intoNetAudio = new IntoNetAudio(iTransmitter);
+                publishProgress(intoNetAudio.start());
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        streamAudio.run();
+                        intoNetAudio.run();
                     }
                 }).start();
                 break;
@@ -43,12 +43,12 @@ public class Stream
                     if (debug) Log.e(TAG, "doInBackground bluetooth storage is null");
                     return null;
                 }
-                final StreamBluetooth streamBluetooth = new StreamBluetooth(iTransmitter, storageBtToNet);
-                publishProgress(streamBluetooth.start());
+                final IntoNetBluetooth intoNetBluetooth = new IntoNetBluetooth(iTransmitter, storageBtToNet);
+                publishProgress(intoNetBluetooth.start());
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        streamBluetooth.run();
+                        intoNetBluetooth.run();
                     }
                 }).start();
                 break;
@@ -57,8 +57,8 @@ public class Stream
     }
 
     @Override
-    protected void onProgressUpdate(IStreamCtrl... iStreamCtrl) {
+    protected void onProgressUpdate(IIntoNetCtrl... iIntoNetCtrl) {
         if (debug) Log.i(TAG, "onProgressUpdate");
-        iStreamCtrlReg.registerStreamCtrl(iStreamCtrl[0]);
+        iIntoNetCtrlReg.registerStreamCtrl(iIntoNetCtrl[0]);
     }
 }

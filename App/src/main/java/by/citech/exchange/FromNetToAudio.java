@@ -1,4 +1,4 @@
-package by.citech.network.receive;
+package by.citech.exchange;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
@@ -8,19 +8,19 @@ import android.util.Log;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class RedirectToAudio
-        implements IRedirectCtrl, IReceiveListener {
+class FromNetToAudio
+        implements IFromNetCtrl, IReceiveListener {
 
     private int bufferSize = Settings.bufferSize;
     private IReceiveListenerReg iReceiveListenerReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    RedirectToAudio(IReceiveListenerReg iReceiveListenerReg) {
+    FromNetToAudio(IReceiveListenerReg iReceiveListenerReg) {
         this.iReceiveListenerReg = iReceiveListenerReg;
     }
 
-    public IRedirectCtrl start() {
+    public IFromNetCtrl start() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build");
         redirectOff();
 
