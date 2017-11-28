@@ -10,7 +10,7 @@ import by.citech.param.Tags;
 public class RedirectToNet
         extends AsyncTask<String, ITransmitterCtrl, Void> {
 
-    private static final String TAG = Tags.NET_STREAM;
+    private static final String TAG = Tags.REDIRECT2NET;
     private static final boolean debug = Settings.debug;
 
     private ITransmitterCtrlReg iTransmitterCtrlReg;

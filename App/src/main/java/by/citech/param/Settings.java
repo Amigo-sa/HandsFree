@@ -5,6 +5,8 @@ import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
+import by.citech.codec.audio.AudioCodecType;
+
 public class Settings {
 
     //---------------- COMMON
@@ -19,7 +21,6 @@ public class Settings {
     public static final boolean showTraffic = true;
 //  public static final boolean debug = true;
     public static final boolean debug = true;
-    public static final int bufferSize = 3000;
     public static final boolean testSendOneOnCall = false;
 
     //---------------- BLUETOOTH
@@ -37,8 +38,11 @@ public class Settings {
 
     //---------------- AUDIO COMMON
 
+    public static final AudioCodecType codecType = AudioCodecType.Sit;
     public static final int audioRate = 8000;
-    public static final int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
+    public static final int bufferSize = 4000;
+    public static final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+//  public static final int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
 
     //---------------- AUDIO IN
 

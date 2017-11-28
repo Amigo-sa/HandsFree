@@ -6,8 +6,8 @@ public class SitAudioCodec implements ICodec {
 //        System.loadLibrary("SitCodecWrapper");
 //    }
 
-    public static final int SHORT_CNT_DECODED = 80;
-    public static final int BYTE_CNT_ENCODED = 10;
+    private static final int decodedShortCnt = AudioCodecType.Sit.getDecodedShortCnt();
+    private static final int encodedByteCnt = AudioCodecType.Sit.getEncodedByteCnt();
 
     private CodecState decoderState;
     private CodecState encoderState;
@@ -18,8 +18,8 @@ public class SitAudioCodec implements ICodec {
 //    public native void nativeDecode(byte[] dataToDecode, short[] decodedData, CodecState codecState);
 
     public SitAudioCodec() {
-        decodedData = new short[SHORT_CNT_DECODED];
-        encodedData = new byte[BYTE_CNT_ENCODED];
+        decodedData = new short[decodedShortCnt];
+        encodedData = new byte[encodedByteCnt];
     }
 
     @Override

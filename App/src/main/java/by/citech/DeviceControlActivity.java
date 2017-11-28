@@ -251,6 +251,7 @@ public class DeviceControlActivity
         animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
 
         switch (debugMode) {
+            case MicToAudio:
             case LoopbackBtToBt:
                 btnSetEnabled(btnGreen, "LBACK ON");
                 btnSetDisabled(btnRed, "LBACK OFF");
@@ -655,7 +656,9 @@ public class DeviceControlActivity
         if (Settings.debug) Log.i(TAG,"onResume");
         enPermissions();
         // по запуску регистрируем наш LeBroadcastReceiver
-        connectorBluetooth.updateBCRData();
+        if (connectorBluetooth != null) {
+            connectorBluetooth.updateBCRData();
+        }
     }
 
     // в случае засыпания активности сбрасываем регистрацию LeBroadcastReceiver
@@ -999,6 +1002,7 @@ public class DeviceControlActivity
     @Override
     public void startDebug() {
         switch (debugMode) {
+            case MicToAudio:
             case LoopbackBtToBt:
                 btnSetDisabled(btnGreen, "LBACK ON");
                 btnSetEnabled(btnRed, "LBACK OFF");
@@ -1030,6 +1034,7 @@ public class DeviceControlActivity
     @Override
     public void stopDebug() {
         switch (debugMode) {
+            case MicToAudio:
             case LoopbackBtToBt:
                 btnSetEnabled(btnGreen, "LBACK ON");
                 btnSetDisabled(btnRed, "LBACK OFF");
@@ -1171,9 +1176,6 @@ public class DeviceControlActivity
         }
 
     }
-
-
-
 
     //--------------------- ContactEditorHelper
 
@@ -1369,6 +1371,7 @@ public class DeviceControlActivity
     }
 
     //--------------------- ViewHelper
+
     private boolean getVisiblityMain(){
         return visiblityMain;
     }
@@ -1435,7 +1438,6 @@ public class DeviceControlActivity
             super.onBackPressed();
     }
 
-
     private class ViewHelper {
 
         private static final boolean debug = true;
@@ -1474,8 +1476,6 @@ public class DeviceControlActivity
             viewChosenContact.setVisibility(View.GONE);
             editTextSearch.setVisibility(View.VISIBLE);
         }
-
-
 
     }
 

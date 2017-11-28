@@ -217,11 +217,13 @@ public class ConnectorBluetooth
                 mIBluetoothListener.finishConnection();
             }
             // Automatically connects to the device upon successful start-up initialization.
-            if(mBTDevice != null)
-                mBluetoothLeService.connect(mBTDevice.getAddress());
-            leBroadcastReceiver.setBluetoothLeService(mBluetoothLeService);
-            leConnector.setBluetoothLeService(mBluetoothLeService);
-            leDataTransmitter.setBluetoothLeService(mBluetoothLeService);
+            if (mBluetoothLeService != null && leBroadcastReceiver != null && leConnector != null && leDataTransmitter != null) {
+                if (mBTDevice != null)
+                    mBluetoothLeService.connect(mBTDevice.getAddress());
+                leBroadcastReceiver.setBluetoothLeService(mBluetoothLeService);
+                leConnector.setBluetoothLeService(mBluetoothLeService);
+                leDataTransmitter.setBluetoothLeService(mBluetoothLeService);
+            }
         }
 
         @Override
@@ -241,11 +243,15 @@ public class ConnectorBluetooth
     //----------------------- BroadcastReceiver ---------------------
 
     public void updateBCRData(){
-        leBroadcastReceiver.updateBroadcastReceiveData();
+        if (leBroadcastReceiver != null) {
+            leBroadcastReceiver.updateBroadcastReceiveData();
+        }
     }
 
     public void unregisterReceiver(){
-        leBroadcastReceiver.unregisterReceiver();
+        if (leBroadcastReceiver != null) {
+            leBroadcastReceiver.unregisterReceiver();
+        }
     }
 
     //------------ устанавливаем хранилища для данных ---------------

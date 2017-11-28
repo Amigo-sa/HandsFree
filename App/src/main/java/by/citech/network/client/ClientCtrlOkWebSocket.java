@@ -118,6 +118,11 @@ public class ClientCtrlOkWebSocket
     }
 
     @Override
+    public void sendData(short[] data) {
+        Log.e(TAG, "sendData short[]");
+    }
+
+    @Override
     public void sendMessage(String string) {
         if (debug) Log.i(TAG, "sendMessage");
         webSocket.send(string);

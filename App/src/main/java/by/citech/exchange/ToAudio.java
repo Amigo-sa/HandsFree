@@ -11,6 +11,9 @@ import by.citech.param.Tags;
 public class ToAudio
         implements IReceiverCtrl, IReceiver {
 
+    private static final String TAG = Tags.TO_AUDIO;
+    private static final boolean debug = Settings.debug;
+
     private int bufferSize = Settings.bufferSize;
     private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
@@ -21,7 +24,7 @@ public class ToAudio
     }
 
     public void prepare() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build");
+        if (debug) Log.i(TAG, "prepare");
         redirectOff();
 
         audioTrack = new AudioTrack.Builder()
@@ -38,20 +41,28 @@ public class ToAudio
                 .setTransferMode(Settings.audioMode)
                 .build();
 
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build done");
+        if (debug) Log.i(TAG, "prepare done");
     }
 
     public void run() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient");
+        if (debug) Log.i(TAG, "run");
         isRedirecting = true;
         audioTrack.play();
         iReceiverReg.registerReceiver(this);
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient done");
+        if (debug) Log.i(TAG, "run done");
     }
 
     @Override
     public void onReceiveData(byte[] data) {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "onReceiveData");
+        if (debug) Log.i(TAG, "onReceiveData byte[]");
+        if (isRedirecting) {
+            audioTrack.write(data, 0, bufferSize);
+        }
+    }
+
+    @Override
+    public void onReceiveData(short[] data) {
+        if (debug) Log.i(TAG, "onReceiveData short[]");
         if (isRedirecting) {
             audioTrack.write(data, 0, bufferSize);
         }
@@ -59,7 +70,7 @@ public class ToAudio
 
     @Override
     public void redirectOff() {
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
+        if (debug) Log.i(TAG, "redirectOff");
         isRedirecting = false;
         iReceiverReg.registerReceiver(null);
         if (audioTrack != null) {
@@ -69,7 +80,7 @@ public class ToAudio
             audioTrack.release();
             audioTrack = null;
         }
-        if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff done");
+        if (debug) Log.i(TAG, "redirectOff done");
     }
 
 }

@@ -19,7 +19,6 @@ public class DebugBtToBtLooper
     private boolean isActive;
 
     public DebugBtToBtLooper(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
-
         this.storageBtToNet = storageBtToNet;
         this.storageNetToBt = storageNetToBt;
         dataAssembled = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
@@ -29,6 +28,7 @@ public class DebugBtToBtLooper
 
     @Override
     public void run() {
+        //TODO: разве не должно быть по умолчанию isRunning=false, чтобы вызывать из интерфейса?
         isActive = true;
         isRunning = true;
         while (isActive) {

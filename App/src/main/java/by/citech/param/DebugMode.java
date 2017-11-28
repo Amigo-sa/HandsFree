@@ -4,5 +4,7 @@ public enum DebugMode {
     LoopbackBtToBt,
     LoopbackNetToNet,
     Record,
-    BtToAudio, MicToAudio, Normal
+    BtToAudio,
+    MicToAudio,
+    Normal
 }

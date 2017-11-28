@@ -25,29 +25,6 @@ public class TrashSitAudioCodec implements ICodec {
     private static final int[] qtab_723_16 = {261};
     private static final int[] power2 = {1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000};
 
-    public static void gsit_init_state(CodecState state_ptr) {
-        int cnta;
-
-        state_ptr.yl = 34816;
-        state_ptr.yu = 544;
-        state_ptr.dms = 0;
-        state_ptr.dml = 0;
-        state_ptr.ap = 0;
-
-        for (cnta = 0; cnta < 2; cnta++) {
-            state_ptr.a[cnta] = 0;
-            state_ptr.pk[cnta] = 0;
-            state_ptr.sr[cnta] = 32;
-        }
-
-        for (cnta = 0; cnta < 6; cnta++) {
-            state_ptr.b[cnta] = 0;
-            state_ptr.dq[cnta] = 32;
-        }
-
-        state_ptr.td = 0;
-    }
-
     private static void SitEncoder(short[] u, byte[] y, CodecState state_ptr) {
         int i;
         byte smp;

@@ -15,7 +15,7 @@ import by.citech.param.Tags;
 public class ToBluetooth
         implements IReceiverCtrl, IReceiver, ITrafficUpdate {
 
-    private static final String TAG = Tags.NET_REDIR_BT;
+    private static final String TAG = Tags.TO_BLUETOOTH;
     private static final boolean debug = Settings.debug;
 
     private IReceiverReg iReceiverReg;
@@ -76,6 +76,11 @@ public class ToBluetooth
             }
             source.putData(dataAssembled);
         }
+    }
+
+    @Override
+    public void onReceiveData(short[] data) {
+        Log.e(TAG, "onReceiveData short[]");
     }
 
     @Override

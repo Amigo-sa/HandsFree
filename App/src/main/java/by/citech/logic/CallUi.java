@@ -81,6 +81,7 @@ public class CallUi
     public void onClickBtnGreen() {
         if (debug) Log.i(TAG, "onClickBtnGreen");
         switch (debugMode) {
+            case MicToAudio:
             case LoopbackBtToBt:
                 switch (getCallerState()) {
                     case Null:
@@ -110,6 +111,7 @@ public class CallUi
                         break;
                 }
                 break;
+            case Normal:
             default:
                 switch (getCallerState()) {
                     case Idle:
@@ -136,6 +138,7 @@ public class CallUi
     public void onClickBtnRed() {
         if (debug) Log.i(TAG, "onClickBtnRed");
         switch (debugMode) {
+            case MicToAudio:
             case LoopbackBtToBt:
                 switch (getCallerState()) {
                     case DebugLoopBack:
@@ -166,6 +169,7 @@ public class CallUi
                 }
                 break;
             case Normal:
+            default:
                 switch (getCallerState()) {
                     case Call:
                         if (debug) Log.i(TAG, "onClickBtnRed Call");

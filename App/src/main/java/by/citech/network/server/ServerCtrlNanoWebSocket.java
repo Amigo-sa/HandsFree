@@ -65,6 +65,11 @@ public class ServerCtrlNanoWebSocket
         }
     }
 
+    @Override
+    public void sendData(short[] data) {
+        Log.e(TAG, "sendData short[]");
+    }
+
     //--------------------- IExchangeCtrl
 
     @Override

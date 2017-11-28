@@ -17,32 +17,14 @@ public class ConnectorPlayAudio implements IReceiverReg {
 
     private IReceiver iReceiver;
     private IReceiverCtrl iReceiverCtrl;
-    private StorageData<byte[]> source;
+    private StorageData<short[]> source;
     private boolean isRunning;
 
-    //--------------------- singleton
-
-    private static volatile ConnectorPlayAudio instance = null;
-
-    private ConnectorPlayAudio() {
-    }
-
-    public static ConnectorPlayAudio getInstance() {
-        if (instance == null) {
-            synchronized (ConnectorPlayAudio.class) {
-                if (instance == null) {
-                    instance = new ConnectorPlayAudio();
-                }
-            }
-        }
-        return instance;
+    public ConnectorPlayAudio(StorageData<short[]> source) {
+        this.source = source;
     }
 
     //--------------------- getters and setters
-
-    public void setSource(StorageData<byte[]> source) {
-        this.source = source;
-    }
 
     public void start() {
         if (source == null) {
@@ -58,13 +40,9 @@ public class ConnectorPlayAudio implements IReceiverReg {
 
     private void run() {
         if (debug) Log.i(TAG, "run");
-        if (iReceiver == null) {
-            Log.e(TAG, "run illegal parameters");
-            return;
-        }
         isRunning = true;
         while (isRunning) {
-            if (!source.isEmpty()) {
+            if (!source.isEmpty() && iReceiver != null) {
                 iReceiver.onReceiveData(source.getData());
             } else {
                 try {
@@ -74,6 +52,7 @@ public class ConnectorPlayAudio implements IReceiverReg {
                 }
             }
         }
+        if (debug) Log.w(TAG, "run done");
     }
 
     public void stop() {
@@ -92,6 +71,8 @@ public class ConnectorPlayAudio implements IReceiverReg {
 
     @Override
     public void registerReceiver(IReceiver iReceiver) {
+        if (debug) Log.w(TAG, "registerReceiver");
         this.iReceiver = iReceiver;
     }
+
 }

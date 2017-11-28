@@ -15,31 +15,13 @@ public class ConnectorRecordAudio implements ITransmitter {
     private static final boolean debug = Settings.debug;
 
     private ITransmitterCtrl iTransmitterCtrl;
-    private StorageData<byte[]> storage;
+    private StorageData<short[]> storage;
 
-    //--------------------- singleton
-
-    private static volatile ConnectorRecordAudio instance = null;
-
-    private ConnectorRecordAudio() {
-    }
-
-    public static ConnectorRecordAudio getInstance() {
-        if (instance == null) {
-            synchronized (ConnectorRecordAudio.class) {
-                if (instance == null) {
-                    instance = new ConnectorRecordAudio();
-                }
-            }
-        }
-        return instance;
-    }
-
-    //--------------------- getters and setters
-
-    public void setStorage(StorageData<byte[]> storage) {
+    public ConnectorRecordAudio(StorageData<short[]> storage) {
         this.storage = storage;
     }
+
+    //--------------------- main
 
     public void start() {
         if (debug) Log.i(TAG, "prepare");
@@ -67,12 +49,18 @@ public class ConnectorRecordAudio implements ITransmitter {
 
     @Override
     public void sendMessage(String message) {
-        Log.e(TAG, "sendMessage excess method");
+        Log.e(TAG, "sendMessage String");
     }
 
     @Override
     public void sendData(byte[] data) {
-        if (debug) Log.i(TAG, "sendData");
+        Log.e(TAG, "sendData byte[]");
+    }
+
+    @Override
+    public void sendData(short[] data) {
+        if (debug) Log.i(TAG, "sendData short[]");
         storage.putData(data);
     }
+
 }

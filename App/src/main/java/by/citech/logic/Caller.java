@@ -4,8 +4,11 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.util.Log;
 import by.citech.data.StorageData;
+import by.citech.debug.DebugBtToAudLooper;
 import by.citech.debug.DebugBtToBtLooper;
 import by.citech.debug.DebugBtToBtRecorder;
+import by.citech.debug.DebugMicToAudLooper;
+import by.citech.debug.DebugMicToAudLooperAlter;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
@@ -21,7 +24,7 @@ public class Caller {
     private static final boolean debug = Settings.debug;
     private static final DebugMode debugMode = Settings.debugMode;
 
-    private volatile CallerState callerState = CallerState.Null;
+    private volatile CallerState callerState;
     private ICallUiListener iCallUiListener;
     private ICallNetListener iCallNetworkListener;
     private INetInfoListener iNetInfoListener;
@@ -30,17 +33,19 @@ public class Caller {
     private HandlerExtended handlerExtended;
     private DebugBtToBtLooper debugBtToBtLooper;
     private DebugBtToBtRecorder debugBtToBtRecorder;
+    private DebugMicToAudLooper debugMicToAudLooper;
+    private DebugBtToAudLooper debugBtToAudLooper;
+    private DebugMicToAudLooperAlter debugMicToAudLooperAlter;
     private ConnectorBluetooth connectorBluetooth;
     private ConnectorNet connectorNet;
     private CallUi callUi;
-    private StorageData<byte[]> storageBtToNet;
-    private StorageData<byte[][]> storageNetToBt;
 
     //--------------------- singleton
 
     private static volatile Caller instance = null;
 
     private Caller() {
+        callerState = CallerState.Null;
     }
 
     public static Caller getInstance() {
@@ -132,7 +137,7 @@ public class Caller {
                 || iCallNetworkListener == null
                 || iNetInfoListener == null
                 || iBluetoothListener == null) {
-            if (debug) Log.e(TAG, "build at least one of key parameters are null");
+            if (debug) Log.e(TAG, "build illegal parameters");
             return;
         }
 
@@ -147,10 +152,10 @@ public class Caller {
                 buildDebugRecord();
                 break;
             case BtToAudio:
-                buildDebugBtToAudio();
+                buildDebugBtToAud();
                 break;
             case MicToAudio:
-                buildDebugMicToAudio();
+                buildDebugMicToAud();
                 break;
             case Normal:
             default:
@@ -159,25 +164,44 @@ public class Caller {
         }
     }
 
-    private void buildDebugBtToAudio() {
-        if (debug) Log.i(TAG, "buildDebugBtToAudio");
-        storageBtToNet = new StorageData<>(Tags.BLE2AUD_STORE);
+    private void buildDebugBtToAud() {
+        if (debug) Log.i(TAG, "buildDebugBtToAud");
+        StorageData<byte[]> storageBtToAud = new StorageData<>(Tags.BT2AUD_STORE);
     }
 
-    private void buildDebugMicToAudio() {
-        if (debug) Log.i(TAG, "buildDebugMicToAudio");
-        storageBtToNet = new StorageData<>(Tags.MIC2AUD_STORE);
+    private void buildDebugMicToAud() {
+        if (debug) Log.i(TAG, "buildDebugMicToAud");
+        if (iDebugListener == null) {
+            if (debug) Log.e(TAG, "buildDebugMicToAud illegal parameters");
+            return;
+        }
+
+//        StorageData<short[]> storageMic = new StorageData<>(Tags.MIC_STORE);
+//        StorageData<short[]> sourceAud = new StorageData<>(Tags.AUD_SOURCE);
+//
+//        debugMicToAudLooper = new DebugMicToAudLooper(storageMic, sourceAud);
+
+        debugMicToAudLooperAlter = new DebugMicToAudLooperAlter();
+
+        callUi = CallUi.getInstance()
+                .addiDebugListener(iDebugListener)
+//                .addiDebugListener(debugMicToAudLooper)
+                .addiDebugListener(debugMicToAudLooperAlter)
+                .addiCallUiListener(iCallUiListener);
+
+//        debugMicToAudLooper.start();
+        debugMicToAudLooperAlter.start();
     }
 
     private void buildDebugLoopbackBtToBt() {
         if (debug) Log.i(TAG, "buildDebugLoopbackBtToBt");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt at least one of key parameters are null");
+            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt illegal parameters");
             return;
         }
 
-        storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
-        storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
 
         debugBtToBtLooper = new DebugBtToBtLooper(storageBtToNet, storageNetToBt);
 
@@ -202,12 +226,12 @@ public class Caller {
     private void buildDebugRecord() {
         if (debug) Log.i(TAG, "buildDebugRecord");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt at least one of key parameters are null");
+            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt illegal parameters");
             return;
         }
 
-        storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
-        storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
 
         debugBtToBtRecorder = new DebugBtToBtRecorder(storageBtToNet, storageNetToBt);
 
@@ -232,15 +256,15 @@ public class Caller {
     private void buildDebugLoopbackNetToNet() {
         if (debug) Log.i(TAG, "buildDebugLoopbackNetToNet");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugLoopbackNetToNet at least one of key parameters are null");
+            if (debug) Log.e(TAG, "buildDebugLoopbackNetToNet illegal parameters");
             return;
         }
     }
 
     private void buildNormal() {
         if (debug) Log.i(TAG, "buildNormal");
-        storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
-        storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
         handlerExtended = new HandlerExtended(getiNetworkListener());
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
@@ -274,6 +298,10 @@ public class Caller {
 
     public void stop() {
         if (debug) Log.i(TAG, "stop");
+        if (debugMicToAudLooper != null) {
+            debugMicToAudLooper.deactivate();
+            debugMicToAudLooper = null;
+        }
         if (debugBtToBtLooper != null) {
             debugBtToBtLooper.deactivate();
             debugBtToBtLooper = null;
@@ -291,14 +319,6 @@ public class Caller {
         if (connectorNet != null) {
             connectorNet.stop();
             connectorNet = null;
-        }
-        if (storageNetToBt != null) {
-            storageNetToBt.clear();
-            storageNetToBt = null;
-        }
-        if (storageBtToNet != null) {
-            storageBtToNet.clear();
-            storageBtToNet = null;
         }
     }
 
