@@ -35,4 +35,8 @@ public class Tags {
     public static final String TRAFFIC_ANAL     = "WSD_TRAFFIC_STAT";
     public static final String TRAFFIC_INFO     = "WSD_TRAFFIC_INFO";
 
+    public static final String AUDPLA_CONNECTOR = "WSD_AUDPLA_CONNECTOR";
+    public static final String BLE2AUD_STORE    = "WSD_BLE2AUD_STORE";
+    public static final String MIC2AUD_STORE    = "WSD_MIC2AUD_STORE";
+    public static final String AUDREC_CONNECTOR = "WSD_AUDREC_CONNECTOR";
 }

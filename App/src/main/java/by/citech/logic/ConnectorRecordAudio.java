@@ -57,9 +57,11 @@ public class ConnectorRecordAudio implements ITransmitter {
         if (debug) Log.i(TAG, "stop");
         if (iTransmitterCtrl != null){
             iTransmitterCtrl.streamOff();
+            iTransmitterCtrl = null;
         }
         if (storage != null) {
             storage.clear();
+            storage = null;
         }
     }
 

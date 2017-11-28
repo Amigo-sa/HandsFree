@@ -57,6 +57,11 @@ public class ConnectorPlayAudio implements IReceiverReg {
     }
 
     private void run() {
+        if (debug) Log.i(TAG, "run");
+        if (iReceiver == null) {
+            Log.e(TAG, "run illegal parameters");
+            return;
+        }
         isRunning = true;
         while (isRunning) {
             if (!source.isEmpty()) {
@@ -74,12 +79,15 @@ public class ConnectorPlayAudio implements IReceiverReg {
     public void stop() {
         if (debug) Log.i(TAG, "stop");
         isRunning = false;
-        if (iReceiver != null){
+        if (iReceiverCtrl != null){
             iReceiverCtrl.redirectOff();
+            iReceiverCtrl = null;
         }
         if (source != null) {
             source.clear();
+            source = null;
         }
+        iReceiver = null;
     }
 
     @Override
