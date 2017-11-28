@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MainFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,7 +12,7 @@
         android:orientation="vertical"
         android:visibility="visible">
 
-        <LinearLayout
+<!--        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/ip_info_margin"
@@ -29,16 +30,16 @@
                 android:id="@+id/editTextSrvLocAddr"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Local IP"
+                android:hint="@string/label_local_ip_text"
                 android:visibility="visible" />
 
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>
+        </LinearLayout>-->
 
 
-        <LinearLayout
+<!--        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/ip_info_margin"
@@ -56,16 +57,16 @@
                 android:id="@+id/editTextSrvLocPort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Port number"
+                android:hint="@string/label_port_number"
                 android:visibility="visible" />
 
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>
+        </LinearLayout>-->
 
 
-        <LinearLayout
+<!--        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/ip_info_margin"
@@ -88,7 +89,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorWhite"
-                    android:hint="Введите IP-адрес"
+                    android:hint="@string/label_insert_ip"
                     android:inputType="phone|date"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorBlack" />
@@ -99,7 +100,6 @@
                     android:layout_height="20dp"
                     android:layout_gravity="end|center_vertical"
                     android:layout_marginEnd="1dp"
-                    android:layout_marginRight="1dp"
                     android:background="@drawable/cross_256x256"
                     android:visibility="gone" />
             </FrameLayout>
@@ -107,10 +107,10 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>
+        </LinearLayout>-->
 
 
-        <LinearLayout
+<!--        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/ip_info_margin"
@@ -134,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/colorWhite"
                     android:gravity="fill_horizontal"
-                    android:hint="Port number"
+                    android:hint="@string/label_port_number"
                     android:inputType="number"
                     android:textColor="@color/colorBlack" />
 
@@ -144,7 +144,6 @@
                     android:layout_height="20dp"
                     android:layout_gravity="end|center_vertical"
                     android:layout_marginEnd="1dp"
-                    android:layout_marginRight="1dp"
                     android:background="@drawable/cross_256x256"
                     android:visibility="gone" />
 
@@ -153,7 +152,20 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>
+        </LinearLayout>-->
+
+
+        <ScrollView
+            android:id="@+id/ContactList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:layout_margin="@dimen/ip_info_margin"
+            android:paddingBottom="@dimen/ip_info_vertical">
+
+            <include layout="@layout/view_contacts" />
+
+        </ScrollView>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -163,7 +175,7 @@
 
             <Button
                 android:id="@+id/btnGreen"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="0dp"
                 android:layout_weight="1"
@@ -178,7 +190,7 @@
 
             <Button
                 android:id="@+id/btnRed"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="0dp"
                 android:layout_weight="1"
@@ -201,7 +213,7 @@
             <Button
                 android:id="@+id/btnChangeHandsFree"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:onClick="btnChangeDevice"
                 android:text="@string/label_buttonChDevice"
@@ -243,6 +255,8 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <include layout="@layout/view_contact_editor" />
+
     <LinearLayout
         android:id="@+id/ScanList"
         android:layout_width="match_parent"
@@ -257,27 +271,31 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/AvailDevices"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:background="#008080"
                 android:gravity="center"
                 android:text="@string/label_list_devices"
                 android:textAllCaps="true"
                 android:textColor="@color/colorWhite"
-                android:textSize="18dp" />
-
+                android:textSize="18sp" />
         </LinearLayout>
 
-        <LinearLayout
+        <ListView
+            android:id="@+id/ListDevices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:background="@color/colorWhite">
+        </ListView>
+        <!---->
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="vertical">-->
 
-            <ListView
-                android:id="@+id/ListDevices"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></ListView>
-        </LinearLayout>
+
+        <!--</LinearLayout>-->
 
     </LinearLayout>
 

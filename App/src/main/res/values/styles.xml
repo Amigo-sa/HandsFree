@@ -2,7 +2,14 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo">
-        <!-- Customize your theme here. -->
+        <!-- This is the styling for action bar -->
+        <item name="android:windowActionBar">@color/colorBlack</item>
     </style>
+
+
+
+
+
+
 
 </resources>

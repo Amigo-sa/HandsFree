@@ -36,8 +36,8 @@ public class LeDeviceListAdapter extends BaseAdapter {
         ImageView deviceHeadSet;
         TextView  deviceName;
         TextView  deviceAddress;
-        TextView  bluetoothClass;
-        TextView  deviceRssi;
+/*        TextView  bluetoothClass;
+        TextView  deviceRssi;*/
         ImageView checkIcon;
     }
 
@@ -90,10 +90,10 @@ public class LeDeviceListAdapter extends BaseAdapter {
             viewHolder.deviceIcon.setVisibility(View.VISIBLE);
             viewHolder.deviceHeadSet = (ImageView) view.findViewById(R.id.iconhead);
             viewHolder.deviceHeadSet.setVisibility(View.GONE);
-            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
-            viewHolder.bluetoothClass = (TextView) view.findViewById(R.id.bluetooth_class);
-            viewHolder.deviceRssi = (TextView) view.findViewById(R.id.device_rssi);
+            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
+/*            viewHolder.bluetoothClass = (TextView) view.findViewById(R.id.bluetooth_class);
+            viewHolder.deviceRssi = (TextView) view.findViewById(R.id.device_rssi);*/
             viewHolder.checkIcon = (ImageView) view.findViewById(R.id.iconcheck);
             view.setTag(viewHolder);
         } else {
@@ -127,8 +127,9 @@ public class LeDeviceListAdapter extends BaseAdapter {
             viewHolder.checkIcon.setVisibility(View.GONE);
 
         viewHolder.deviceAddress.setText(device.getAddress());
-        viewHolder.bluetoothClass.setText("Device Class: " + device.getBluetoothClass().toString());
+/*        viewHolder.bluetoothClass.setText("Device Class: " + device.getBluetoothClass().toString());
         viewHolder.deviceRssi.setText("RSSI: " + mLeRssi.get(i) + " dbm");
+*/
 
         return view;
     }

@@ -108,8 +108,10 @@ public class LeBroadcastReceiver {
         if (Settings.debug) Log.i(TAG, "updateBroadcastReceiveData()");
         mIBluetoothListener.registerIReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         if (mBluetoothLeService != null) {
-            final boolean result = mBluetoothLeService.connect(mBTDevice.getAddress());
-            if (Settings.debug) Log.i(TAG, "Connect request result = " + result);
+            if (mBTDevice != null) {
+                final boolean result = mBluetoothLeService.connect(mBTDevice.getAddress());
+                if (Settings.debug) Log.i(TAG, "Connect request result = " + result);
+            }
         }
     }
 
