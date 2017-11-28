@@ -20,6 +20,7 @@
     <string name="label_device_address">Device address:</string>
     <string name="label_device_name">Device name:</string>
     <string name="label_state">State:</string>
+    <string name="label_abonent">Вызываемый абонент:</string>
     <string name="no_data">No data</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
@@ -37,7 +38,7 @@
     <string name="menu_stop">Stop</string>
 
     <string name="menu_refresh"> </string>
-
+    <string name="menu_settings">Настройки</string>
     <!-- Button chnage device names -->
     <string name="connect_device">ПОДКЛЮЧИТЬ ГАРНИТУРУ</string>
     <string name="change_device">СМЕНИТЬ ГАРНИТУРУ</string>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/MainFrame"
+    android:layout_margin="1dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -8,168 +9,33 @@
         android:id="@+id/MainView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_margin="3dp"
         android:orientation="vertical"
         android:visibility="visible">
 
-<!--        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/ip_info_margin"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/ip_info_vertical">
-
-            <TextView
-                android:id="@+id/local_ip_address"
-                android:layout_width="@dimen/text_label"
-                android:layout_height="wrap_content"
-                android:text="@string/label_local_ip_address"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/editTextSrvLocAddr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/label_local_ip_text"
-                android:visibility="visible" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>-->
-
-
-<!--        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/ip_info_margin"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/ip_info_vertical">
-
-            <TextView
-                android:id="@+id/locPort"
-                android:layout_width="@dimen/text_label"
-                android:layout_height="wrap_content"
-                android:text="@string/label_local_port"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/editTextSrvLocPort"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/label_port_number"
-                android:visibility="visible" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>-->
-
-
-<!--        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/ip_info_margin"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/ip_info_vertical">
-
-            <TextView
-                android:id="@+id/ip_address"
-                android:layout_width="@dimen/text_label"
-                android:layout_height="wrap_content"
-                android:text="@string/label_ip_address"
-                android:textSize="18sp" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/editTextSrvRemAddr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/colorWhite"
-                    android:hint="@string/label_insert_ip"
-                    android:inputType="phone|date"
-                    android:textAlignment="viewStart"
-                    android:textColor="@color/colorBlack" />
-
-                <Button
-                    android:id="@+id/btnClearRemAddr"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:layout_marginEnd="1dp"
-                    android:background="@drawable/cross_256x256"
-                    android:visibility="gone" />
-            </FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>-->
-
-
-<!--        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/ip_info_margin"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/ip_info_vertical">
-
-            <TextView
-                android:id="@+id/remPort"
-                android:layout_width="@dimen/text_label"
-                android:layout_height="wrap_content"
-                android:text="@string/label_remote_port"
-                android:textSize="18sp" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/editTextSrvRemPort"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/colorWhite"
-                    android:gravity="fill_horizontal"
-                    android:hint="@string/label_port_number"
-                    android:inputType="number"
-                    android:textColor="@color/colorBlack" />
-
-                <Button
-                    android:id="@+id/btnClearRemPort"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:layout_marginEnd="1dp"
-                    android:background="@drawable/cross_256x256"
-                    android:visibility="gone" />
-
-            </FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/vertical_space_high" />
-        </LinearLayout>-->
-
-
-        <ScrollView
+        <LinearLayout
             android:id="@+id/ContactList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
             android:layout_margin="@dimen/ip_info_margin"
-            android:paddingBottom="@dimen/ip_info_vertical">
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="@string/label_abonent"
+                android:textColor="@color/colorWhite"/>
 
             <include layout="@layout/view_contacts" />
 
-        </ScrollView>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:orientation="horizontal"
             android:weightSum="2">
 
@@ -182,7 +48,7 @@
                 android:background="#006633"
                 android:text=""
                 android:textColor="#FFFFFF"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
 
             <Space
                 android:layout_width="32dp"
@@ -197,12 +63,13 @@
                 android:background="#CC0000"
                 android:text=""
                 android:textColor="#FFFFFF"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:orientation="vertical"
             android:paddingTop="15dp">
 
@@ -217,7 +84,7 @@
                 android:layout_weight="1"
                 android:onClick="btnChangeDevice"
                 android:text="@string/label_buttonChDevice"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/textViewBtInTraffic"

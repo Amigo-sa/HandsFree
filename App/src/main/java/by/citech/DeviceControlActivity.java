@@ -2,6 +2,7 @@ package by.citech;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
@@ -169,6 +170,12 @@ public class DeviceControlActivity
         provider = locationManager.getBestProvider(new Criteria(), true);
         setContentView(R.layout.gatt_services_characteristics);
 
+        // Проверяем поддерживается ли технология Bluetooth Le
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Log.e(TAG,"ble not supported");
+            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+            finish();
+        }
         caller = Caller.getInstance()
                 .setiCallUiListener(this)
                 .setiDebugListener(this)
@@ -179,23 +186,24 @@ public class DeviceControlActivity
         connectorBluetooth = caller.getConnectorBluetooth();
         iUiBtnGreenRedListener = caller.getiUiBtnGreenRedListener();
         iNetworkListener = caller.getiNetworkListener();
-
-        // Use this check to determine whether BLE is supported on the device.  Then you can
-        // selectively disable BLE-related features.
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Log.e("ACTIVITY","!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE");
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            finish();
-        }
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
         // And Checks if Bluetooth is supported on the device.
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        // Проверяем поддерживается ли технология Bluetooth
         if (!connectorBluetooth.getBluetoothAdapter(bluetoothManager)) {
-            Log.e("ACTIVITY","!connectorBluetooth.getBluetoothAdapter(bluetoothManager)");
+            Log.e(TAG,"Bluetooth not supported");
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
             return;
+        }
+        // Включаем Bluetooth
+        if (!connectorBluetooth.getBTAdapter().isEnabled()){
+            Log.e(TAG,"Bluetooth is Disable");
+            connectorBluetooth.getBTAdapter().enable();
+            Toast.makeText(getApplicationContext(), "Bluetooth now enabling", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Bluetooth Al-Ready Enable", Toast.LENGTH_LONG).show();
         }
 
         MainView = findViewById(R.id.MainView);
@@ -233,11 +241,10 @@ public class DeviceControlActivity
         setupViewRecyclerContacts();
         startContactor();
 
-
         // Sets up UI references.
         btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
         btnChangeDevice.setText(R.string.connect_device);
-        btnChangeDevice.setBackgroundColor(DARKKHAKI);
+        btnChangeDevice.setBackgroundColor(DARKCYAN);
 
         btnGreen = findViewById(R.id.btnGreen);
         btnRed = findViewById(R.id.btnRed);
@@ -290,6 +297,7 @@ public class DeviceControlActivity
     //------------------------------ Разрешения местоположения --------------
 
     private boolean checkPermission(String permission, int requestPermission){
+        if (Settings.debug) Log.i(TAG, "checkPermission()");
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
                 ActivityCompat.requestPermissions(this, new String[]{permission}, requestPermission);
@@ -299,6 +307,7 @@ public class DeviceControlActivity
     }
 
     private void enPermission(String permission){
+        if (Settings.debug) Log.i(TAG, "enPermission()");
         // permission was granted, yay! Do the
         // location-related task you need to do.
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
@@ -309,6 +318,7 @@ public class DeviceControlActivity
     }
 
     private void enPermissions(){
+        if (Settings.debug) Log.i(TAG, "enPermissions()");
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, REQUEST_LOCATION))
             enPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         if (checkPermission(Manifest.permission.RECORD_AUDIO, REQUEST_MICROPHONE))
@@ -498,8 +508,9 @@ public class DeviceControlActivity
         AvailDevice = findViewById(R.id.AvailDevices);
         connectorBluetooth.initListBTDevice();
         myListDevices.setAdapter(connectorBluetooth.getmLeDeviceListAdapter());
-        myListDevices.setOnTouchListener(new LinearLayoutTouchListener(connectorBluetooth));
-        FrameView.setOnTouchListener(new LinearLayoutTouchListener(connectorBluetooth));
+        myListDevices.setOnTouchListener(new LinearLayoutTouchListener());
+        FrameView.setOnTouchListener(new LinearLayoutTouchListener());
+        Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
         myListDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
             // останавливаем сканирование и запускаем новое Activity
@@ -641,6 +652,7 @@ public class DeviceControlActivity
     @Override
     protected void onResume() {
         super.onResume();
+        if (Settings.debug) Log.i(TAG,"onResume");
         enPermissions();
         // по запуску регистрируем наш LeBroadcastReceiver
         connectorBluetooth.updateBCRData();
@@ -671,7 +683,7 @@ public class DeviceControlActivity
     // создаём меню
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (getVisiblityMain())
+        if (!viewHelper.isMainViewHidden())
             onCreateConnectMenu(menu);
         else
             onCreateScanMenu(menu);
@@ -679,17 +691,20 @@ public class DeviceControlActivity
     }
 
     private void onCreateConnectMenu(Menu menu){
+        if (debug) Log.i(TAG, "onCreateConnectMenu()");
         getMenuInflater().inflate(R.menu.gatt_services, menu);
-        if (connectorBluetooth.ismConnected()) {
-            menu.findItem(R.id.menu_connect).setVisible(false);
-            menu.findItem(R.id.menu_refresh).setVisible(true);
-        } else {
-            menu.findItem(R.id.menu_connect).setVisible(true);
-            menu.findItem(R.id.menu_refresh).setVisible(false);
-        }
+        getSupportActionBar().setCustomView(null);
+//        if (connectorBluetooth.ismConnected()) {
+//            menu.findItem(R.id.menu_connect).setVisible(false);
+//            menu.findItem(R.id.menu_refresh).setVisible(true);
+//        } else {
+//            menu.findItem(R.id.menu_connect).setVisible(true);
+//            menu.findItem(R.id.menu_refresh).setVisible(false);
+//        }
     }
 
     private void onCreateScanMenu(Menu menu){
+        if (Settings.debug) Log.i(TAG, "onCreateScanMenu()");
         getMenuInflater().inflate(R.menu.main, menu);
         if (!connectorBluetooth.ismScanning()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
@@ -701,7 +716,6 @@ public class DeviceControlActivity
             getSupportActionBar().setCustomView(R.layout.actionbar_indeterminate_progress);
         }
     }
-
     // включаем/выключаем сканирование в зависимости от того нажата клавиша SCAN или нет
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -711,6 +725,9 @@ public class DeviceControlActivity
                 break;
             case R.id.menu_stop:
                 connectorBluetooth.stopScanBTDevice();
+                break;
+            case R.id.menu_settings:
+                if (debug) Log.i(TAG, "menu settings");
                 break;
         }
         return true;
@@ -901,7 +918,7 @@ public class DeviceControlActivity
 
     @Override
     public String getLocPort() {
-        return editTextSrvLocPort.getText().toString();
+        return Integer.toString(Settings.serverLocalPortNumber);
     }
 
     //--------------------- IBluetoothListener
@@ -939,13 +956,13 @@ public class DeviceControlActivity
 
     @Override
     public void disconnectDialogInfo(BluetoothDevice bluetoothDevice) {
-        changeMainGUI(DARKKHAKI, R.string.connect_device);
+        changeMainGUI(DARKCYAN, R.string.connect_device);
         onCreateDialogIsDisconnected(bluetoothDevice);
     }
 
     @Override
     public void connectDialogInfo(BluetoothDevice bluetoothDevice) {
-        changeMainGUI(DARKCYAN, R.string.change_device);
+        changeMainGUI(DARKKHAKI, R.string.change_device);
         onCreateDialogIsConnected(bluetoothDevice);
     }
 
@@ -1054,16 +1071,28 @@ public class DeviceControlActivity
      * Created by tretyak on 24.11.2017.
      */
 
-    public static class LinearLayoutTouchListener implements View.OnTouchListener {
+    private void swipeScanStart(){
+        if (viewHelper.isScanViewShow()) {
+            connectorBluetooth.stopScanBTDevice();
+            connectorBluetooth.scanWork();
+        }
+    }
+
+    private void swipeScanStop(){
+        if (viewHelper.isScanViewShow()) {
+            connectorBluetooth.stopScanBTDevice();
+        }
+    }
+
+
+    public class LinearLayoutTouchListener implements View.OnTouchListener {
 
             static final String logTag = "ActivitySwipeDetector";
             static final int MIN_DISTANCE = 100;// TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
             private float downX, downY, upX, upY;
-            private ConnectorBluetooth connectorBluetooth;
             // private MainActivity mMainActivity;
 
-            public LinearLayoutTouchListener(ConnectorBluetooth connectorBluetooth) {
-                this.connectorBluetooth = connectorBluetooth;
+            public LinearLayoutTouchListener() {
             }
 
             public void onRightToLeftSwipe() {
@@ -1078,14 +1107,13 @@ public class DeviceControlActivity
 
             public void onTopToBottomSwipe() {
                 Log.i(logTag, "onTopToBottomSwipe!");
-                connectorBluetooth.stopScanBTDevice();
-                connectorBluetooth.scanWork();
+                    swipeScanStart();
                 // activity.doSomething();
             }
 
             public void onBottomToTopSwipe() {
                 Log.i(logTag, "onBottomToTopSwipe!");
-                connectorBluetooth.stopScanBTDevice();
+                swipeScanStop();
                 // activity.doSomething();
             }
 
@@ -1391,7 +1419,7 @@ public class DeviceControlActivity
 
     // кнопка на телефоне
     @Override
-    public void onBackPressed(){
+    public void onBackPressed() {
         if (debug) Log.i(TAG, "onBackPressed");
         Keyboard.hideSoftKeyboard(this);
         if (viewHelper.isMainViewHidden()) {
@@ -1400,10 +1428,11 @@ public class DeviceControlActivity
             activeContactHelper.goToState(ActiveContactState.Default);
             if (contactEditorHelper.getState() != EditorState.Inactive)
                 contactEditorHelper.goToState(EditorState.Inactive);
-                getSupportActionBar().setCustomView(null);
-                connectorBluetooth.stopScanBTDevice();
+            getSupportActionBar().setCustomView(null);
+            connectorBluetooth.stopScanBTDevice();
+            invalidateOptionsMenu();
         } else
-                super.onBackPressed();
+            super.onBackPressed();
     }
 
 
@@ -1413,6 +1442,7 @@ public class DeviceControlActivity
         private static final String TAG = "WSD_ViewHelper";
 
         boolean isMainViewHidden() {return (MainView.getVisibility() != View.VISIBLE);}
+        boolean isScanViewShow() {return (ScanView.getVisibility() == View.VISIBLE);}
 
         void showMainView() {
             MainView.setVisibility(View.VISIBLE);

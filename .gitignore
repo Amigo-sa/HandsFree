@@ -2,3 +2,7 @@
 .gradle
 *.iml
 /build
+App/App.iml
+App/build.gradle
+HandsFree.iml
+build.gradle

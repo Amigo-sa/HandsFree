@@ -166,6 +166,10 @@ public class ConnectorBluetooth
             return true;
     }
 
+    public BluetoothAdapter getBTAdapter(){
+        return mBluetoothAdapter;
+    }
+
     //------------------ inittialization-------------------------
 
     public void initListBTDevice() {

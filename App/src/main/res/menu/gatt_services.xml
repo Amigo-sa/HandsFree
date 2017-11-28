@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:icon="@drawable/check256x256"
-          android:id="@+id/menu_refresh"
-          android:checkable="false"
-          android:orderInCategory="1"
-          android:showAsAction="ifRoom"/>
-    <item android:icon="@drawable/crossblack"
-          android:id="@+id/menu_connect"
-          android:orderInCategory="100"
-          android:showAsAction="ifRoom|withText"/>
+
+    <item
+        android:id="@+id/menu_settings"
+        android:checkable="false"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_settings" />
+    <!--<item-->
+        <!--android:id="@+id/menu_refresh"-->
+        <!--android:checkable="false"-->
+        <!--android:icon="@drawable/check256x256"-->
+        <!--android:orderInCategory="1"-->
+        <!--android:showAsAction="ifRoom" />-->
+    <!--<item-->
+        <!--android:id="@+id/menu_connect"-->
+        <!--android:icon="@drawable/crossblack"-->
+        <!--android:orderInCategory="100"-->
+        <!--android:showAsAction="ifRoom|withText" />-->
 
 </menu>
