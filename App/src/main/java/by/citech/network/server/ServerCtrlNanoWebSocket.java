@@ -5,8 +5,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import by.citech.exchange.IReceiveListener;
-import by.citech.exchange.IReceiveListenerReg;
+import by.citech.exchange.IReceiver;
+import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
 import by.citech.param.Settings;
 import by.citech.network.server.connection.protocols.http.IHTTPSession;
@@ -22,14 +22,14 @@ import static by.citech.util.Decode.bytesToHexMark1;
 
 public class ServerCtrlNanoWebSocket
         extends NanoWSD
-        implements IServerCtrl, IReceiveListenerReg, ITransmitter {
+        implements IServerCtrl, IReceiverReg, ITransmitter {
 
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
     private static final String TAG = Tags.SRV_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
     private WebSocket webSocket;
     private Handler handler;
-    private IReceiveListener listener;
+    private IReceiver listener;
     private String status = "";
 
     public ServerCtrlNanoWebSocket(int port, Handler handler) {
@@ -74,8 +74,8 @@ public class ServerCtrlNanoWebSocket
     }
 
     @Override
-    public IReceiveListenerReg getReceiverRegister() {
-        if (debug) Log.i(TAG, "getReceiverRegister");
+    public IReceiverReg getReceiverReg() {
+        if (debug) Log.i(TAG, "getReceiverReg");
         return this;
     }
 
@@ -142,11 +142,11 @@ public class ServerCtrlNanoWebSocket
         return false;
     }
 
-    //--------------------- IReceiveListenerReg
+    //--------------------- IReceiverReg
 
     @Override
-    public void registerReceiverListener(IReceiveListener listener) {
-        if (debug) Log.i(TAG, "registerReceiverListener");
+    public void registerReceiver(IReceiver listener) {
+        if (debug) Log.i(TAG, "registerReceiver");
         this.listener = listener;
     }
 

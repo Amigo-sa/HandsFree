@@ -1,5 +1,5 @@
 package by.citech.exchange;
 
-public interface IIntoNetCtrl {
+public interface ITransmitterCtrl {
     void streamOff();
 }

@@ -12,43 +12,42 @@ import by.citech.debug.TrafficNodes;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class FromNetToBluetooth
-        implements IFromNetCtrl, IReceiveListener, ITrafficUpdate {
+public class ToBluetooth
+        implements IReceiverCtrl, IReceiver, ITrafficUpdate {
 
     private static final String TAG = Tags.NET_REDIR_BT;
     private static final boolean debug = Settings.debug;
 
-    private IReceiveListenerReg iReceiveListenerReg;
+    private IReceiverReg iReceiverReg;
     private TrafficInfo trafficInfo;
     private boolean isRedirecting = false;
-    private StorageData<byte[][]> storageNetToBt;
+    private StorageData<byte[][]> source;
     private byte[][] dataAssembled;
     private byte[] dataChunk;
 
-    FromNetToBluetooth(IReceiveListenerReg iReceiveListenerReg, StorageData<byte[][]> storageNetToBt) {
-        if (iReceiveListenerReg == null
-                || storageNetToBt == null) {
-            Log.e(TAG, "FromNetToBluetooth one of key parameters are null");
+    public ToBluetooth(IReceiverReg iReceiverReg, StorageData<byte[][]> source) {
+        if (iReceiverReg == null
+                || source == null) {
+            Log.e(TAG, "ToBluetooth one of key parameters are null");
             return;
         }
-        this.iReceiveListenerReg = iReceiveListenerReg;
-        this.storageNetToBt = storageNetToBt;
+        this.iReceiverReg = iReceiverReg;
+        this.source = source;
         dataAssembled = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
         dataChunk = new byte[Settings.btSignificantBytes];
         trafficInfo = new TrafficInfo(TrafficNodes.NetIn, this);
         TrafficAnalyzer.getInstance().addTrafficInfo(trafficInfo);
     }
 
-    public IFromNetCtrl start() {
-        if (debug) Log.i(TAG, "start");
+    public void prepare() {
+        if (debug) Log.i(TAG, "prepare");
         redirectOff();
-        return this;
     }
 
     public void run() {
         if (debug) Log.i(TAG, "run");
         isRedirecting = true;
-        iReceiveListenerReg.registerReceiverListener(this);
+        iReceiverReg.registerReceiver(this);
         if (Settings.debug) Log.i(TAG, "run done");
     }
 
@@ -56,8 +55,8 @@ class FromNetToBluetooth
     public void redirectOff() {
         if (debug) Log.i(TAG, "redirectOff");
         isRedirecting = false;
-        storageNetToBt.clear();
-        iReceiveListenerReg.registerReceiverListener(null);
+        source.clear();
+        iReceiverReg.registerReceiver(null);
     }
 
     @Override
@@ -75,7 +74,7 @@ class FromNetToBluetooth
                 dataAssembled[i] = Arrays.copyOf(dataChunk, Settings.btToBtSendSize);
 //                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Decode.bytesToHexMark1(dataAssembled[i])));
             }
-            storageNetToBt.putData(dataAssembled);
+            source.putData(dataAssembled);
         }
     }
 

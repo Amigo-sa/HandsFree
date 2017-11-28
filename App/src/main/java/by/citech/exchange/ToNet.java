@@ -8,24 +8,23 @@ import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class IntoNetBluetooth
-        implements IIntoNetCtrl {
+public class ToNet
+        implements ITransmitterCtrl {
 
-    private static final String TAG = Tags.NET_STREAM_BT;
+    private static final String TAG = Tags.NET_TRANSMIT;
     private static final boolean debug = Settings.debug;
 
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
-    private StorageData<byte[]> storageBtToNet;
+    private StorageData<byte[]> source;
 
-    public IntoNetBluetooth(ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
+    public ToNet(ITransmitter iTransmitter, StorageData<byte[]> source) {
         this.iTransmitter = iTransmitter;
-        this.storageBtToNet = storageBtToNet;
+        this.source = source;
     }
 
-    public IIntoNetCtrl start() {
-        if (debug) Log.i(TAG, "start");
-        return this;
+    public void prepare() {
+        if (debug) Log.i(TAG, "prepare");
     }
 
     public void run() {
@@ -35,7 +34,7 @@ class IntoNetBluetooth
         int bufferedDataSize;
         //TODO: упростить логику
         while (isStreaming) {
-            while (storageBtToNet.isEmpty()) {
+            while (source.isEmpty()) {
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
@@ -43,7 +42,7 @@ class IntoNetBluetooth
                 }
                 if (!isStreaming) return;
             }
-            baos.write(storageBtToNet.getData(), 0, Settings.btSignificantBytes);
+            baos.write(source.getData(), 0, Settings.btSignificantBytes);
             if (debug) Log.i(TAG, "run got data from storage");
             if (!isStreaming) return;
             bufferedDataSize = baos.size();

@@ -179,7 +179,7 @@ public class HTTPSession implements IHTTPSession {
                 String mpline = in.readLine();
                 headerLines++;
                 if (mpline == null || !mpline.contains(contentType.getBoundary())) {
-                    throw new ResponseException(Status.BAD_REQUEST, "BAD REQUEST: Content type is multipart/form-data but chunk does not start with boundary.");
+                    throw new ResponseException(Status.BAD_REQUEST, "BAD REQUEST: Content type is multipart/form-data but chunk does not prepare with boundary.");
                 }
 
                 String partName = null, fileName = null, partContentType = null;
@@ -453,7 +453,7 @@ public class HTTPSession implements IHTTPSession {
     }
 
     /**
-     * Find the byte positions where multipart boundaries start. This reads a
+     * Find the byte positions where multipart boundaries prepare. This reads a
      * large block at a time and uses a temporary buffer to optimize (memory
      * mapped) file access.
      */
@@ -487,7 +487,7 @@ public class HTTPSession implements IHTTPSession {
             }
             search_window_pos += new_bytes;
 
-            // Copy the end of the buffer to the start
+            // Copy the end of the buffer to the prepare
             System.arraycopy(search_window, search_window.length - boundary.length, search_window, 0, boundary.length);
 
             // Refill search_window

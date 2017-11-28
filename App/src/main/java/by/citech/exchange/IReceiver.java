@@ -1,5 +1,5 @@
 package by.citech.exchange;
 
-public interface IReceiveListener {
+public interface IReceiver {
     void onReceiveData(byte[] data);
 }

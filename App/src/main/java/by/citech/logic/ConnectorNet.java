@@ -6,7 +6,9 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.data.StorageData;
-import by.citech.exchange.FromNet;
+import by.citech.exchange.IReceiverCtrl;
+import by.citech.exchange.RedirectFromNet;
+import by.citech.exchange.ITransmitterCtrl;
 import by.citech.gui.ICallUiListener;
 import by.citech.network.INetInfoListener;
 import by.citech.network.INetListener;
@@ -15,14 +17,12 @@ import by.citech.network.client.IClientCtrl;
 import by.citech.network.client.IClientCtrlReg;
 import by.citech.network.control.IConnCtrl;
 import by.citech.network.control.IDisc;
-import by.citech.exchange.IFromNetCtrl;
 import by.citech.exchange.IMessage;
 import by.citech.network.control.Disc;
 import by.citech.exchange.SendMessage;
-import by.citech.exchange.IFromNetCtrlReg;
-import by.citech.exchange.IIntoNetCtrl;
-import by.citech.exchange.IIntoNetCtrlReg;
-import by.citech.exchange.IntoNet;
+import by.citech.exchange.IReceiverCtrlReg;
+import by.citech.exchange.ITransmitterCtrlReg;
+import by.citech.exchange.RedirectToNet;
 import by.citech.network.server.ServerOff;
 import by.citech.network.server.ServerOn;
 import by.citech.network.server.IServerCtrl;
@@ -35,13 +35,13 @@ import by.citech.param.Tags;
 import static by.citech.util.NetworkInfo.getIpAddr;
 
 public class ConnectorNet
-        implements IServerCtrlReg, IFromNetCtrlReg, IIntoNetCtrlReg, IClientCtrlReg,
+        implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg,
         IMessage, IServerOff, IDisc, INetListener, ICallUiListener {
 
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
-    private IFromNetCtrl iFromNetCtrl;
-    private IIntoNetCtrl iIntoNetCtrl;
+    private IReceiverCtrl iReceiverCtrl;
+    private ITransmitterCtrl iTransmitterCtrl;
     private IConnCtrl iConnCtrl;
     private Handler handler;
     private INetInfoListener iNetInfoListener;
@@ -343,8 +343,8 @@ public class ConnectorNet
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart");
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
-        new IntoNet(this, iConnCtrl.getTransmitter(), storageBtToNet).execute();
-        new FromNet(this, iConnCtrl.getReceiverRegister(), storageNetToBt).execute();
+        new RedirectToNet(this, iConnCtrl.getTransmitter(), storageBtToNet).execute();
+        new RedirectFromNet(this, iConnCtrl.getReceiverReg(), storageNetToBt).execute();
     }
 
     private void exchangeStop() {
@@ -387,19 +387,19 @@ public class ConnectorNet
 
     private void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "redirectOff");
-        if (iFromNetCtrl != null) {
-            iFromNetCtrl.redirectOff();
-            iFromNetCtrl = null;
+        if (iReceiverCtrl != null) {
+            iReceiverCtrl.redirectOff();
+            iReceiverCtrl = null;
         }
     }
 
     private void streamOff() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "streamOff");
-        if (iIntoNetCtrl != null) {
-            iIntoNetCtrl.streamOff();
-            iIntoNetCtrl = null;
+        if (iTransmitterCtrl != null) {
+            iTransmitterCtrl.streamOff();
+            iTransmitterCtrl = null;
         }
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop iIntoNetCtrl.streamOff() done");
+        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop iTransmitterCtrl.streamOff() done");
     }
 
     @Override
@@ -421,22 +421,22 @@ public class ConnectorNet
     }
 
     @Override
-    public void registerRedirectCtrl(IFromNetCtrl iFromNetCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerRedirectCtrl");
-        if (iFromNetCtrl == null) {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerRedirectCtrl iFromNetCtrl is null");
+    public void registerReceiverCtrl(IReceiverCtrl iReceiverCtrl) {
+        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerReceiverCtrl");
+        if (iReceiverCtrl == null) {
+            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerReceiverCtrl iReceiverCtrl is null");
         } else {
-            this.iFromNetCtrl = iFromNetCtrl;
+            this.iReceiverCtrl = iReceiverCtrl;
         }
     }
 
     @Override
-    public void registerStreamCtrl(IIntoNetCtrl iIntoNetCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerStreamCtrl");
-        if (iIntoNetCtrl == null) {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerStreamCtrl iIntoNetCtrl is null");
+    public void registerTransmitterCtrl(ITransmitterCtrl iTransmitterCtrl) {
+        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerTransmitterCtrl");
+        if (iTransmitterCtrl == null) {
+            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerTransmitterCtrl iTransmitterCtrl is null");
         } else {
-            this.iIntoNetCtrl = iIntoNetCtrl;
+            this.iTransmitterCtrl = iTransmitterCtrl;
         }
     }
 

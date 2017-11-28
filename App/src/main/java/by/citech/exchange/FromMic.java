@@ -7,18 +7,20 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 import static by.citech.util.Decode.bytesToHexMark1;
 
-class IntoNetAudio implements IIntoNetCtrl {
+public class FromMic implements ITransmitterCtrl {
 
     private static final String TAG = Tags.NET_STREAM_AUDIO;
     private static final boolean debug = Settings.debug;
+    private static final int bufferSize = Settings.bufferSize;
 
     private byte[] buffer;
     private AudioRecord recorder;
     private boolean isStreaming = false;
     private ITransmitter iTransmitter;
 
-    IntoNetAudio(ITransmitter iTransmitter) {
+    public FromMic(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
+        buffer = new byte[bufferSize];
     }
 
     @Override
@@ -34,10 +36,9 @@ class IntoNetAudio implements IIntoNetCtrl {
         }
     }
 
-    public IIntoNetCtrl start() {
-        if (debug) Log.i(TAG, "start");
-        int bufferSize = Settings.bufferSize;
-        if (debug) Log.i(TAG, String.format("start audioOutBuffersize is %d", bufferSize));
+    public void prepare() {
+        if (debug) Log.i(TAG, "prepare");
+        if (debug) Log.i(TAG, String.format("prepare audioOutBuffersize is %d", bufferSize));
         streamOff();
         recorder = new AudioRecord(
                 Settings.audioSource,
@@ -45,14 +46,10 @@ class IntoNetAudio implements IIntoNetCtrl {
                 Settings.audioInChannel,
                 Settings.audioEncoding,
                 bufferSize);
-        buffer = new byte[bufferSize];
-        if (debug) Log.i(TAG, String.format("start buffer length is %d", buffer.length));
+        if (debug) Log.i(TAG, String.format("prepare buffer length is %d", buffer.length));
         if (recorder == null) {
-            if (debug) Log.e(TAG, "start recorder is null");
-            return null;
+            Log.e(TAG, "prepare recorder is null");
         }
-        if (debug) Log.i(TAG, "start recorder started");
-        return this;
     }
 
     public void run() {

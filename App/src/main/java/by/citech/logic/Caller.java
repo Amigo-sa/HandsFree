@@ -146,12 +146,27 @@ public class Caller {
             case Record:
                 buildDebugRecord();
                 break;
+            case BtToAudio:
+                buildDebugBtToAudio();
+                break;
+            case MicToAudio:
+                buildDebugMicToAudio();
+                break;
             case Normal:
+            default:
                 buildNormal();
                 break;
-            default:
-                break;
         }
+    }
+
+    private void buildDebugBtToAudio() {
+        if (debug) Log.i(TAG, "buildDebugBtToAudio");
+        storageBtToNet = new StorageData<>(Tags.BLE2AUD_STORE);
+    }
+
+    private void buildDebugMicToAudio() {
+        if (debug) Log.i(TAG, "buildDebugMicToAudio");
+        storageBtToNet = new StorageData<>(Tags.MIC2AUD_STORE);
     }
 
     private void buildDebugLoopbackBtToBt() {

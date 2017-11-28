@@ -1,5 +1,5 @@
 package by.citech.exchange;
 
-public interface IFromNetCtrl {
+public interface IReceiverCtrl {
     void redirectOff();
 }

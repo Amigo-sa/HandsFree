@@ -8,19 +8,19 @@ import android.util.Log;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-class FromNetToAudio
-        implements IFromNetCtrl, IReceiveListener {
+public class ToAudio
+        implements IReceiverCtrl, IReceiver {
 
     private int bufferSize = Settings.bufferSize;
-    private IReceiveListenerReg iReceiveListenerReg;
+    private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;
 
-    FromNetToAudio(IReceiveListenerReg iReceiveListenerReg) {
-        this.iReceiveListenerReg = iReceiveListenerReg;
+    public ToAudio(IReceiverReg iReceiverReg) {
+        this.iReceiverReg = iReceiverReg;
     }
 
-    public IFromNetCtrl start() {
+    public void prepare() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build");
         redirectOff();
 
@@ -39,14 +39,13 @@ class FromNetToAudio
                 .build();
 
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "build done");
-        return this;
     }
 
     public void run() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient");
         isRedirecting = true;
         audioTrack.play();
-        iReceiveListenerReg.registerReceiverListener(this);
+        iReceiverReg.registerReceiver(this);
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "startClient done");
     }
 
@@ -62,7 +61,7 @@ class FromNetToAudio
     public void redirectOff() {
         if (Settings.debug) Log.i(Tags.NET_REDIR_AUDIO, "redirectOff");
         isRedirecting = false;
-        iReceiveListenerReg.registerReceiverListener(null);
+        iReceiverReg.registerReceiver(null);
         if (audioTrack != null) {
             if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
                 audioTrack.stop();
