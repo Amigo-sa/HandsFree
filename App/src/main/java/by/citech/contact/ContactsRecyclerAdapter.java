@@ -21,7 +21,6 @@ public class ContactsRecyclerAdapter
     private static final String TAG = "WSD_ContactsAdapter";
     private List<Contact> contacts, contactsCleanCopy;
     private OnClickViewListener onClickViewListener;
-    private OnBindViewListener onBindViewListener;
 
     public ContactsRecyclerAdapter(List<Contact> contacts) {
         this.contacts = contacts;
@@ -87,27 +86,11 @@ public class ContactsRecyclerAdapter
 
     }
 
-    public interface OnBindViewListener {
-        void doCallbackOnBindView(int position);
-    }
-
     public interface OnClickViewListener {
         void doCallbackOnClickView(Contact contact, int position);
     }
 
     //--------------------- extended
-
-    public void checkAndProcItemInserted(Contact contact) {
-        notifyItemInserted(getItemPosition(contact));
-    }
-
-    public void checkAndProcItemRemoved(Contact contact) {
-        notifyItemRemoved(getItemPosition(contact));
-    }
-
-    public void checkAndProcItemChanged(Contact contact) {
-        notifyItemChanged(getItemPosition(contact));
-    }
 
     public int getItemPosition(Contact contact) {
         if (contacts.contains(contact)) {
@@ -127,10 +110,6 @@ public class ContactsRecyclerAdapter
     }
 
     //--------------------- getters and setters
-
-    public void setOnBindViewListener(OnBindViewListener onBindViewListener) {
-        this.onBindViewListener = onBindViewListener;
-    }
 
     public void setOnClickViewListener(OnClickViewListener onClickViewListener) {
         this.onClickViewListener = onClickViewListener;
@@ -161,9 +140,6 @@ public class ContactsRecyclerAdapter
                 onClickViewListener.doCallbackOnClickView(contact, position);
             }
         });
-        if (onBindViewListener != null) {
-            onBindViewListener.doCallbackOnBindView(position);
-        }
     }
 
     @Override

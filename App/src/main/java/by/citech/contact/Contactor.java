@@ -2,7 +2,11 @@ package by.citech.contact;
 
 import android.content.Context;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import by.citech.element.ElementsMemCtrl;
 import by.citech.element.IElementAdd;
@@ -17,13 +21,15 @@ public class Contactor
     private ContactsDbCtrl dbCtrl;
     private IContactsListener iContactsListener;
     private ElementsMemCtrl<Contact> memCtrl;
+    private List<Contact> contacts;
 
     //--------------------- singleton
 
     private static volatile Contactor instance = null;
 
     private Contactor() {
-        memCtrl = new ElementsMemCtrl<>();
+        contacts = Collections.synchronizedList(new ArrayList<>());
+        memCtrl = new ElementsMemCtrl<>(contacts);
     }
 
     public static Contactor getInstance() {
@@ -60,8 +66,8 @@ public class Contactor
 
     private void getAllContacts() {
         if (debug) Log.i(TAG, "getAllContacts");  //TODO: заменить на норм. условие
-        List<Contact> contacts = dbCtrl.downloadAllContacts();
-        memCtrl.initiate(contacts);
+        dbCtrl.downloadAllContacts(contacts);
+        memCtrl.sort();
         for (Contact contact : contacts)
             contact.setState(ContactState.SuccessAdd);
         iContactsListener.doCallbackOnContactsChange(contacts.toArray(new Contact[contacts.size()]));
@@ -110,7 +116,6 @@ public class Contactor
                 contactToAdd.setId(contactId);
                 memCtrl.add(contactToAdd);
                 contactToAdd.setState(ContactState.SuccessAdd);
-                iContactsListener.doCallbackOnContactsChange(contactToAdd);
             } else {
                 contactToAdd.setState(ContactState.FailToAdd);
             }

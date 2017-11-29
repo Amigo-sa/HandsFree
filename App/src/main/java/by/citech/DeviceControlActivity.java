@@ -274,7 +274,8 @@ public class DeviceControlActivity
                 Settings.serverLocalPortNumber));
         //
         // скрываем клавиатуру
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+//      getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         // инициализируем сервис
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -449,59 +450,6 @@ public class DeviceControlActivity
         activeContactHelper.goToState(ActiveContactState.FromChosen);
     }
 
-    //--------------------- IContactsListener
-
-    @Override
-    public void doCallbackOnContactsChange(final Contact... contacts) {
-        if (debug) Log.i(TAG, "doCallbackOnContactsChange");
-        runOnUiThread(() -> {
-                    Contact contact = contacts[0];
-                    ContactState state = contact.getState();
-                    Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
-                    if (contacts.length > 1) {
-                        contactsAdapter.notifyDataSetChanged();
-                    } else {
-                        int position = contactsAdapter.getItemPosition(contact);
-                        switch (state) {
-                            case SuccessAdd:
-                                contactsAdapter.notifyItemInserted(position);
-                                if (contactEditorHelper.isAddPending(contact))
-                                    contactEditorHelper.onContactAddSucc(position);
-                                break;
-                            case SuccessUpdate:
-                                contactsAdapter.notifyItemChanged(position);
-                                if (contactEditorHelper.isUpdPending(contact))
-                                    contactEditorHelper.onContactEditSucc(position);
-                                break;
-                            case FailInvalidContact:
-                            case FailNotUniqueContact:
-                                if (contactEditorHelper.isUpdPending(contact))
-                                    contactEditorHelper.onContactEditFail();
-                                if (contactEditorHelper.isAddPending(contact))
-                                    contactEditorHelper.onContactAddFail();
-                                break;
-                            case SuccessDelete:
-                                if (contactEditorHelper.isDelPending(contact))
-                                    contactEditorHelper.onContactDelSuccess();
-                                else
-                                    contactsAdapter.notifyDataSetChanged();
-                                break;
-                            case FailToAdd:
-                                if (contactEditorHelper.isAddPending(contact))
-                                    contactEditorHelper.onContactAddFail();
-                            case Null:
-                                Log.e(TAG, "doCallbackOnContactsChange state Null");
-                                break;
-                            default:
-                                Log.e(TAG, "doCallbackOnContactsChange state default");
-                                break;
-                        }
-                    }
-                }
-        );
-    }
-
-    // кнопка подключения/изменения гарнитуры
     public void btnChangeDevice(View view){
         setVisibleList();
         myListDevices = findViewById(R.id.ListDevices);
@@ -511,24 +459,21 @@ public class DeviceControlActivity
         myListDevices.setOnTouchListener(new LinearLayoutTouchListener());
         FrameView.setOnTouchListener(new LinearLayoutTouchListener());
         Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
-        myListDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
-            // останавливаем сканирование и запускаем новое Activity
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final BluetoothDevice device = connectorBluetooth.getmLeDeviceListAdapter().getDevice(position);
-                if (device == null) return;
-                connectorBluetooth.setmBTDevice(device);
-                //выкидываем соответствующее диалоговое окно о подключении устройства
-                if (debug) Log.i(TAG, "mBTDevice = " + device);
-                if (debug) Log.i(TAG, "mBTDeviceConn = " + connectorBluetooth.getmBTDeviceConn());
-                if (connectorBluetooth.getmBTDevice().equals(connectorBluetooth.getmBTDeviceConn())) {
-                    onCreateDialog(THIS_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
-                } else if (connectorBluetooth.getmBTDeviceConn() != null) {
-                    onCreateDialog(OTHER_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
-                } else {
-                    onCreateDialog(DEVICE_CONNECT, connectorBluetooth.getmBTDevice());
-                }
+        // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
+// останавливаем сканирование и запускаем новое Activity
+        myListDevices.setOnItemClickListener((parent, view1, position, id) -> {
+            final BluetoothDevice device = connectorBluetooth.getmLeDeviceListAdapter().getDevice(position);
+            if (device == null) return;
+            connectorBluetooth.setmBTDevice(device);
+            //выкидываем соответствующее диалоговое окно о подключении устройства
+            if (debug) Log.i(TAG, "mBTDevice = " + device);
+            if (debug) Log.i(TAG, "mBTDeviceConn = " + connectorBluetooth.getmBTDeviceConn());
+            if (connectorBluetooth.getmBTDevice().equals(connectorBluetooth.getmBTDeviceConn())) {
+                onCreateDialog(THIS_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
+            } else if (connectorBluetooth.getmBTDeviceConn() != null) {
+                onCreateDialog(OTHER_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
+            } else {
+                onCreateDialog(DEVICE_CONNECT, connectorBluetooth.getmBTDevice());
             }
         });
         connectorBluetooth.stopScanBTDevice();
@@ -547,11 +492,9 @@ public class DeviceControlActivity
                         .setMessage(R.string.connect_message)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setCancelable(true)
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                connectorBluetooth.disconnectBTDevice();
-                                dialog.cancel();
-                            }
+                        .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
+                            connectorBluetooth.disconnectBTDevice();
+                            dialog.cancel();
                         });
                 alertDialog = adb.create();
                 break;
@@ -560,18 +503,11 @@ public class DeviceControlActivity
                 adb.setTitle(device.getName());
                 adb.setMessage(R.string.click_connected_device_message);
                 adb.setIcon(android.R.drawable.ic_dialog_info);
-                adb.setPositiveButton(R.string.disconnect, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        connectorBluetooth.disconnectWork();
-                        dialog.dismiss();
-                    }
+                adb.setPositiveButton(R.string.disconnect, (dialog, which) -> {
+                    connectorBluetooth.disconnectWork();
+                    dialog.dismiss();
                 });
-                adb.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                adb.setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.dismiss());
                 alertDialog = adb.create();
                 break;
             }
@@ -579,19 +515,12 @@ public class DeviceControlActivity
                 adb.setTitle(device.getName());
                 adb.setMessage(R.string.click_other_device_message);
                 adb.setIcon(android.R.drawable.ic_dialog_info);
-                adb.setPositiveButton(R.string.connect, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        connectorBluetooth.disconnectBTDevice();
-                        connectorBluetooth.onConnectBTDevice();
-                        dialog.dismiss();
-                    }
+                adb.setPositiveButton(R.string.connect, (dialog, which) -> {
+                    connectorBluetooth.disconnectBTDevice();
+                    connectorBluetooth.onConnectBTDevice();
+                    dialog.dismiss();
                 });
-                adb.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                adb.setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.dismiss());
                 alertDialog = adb.create();
                 break;
             }
@@ -743,7 +672,6 @@ public class DeviceControlActivity
         if (viewHelper.isMainViewHidden()) {
             if (debug) Log.i(TAG, "onBackPressed get main visible");
             viewHelper.showMainView();
-            activeContactHelper.goToState(ActiveContactState.Default);
             if (contactEditorHelper.getState() != EditorState.Inactive)
                 contactEditorHelper.goToState(EditorState.Inactive);
             getSupportActionBar().setCustomView(null);
@@ -952,12 +880,9 @@ public class DeviceControlActivity
 
     @Override
     public void addDeviceToList(final LeDeviceListAdapter leDeviceListAdapter, final BluetoothDevice device, final int rssi) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                leDeviceListAdapter.addDevice(device, rssi);
-                leDeviceListAdapter.notifyDataSetChanged();
-            }
+        runOnUiThread(() -> {
+            leDeviceListAdapter.addDevice(device, rssi);
+            leDeviceListAdapter.notifyDataSetChanged();
         });
     }
 
@@ -1029,14 +954,14 @@ public class DeviceControlActivity
     }
 
     private void swipeScanStart(){
-        if (viewHelper.isScanViewShow()) {
+        if (!viewHelper.isScanViewHidden()) {
             connectorBluetooth.stopScanBTDevice();
             connectorBluetooth.scanWork();
         }
     }
 
     private void swipeScanStop(){
-        if (viewHelper.isScanViewShow()) {
+        if (!viewHelper.isScanViewHidden()) {
             connectorBluetooth.stopScanBTDevice();
         }
     }
@@ -1116,6 +1041,88 @@ public class DeviceControlActivity
 
     }
 
+    //--------------------- ViewHelper
+
+    private boolean getVisiblityMain(){
+        return visiblityMain;
+    }
+
+    private void setVisiblityMain(boolean visiblityMain){
+        this.visiblityMain = visiblityMain;
+    }
+
+    private void setVisibleMain() {
+        runOnUiThread(() -> {
+            invalidateOptionsMenu();
+            setVisiblityMain(true);
+            MainView.setVisibility(View.VISIBLE);
+            ScanView.setVisibility(View.GONE);
+        });
+    }
+
+    private void setVisibleList() {
+        runOnUiThread(() -> {
+            invalidateOptionsMenu();
+            setVisiblityMain(false);
+            viewHelper.showScaner();
+        });
+    }
+
+    private void setVisibleContact() {
+        runOnUiThread(() -> {
+            invalidateOptionsMenu();
+            setVisiblityMain(false);
+            MainView.setVisibility(View.GONE);
+        });
+    }
+
+    private void changeMainGUI(int color, int buttonName){
+        btnChangeDevice.setText(buttonName);
+        btnChangeDevice.setBackgroundColor(color);
+        invalidateOptionsMenu();
+    }
+
+    private class ViewHelper {
+
+        private static final boolean debug = true;
+        private static final String TAG = "WSD_ViewHelper";
+
+        boolean isMainViewHidden() {return (MainView.getVisibility() != View.VISIBLE);}
+        boolean isScanViewHidden() {return (ScanView.getVisibility() != View.VISIBLE);}
+
+        void showMainView() {
+            MainView.setVisibility(View.VISIBLE);
+            viewContactEditor.setVisibility(View.GONE);
+            ScanView.setVisibility(View.GONE);
+        }
+
+        void showEditor() {
+            MainView.setVisibility(View.GONE);
+            viewContactEditor.setVisibility(View.VISIBLE);
+        }
+
+        void showScaner() {
+            MainView.setVisibility(View.GONE);
+            ScanView.setVisibility(View.VISIBLE);
+        }
+
+        void hideEditor() {
+            MainView.setVisibility(View.VISIBLE);
+            viewContactEditor.setVisibility(View.GONE);
+        }
+
+        void showChosen() {
+            viewChosenContact.setVisibility(View.VISIBLE);
+            editTextSearch.setVisibility(View.GONE);
+        }
+
+        void hideChosen() {
+            viewChosenContact.setVisibility(View.GONE);
+            editTextSearch.setVisibility(View.VISIBLE);
+        }
+
+    }
+
     //--------------------- ContactEditorHelper
 
     private class ContactEditorHelper {
@@ -1182,6 +1189,7 @@ public class DeviceControlActivity
                     contactToEditPosition = -1;
                     viewHelper.hideEditor();
                     if (isSwipedIn) {
+                        if (debug) Log.i(TAG, "goToState Inactive isSwipedIn");
                         if (isDeleted || isEdited) {
                             swipeCrutch.resetSwipe();
                         } else {
@@ -1311,95 +1319,59 @@ public class DeviceControlActivity
 
     }
 
-    //--------------------- ViewHelper
+    //--------------------- IContactsListener
 
-    private boolean getVisiblityMain(){
-        return visiblityMain;
-    }
-
-    private void setVisiblityMain(boolean visiblityMain){
-        this.visiblityMain = visiblityMain;
-    }
-
-    private void setVisibleMain() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                invalidateOptionsMenu();
-                setVisiblityMain(true);
-                MainView.setVisibility(View.VISIBLE);
-                ScanView.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void setVisibleList() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                invalidateOptionsMenu();
-                setVisiblityMain(false);
-                viewHelper.showScaner();
-            }
-        });
-    }
-
-    private void setVisibleContact() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                invalidateOptionsMenu();
-                setVisiblityMain(false);
-                MainView.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void changeMainGUI(int color, int buttonName){
-        btnChangeDevice.setText(buttonName);
-        btnChangeDevice.setBackgroundColor(color);
-        invalidateOptionsMenu();
-    }
-
-    private class ViewHelper {
-
-        private static final boolean debug = true;
-        private static final String TAG = "WSD_ViewHelper";
-
-        boolean isMainViewHidden() {return (MainView.getVisibility() != View.VISIBLE);}
-        boolean isScanViewShow() {return (ScanView.getVisibility() == View.VISIBLE);}
-
-        void showMainView() {
-            MainView.setVisibility(View.VISIBLE);
-            viewContactEditor.setVisibility(View.GONE);
-            ScanView.setVisibility(View.GONE);
-        }
-
-        void showEditor() {
-            MainView.setVisibility(View.GONE);
-            viewContactEditor.setVisibility(View.VISIBLE);
-        }
-
-        void showScaner() {
-            MainView.setVisibility(View.GONE);
-            ScanView.setVisibility(View.VISIBLE);
-        }
-
-        void hideEditor() {
-            MainView.setVisibility(View.VISIBLE);
-            viewContactEditor.setVisibility(View.GONE);
-        }
-
-        void showChosen() {
-            viewChosenContact.setVisibility(View.VISIBLE);
-            editTextSearch.setVisibility(View.GONE);
-        }
-
-        void hideChosen() {
-            viewChosenContact.setVisibility(View.GONE);
-            editTextSearch.setVisibility(View.VISIBLE);
-        }
-
+    @Override
+    public void doCallbackOnContactsChange(final Contact... contacts) {
+        if (debug) Log.i(TAG, "doCallbackOnContactsChange");
+        runOnUiThread(() -> {
+                    Contact contact = contacts[0];
+                    ContactState state = contact.getState();
+                    Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (contacts.length > 1) {
+                        contactsAdapter.notifyDataSetChanged();
+                    } else {
+                        int position = contactsAdapter.getItemPosition(contact);
+                        if (debug) Log.w(TAG, String.format(Locale.US,
+                                "doCallbackOnContactsChange: state is %s, pos is %d, contact is %s",
+                                state.getMessage(), position, contact.toString()));
+                        switch (state) {
+                            case SuccessAdd:
+                                contactsAdapter.notifyItemInserted(position);
+                                if (contactEditorHelper.isAddPending(contact))
+                                    contactEditorHelper.onContactAddSucc(position);
+                                break;
+                            case SuccessUpdate:
+                                contactsAdapter.notifyItemChanged(position);
+                                if (contactEditorHelper.isUpdPending(contact))
+                                    contactEditorHelper.onContactEditSucc(position);
+                                break;
+                            case FailInvalidContact:
+                            case FailNotUniqueContact:
+                                if (contactEditorHelper.isUpdPending(contact))
+                                    contactEditorHelper.onContactEditFail();
+                                if (contactEditorHelper.isAddPending(contact))
+                                    contactEditorHelper.onContactAddFail();
+                                break;
+                            case SuccessDelete:
+                                if (contactEditorHelper.isDelPending(contact))
+                                    contactEditorHelper.onContactDelSuccess();
+                                else
+                                    contactsAdapter.notifyDataSetChanged();
+                                break;
+                            case FailToAdd:
+                                if (contactEditorHelper.isAddPending(contact))
+                                    contactEditorHelper.onContactAddFail();
+                            case Null:
+                                Log.e(TAG, "doCallbackOnContactsChange state Null");
+                                break;
+                            default:
+                                Log.e(TAG, "doCallbackOnContactsChange state default");
+                                break;
+                        }
+                    }
+                }
+        );
     }
 
     //--------------------- ChosenContactHelper
@@ -1418,8 +1390,6 @@ public class DeviceControlActivity
         }
 
         boolean isChosen() {return isChosen;}
-        public Contact getChosenContact() {return chosenContact;}
-        public int getChosenContactPosition() {return chosenContactPosition;}
         public Contact getContact() {return chosenContact;}
 
         void choose(Contact contact, int position) {
@@ -1474,7 +1444,7 @@ public class DeviceControlActivity
         ActiveContactState getState() {return activeContactState;}
 
         void goToState(ActiveContactState toState) {
-            if (debug) Log.i(TAG, "ActiveContactHelper goToState");
+            if (debug) Log.i(TAG, "goToState");
             this.activeContactState = toState;
             switch (activeContactState) {
                 case FromChosen:

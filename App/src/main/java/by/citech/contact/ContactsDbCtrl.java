@@ -9,12 +9,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ContactsDbCtrl extends SQLiteOpenHelper {
+
     private static final boolean debug = true;
     private static final String TAG = "WSD_ContactsDbCtrl";
     private static final int DB_CONTACTS_VERSION = 1;
     private static final String DB_CONTACTS_NAME = "DB_CONTACTS";
+
     private SQLiteDatabase db;
 
     private static final String CREATE_DB_CONTACTS = String.format(
@@ -62,12 +65,11 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
         return contentValues;
     }
 
-    ArrayList<Contact> downloadAllContacts() {
+    void downloadAllContacts(List<Contact> contacts) {
         if (debug) Log.i(TAG, "downloadAllContacts");
-        ArrayList<Contact> contacts = null;
         Cursor cursor = db.query(ContactsContract.Contacts.TABLE_NAME, null, null, null ,null, null, null);
         if (cursor.moveToFirst()) {
-            contacts = new ArrayList<>();
+            contacts.clear();
             if (debug) Log.i(TAG, "downloadAllContacts db already have contacts");
             int i = 0;
             do {
@@ -82,7 +84,6 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
             if (debug) Log.i(TAG, "downloadAllContacts db have no contacts");
         }
         cursor.close();
-        return contacts;
     }
 
     long add(Contact contact) {

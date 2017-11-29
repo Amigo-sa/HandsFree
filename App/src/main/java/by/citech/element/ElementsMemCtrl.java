@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import by.citech.contact.ContactsComparator;
 import by.citech.contact.ICopy;
 import by.citech.contact.IIdentifier;
-
 
 public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> {
 
@@ -16,8 +16,8 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
     private static final String TAG = "WSD_ElementsMemCtrl";
     private List<T> elements;
 
-    public ElementsMemCtrl() {
-        elements = new ArrayList<>(0);
+    public ElementsMemCtrl(List<T> elements) {
+        this.elements = elements;
     }
 
     public List<T> getElements() {
@@ -27,10 +27,8 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
 
     //--------------------- main
 
-    public void initiate(List<T> entry) {
-        if (debug) Log.i(TAG, "initiate");
-        elements.clear();
-        elements.addAll(entry);
+    public void sort() {
+        if (debug) Log.i(TAG, "sort");
         if (debug) {Log.d(TAG, "elements is (before sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
         Collections.sort(elements);
         if (debug) {Log.d(TAG, "elements is (after sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
@@ -39,9 +37,7 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
     public void add(T entry) {
         if (debug) Log.i(TAG, "add");
         elements.add(entry);
-        if (debug) {Log.d(TAG, "elements is (before sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
-        Collections.sort(elements);
-        if (debug) {Log.d(TAG, "elements is (after sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
+        sort();
     }
 
     public void delete(T entry) {
@@ -63,14 +59,12 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
         } else {
             if (debug) Log.e(TAG, "update no such element");
         }
-        if (debug) {Log.d(TAG, "elements is (before sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
         if (entryToCopy.compareTo(entryToUpd) == 0) {
             if (debug) Log.i(TAG, "update need to sort");
-            Collections.sort(elements);
+            sort();
         } else {
             if (debug) Log.i(TAG, "update no need to sort");
         }
-        if (debug) {Log.d(TAG, "elements is (after sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
     }
 
     public boolean checkForUniqueness(T entry) {
