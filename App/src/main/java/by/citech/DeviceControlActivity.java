@@ -115,8 +115,7 @@ public class DeviceControlActivity
     // Вьюхи для соединения с интернетом
     private Animation animCall;
     private Button btnGreen, btnRed, btnChangeDevice;
-    private EditText editTextSrvLocAddr, editTextSrvRemAddr, editTextSrvLocPort, editTextSrvRemPort;
-    // Отображение траффика для дебага
+    // TODO: отображение траффика для дебага
     TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
     // условие повторения анимации
@@ -290,6 +289,7 @@ public class DeviceControlActivity
             @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {callAnimStart();}}
             @Override public void onAnimationRepeat(Animation animation) {}
         });
+
         caller.build();
     }
 
@@ -930,12 +930,12 @@ public class DeviceControlActivity
 
     @Override
     public String getRemAddr() {
-        return editTextSrvRemAddr.getText().toString();
+        return activeContactHelper.getIp();
     }
 
     @Override
     public String getRemPort() {
-        return editTextSrvRemPort.getText().toString();
+        return Integer.toString(Settings.serverRemotePortNumber);
     }
 
     @Override

@@ -7,8 +7,8 @@ import by.citech.data.StorageData;
 import by.citech.debug.DebugBtToAudLooper;
 import by.citech.debug.DebugBtToBtLooper;
 import by.citech.debug.DebugBtToBtRecorder;
-import by.citech.debug.DebugMicToAudLooper;
 import by.citech.debug.DebugMicToAudLooperAlter;
+import by.citech.debug.DebugMicToAudLooper;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
@@ -33,9 +33,9 @@ public class Caller {
     private HandlerExtended handlerExtended;
     private DebugBtToBtLooper debugBtToBtLooper;
     private DebugBtToBtRecorder debugBtToBtRecorder;
-    private DebugMicToAudLooper debugMicToAudLooper;
-    private DebugBtToAudLooper debugBtToAudLooper;
     private DebugMicToAudLooperAlter debugMicToAudLooperAlter;
+    private DebugBtToAudLooper debugBtToAudLooper;
+    private DebugMicToAudLooper debugMicToAudLooper;
     private ConnectorBluetooth connectorBluetooth;
     private ConnectorNet connectorNet;
     private CallUi callUi;
@@ -179,18 +179,18 @@ public class Caller {
 //        StorageData<short[]> storageMic = new StorageData<>(Tags.MIC_STORE);
 //        StorageData<short[]> sourceAud = new StorageData<>(Tags.AUD_SOURCE);
 //
-//        debugMicToAudLooper = new DebugMicToAudLooper(storageMic, sourceAud);
+//        debugMicToAudLooperAlter = new DebugMicToAudLooperAlter(storageMic, sourceAud);
 
-        debugMicToAudLooperAlter = new DebugMicToAudLooperAlter();
+        debugMicToAudLooper = new DebugMicToAudLooper();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
-//                .addiDebugListener(debugMicToAudLooper)
-                .addiDebugListener(debugMicToAudLooperAlter)
+//                .addiDebugListener(debugMicToAudLooperAlter)
+                .addiDebugListener(debugMicToAudLooper)
                 .addiCallUiListener(iCallUiListener);
 
-//        debugMicToAudLooper.start();
-        debugMicToAudLooperAlter.start();
+//        debugMicToAudLooperAlter.start();
+        debugMicToAudLooper.start();
     }
 
     private void buildDebugLoopbackBtToBt() {
@@ -298,9 +298,9 @@ public class Caller {
 
     public void stop() {
         if (debug) Log.i(TAG, "stop");
-        if (debugMicToAudLooper != null) {
-            debugMicToAudLooper.deactivate();
-            debugMicToAudLooper = null;
+        if (debugMicToAudLooperAlter != null) {
+            debugMicToAudLooperAlter.deactivate();
+            debugMicToAudLooperAlter = null;
         }
         if (debugBtToBtLooper != null) {
             debugBtToBtLooper.deactivate();
