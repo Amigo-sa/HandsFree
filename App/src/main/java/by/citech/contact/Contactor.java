@@ -60,7 +60,6 @@ public class Contactor
         }
         this.iContactsListener = iContactsListener;
         dbCtrl = new ContactsDbCtrl(context);
-        dbCtrl.test();
         getAllContacts();
     }
 

@@ -216,12 +216,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 //            }
         }
 
-
-
-
-
-
     };
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return super.onStartCommand(intent, flags, startId);
+
+    }
+
     // строку загружаем в Intent и передаём в LeBroadcastReceiver-у
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
@@ -335,15 +337,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        synchronized(this)
-        {
+        synchronized (this) {
             mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+            mBluetoothGatt.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
         }
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
-        if (mBluetoothGatt != null)
-            mBluetoothGatt.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
+
         return true;
     }
     /**
@@ -400,26 +401,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
-
-//
-//        if (Settings.MTU <= 20) {
-//            if (Settings.debug) Log.w(TAG, "enWriteCharacteristicThread");
-//            enWriteCharacteristicThread(write_characteristic, DEFAULT_MTU);
-//        }
-//        else {
-//            if (Settings.debug) Log.w(TAG, "requestMtu");
-//
-//        }
         write_characteristic = characteristic;
-
         enWriteCharacteristicThread(write_characteristic, DEFAULT_MTU);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            if (mBluetoothGatt.requestMtu(120))
-//                Log.w(TAG, "requestMtu is done");
-//            else
-//                Log.w(TAG, "requestMtu is shit");
-//        }
-
     }
 
     private void singleWriteCharacteristic(BluetoothGattCharacteristic characteristic) {
