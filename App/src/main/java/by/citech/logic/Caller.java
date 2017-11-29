@@ -176,20 +176,20 @@ public class Caller {
             return;
         }
 
-//        StorageData<short[]> storageMic = new StorageData<>(Tags.MIC_STORE);
-//        StorageData<short[]> sourceAud = new StorageData<>(Tags.AUD_SOURCE);
+//      StorageData<short[]> storageMic = new StorageData<>(Tags.MIC_STORE);
+//      StorageData<short[]> sourceAud = new StorageData<>(Tags.AUD_SOURCE);
 //
-//        debugMicToAudLooperAlter = new DebugMicToAudLooperAlter(storageMic, sourceAud);
+//      debugMicToAudLooperAlter = new DebugMicToAudLooperAlter(storageMic, sourceAud);
 
         debugMicToAudLooper = new DebugMicToAudLooper();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
-//                .addiDebugListener(debugMicToAudLooperAlter)
+//              .addiDebugListener(debugMicToAudLooperAlter)
                 .addiDebugListener(debugMicToAudLooper)
                 .addiCallUiListener(iCallUiListener);
 
-//        debugMicToAudLooperAlter.start();
+//      debugMicToAudLooperAlter.start();
         debugMicToAudLooper.start();
     }
 
@@ -298,6 +298,7 @@ public class Caller {
 
     public void stop() {
         if (debug) Log.i(TAG, "stop");
+        callerState = CallerState.Null;
         if (debugMicToAudLooperAlter != null) {
             debugMicToAudLooperAlter.deactivate();
             debugMicToAudLooperAlter = null;

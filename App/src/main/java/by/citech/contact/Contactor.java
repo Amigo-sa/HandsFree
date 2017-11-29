@@ -58,15 +58,15 @@ public class Contactor
             return;
         }
         this.iContactsListener = iContactsListener;
-        new Thread(() -> {
+//      new Thread(() -> {
             dbCtrl = new ContactsDbCtrl(context);
 //          dbCtrl.test();
             getAllContacts();
-        }).start();
+//      }).start();
     }
 
     private void getAllContacts() {
-        if (debug) Log.i(TAG, "getAllContacts");  //TODO: заменить на норм. условие
+        if (debug) Log.i(TAG, "getAllContacts");
         dbCtrl.downloadAllContacts(contacts);
         memCtrl.sort();
         for (Contact contact : contacts)

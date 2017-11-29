@@ -5,7 +5,7 @@ public interface ICallNetListener
     void callOutcomingConnected();
     void callOutcomingRejected();
     void callOutcomingFailed();
-    void callOutcomingLocal();
+    void callOutcomingInvalid();
     void callIncomingDetected();
     void callIncomingCanceled();
     void callIncomingFailed();

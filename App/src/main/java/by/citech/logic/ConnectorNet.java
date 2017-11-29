@@ -31,6 +31,7 @@ import by.citech.network.server.IServerOff;
 import by.citech.param.Messages;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
+import by.citech.util.InetAddress;
 
 import static by.citech.util.NetworkInfo.getIpAddr;
 
@@ -151,10 +152,10 @@ public class ConnectorNet
     @Override
     public void callOutcomingStarted() {
         if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callOutcomingStarted");
-        if (isLocalIp()) {
-            if (Settings.debug) Log.w(Tags.NET_CONNECTOR, "callOutcomingStarted isLocalIp()");
+        if (!isValidIp()) {
+            if (Settings.debug) Log.w(Tags.NET_CONNECTOR, "callOutcomingStarted isValidIp()");
             if (setState(CallerState.OutcomingStarted, CallerState.Idle))
-                for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingLocal();
+                for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingInvalid();
             return;
         }
         connect();
@@ -315,12 +316,12 @@ public class ConnectorNet
         new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_ACCEPT);
     }
 
-    private boolean isLocalIp() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "isLocalIp");
+    private boolean isValidIp() {
+        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "isValidIp");
         String remAddr = iNetInfoListener.getRemAddr();
-        return (remAddr.equals(getIpAddr(Settings.ipv4)) ||
-                remAddr.equals("127.0.0.1") ||
-                remAddr.equals("localhost"));
+        return !(remAddr.matches(getIpAddr(Settings.ipv4))
+                || remAddr.matches("127.0.0.1")
+                || !InetAddress.checkForValidityIpAddress(remAddr));
     }
 
     private void connect() {

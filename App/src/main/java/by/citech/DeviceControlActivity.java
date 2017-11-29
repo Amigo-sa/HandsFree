@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -157,10 +158,22 @@ public class DeviceControlActivity
     private LocationManager locationManager;
     private String provider;
 
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        if (debug) Log.i(TAG, "onStart");
+//    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (debug) Log.i(TAG, "onCreate");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (debug) Log.i(TAG, "onStart");
         // Для проверки разрешения местоположения
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
@@ -172,6 +185,7 @@ public class DeviceControlActivity
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
+
         caller = Caller.getInstance()
                 .setiCallUiListener(this)
                 .setiDebugListener(this)
@@ -199,7 +213,7 @@ public class DeviceControlActivity
             connectorBluetooth.getBTAdapter().enable();
             Toast.makeText(getApplicationContext(), "Bluetooth now enabling", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(getApplicationContext(), "Bluetooth Al-Ready Enable", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
         }
 
         MainView = findViewById(R.id.MainView);
@@ -237,7 +251,6 @@ public class DeviceControlActivity
         setupViewRecyclerContacts();
         contactor.start(DeviceControlActivity.this, DeviceControlActivity.this);
 
-        // Sets up UI references.
         btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
         btnChangeDevice.setText(R.string.connect_device);
         btnChangeDevice.setBackgroundColor(DARKCYAN);
@@ -270,8 +283,7 @@ public class DeviceControlActivity
         getSupportActionBar().setTitle(String.format(Locale.US, "SecTel %s:%d",
                 getIpAddr(Settings.ipv4),
                 Settings.serverLocalPortNumber));
-        //
-        // скрываем клавиатуру
+
 //      getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
@@ -290,6 +302,115 @@ public class DeviceControlActivity
         });
 
         caller.build();
+    }
+
+    //-------------------------- base
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Settings.debug) Log.i(TAG,"onResume");
+        enPermissions();
+        if (connectorBluetooth != null) {
+            connectorBluetooth.updateBCRData();
+        }
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        if (debug) Log.i(TAG, "onPostCreate");
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (debug) Log.i(TAG, "onPostResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (debug) Log.i(TAG, "onPause");
+        connectorBluetooth.unregisterReceiver();
+        caller.stop();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (debug) Log.i(TAG, "onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (debug) Log.i(TAG, "onDestroy");
+        unbindService(connectorBluetooth.mServiceConnection);
+        connectorBluetooth.closeLeService();
+        caller.stop();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!viewHelper.isMainViewHidden())
+            onCreateConnectMenu(menu);
+        else
+            onCreateScanMenu(menu);
+        return true;
+    }
+
+    private void onCreateConnectMenu(Menu menu){
+        if (debug) Log.i(TAG, "onCreateConnectMenu()");
+        getMenuInflater().inflate(R.menu.gatt_services, menu);
+        getSupportActionBar().setCustomView(null);
+    }
+
+    private void onCreateScanMenu(Menu menu){
+        if (Settings.debug) Log.i(TAG, "onCreateScanMenu()");
+        getMenuInflater().inflate(R.menu.main, menu);
+        if (!connectorBluetooth.ismScanning()) {
+            menu.findItem(R.id.menu_stop).setVisible(false);
+            menu.findItem(R.id.menu_scan).setVisible(true);
+            getSupportActionBar().setCustomView(null);
+        } else {
+            menu.findItem(R.id.menu_stop).setVisible(true);
+            menu.findItem(R.id.menu_scan).setVisible(false);
+            getSupportActionBar().setCustomView(R.layout.actionbar);
+        }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_scan:
+                connectorBluetooth.scanWork();
+                break;
+            case R.id.menu_stop:
+                connectorBluetooth.stopScanBTDevice();
+                break;
+            case R.id.menu_settings:
+                if (debug) Log.i(TAG, "menu settings");
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (debug) Log.i(TAG, "onBackPressed");
+        Keyboard.hideSoftKeyboard(this);
+        if (viewHelper.isMainViewHidden()) {
+            if (debug) Log.i(TAG, "onBackPressed get main visible");
+            viewHelper.showMainView();
+            if (contactEditorHelper.getState() != EditorState.Inactive)
+                contactEditorHelper.goToState(EditorState.Inactive);
+            getSupportActionBar().setCustomView(null);
+            if (connectorBluetooth != null) {
+                connectorBluetooth.stopScanBTDevice();
+            }
+            invalidateOptionsMenu();
+        } else
+            super.onBackPressed();
     }
 
     //------------------------------ Разрешения местоположения --------------
@@ -569,114 +690,6 @@ public class DeviceControlActivity
         }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
     }
 
-    //--------------------------Other Activity Methods-------------------------
-
-    // по запуску регистрируем наш LeBroadcastReceiver
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (Settings.debug) Log.i(TAG,"onResume");
-        enPermissions();
-        // по запуску регистрируем наш LeBroadcastReceiver
-        if (connectorBluetooth != null) {
-            connectorBluetooth.updateBCRData();
-        }
-    }
-
-    // в случае засыпания активности сбрасываем регистрацию LeBroadcastReceiver
-    @Override
-    protected void onPause() {
-        super.onPause();
-        connectorBluetooth.unregisterReceiver();
-        caller.stop();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    // в случае отключения программы отвязываем сервис и отключаем его
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(connectorBluetooth.mServiceConnection);
-        connectorBluetooth.closeLeService();
-        caller.stop();
-    }
-
-    // создаём меню
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!viewHelper.isMainViewHidden())
-            onCreateConnectMenu(menu);
-        else
-            onCreateScanMenu(menu);
-        return true;
-    }
-
-    private void onCreateConnectMenu(Menu menu){
-        if (debug) Log.i(TAG, "onCreateConnectMenu()");
-        getMenuInflater().inflate(R.menu.gatt_services, menu);
-        getSupportActionBar().setCustomView(null);
-//        if (connectorBluetooth.ismConnected()) {
-//            menu.findItem(R.id.menu_connect).setVisible(false);
-//            menu.findItem(R.id.menu_refresh).setVisible(true);
-//        } else {
-//            menu.findItem(R.id.menu_connect).setVisible(true);
-//            menu.findItem(R.id.menu_refresh).setVisible(false);
-//        }
-    }
-
-    private void onCreateScanMenu(Menu menu){
-        if (Settings.debug) Log.i(TAG, "onCreateScanMenu()");
-        getMenuInflater().inflate(R.menu.main, menu);
-        if (!connectorBluetooth.ismScanning()) {
-            menu.findItem(R.id.menu_stop).setVisible(false);
-            menu.findItem(R.id.menu_scan).setVisible(true);
-            getSupportActionBar().setCustomView(null);
-        } else {
-            menu.findItem(R.id.menu_stop).setVisible(true);
-            menu.findItem(R.id.menu_scan).setVisible(false);
-            getSupportActionBar().setCustomView(R.layout.actionbar);
-        }
-    }
-    // включаем/выключаем сканирование в зависимости от того нажата клавиша SCAN или нет
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_scan:
-                connectorBluetooth.scanWork();
-                break;
-            case R.id.menu_stop:
-                connectorBluetooth.stopScanBTDevice();
-                break;
-            case R.id.menu_settings:
-                if (debug) Log.i(TAG, "menu settings");
-                break;
-        }
-        return true;
-    }
-
-    // кнопка на телефоне
-    @Override
-    public void onBackPressed() {
-        if (debug) Log.i(TAG, "onBackPressed");
-        Keyboard.hideSoftKeyboard(this);
-        if (viewHelper.isMainViewHidden()) {
-            if (debug) Log.i(TAG, "onBackPressed get main visible");
-            viewHelper.showMainView();
-            if (contactEditorHelper.getState() != EditorState.Inactive)
-                contactEditorHelper.goToState(EditorState.Inactive);
-            getSupportActionBar().setCustomView(null);
-            if (connectorBluetooth != null) {
-                connectorBluetooth.stopScanBTDevice();
-            }
-            invalidateOptionsMenu();
-        } else
-            super.onBackPressed();
-    }
-
     //--------------------- Network Buttons
 
     private void btnSetDisabled(Button button, String label) {
@@ -763,10 +776,10 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void callOutcomingLocal() {
-        if (debug) Log.i(TAG, "callOutcomingLocal");
+    public void callOutcomingInvalid() {
+        if (debug) Log.i(TAG, "callOutcomingInvalid");
         btnSetEnabled(btnGreen, "CALL");
-        btnSetDisabled(btnRed, "LOCAL");
+        btnSetDisabled(btnRed, "INVALID");
         callAnimStop();
     }
 
@@ -1319,7 +1332,7 @@ public class DeviceControlActivity
     @Override
     public void doCallbackOnContactsChange(final Contact... contacts) {
         if (debug) Log.i(TAG, "doCallbackOnContactsChange");
-        runOnUiThread(() -> {
+//      runOnUiThread(() -> {
                     Contact contact = contacts[0];
                     ContactState state = contact.getState();
                     Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1365,8 +1378,7 @@ public class DeviceControlActivity
                                 break;
                         }
                     }
-                }
-        );
+//              });
     }
 
     //--------------------- ChosenContactHelper
@@ -1400,6 +1412,7 @@ public class DeviceControlActivity
             chosenContact = null;
             chosenContactPosition = -1;
             viewHelper.hideChosen();
+            activeContactHelper.goToState(ActiveContactState.Default);
             Contacts.setContactInfo(textViewChosenContactName, textViewChosenContactIp);
         }
 
@@ -1421,11 +1434,13 @@ public class DeviceControlActivity
         Contact getContact() {
             switch (activeContactState) {
                 case IpFromSearch:
+                    if (debug) Log.i(TAG, "getContact IpFromSearch");
+                case FromEditor:
+                    if (debug) Log.i(TAG, "getContact FromEditor");
                     return new Contact(getName(), getIp());
                 case FromChosen:
+                    if (debug) Log.i(TAG, "getContact FromChosen");
                     return chosenContactHelper.getContact();
-                case FromEditor:
-                    return new Contact(getName(), getIp());
                 case Null:
                     Log.e(TAG, "ActiveContactHelper getContact state null");
                     break;
@@ -1450,7 +1465,7 @@ public class DeviceControlActivity
                     if (chosenContactHelper.isChosen())
                         activeContactState = ActiveContactState.FromChosen;
                     else
-                        activeContactState = ActiveContactState.Null;
+                        activeContactState = ActiveContactState.IpFromSearch;
                     break;
                 case IpFromSearch:
                     break;
