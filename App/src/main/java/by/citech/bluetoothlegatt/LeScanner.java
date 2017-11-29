@@ -78,7 +78,8 @@ public class LeScanner {
                 public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
                     if (Settings.debug) Log.i(TAG, "onLeScan()");
                     final LeDeviceListAdapter leDeviceListAdapter = controlAdapter.getLeDeviceListAdapter();
-                    mIBluetoothListener.addDeviceToList(leDeviceListAdapter, device, rssi);
+                    if (leDeviceListAdapter != null && mIBluetoothListener != null)
+                        mIBluetoothListener.addDeviceToList(leDeviceListAdapter, device, rssi);
 
                 }
             };

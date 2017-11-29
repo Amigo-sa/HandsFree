@@ -75,7 +75,8 @@ public class LeBroadcastReceiver {
                 mConnected = true;
                 mBTDeviceConn = mBTDevice;
                 if (Settings.debug) Log.i(TAG, "mBTDevice = " + mBTDevice);
-                mIBluetoothListener.connectDialogInfo(mBTDevice);
+                if (mBTDevice != null)
+                    mIBluetoothListener.connectDialogInfo(mBTDevice);
                 controlAdapter.setBTDevice(mBTDeviceConn);
                 controlAdapter.setConnected(mConnected);
                 storageListener.setStorages();
@@ -83,12 +84,13 @@ public class LeBroadcastReceiver {
                 mConnected = false;
                 mBTDeviceConn = null;
                 if (Settings.debug) Log.i(TAG, "ACTION_GATT_DISCONNECTED");
-                mIBluetoothListener.disconnectDialogInfo(mBTDevice);
+                if (mBTDevice != null)
+                    mIBluetoothListener.disconnectDialogInfo(mBTDevice);
                 controlAdapter.setBTDevice(mBTDeviceConn);
                 controlAdapter.setConnected(mConnected);
                 controlAdapter.clearAllDevicesFromList();
                 //clearAllDevicesFromList();
-                leScanner.startScanBluetoothDevice();
+                //leScanner.startScanBluetoothDevice();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
                 // Show all the supported services and characteristics on the user interface.
