@@ -1332,53 +1332,53 @@ public class DeviceControlActivity
     @Override
     public void doCallbackOnContactsChange(final Contact... contacts) {
         if (debug) Log.i(TAG, "doCallbackOnContactsChange");
-//      runOnUiThread(() -> {
-                    Contact contact = contacts[0];
-                    ContactState state = contact.getState();
-                    Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
-                    if (contacts.length > 1) {
-                        contactsAdapter.notifyDataSetChanged();
-                    } else {
-                        int position = contactsAdapter.getItemPosition(contact);
-                        if (debug) Log.w(TAG, String.format(Locale.US,
-                                "doCallbackOnContactsChange: state is %s, pos is %d, contact is %s",
-                                state.getMessage(), position, contact.toString()));
-                        switch (state) {
-                            case SuccessAdd:
-                                contactsAdapter.notifyItemInserted(position);
-                                if (contactEditorHelper.isAddPending(contact))
-                                    contactEditorHelper.onContactAddSucc(position);
-                                break;
-                            case SuccessUpdate:
-                                contactsAdapter.notifyItemChanged(position);
-                                if (contactEditorHelper.isUpdPending(contact))
-                                    contactEditorHelper.onContactEditSucc(position);
-                                break;
-                            case FailInvalidContact:
-                            case FailNotUniqueContact:
-                                if (contactEditorHelper.isUpdPending(contact))
-                                    contactEditorHelper.onContactEditFail();
-                                if (contactEditorHelper.isAddPending(contact))
-                                    contactEditorHelper.onContactAddFail();
-                                break;
-                            case SuccessDelete:
-                                if (contactEditorHelper.isDelPending(contact))
-                                    contactEditorHelper.onContactDelSuccess();
-                                else
-                                    contactsAdapter.notifyDataSetChanged();
-                                break;
-                            case FailToAdd:
-                                if (contactEditorHelper.isAddPending(contact))
-                                    contactEditorHelper.onContactAddFail();
-                            case Null:
-                                Log.e(TAG, "doCallbackOnContactsChange state Null");
-                                break;
-                            default:
-                                Log.e(TAG, "doCallbackOnContactsChange state default");
-                                break;
-                        }
-                    }
-//              });
+//        runOnUiThread(() -> {
+            Contact contact = contacts[0];
+            ContactState state = contact.getState();
+            Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
+            if (contacts.length > 1) {
+                contactsAdapter.notifyDataSetChanged();
+            } else {
+                int position = contactsAdapter.getItemPosition(contact);
+                if (debug) Log.w(TAG, String.format(Locale.US,
+                        "doCallbackOnContactsChange: state is %s, pos is %d, contact is %s",
+                        state.getMessage(), position, contact.toString()));
+                switch (state) {
+                    case SuccessAdd:
+                        contactsAdapter.notifyItemInserted(position);
+                        if (contactEditorHelper.isAddPending(contact))
+                            contactEditorHelper.onContactAddSucc(position);
+                        break;
+                    case SuccessUpdate:
+                        contactsAdapter.notifyItemChanged(position);
+                        if (contactEditorHelper.isUpdPending(contact))
+                            contactEditorHelper.onContactEditSucc(position);
+                        break;
+                    case FailInvalidContact:
+                    case FailNotUniqueContact:
+                        if (contactEditorHelper.isUpdPending(contact))
+                            contactEditorHelper.onContactEditFail();
+                        if (contactEditorHelper.isAddPending(contact))
+                            contactEditorHelper.onContactAddFail();
+                        break;
+                    case SuccessDelete:
+                        if (contactEditorHelper.isDelPending(contact))
+                            contactEditorHelper.onContactDelSuccess();
+                        else
+                            contactsAdapter.notifyDataSetChanged();
+                        break;
+                    case FailToAdd:
+                        if (contactEditorHelper.isAddPending(contact))
+                            contactEditorHelper.onContactAddFail();
+                    case Null:
+                        Log.e(TAG, "doCallbackOnContactsChange state Null");
+                        break;
+                    default:
+                        Log.e(TAG, "doCallbackOnContactsChange state default");
+                        break;
+                }
+            }
+//        });
     }
 
     //--------------------- ChosenContactHelper
