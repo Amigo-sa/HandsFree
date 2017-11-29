@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -33,7 +32,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -92,7 +90,7 @@ public class DeviceControlActivity
         IBluetoothListener,
         IDebugListener,
         IContactsListener,
-        LocationListener{
+        LocationListener {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -237,7 +235,7 @@ public class DeviceControlActivity
         setupContactEditor();
         setupDialogConstructor();
         setupViewRecyclerContacts();
-        startContactor();
+        contactor.start(DeviceControlActivity.this, DeviceControlActivity.this);
 
         // Sets up UI references.
         btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
@@ -408,10 +406,6 @@ public class DeviceControlActivity
                 }
             }
         };
-    }
-
-    private void startContactor() {
-        new Thread(() -> contactor.start(DeviceControlActivity.this, DeviceControlActivity.this)).start();
     }
 
     //--------------------- Actions
@@ -773,6 +767,7 @@ public class DeviceControlActivity
         if (debug) Log.i(TAG, "callOutcomingLocal");
         btnSetEnabled(btnGreen, "CALL");
         btnSetDisabled(btnRed, "LOCAL");
+        callAnimStop();
     }
 
     @Override

@@ -6,7 +6,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import by.citech.element.ElementsMemCtrl;
 import by.citech.element.IElementAdd;
@@ -59,8 +58,11 @@ public class Contactor
             return;
         }
         this.iContactsListener = iContactsListener;
-        dbCtrl = new ContactsDbCtrl(context);
-        getAllContacts();
+        new Thread(() -> {
+            dbCtrl = new ContactsDbCtrl(context);
+//          dbCtrl.test();
+            getAllContacts();
+        }).start();
     }
 
     private void getAllContacts() {

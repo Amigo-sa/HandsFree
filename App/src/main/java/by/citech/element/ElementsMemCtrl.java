@@ -2,11 +2,9 @@ package by.citech.element;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import by.citech.contact.ContactsComparator;
 import by.citech.contact.ICopy;
 import by.citech.contact.IIdentifier;
 
