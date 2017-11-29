@@ -44,6 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -268,10 +269,9 @@ public class DeviceControlActivity
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setTitle("SecTel " +
-                getIpAddr(Settings.ipv4) +
-                ":" +
-                Settings.serverLocalPortNumber);
+        getSupportActionBar().setTitle(String.format(Locale.US, "SecTel %s:%d",
+                getIpAddr(Settings.ipv4),
+                Settings.serverLocalPortNumber));
         //
         // скрываем клавиатуру
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -951,7 +951,7 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void addDeviceToList(final LeDeviceListAdapter leDeviceListAdapter, final BluetoothDevice device , final int rssi) {
+    public void addDeviceToList(final LeDeviceListAdapter leDeviceListAdapter, final BluetoothDevice device, final int rssi) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1450,7 +1450,7 @@ public class DeviceControlActivity
         ActiveContactState activeContactState;
 
         ActiveContactHelper() {
-            activeContactState = ActiveContactState.Null;
+            activeContactState = ActiveContactState.IpFromSearch;
         }
 
         Contact getContact() {
@@ -1516,10 +1516,13 @@ public class DeviceControlActivity
             if (debug) Log.i(TAG, "getIp");
             switch (activeContactHelper.getState()) {
                 case FromChosen:
+                    if (debug) Log.i(TAG, "getIp FromChosen");
                     return activeContactHelper.getContact().getIp();
                 case FromEditor:
+                    if (debug) Log.i(TAG, "getIp FromEditor");
                     return editTextContactIp.getText().toString();
                 case IpFromSearch:
+                    if (debug) Log.i(TAG, "getIp IpFromSearch");
                     return editTextSearch.getText().toString();
                 default:
                     Log.e(TAG, "getIp editorState default");
