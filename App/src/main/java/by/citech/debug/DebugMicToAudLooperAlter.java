@@ -12,7 +12,7 @@ import by.citech.param.Tags;
 
 public class DebugMicToAudLooperAlter
         extends Thread
-        implements IDebugListener {
+        implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.MIC2AUD_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -65,6 +65,7 @@ public class DebugMicToAudLooperAlter
         if (debug) Log.w(TAG, "run done");
     }
 
+    @Override
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
         isActive = false;

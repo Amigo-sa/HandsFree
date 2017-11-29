@@ -9,6 +9,7 @@ import by.citech.debug.DebugBtToBtLooper;
 import by.citech.debug.DebugBtToBtRecorder;
 import by.citech.debug.DebugMicToAudLooperAlter;
 import by.citech.debug.DebugMicToAudLooper;
+import by.citech.debug.IDebugCtrl;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
@@ -31,11 +32,7 @@ public class Caller {
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
     private HandlerExtended handlerExtended;
-    private DebugBtToBtLooper debugBtToBtLooper;
-    private DebugBtToBtRecorder debugBtToBtRecorder;
-    private DebugMicToAudLooperAlter debugMicToAudLooperAlter;
-    private DebugBtToAudLooper debugBtToAudLooper;
-    private DebugMicToAudLooper debugMicToAudLooper;
+    private IDebugCtrl iDebugCtrl;
     private ConnectorBluetooth connectorBluetooth;
     private ConnectorNet connectorNet;
     private CallUi callUi;
@@ -181,7 +178,8 @@ public class Caller {
 //
 //      debugMicToAudLooperAlter = new DebugMicToAudLooperAlter(storageMic, sourceAud);
 
-        debugMicToAudLooper = new DebugMicToAudLooper();
+        DebugMicToAudLooper debugMicToAudLooper = new DebugMicToAudLooper();
+        iDebugCtrl = debugMicToAudLooper;
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -203,7 +201,8 @@ public class Caller {
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
 
-        debugBtToBtLooper = new DebugBtToBtLooper(storageBtToNet, storageNetToBt);
+        DebugBtToBtLooper debugBtToBtLooper = new DebugBtToBtLooper(storageBtToNet, storageNetToBt);
+        iDebugCtrl = debugBtToBtLooper;
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -233,7 +232,8 @@ public class Caller {
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
 
-        debugBtToBtRecorder = new DebugBtToBtRecorder(storageBtToNet, storageNetToBt);
+        DebugBtToBtRecorder debugBtToBtRecorder = new DebugBtToBtRecorder(storageBtToNet, storageNetToBt);
+        iDebugCtrl = debugBtToBtRecorder;
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -299,17 +299,9 @@ public class Caller {
     public void stop() {
         if (debug) Log.i(TAG, "stop");
         callerState = CallerState.Null;
-        if (debugMicToAudLooperAlter != null) {
-            debugMicToAudLooperAlter.deactivate();
-            debugMicToAudLooperAlter = null;
-        }
-        if (debugBtToBtLooper != null) {
-            debugBtToBtLooper.deactivate();
-            debugBtToBtLooper = null;
-        }
-        if (debugBtToBtRecorder != null) {
-            debugBtToBtRecorder.deactivate();
-            debugBtToBtRecorder = null;
+        if (iDebugCtrl != null) {
+            iDebugCtrl.deactivate();
+            iDebugCtrl = null;
         }
         if (connectorBluetooth != null) {
             connectorBluetooth = null;

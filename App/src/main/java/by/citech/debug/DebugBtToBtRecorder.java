@@ -8,7 +8,8 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class DebugBtToBtRecorder
-        extends Thread implements IDebugListener {
+        extends Thread
+        implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.BT2BT_RECORDER;
     private static final boolean debug = Settings.debug;
@@ -80,6 +81,7 @@ public class DebugBtToBtRecorder
         }
     }
 
+    @Override
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
         isActive = false;

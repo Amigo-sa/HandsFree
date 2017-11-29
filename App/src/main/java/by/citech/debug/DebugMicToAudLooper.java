@@ -2,8 +2,6 @@ package by.citech.debug;
 
 import android.util.Log;
 
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import by.citech.codec.audio.AudioCodec;
@@ -20,7 +18,7 @@ import by.citech.param.Tags;
 
 public class DebugMicToAudLooper
         extends Thread
-        implements IDebugListener, IReceiverReg, ITransmitter {
+        implements IDebugListener, IReceiverReg, ITransmitter, IDebugCtrl {
 
     private static final String TAG = Tags.MIC2AUD_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -59,6 +57,7 @@ public class DebugMicToAudLooper
         mic.run();
     }
 
+    @Override
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
         iTransmitterCtrl.streamOff();

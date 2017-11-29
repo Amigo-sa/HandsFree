@@ -7,7 +7,7 @@ import by.citech.param.Tags;
 
 public class DebugBtToBtLooper
         extends Thread
-        implements IDebugListener {
+        implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -65,6 +65,7 @@ public class DebugBtToBtLooper
         }
     }
 
+    @Override
     public void deactivate() {
         isActive = false;
         isRunning = false;
