@@ -12,6 +12,9 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:background="@drawable/border"
         android:layout_height="68dp">
 
         <RelativeLayout
@@ -53,8 +56,9 @@
             android:id="@+id/editTextSearch"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:inputType="textNoSuggestions"
+            android:layout_marginStart="8dp"
             android:hint="@string/hint_search"
-            android:inputType="text"
             android:textColor="@color/colorBlack"
             android:layout_alignParentStart="true"
             android:textSize="16sp" />

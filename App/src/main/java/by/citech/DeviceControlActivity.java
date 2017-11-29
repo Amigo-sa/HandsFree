@@ -2,7 +2,6 @@ package by.citech;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
@@ -27,7 +26,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -42,7 +40,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,6 +73,7 @@ import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
 import by.citech.network.INetListener;
 import by.citech.logic.CallerState;
+import by.citech.param.Colors;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -168,7 +166,7 @@ public class DeviceControlActivity
         // Для проверки разрешения местоположения
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
-        setContentView(R.layout.gatt_services_characteristics);
+        setContentView(R.layout.device_control_activity);
 
         // Проверяем поддерживается ли технология Bluetooth Le
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -285,8 +283,8 @@ public class DeviceControlActivity
         // привязываем сервис
         bindService(gattServiceIntent, caller.getServiceConnection(), BIND_AUTO_CREATE);
 
-        btnGreen.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnGreen();}});
-        btnRed.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {iUiBtnGreenRedListener.onClickBtnRed();}});
+        btnGreen.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
+        btnRed.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
         animCall.setAnimationListener(new Animation.AnimationListener() {
             @Override public void onAnimationStart(Animation animation) {}
             @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {callAnimStart();}}
@@ -335,7 +333,7 @@ public class DeviceControlActivity
                     enPermission(Manifest.permission.ACCESS_FINE_LOCATION);
                 return;
             }
-            case REQUEST_MICROPHONE:{
+            case REQUEST_MICROPHONE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     enPermission(Manifest.permission.RECORD_AUDIO);
                 return;
@@ -347,6 +345,7 @@ public class DeviceControlActivity
 
     private void setupContactor() {
         if (debug) Log.i(TAG, "setupContactor");
+        editTextSearch.setHintTextColor(Colors.GRAY);
         editTextSearch.addTextChangedListener(new TextWatcher() {
             @Override public void afterTextChanged(Editable arg0) {contactsAdapter.filter(editTextSearch.getText().toString());}
             @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
@@ -716,7 +715,7 @@ public class DeviceControlActivity
         } else {
             menu.findItem(R.id.menu_stop).setVisible(true);
             menu.findItem(R.id.menu_scan).setVisible(false);
-            getSupportActionBar().setCustomView(R.layout.actionbar_indeterminate_progress);
+            getSupportActionBar().setCustomView(R.layout.actionbar);
         }
     }
     // включаем/выключаем сканирование в зависимости от того нажата клавиша SCAN или нет
@@ -734,6 +733,26 @@ public class DeviceControlActivity
                 break;
         }
         return true;
+    }
+
+    // кнопка на телефоне
+    @Override
+    public void onBackPressed() {
+        if (debug) Log.i(TAG, "onBackPressed");
+        Keyboard.hideSoftKeyboard(this);
+        if (viewHelper.isMainViewHidden()) {
+            if (debug) Log.i(TAG, "onBackPressed get main visible");
+            viewHelper.showMainView();
+            activeContactHelper.goToState(ActiveContactState.Default);
+            if (contactEditorHelper.getState() != EditorState.Inactive)
+                contactEditorHelper.goToState(EditorState.Inactive);
+            getSupportActionBar().setCustomView(null);
+            if (connectorBluetooth != null) {
+                connectorBluetooth.stopScanBTDevice();
+            }
+            invalidateOptionsMenu();
+        } else
+            super.onBackPressed();
     }
 
     //--------------------- Network Buttons
@@ -989,69 +1008,6 @@ public class DeviceControlActivity
         return  getResources().getString(R.string.unknown_characteristic);
     }
 
-    //--------------------- debug
-
-    private CallerState getCallerState() {
-        return Caller.getInstance().getCallerState();
-    }
-
-    private String getCallerStateName() {
-        return Caller.getInstance().getCallerState().getName();
-    }
-
-    @Override
-    public void startDebug() {
-        switch (debugMode) {
-            case MicToAudio:
-            case LoopbackBtToBt:
-                btnSetDisabled(btnGreen, "LBACK ON");
-                btnSetEnabled(btnRed, "LBACK OFF");
-                break;
-            case Record:
-                switch (getCallerState()) {
-                    case DebugPlay:
-                        btnSetDisabled(btnGreen, "PLAYING");
-                        btnSetEnabled(btnRed, "STOP");
-                        break;
-                    case DebugRecord:
-                        btnSetDisabled(btnGreen, "RECORDING");
-                        btnSetEnabled(btnRed, "STOP");
-                        break;
-                    default:
-                        if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
-                        break;
-                }
-                break;
-            case LoopbackNetToNet:
-                break;
-            case Normal:
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void stopDebug() {
-        switch (debugMode) {
-            case MicToAudio:
-            case LoopbackBtToBt:
-                btnSetEnabled(btnGreen, "LBACK ON");
-                btnSetDisabled(btnRed, "LBACK OFF");
-                break;
-            case Record:
-                btnSetEnabled(btnGreen, "PLAY");
-                btnSetDisabled(btnRed, "RECORDED");
-                break;
-            case LoopbackNetToNet:
-                break;
-            case Normal:
-                break;
-            default:
-                break;
-        }
-    }
-
     @Override
     public void onLocationChanged(Location location) {
         if (Settings.debug) Log.i(TAG, "onLocationChanged");
@@ -1072,10 +1028,6 @@ public class DeviceControlActivity
         if (Settings.debug) Log.i(TAG, "onProviderDisabled");
     }
 
-    /**
-     * Created by tretyak on 24.11.2017.
-     */
-
     private void swipeScanStart(){
         if (viewHelper.isScanViewShow()) {
             connectorBluetooth.stopScanBTDevice();
@@ -1089,37 +1041,24 @@ public class DeviceControlActivity
         }
     }
 
-
     public class LinearLayoutTouchListener implements View.OnTouchListener {
 
             static final String logTag = "ActivitySwipeDetector";
             static final int MIN_DISTANCE = 100;// TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
             private float downX, downY, upX, upY;
-            // private MainActivity mMainActivity;
 
-            public LinearLayoutTouchListener() {
-            }
-
-            public void onRightToLeftSwipe() {
-                Log.i(logTag, "RightToLeftSwipe!");
-                // activity.doSomething();
-            }
-
-            public void onLeftToRightSwipe() {
-                Log.i(logTag, "LeftToRightSwipe!");
-                // activity.doSomething();
-            }
+            public LinearLayoutTouchListener() {}
+            public void onRightToLeftSwipe() {Log.i(logTag, "RightToLeftSwipe!");}
+            public void onLeftToRightSwipe() {Log.i(logTag, "LeftToRightSwipe!");}
 
             public void onTopToBottomSwipe() {
                 Log.i(logTag, "onTopToBottomSwipe!");
                     swipeScanStart();
-                // activity.doSomething();
             }
 
             public void onBottomToTopSwipe() {
                 Log.i(logTag, "onBottomToTopSwipe!");
                 swipeScanStop();
-                // activity.doSomething();
             }
 
         @Override
@@ -1225,6 +1164,7 @@ public class DeviceControlActivity
                 case Add:
                     btnSaveContact.setText("ADD");
                     Contacts.setContactInfo(editTextContactName, editTextContactIp);
+                    btnDelContact.setVisibility(View.GONE);
                     Buttons.disable(btnDelContact, btnSaveContact, btnCancelContact);
                     break;
                 case Edit:
@@ -1232,6 +1172,7 @@ public class DeviceControlActivity
                     contactToEditPosition = position;
                     btnSaveContact.setText("SAVE");
                     Contacts.setContactInfo(contactToEdit, editTextContactName, editTextContactIp);
+                    btnDelContact.setVisibility(View.VISIBLE);
                     Buttons.enable(btnDelContact);
                     Buttons.disable(btnSaveContact, btnCancelContact);
                     break;
@@ -1420,24 +1361,6 @@ public class DeviceControlActivity
         invalidateOptionsMenu();
     }
 
-    // кнопка на телефоне
-    @Override
-    public void onBackPressed() {
-        if (debug) Log.i(TAG, "onBackPressed");
-        Keyboard.hideSoftKeyboard(this);
-        if (viewHelper.isMainViewHidden()) {
-            if (debug) Log.i(TAG, "onBackPressed get main visible");
-            viewHelper.showMainView();
-            activeContactHelper.goToState(ActiveContactState.Default);
-            if (contactEditorHelper.getState() != EditorState.Inactive)
-                contactEditorHelper.goToState(EditorState.Inactive);
-            getSupportActionBar().setCustomView(null);
-            connectorBluetooth.stopScanBTDevice();
-            invalidateOptionsMenu();
-        } else
-            super.onBackPressed();
-    }
-
     private class ViewHelper {
 
         private static final boolean debug = true;
@@ -1606,5 +1529,67 @@ public class DeviceControlActivity
 
     }
 
+    //--------------------- debug
+
+    private CallerState getCallerState() {
+        return Caller.getInstance().getCallerState();
+    }
+
+    private String getCallerStateName() {
+        return Caller.getInstance().getCallerState().getName();
+    }
+
+    @Override
+    public void startDebug() {
+        switch (debugMode) {
+            case MicToAudio:
+            case LoopbackBtToBt:
+                btnSetDisabled(btnGreen, "LBACK ON");
+                btnSetEnabled(btnRed, "LBACK OFF");
+                break;
+            case Record:
+                switch (getCallerState()) {
+                    case DebugPlay:
+                        btnSetDisabled(btnGreen, "PLAYING");
+                        btnSetEnabled(btnRed, "STOP");
+                        break;
+                    case DebugRecord:
+                        btnSetDisabled(btnGreen, "RECORDING");
+                        btnSetEnabled(btnRed, "STOP");
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
+                        break;
+                }
+                break;
+            case LoopbackNetToNet:
+                break;
+            case Normal:
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void stopDebug() {
+        switch (debugMode) {
+            case MicToAudio:
+            case LoopbackBtToBt:
+                btnSetEnabled(btnGreen, "LBACK ON");
+                btnSetDisabled(btnRed, "LBACK OFF");
+                break;
+            case Record:
+                btnSetEnabled(btnGreen, "PLAY");
+                btnSetDisabled(btnRed, "RECORDED");
+                break;
+            case LoopbackNetToNet:
+                break;
+            case Normal:
+                break;
+            default:
+                break;
+        }
+    }
 
 }

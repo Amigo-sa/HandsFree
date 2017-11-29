@@ -179,24 +179,32 @@ public class ConnectorBluetooth
     //----------------------- Scanning---------------------------
 
     public void startScanBTDevices(){
-        leScanner.startScanBluetoothDevice();
+        if (leScanner != null) {
+            leScanner.startScanBluetoothDevice();
+        }
     }
 
     public void stopScanBTDevice(){
-        leScanner.stopScanBluetoothDevice();
+        if (leScanner != null) {
+            leScanner.stopScanBluetoothDevice();
+        }
     }
 
     public void scanWork() {
-        controlAdapter.clearAllDevicesFromList();
-        controlAdapter.addConnectDeviceToList();
+        if (controlAdapter != null) {
+            controlAdapter.clearAllDevicesFromList();
+            controlAdapter.addConnectDeviceToList();
+        }
         startScanBTDevices();
     }
 
     //----------------- Connection/Disconnection ----------------
 
     public void disconnectWork() {// for dialog
-        controlAdapter.clearAllDevicesFromList();
-        leConnector.disconnectBTDevice();
+        if (controlAdapter != null && leConnector != null) {
+            controlAdapter.clearAllDevicesFromList();
+            leConnector.disconnectBTDevice();
+        }
         startScanBTDevices();
     }
 

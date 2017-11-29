@@ -27,6 +27,7 @@ public class DebugMicToAudLooperAlter
     private static final AudioCodecType codecType = Settings.codecType;
     private static final int codecFactor = codecType.getDecodedShortCnt();
     private static final int buffersize = Settings.bufferSize;
+    private static final int bufferToCodecFactor = buffersize / codecFactor;
 
     private boolean isRunning;
     private boolean isActive;
@@ -104,9 +105,7 @@ public class DebugMicToAudLooperAlter
         dataBuffer = data;
         int from;
         if (iReceiver != null) {
-            if (debug) Log.i(TAG, "sendData data sended");
-            if (debug) Log.i(TAG, "sendData databuffer length is " + dataBuffer.length);
-            for (int i = 0; i < ((dataBuffer.length)/codecFactor); i++) {
+            for (int i = 0; i < bufferToCodecFactor; i++) {
                 from = i*codecFactor;
                 if (debug) Log.i(TAG, "sendData from is " + from);
                 System.arraycopy(audioCodec.getDecodedData(audioCodec.getEncodedData(Arrays.copyOfRange(dataBuffer, from, from + codecFactor))), 0, dataBuffer, from, codecFactor);
