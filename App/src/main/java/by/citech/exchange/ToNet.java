@@ -13,14 +13,17 @@ public class ToNet
 
     private static final String TAG = Tags.NET_TRANSMIT;
     private static final boolean debug = Settings.debug;
+    private static final int dataChunkSize = Settings.btToBtSendSize;
 
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
     private StorageData<byte[]> source;
+    private byte[] dataChunk;
 
     public ToNet(ITransmitter iTransmitter, StorageData<byte[]> source) {
         this.iTransmitter = iTransmitter;
         this.source = source;
+        dataChunk = new byte[dataChunkSize];
     }
 
     public void prepare() {
@@ -42,8 +45,12 @@ public class ToNet
                 }
                 if (!isStreaming) return;
             }
-            baos.write(source.getData(), 0, Settings.btSignificantBytes);
-            if (debug) Log.i(TAG, "run got data from storage");
+            dataChunk = source.getData();
+            if (dataChunk != null && dataChunk.length != 0) {
+                baos.write(dataChunk, 0, Settings.btSignificantBytes);
+            } else {
+                Log.e(TAG, "readed null from storage");
+            }
             if (!isStreaming) return;
             bufferedDataSize = baos.size();
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));

@@ -41,7 +41,9 @@ public class LeConnector {
     public void disconnectBTDevice(){
         // производим отключение от устройства
         if (Settings.debug) Log.i(TAG,"disconnectBTDevice()");
-        mBluetoothLeService.disconnect();
+        if (mBluetoothLeService != null) {
+            mBluetoothLeService.disconnect();
+        }
     }
 
     public void onConnectBTDevice() {
