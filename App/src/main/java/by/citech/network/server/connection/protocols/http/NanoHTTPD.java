@@ -480,7 +480,7 @@ public abstract class NanoHTTPD {
     }
 
     /**
-     * Call before start() to serve over HTTPS instead of HTTP
+     * Call before build() to serve over HTTPS instead of HTTP
      */
     public void makeSecure(SSLServerSocketFactory sslServerSocketFactory, String[] sslProtocols) {
         this.serverSocketFactory = new SecureServerSocketFactory(sslServerSocketFactory, sslProtocols);
@@ -554,7 +554,7 @@ public abstract class NanoHTTPD {
      * Starts the server (in setDaemon(true) mode).
      */
     public void start(final int timeout) throws IOException {
-        Log.i(Tags.SRV_NANOHTTPD, "start");
+        Log.i(Tags.SRV_NANOHTTPD, "build");
         start(timeout, true);
     }
 
@@ -564,7 +564,7 @@ public abstract class NanoHTTPD {
      * @param timeout
      *            timeout to use for socket connections.
      * @param daemon
-     *            start the thread daemon or not.
+     *            build the thread daemon or not.
      * @throws IOException
      *             if the socket is in use.
      */

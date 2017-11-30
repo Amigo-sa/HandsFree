@@ -261,7 +261,10 @@ public class DeviceControlActivity
 
         switch (debugMode) {
             case MicToAudio:
+                btnSetEnabled(btnGreen, "PLAY");
+                btnSetDisabled(btnRed, "STOP");
             case LoopbackBtToBt:
+            case LoopbackNetToNet:
                 btnSetEnabled(btnGreen, "LBACK ON");
                 btnSetDisabled(btnRed, "LBACK OFF");
                 break;
@@ -270,11 +273,9 @@ public class DeviceControlActivity
                 btnSetDisabled(btnRed, "PLAY");
                 break;
             case Normal:
+            default:
                 btnSetDisabled(btnGreen, "IDLE");
                 btnSetDisabled(btnRed, "IDLE");
-            case LoopbackNetToNet:
-                break;
-            default:
                 break;
         }
 
@@ -1527,8 +1528,9 @@ public class DeviceControlActivity
         switch (debugMode) {
             case MicToAudio:
             case LoopbackBtToBt:
-                btnSetDisabled(btnGreen, "LBACK ON");
-                btnSetEnabled(btnRed, "LBACK OFF");
+            case LoopbackNetToNet:
+                Buttons.disable(btnGreen);
+                Buttons.enable(btnRed);
                 break;
             case Record:
                 switch (getCallerState()) {
@@ -1545,10 +1547,7 @@ public class DeviceControlActivity
                         break;
                 }
                 break;
-            case LoopbackNetToNet:
-                break;
             case Normal:
-                break;
             default:
                 break;
         }
@@ -1559,17 +1558,15 @@ public class DeviceControlActivity
         switch (debugMode) {
             case MicToAudio:
             case LoopbackBtToBt:
-                btnSetEnabled(btnGreen, "LBACK ON");
-                btnSetDisabled(btnRed, "LBACK OFF");
+            case LoopbackNetToNet:
+                Buttons.enable(btnGreen);
+                Buttons.disable(btnRed);
                 break;
             case Record:
                 btnSetEnabled(btnGreen, "PLAY");
                 btnSetDisabled(btnRed, "RECORDED");
                 break;
-            case LoopbackNetToNet:
-                break;
             case Normal:
-                break;
             default:
                 break;
         }

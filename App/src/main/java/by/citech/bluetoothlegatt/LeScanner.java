@@ -48,7 +48,7 @@ public class LeScanner {
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
         if (enable) {
-            if (Settings.debug) Log.i(TAG, "start scanLeDevice()");
+            if (Settings.debug) Log.i(TAG, "build scanLeDevice()");
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
                 @Override

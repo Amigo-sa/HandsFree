@@ -110,7 +110,7 @@ public class ConnectorNet
 
     //--------------------- main
 
-    public void start() {
+    public void build() {
         new ServerOn(this, handler).execute(iNetInfoListener.getLocPort());
     }
 

@@ -17,7 +17,7 @@ public class ServerRunner {
         try {
             server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         } catch (IOException ioe) {
-            System.err.println("Couldn't start server:\n" + ioe);
+            System.err.println("Couldn't build server:\n" + ioe);
             System.exit(-1);
         }
 

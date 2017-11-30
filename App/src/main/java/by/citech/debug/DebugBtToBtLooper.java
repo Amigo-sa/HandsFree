@@ -6,7 +6,6 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class DebugBtToBtLooper
-        extends Thread
         implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.BT2BT_LOOPER;
@@ -27,20 +26,23 @@ public class DebugBtToBtLooper
     }
 
     @Override
-    public void run() {
+    public void activate() {
         //TODO: разве не должно быть по умолчанию isRunning=false, чтобы вызывать из интерфейса?
+//      isRunning = true;
+        isRunning = false;
         isActive = true;
-        isRunning = true;
-        while (isActive) {
-            while (!isRunning) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        new Thread(() -> {
+            while (isActive) {
+                while (!isRunning) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+                looping();
             }
-            looping();
-        }
+        }).start();
     }
 
     private void looping() {
