@@ -57,6 +57,8 @@ public class ConnectorBluetooth
     private LeBroadcastReceiver leBroadcastReceiver;
     private IBluetoothListener mIBluetoothListener;
     private ITransmitter iTransmitter;
+    //для дебага
+    private boolean isDebugRunning;
 
     //--------------------- singleton
 
@@ -328,16 +330,26 @@ public class ConnectorBluetooth
                     enableTransmitData();
                 }
                 break;
+            case BtToAudio:
+                if (!isDebugRunning) {
+                    isDebugRunning = true;
+                    enableTransmitData();
+                }
+                break;
             default:
-                enableTransmitData();
                 break;
         }
     }
 
     @Override
     public void stopDebug() {
-        if (debugMode != DebugMode.Record) {
-            disableTransmitData();
+        if (Settings.debug) Log.i(TAG, "stopDebug");
+        switch (debugMode) {
+            case Record:
+                disableTransmitData();
+                break;
+            default:
+                break;
         }
     }
 
