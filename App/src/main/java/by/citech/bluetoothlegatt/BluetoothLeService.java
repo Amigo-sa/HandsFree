@@ -17,13 +17,16 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.debug.ITrafficUpdate;
+import by.citech.exchange.ITransmitter;
 import by.citech.logic.Resource;
+import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 import by.citech.util.Decode;
 
@@ -97,6 +100,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public void closeStore(){
         loopback = false;
     }
+
+
     // Методы для работы с потоком записи
     public WriteCharacteristicThread getWriteThread(){
         return wrt;
@@ -151,7 +156,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
                 if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
                 if (mCallbackWriteListener != null)
                     mCallbackWriteListener.callbackIsDone();
-//            res.setCallback(true);
                 if(status==BluetoothGatt.GATT_SUCCESS)
                 {
                     if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA :");
@@ -189,7 +193,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
             }
         }
 
-
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             super.onReadRemoteRssi(gatt, rssi, status);
@@ -197,15 +200,11 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             if (mCallbackWriteListener != null)
                 mCallbackWriteListener.rcvBtPktIsDone();
         }
-
-
-
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
@@ -218,11 +217,11 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 
     };
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-
-    }
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//        return super.onStartCommand(intent, flags, startId);
+//
+//    }
 
     // строку загружаем в Intent и передаём в LeBroadcastReceiver-у
     private void broadcastUpdate(final String action) {
@@ -232,11 +231,13 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     }
    // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
    // и получаем данные
-   private void broadcastUpdate(final String action,
-                                final BluetoothGattCharacteristic characteristic) {
+   private void broadcastUpdate(final String action,final BluetoothGattCharacteristic characteristic) {
        final Intent intent = new Intent(action);
        final byte[] data = characteristic.getValue();
-       storageBtToNet.putData(data);
+       if (Settings.debugMode == DebugMode.BtToAudio)
+           intent.putExtra(EXTRA_DATA, data);
+       else
+           storageBtToNet.putData(data);
 
        if (!Settings.debug) {
            if (numBTpackage == 0)

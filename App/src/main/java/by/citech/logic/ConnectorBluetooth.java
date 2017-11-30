@@ -20,6 +20,7 @@ import by.citech.bluetoothlegatt.LeScanner;
 import by.citech.bluetoothlegatt.StorageListener;
 import by.citech.data.StorageData;
 import by.citech.debug.IDebugListener;
+import by.citech.exchange.ITransmitter;
 import by.citech.gui.ICallUiExchangeListener;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
@@ -61,6 +62,7 @@ public class ConnectorBluetooth
     private static volatile ConnectorBluetooth instance = null;
 
     private ConnectorBluetooth() {
+
     }
 
     public static ConnectorBluetooth getInstance() {
@@ -117,6 +119,11 @@ public class ConnectorBluetooth
 
     public boolean ismConnected() {
         return leBroadcastReceiver.isConnected();
+    }
+
+    public ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
+       leBroadcastReceiver.addIRxDataListener(iTransmitter);
+       return this;
     }
 
     public boolean ismScanning() {

@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import java.util.ArrayList;
+
+import by.citech.exchange.ITransmitter;
 import by.citech.logic.IBluetoothListener;
 import by.citech.param.Settings;
 
@@ -25,6 +28,7 @@ public class LeBroadcastReceiver {
     private LeScanner leScanner;
     private Characteristics characteristics;
     private BluetoothLeService mBluetoothLeService;
+    private ArrayList<ITransmitter> iRxDataListeners;
 
     private IBluetoothListener mIBluetoothListener;
     private StorageListener storageListener;//this
@@ -40,6 +44,7 @@ public class LeBroadcastReceiver {
         this.characteristics = characteristics;
         this.mIBluetoothListener = mIBluetoothListener;
         this.storageListener = storageListener;
+        iRxDataListeners = new ArrayList<>();
     }
 
     public void setBTDevice(BluetoothDevice mBTDevice) {
@@ -98,12 +103,25 @@ public class LeBroadcastReceiver {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                if (Settings.debug) Log.i(TAG, intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA).toString());
+                updateRxData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
             } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");
                 // displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));
             }
         }
     };
+
+    public void addIRxDataListener(ITransmitter iTransmitter) {
+        iRxDataListeners.add(iTransmitter);
+    }
+
+    private void updateRxData(byte[] data){
+        for (ITransmitter iRxDataListener : iRxDataListeners) {
+            iRxDataListener.sendData(data);
+        }
+    }
+
 
     // Обновление данных LeBroadcastReceiver
     public void updateBroadcastReceiveData(){

@@ -77,7 +77,7 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
             }
             if (numBTpackage < Settings.btToNetFactor)
                 try {
-                    Thread.sleep(8);
+                    Thread.sleep(Settings.btLatencyMs);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

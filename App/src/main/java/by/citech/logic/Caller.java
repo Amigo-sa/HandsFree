@@ -191,6 +191,12 @@ public class Caller {
         iDebugCtrl = debugBtToAudLooper;
 
         //TODO: ConnectorBluetooth to iTransmitter
+        connectorBluetooth = ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .addIRxDataListener(debugBtToAudLooper)
+                .setmHandler(new Handler());
+
+        connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
