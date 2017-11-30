@@ -26,13 +26,14 @@ public class RedirectToNet
     @Override
     protected Void doInBackground(String... params) {
         if (debug) Log.i(TAG, "doInBackground");
+        ITransmitterCtrl iTransmitterCtrl;
         switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
-                final FromMic fromMic = new FromMic(iTransmitter);
-                fromMic.prepare();
-                publishProgress(fromMic);
-                new Thread(fromMic::run).start();
+                iTransmitterCtrl = new FromMic(iTransmitter);
+                iTransmitterCtrl.prepareStream();
+                publishProgress(iTransmitterCtrl);
+                new Thread(iTransmitterCtrl::streamOn).start();
                 break;
             case BLUETOOTH:
                 if (debug) Log.i(TAG, "doInBackground bluetooth");
@@ -40,10 +41,10 @@ public class RedirectToNet
                     if (debug) Log.e(TAG, "doInBackground bluetooth storage is null");
                     return null;
                 }
-                final ToNet toNet = new ToNet(iTransmitter, storageBtToNet);
-                toNet.prepare();
-                publishProgress(toNet);
-                new Thread(toNet::run).start();
+                iTransmitterCtrl = new ToNet(iTransmitter, storageBtToNet);
+                iTransmitterCtrl.prepareStream();
+                publishProgress(iTransmitterCtrl);
+                new Thread(iTransmitterCtrl::streamOn).start();
                 break;
         }
         return null;

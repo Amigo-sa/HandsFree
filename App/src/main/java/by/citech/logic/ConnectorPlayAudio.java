@@ -28,13 +28,12 @@ public class ConnectorPlayAudio implements IReceiverReg {
 
     public void start() {
         if (source == null) {
-            Log.e(TAG, "prepare illegal parameters");
+            Log.e(TAG, "prepareStream illegal parameters");
             return;
         }
-        ToAudio toAudio = new ToAudio(this);
-        toAudio.prepare();
-        iReceiverCtrl = toAudio;
-        new Thread(toAudio::run).start();
+        iReceiverCtrl = new ToAudio(this);
+        iReceiverCtrl.prepareRedirect();
+        new Thread(iReceiverCtrl::redirectOn).start();
         run();
     }
 

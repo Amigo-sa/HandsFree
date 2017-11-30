@@ -26,11 +26,12 @@ public class ToNet
         dataChunk = new byte[dataChunkSize];
     }
 
-    public void prepare() {
-        if (debug) Log.i(TAG, "prepare");
+    public void prepareStream() {
+        if (debug) Log.i(TAG, "prepareStream");
     }
 
-    public void run() {
+    @Override
+    public void streamOn() {
         if (debug) Log.i(TAG, "run");
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

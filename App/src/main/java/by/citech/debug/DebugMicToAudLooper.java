@@ -26,8 +26,6 @@ public class DebugMicToAudLooper
     private static final int buffersize = Settings.bufferSize;
     private static final int bufferToCodecFactor = buffersize / codecFactor;
 
-    private ToAudio audio;
-    private FromMic mic;
     private AudioCodec audioCodec;
     private IReceiver iReceiver;
     private ITransmitterCtrl iTransmitterCtrl;
@@ -35,11 +33,9 @@ public class DebugMicToAudLooper
     private short[] dataBuffer;
 
     public DebugMicToAudLooper() {
-        audio = new ToAudio(this);
-        mic = new FromMic(this);
+        iReceiverCtrl = new ToAudio(this);
+        iTransmitterCtrl = new FromMic(this);
         audioCodec = new AudioCodec(codecType);
-        iTransmitterCtrl = mic;
-        iReceiverCtrl = audio;
         dataBuffer = new short[buffersize];
     }
 
@@ -48,10 +44,10 @@ public class DebugMicToAudLooper
         if (debug) Log.i(TAG, "run");
         audioCodec.initiateEncoder();
         audioCodec.initiateDecoder();
-        audio.prepare();
-        mic.prepare();
-        audio.run();
-        mic.run();
+        iReceiverCtrl.prepareRedirect();
+        iTransmitterCtrl.prepareStream();
+        iReceiverCtrl.redirectOn();
+        iTransmitterCtrl.streamOn();
     }
 
     @Override

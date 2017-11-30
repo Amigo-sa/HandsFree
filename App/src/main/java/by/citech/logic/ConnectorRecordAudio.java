@@ -9,7 +9,8 @@ import by.citech.exchange.ITransmitterCtrl;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class ConnectorRecordAudio implements ITransmitter {
+public class ConnectorRecordAudio
+        implements ITransmitter {
 
     private static final String TAG = Tags.AUDREC_CONNECTOR;
     private static final boolean debug = Settings.debug;
@@ -24,15 +25,14 @@ public class ConnectorRecordAudio implements ITransmitter {
     //--------------------- main
 
     public void start() {
-        if (debug) Log.i(TAG, "prepare");
+        if (debug) Log.i(TAG, "prepareStream");
         if (storage == null) {
-            Log.e(TAG, "prepare illegal parameters");
+            Log.e(TAG, "prepareStream illegal parameters");
             return;
         }
-        FromMic fromMic = new FromMic(this);
-        fromMic.prepare();
-        iTransmitterCtrl = fromMic;
-        new Thread(fromMic::run).start();
+        iTransmitterCtrl = new FromMic(this);
+        iTransmitterCtrl.prepareStream();
+        new Thread(iTransmitterCtrl::streamOn).start();
     }
 
     public void stop() {

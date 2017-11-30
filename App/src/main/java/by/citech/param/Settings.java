@@ -31,6 +31,9 @@ public class Settings {
     public static final int btSignificantBytes = 10;
     public static final int btRsvdBytesOffset = 10;
     public static final int btToNetFactor = 90;
+    public static final int btToMicFactor = 1;
+    public static final int btToAudFactor = 1;
+    public static final int toBtFactor = btToAudFactor;
     public static final int btLatencyMs = 10;
     public static final int btMsPerNetSendSize = btMsPerBtToBtSendSize * btToNetFactor;
     public static final int btToNetSendSize = btSignificantBytes * btToNetFactor;

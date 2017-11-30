@@ -23,10 +23,10 @@ public class ToAudio
         this.iReceiverReg = iReceiverReg;
     }
 
-    public void prepare() {
-        if (debug) Log.i(TAG, "prepare");
+    @Override
+    public void prepareRedirect() {
+        if (debug) Log.i(TAG, "prepareStream");
         redirectOff();
-
         audioTrack = new AudioTrack.Builder()
                 .setAudioAttributes(new AudioAttributes.Builder()
                         .setUsage(Settings.audioUsage)
@@ -41,10 +41,26 @@ public class ToAudio
                 .setTransferMode(Settings.audioMode)
                 .build();
 
-        if (debug) Log.i(TAG, "prepare done");
+        if (debug) Log.i(TAG, "prepareStream done");
     }
 
-    public void run() {
+    @Override
+    public void redirectOff() {
+        if (debug) Log.i(TAG, "redirectOff");
+        isRedirecting = false;
+        iReceiverReg.registerReceiver(null);
+        if (audioTrack != null) {
+            if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
+                audioTrack.stop();
+            }
+            audioTrack.release();
+            audioTrack = null;
+        }
+        if (debug) Log.i(TAG, "redirectOff done");
+    }
+
+    @Override
+    public void redirectOn() {
         if (debug) Log.i(TAG, "run");
         isRedirecting = true;
         audioTrack.play();
@@ -66,21 +82,6 @@ public class ToAudio
         if (isRedirecting) {
             audioTrack.write(data, 0, bufferSize);
         }
-    }
-
-    @Override
-    public void redirectOff() {
-        if (debug) Log.i(TAG, "redirectOff");
-        isRedirecting = false;
-        iReceiverReg.registerReceiver(null);
-        if (audioTrack != null) {
-            if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
-                audioTrack.stop();
-            }
-            audioTrack.release();
-            audioTrack = null;
-        }
-        if (debug) Log.i(TAG, "redirectOff done");
     }
 
 }

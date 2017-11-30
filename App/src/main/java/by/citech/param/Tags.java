@@ -32,6 +32,7 @@ public class Tags {
     public static final String TO_BLUETOOTH     = "WSD_TO_BLUETOOTH";
     public static final String FROM_MIC         = "WSD_FROM_MIC";
 
+    public static final String AUD2BT_LOOPER    = "WSD_AUD2BT_LOOPER";
     public static final String BT2BT_LOOPER     = "WSD_BT2BT_LOOPER";
     public static final String NET2NET_LOOPER   = "WSD_NET2NET_LOOPER";
     public static final String BT2BT_RECORDER   = "WSD_BT2BT_RECORDER";
@@ -40,11 +41,11 @@ public class Tags {
     public static final String TRAFFIC_ANAL     = "WSD_TRAFFIC_STAT";
     public static final String TRAFFIC_INFO     = "WSD_TRAFFIC_INFO";
 
-
     public static final String AUDPLA_CONNECTOR = "WSD_AUDPLA_CONNECTOR";
     public static final String AUDREC_CONNECTOR = "WSD_AUDREC_CONNECTOR";
     public static final String BT2AUD_STORE     = "WSD_BLE2AUD_STORE";
     public static final String MIC2AUD_STORE    = "WSD_MIC2AUD_STORE";
     public static final String MIC_STORE        = "WSD_MIC_STORE";
     public static final String AUD_SOURCE       = "WSD_AUD_SOURCE";
+
 }
