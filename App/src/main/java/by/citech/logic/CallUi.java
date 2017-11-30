@@ -82,9 +82,7 @@ public class CallUi
         if (debug) Log.i(TAG, "onClickBtnGreen");
         switch (debugMode) {
             case MicToAudio:
-            case BtToAudio:
             case LoopbackBtToBt:
-            case LoopbackNetToNet:
                 switch (getCallerState()) {
                     case Null:
                         if (setCallerState(CallerState.Null, CallerState.DebugLoopBack))
@@ -141,9 +139,7 @@ public class CallUi
         if (debug) Log.i(TAG, "onClickBtnRed");
         switch (debugMode) {
             case MicToAudio:
-            case BtToAudio:
             case LoopbackBtToBt:
-            case LoopbackNetToNet:
                 switch (getCallerState()) {
                     case DebugLoopBack:
                         if (setCallerState(CallerState.DebugLoopBack, CallerState.Null))

@@ -52,9 +52,9 @@ public class Contactor
     //--------------------- main
 
     public void start(Context context, IContactsListener iContactsListener) {
-        if (debug) Log.i(TAG, "build");
+        if (debug) Log.i(TAG, "start");
         if (context == null || iContactsListener == null) {
-            if (debug) Log.e(TAG, "build at least one of key parameters are null");
+            if (debug) Log.e(TAG, "start at least one of key parameters are null");
             return;
         }
         this.iContactsListener = iContactsListener;
@@ -62,7 +62,7 @@ public class Contactor
             dbCtrl = new ContactsDbCtrl(context);
 //          dbCtrl.test();
             getAllContacts();
-//        }).build();
+//        }).start();
     }
 
     private void getAllContacts() {

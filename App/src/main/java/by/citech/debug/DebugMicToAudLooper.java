@@ -17,6 +17,7 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class DebugMicToAudLooper
+        extends Thread
         implements IDebugListener, IReceiverReg, ITransmitter, IDebugCtrl {
 
     private static final String TAG = Tags.MIC2AUD_LOOPER;
@@ -26,6 +27,8 @@ public class DebugMicToAudLooper
     private static final int buffersize = Settings.bufferSize;
     private static final int bufferToCodecFactor = buffersize / codecFactor;
 
+    private boolean isRunning;
+    private boolean isActive;
     private ToAudio audio;
     private FromMic mic;
     private AudioCodec audioCodec;
@@ -44,7 +47,7 @@ public class DebugMicToAudLooper
     }
 
     @Override
-    public void activate() {
+    public void run() {
         if (debug) Log.i(TAG, "run");
         audioCodec.initiateEncoder();
         audioCodec.initiateDecoder();
@@ -59,16 +62,20 @@ public class DebugMicToAudLooper
         if (debug) Log.i(TAG, "deactivate");
         iTransmitterCtrl.streamOff();
         iReceiverCtrl.redirectOff();
+        isRunning = false;
+        isActive = false;
     }
 
     @Override
     public void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
+        isRunning = true;
     }
 
     @Override
     public void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
+        isRunning = false;
     }
 
     @Override

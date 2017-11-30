@@ -224,7 +224,7 @@ public class ConnectorBluetooth
                 if (Settings.debug) Log.e(TAG, "Unable to initialize Bluetooth");
                 mIBluetoothListener.finishConnection();
             }
-            // Automatically connects to the device upon successful build-up initialization.
+            // Automatically connects to the device upon successful start-up initialization.
             if (mBluetoothLeService != null && leBroadcastReceiver != null && leConnector != null && leDataTransmitter != null) {
                 if (mBTDevice != null)
                     mBluetoothLeService.connect(mBTDevice.getAddress());
