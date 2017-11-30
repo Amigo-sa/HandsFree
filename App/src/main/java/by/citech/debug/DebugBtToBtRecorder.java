@@ -8,7 +8,6 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class DebugBtToBtRecorder
-        extends Thread
         implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.BT2BT_RECORDER;
@@ -36,25 +35,27 @@ public class DebugBtToBtRecorder
     }
 
     @Override
-    public void run() {
+    public void activate() {
         if (debug) Log.i(TAG, "run");
         isActive = true;
-        while (isActive) {
-            while (!isPlaying && !isRecording) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        new Thread(() -> {
+            while (isActive) {
+                while (!isPlaying && !isRecording) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (isPlaying) {
+                    play();
+                }
+                if (isRecording) {
+                    record();
+                    storageBtToNet.setWriteLocked(true);
                 }
             }
-            if (isPlaying) {
-                play();
-            }
-            if (isRecording) {
-                record();
-                storageBtToNet.setWriteLocked(true);
-            }
-        }
+        }).start();
     }
 
     private void record() {

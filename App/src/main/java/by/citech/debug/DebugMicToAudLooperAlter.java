@@ -11,7 +11,6 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class DebugMicToAudLooperAlter
-        extends Thread
         implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.MIC2AUD_LOOPER;
@@ -35,33 +34,35 @@ public class DebugMicToAudLooperAlter
     }
 
     @Override
-    public void run() {
+    public void activate() {
         if (debug) Log.i(TAG, "run");
         isActive = true;
         new Thread(() -> playAudio.start()).start();
         recordAudio.start();
         audioCodec.initiateDecoder();
         audioCodec.initiateEncoder();
-        while (isActive) {
-            while (!isRunning) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        new Thread(() -> {
+            while (isActive) {
+                while (!isRunning) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            while (isRunning) {
-                if (!storageMic.isEmpty()) {
-                    if (debug) Log.i(TAG, "run encode -> decode");
-                    //sourceAud.putData(audioCodec.getDecodedData(audioCodec.getEncodedData(storageMic.getData())));
-                    sourceAud.putData((storageMic.getData()));
+                while (isRunning) {
+                    if (!storageMic.isEmpty()) {
+                        if (debug) Log.i(TAG, "run encode -> decode");
+                        //sourceAud.putData(audioCodec.getDecodedData(audioCodec.getEncodedData(storageMic.getData())));
+                        sourceAud.putData((storageMic.getData()));
+                    }
                 }
+                audioCodec.initiateDecoder();
+                audioCodec.initiateEncoder();
             }
-            audioCodec.initiateDecoder();
-            audioCodec.initiateEncoder();
-        }
-        recordAudio.stop();
-        playAudio.stop();
+            recordAudio.stop();
+            playAudio.stop();
+        }).start();
         if (debug) Log.w(TAG, "run done");
     }
 

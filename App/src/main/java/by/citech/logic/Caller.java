@@ -7,7 +7,6 @@ import by.citech.data.StorageData;
 import by.citech.debug.DebugBtToAudLooper;
 import by.citech.debug.DebugBtToBtLooper;
 import by.citech.debug.DebugBtToBtRecorder;
-import by.citech.debug.DebugMicToAudLooperAlter;
 import by.citech.debug.DebugMicToAudLooper;
 import by.citech.debug.IDebugCtrl;
 import by.citech.debug.IDebugListener;
@@ -31,7 +30,6 @@ public class Caller {
     private INetInfoListener iNetInfoListener;
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
-    private HandlerExtended handlerExtended;
     private IDebugCtrl iDebugCtrl;
     private ConnectorBluetooth connectorBluetooth;
     private ConnectorNet connectorNet;
@@ -161,10 +159,48 @@ public class Caller {
         }
     }
 
+    public void stop() {
+        if (debug) Log.i(TAG, "stop");
+        callerState = CallerState.Null;
+        if (iDebugCtrl != null) {
+            iDebugCtrl.deactivate();
+            iDebugCtrl = null;
+        }
+        if (connectorBluetooth != null) {
+            connectorBluetooth = null;
+        }
+        if (callUi != null) {
+            callUi = null;
+        }
+        if (connectorNet != null) {
+            connectorNet.stop();
+            connectorNet = null;
+        }
+    }
+
+    //--------------------- data from bluetooth redirects to audio
+
     private void buildDebugBtToAud() {
         if (debug) Log.i(TAG, "buildDebugBtToAud");
-        StorageData<byte[]> storageBtToAud = new StorageData<>(Tags.BT2AUD_STORE);
+        if (iDebugListener == null) {
+            if (debug) Log.e(TAG, "buildDebugBtToAud illegal parameters");
+            return;
+        }
+
+        DebugBtToAudLooper debugBtToAudLooper = new DebugBtToAudLooper();
+        iDebugCtrl = debugBtToAudLooper;
+
+        //TODO: ConnectorBluetooth to iTransmitter
+
+        callUi = CallUi.getInstance()
+                .addiDebugListener(iDebugListener)
+                .addiDebugListener(debugBtToAudLooper)
+                .addiCallUiListener(iCallUiListener);
+
+        iDebugCtrl.activate();
     }
+
+    //--------------------- data from microphone redirects to audio
 
     private void buildDebugMicToAud() {
         if (debug) Log.i(TAG, "buildDebugMicToAud");
@@ -173,23 +209,18 @@ public class Caller {
             return;
         }
 
-//      StorageData<short[]> storageMic = new StorageData<>(Tags.MIC_STORE);
-//      StorageData<short[]> sourceAud = new StorageData<>(Tags.AUD_SOURCE);
-//
-//      debugMicToAudLooperAlter = new DebugMicToAudLooperAlter(storageMic, sourceAud);
-
         DebugMicToAudLooper debugMicToAudLooper = new DebugMicToAudLooper();
         iDebugCtrl = debugMicToAudLooper;
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
-//              .addiDebugListener(debugMicToAudLooperAlter)
                 .addiDebugListener(debugMicToAudLooper)
                 .addiCallUiListener(iCallUiListener);
 
-//      debugMicToAudLooperAlter.start();
-        debugMicToAudLooper.start();
+        iDebugCtrl.activate();
     }
+
+    //--------------------- data from bluetooth loops back to bluetooth
 
     private void buildDebugLoopbackBtToBt() {
         if (debug) Log.i(TAG, "buildDebugLoopbackBtToBt");
@@ -219,8 +250,10 @@ public class Caller {
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
-        debugBtToBtLooper.start();
+        iDebugCtrl.activate();
     }
+
+    //--------------------- data from bluetooth recorded and looped back to bluetooth
 
     private void buildDebugRecord() {
         if (debug) Log.i(TAG, "buildDebugRecord");
@@ -250,8 +283,10 @@ public class Caller {
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
-        debugBtToBtRecorder.start();
+        iDebugCtrl.activate();
     }
+
+    //--------------------- data from network looped back to network
 
     private void buildDebugLoopbackNetToNet() {
         if (debug) Log.i(TAG, "buildDebugLoopbackNetToNet");
@@ -261,11 +296,13 @@ public class Caller {
         }
     }
 
+    //--------------------- data from bluetooth redirects to network and vice versa
+
     private void buildNormal() {
         if (debug) Log.i(TAG, "buildNormal");
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
-        handlerExtended = new HandlerExtended(getiNetworkListener());
+        HandlerExtended handlerExtended = new HandlerExtended(getiNetworkListener());
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -288,31 +325,7 @@ public class Caller {
                 .setiNetInfoListener(iNetInfoListener)
                 .setHandler(handlerExtended);
 
-        startConnectorNetwork();
-    }
-
-    private void startConnectorNetwork() {
-        if (debug) Log.i(TAG, "startConnectorNetwork");
-        ConnectorNet.getInstance().start();
-    }
-
-    public void stop() {
-        if (debug) Log.i(TAG, "stop");
-        callerState = CallerState.Null;
-        if (iDebugCtrl != null) {
-            iDebugCtrl.deactivate();
-            iDebugCtrl = null;
-        }
-        if (connectorBluetooth != null) {
-            connectorBluetooth = null;
-        }
-        if (callUi != null) {
-            callUi = null;
-        }
-        if (connectorNet != null) {
-            connectorNet.stop();
-            connectorNet = null;
-        }
+        connectorNet.build();
     }
 
 }
