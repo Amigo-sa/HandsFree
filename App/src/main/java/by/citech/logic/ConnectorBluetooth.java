@@ -56,6 +56,7 @@ public class ConnectorBluetooth
     //////////////////////////////////////////
     private LeBroadcastReceiver leBroadcastReceiver;
     private IBluetoothListener mIBluetoothListener;
+    private ITransmitter iTransmitter;
 
     //--------------------- singleton
 
@@ -91,6 +92,7 @@ public class ConnectorBluetooth
                 characteristics,
                 mIBluetoothListener,
                 this);
+        leBroadcastReceiver.addIRxDataListener(iTransmitter);
         leConnector = new LeConnector(
                 leScanner,
                 leBroadcastReceiver,
@@ -122,7 +124,7 @@ public class ConnectorBluetooth
     }
 
     public ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
-       leBroadcastReceiver.addIRxDataListener(iTransmitter);
+        this.iTransmitter = iTransmitter;
        return this;
     }
 
