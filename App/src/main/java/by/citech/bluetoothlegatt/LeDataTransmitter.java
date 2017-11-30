@@ -37,6 +37,7 @@ public class LeDataTransmitter {
         if(characteristics.isEmpty()){
             mNotifyCharacteristic = characteristics.getNotifyCharacteristic();
             mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
+
             final BluetoothGattCharacteristic characteristic_write = characteristics.getWriteCharacteristic();
             mBluetoothLeService.writeCharacteristic(characteristic_write);
         } else{
@@ -44,6 +45,20 @@ public class LeDataTransmitter {
             mIBluetoothListener.disconnectToast();
         }
     }
+
+    //запускаем запись и нотификацию с устройства
+    public void onlyReceiveData() {
+        if (Settings.debug) Log.i(TAG, "enableTransmitData()");
+        mBluetoothLeService.initStore();
+        if(characteristics.isEmpty()){
+            mNotifyCharacteristic = characteristics.getNotifyCharacteristic();
+            mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
+        } else{
+            if (Settings.debug) Log.i(TAG, "disconnectToast()");
+            mIBluetoothListener.disconnectToast();
+        }
+    }
+
     //отключаем поток записи и нотификации
     public void disableTransmitData() {
         if (Settings.debug) Log.i(TAG, "disableTransmitData()");

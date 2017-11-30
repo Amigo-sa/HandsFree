@@ -288,6 +288,10 @@ public class ConnectorBluetooth
         leDataTransmitter.enableTransmitData();
     }
 
+    public void onlyReceiveData() {
+        leDataTransmitter.onlyReceiveData();
+    }
+
     public void disableTransmitData() {
         leDataTransmitter.disableTransmitData();
     }
@@ -333,7 +337,7 @@ public class ConnectorBluetooth
             case BtToAudio:
                 if (!isDebugRunning) {
                     isDebugRunning = true;
-                    enableTransmitData();
+                    onlyReceiveData();
                 }
                 break;
             default:

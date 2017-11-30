@@ -42,7 +42,7 @@ public class Settings {
 
     public static final AudioCodecType codecType = AudioCodecType.Sit;
     public static final int audioRate = 8000;
-    public static final int bufferSize = 4000;
+    public static final int bufferSize = 80;
     public static final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 //  public static final int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
 

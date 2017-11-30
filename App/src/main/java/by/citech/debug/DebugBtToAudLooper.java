@@ -10,8 +10,6 @@ import by.citech.exchange.IReceiver;
 import by.citech.exchange.IReceiverCtrl;
 import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
-import by.citech.exchange.ITransmitterCtrl;
-import by.citech.exchange.ITransmitterCtrlReg;
 import by.citech.exchange.ToAudio;
 import by.citech.param.Settings;
 import by.citech.param.Tags;

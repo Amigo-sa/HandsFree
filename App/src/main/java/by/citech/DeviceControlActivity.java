@@ -260,9 +260,11 @@ public class DeviceControlActivity
         animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
 
         switch (debugMode) {
+            case BtToAudio:
             case MicToAudio:
                 btnSetEnabled(btnGreen, "PLAY");
                 btnSetDisabled(btnRed, "STOP");
+                break;
             case LoopbackBtToBt:
             case LoopbackNetToNet:
                 btnSetEnabled(btnGreen, "LBACK ON");
@@ -1526,6 +1528,7 @@ public class DeviceControlActivity
     @Override
     public void startDebug() {
         switch (debugMode) {
+            case BtToAudio:
             case MicToAudio:
             case LoopbackBtToBt:
             case LoopbackNetToNet:
@@ -1556,6 +1559,7 @@ public class DeviceControlActivity
     @Override
     public void stopDebug() {
         switch (debugMode) {
+            case BtToAudio:
             case MicToAudio:
             case LoopbackBtToBt:
             case LoopbackNetToNet:

@@ -201,6 +201,7 @@ public class Caller {
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(debugBtToAudLooper)
+                .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
         iDebugCtrl.activate();
