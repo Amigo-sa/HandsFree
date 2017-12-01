@@ -13,11 +13,11 @@ public class Settings {
 
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
-//    public static final DebugMode debugMode = DebugMode.MicToBt;
+    public static final DebugMode debugMode = DebugMode.MicToBt;
 //  public static final DebugMode debugMode = DebugMode.BtToAudio;
 //  public static final DebugMode debugMode = DebugMode.MicToAudio;
 //  public static final DebugMode debugMode = DebugMode.Normal;
-  public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
+//  public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
 //  public static final DebugMode debugMode = DebugMode.LoopbackNetToNet; //TODO: реализовать
 //  public static final DebugMode debugMode = DebugMode.Record;
     public static final boolean showTraffic = true;
@@ -34,8 +34,8 @@ public class Settings {
     public static final int btToNetFactor = 90;
     public static final int btToMicFactor = 1;
     public static final int btToAudFactor = 1;
-    public static final int toBtFactor = btToNetFactor;
-    public static final boolean singlePacket = false;
+    public static final int toBtFactor = btToMicFactor;
+    public static final boolean singlePacket = true;
     public static final int btLatencyMs = 9;
     public static final int btMsPerNetSendSize = btMsPerBtToBtSendSize * btToNetFactor;
     public static final int toBtSendSize = btSignificantBytes * toBtFactor;
