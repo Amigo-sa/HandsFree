@@ -72,7 +72,6 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
                         numBTpackage = 0;
                         isArrayDataEmpty = true;
                     }
-
                     if (Settings.debug) Log.i(TAG, "writeCharacteristic() ");
                     Callback = false;
                     Notify = false;

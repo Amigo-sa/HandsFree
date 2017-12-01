@@ -67,18 +67,14 @@ public class ToBluetooth
     @Override
     public void onReceiveData(byte[] data) {
         if (debug) Log.i(TAG, "onReceiveData");
-//        if (debug) Log.i(TAG, "onReceiveData received bytes: " + data.length);
-        if (data.length != toBtSendSize) return;
-        if (debug) Log.i(TAG, "onReceiveData received correct amount of bytes");
         if (isRedirecting) {
             if (singlePacket) {
                 dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
             } else {
+                if (data.length != toBtSendSize) return;
+                if (debug) Log.i(TAG, "onReceiveData received correct amount of bytes");
                 for (int i = 0; i < toBtFactor; i++) {
-//                if (debug) Log.i(TAG, String.format("chunk %d from %d", (i - 1), data.length));
-//                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Decode.bytesToHexMark1(dataChunk)));
                   dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
-//                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Decode.bytesToHexMark1(dataAssembled[i])));
                 }
             }
             source.putData(dataAssembled);
