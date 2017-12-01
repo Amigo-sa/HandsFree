@@ -34,10 +34,11 @@ public class Settings {
     public static final int btToNetFactor = 90;
     public static final int btToMicFactor = 1;
     public static final int btToAudFactor = 1;
-    public static final int toBtFactor = btToAudFactor;
-    public static final int btLatencyMs = 10;
+    public static final int toBtFactor = btToMicFactor;
+    public static final boolean singlePacket = true;
+    public static final int btLatencyMs = 1;
     public static final int btMsPerNetSendSize = btMsPerBtToBtSendSize * btToNetFactor;
-    public static final int btToNetSendSize = btSignificantBytes * btToNetFactor;
+    public static final int toBtSendSize = btSignificantBytes * toBtFactor;
     public static final int btToNetSendSizeUncut = btToBtSendSize * btToNetFactor;
     // WriteCharacteristic
     public static final int MTU = 80;
@@ -46,7 +47,7 @@ public class Settings {
 
     public static final AudioCodecType codecType = AudioCodecType.Sit;
     public static final int audioRate = 8000;
-    public static final int bufferSize = 80;
+    public static final int audioBufferSize = codecType.getDecodedShortCnt();
     public static final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 //  public static final int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
 

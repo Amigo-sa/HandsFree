@@ -14,7 +14,7 @@ public class ToAudio
     private static final String TAG = Tags.TO_AUDIO;
     private static final boolean debug = Settings.debug;
 
-    private int bufferSize = Settings.bufferSize;
+    private int bufferSize = Settings.audioBufferSize;
     private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting = false;

@@ -13,7 +13,7 @@ public class FromMic
 
     private static final String TAG = Tags.FROM_MIC;
     private static final boolean debug = Settings.debug;
-    private static final int bufferSize = Settings.bufferSize;
+    private static final int audioBufferSize = Settings.audioBufferSize;
 
     private byte[] bytesBuffer;
     private short[] shortsBuffer;
@@ -23,21 +23,21 @@ public class FromMic
 
     public FromMic(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
-        bytesBuffer = new byte[bufferSize];
-        shortsBuffer = new short[bufferSize];
+        bytesBuffer = new byte[audioBufferSize];
+        shortsBuffer = new short[audioBufferSize];
     }
 
     @Override
     public void prepareStream() {
         if (debug) Log.i(TAG, "prepareStream");
-        if (debug) Log.i(TAG, String.format("prepareStream audioOutBuffersize is %d", bufferSize));
+        if (debug) Log.i(TAG, String.format("prepareStream audioOutBuffersize is %d", audioBufferSize));
         streamOff();
         recorder = new AudioRecord(
                 Settings.audioSource,
                 Settings.audioRate,
                 Settings.audioInChannel,
                 Settings.audioEncoding,
-                bufferSize);
+                audioBufferSize);
     }
 
     @Override
@@ -46,8 +46,7 @@ public class FromMic
         recorder.startRecording();
         isStreaming = true;
         while (isStreaming) {
-            if (debug) Log.i(TAG, String.format("run shortsBuffer length is %d", bufferSize));
-            fillBuffer(shortsBuffer, bufferSize);
+            fillBuffer(shortsBuffer, audioBufferSize);
             if (debug) Log.i(TAG, String.format("run sendData: %s", Arrays.toString(shortsBuffer)));
             iTransmitter.sendData(shortsBuffer);
         }

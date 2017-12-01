@@ -23,7 +23,7 @@ public class DebugMicToAudLooper
     private static final boolean debug = Settings.debug;
     private static final AudioCodecType codecType = Settings.codecType;
     private static final int codecFactor = codecType.getDecodedShortCnt();
-    private static final int buffersize = Settings.bufferSize;
+    private static final int buffersize = Settings.audioBufferSize;
     private static final int bufferToCodecFactor = buffersize / codecFactor;
 
     private AudioCodec audioCodec;

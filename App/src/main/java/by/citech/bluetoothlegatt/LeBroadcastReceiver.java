@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import by.citech.exchange.ITransmitter;
 import by.citech.logic.IBluetoothListener;
+import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 
 /**
@@ -103,8 +104,10 @@ public class LeBroadcastReceiver {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
-                if (Settings.debug) Log.i(TAG, intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA).toString());
-                updateRxData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
+                if (Settings.debugMode != DebugMode.MicToBt) {
+                    if (Settings.debug) Log.i(TAG, intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA).toString());
+                    updateRxData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
+                }
             } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");
                 // displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));

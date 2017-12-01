@@ -278,8 +278,8 @@ public class ConnectorBluetooth
     @Override
     public void setStorages(){
         if (Settings.debug) Log.i(TAG, "setStorages()");
-        mBluetoothLeService.setStorageBtToNet(storageFromBt);
-        mBluetoothLeService.setStorageNetToBt(storageToBt);
+        mBluetoothLeService.setStorageFromBt(storageFromBt);
+        mBluetoothLeService.setStorageToBt(storageToBt);
     }
 
     //---------------------- dataexchange ---------------------------
@@ -329,6 +329,11 @@ public class ConnectorBluetooth
         CallerState currentState = getCallerState();
         if (Settings.debug) Log.i(TAG, currentState.getName());
         switch (debugMode) {
+            case MicToBt:
+                if (!isDebugRunning) {
+                    isDebugRunning = true;
+                    enableTransmitData();
+                }
             case Record:
                 if (currentState == CallerState.DebugRecord) {
                     enableTransmitData();

@@ -13,18 +13,15 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.debug.ITrafficUpdate;
-import by.citech.exchange.ITransmitter;
 import by.citech.logic.Resource;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
@@ -76,25 +73,25 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public final static UUID READ_BYTES =
             UUID.fromString(SampleGattAttributes.READ_BYTES);
 
-    private StorageData<byte[]> storageBtToNet;
-    private StorageData<byte[][]> storageNetToBt;
+    private StorageData<byte[]> storageFromBt;
+    private StorageData<byte[][]> storageToBt;
 
     private boolean loopback = true;
     public Resource res;
     private String wrData;
 
-    public void setStorageBtToNet(StorageData<byte[]> storageBtToNet) {
-        this.storageBtToNet = storageBtToNet;
+    public void setStorageFromBt(StorageData<byte[]> storageFromBt) {
+        this.storageFromBt = storageFromBt;
     }
 
-    public void setStorageNetToBt(StorageData<byte[][]> storageNetToBt) {
-        this.storageNetToBt = storageNetToBt;
+    public void setStorageToBt(StorageData<byte[][]> storageToBt) {
+        this.storageToBt = storageToBt;
     }
 
     public void initStore(){
         res = new Resource(true,20);
         loopback = true;
-        // storageNetToBt = new StorageData();
+        // storageToBt = new StorageData();
     }
 
     public void closeStore(){
@@ -234,10 +231,17 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
    private void broadcastUpdate(final String action,final BluetoothGattCharacteristic characteristic) {
        final Intent intent = new Intent(action);
        final byte[] data = characteristic.getValue();
-       if (Settings.debugMode == DebugMode.BtToAudio)
-           intent.putExtra(EXTRA_DATA, data);
-       else
-           storageBtToNet.putData(data);
+       switch (Settings.debugMode) {
+           case BtToAudio:
+                intent.putExtra(EXTRA_DATA, data);
+               break;
+           case Normal:
+               storageFromBt.putData(data);
+               break;
+           case MicToBt:
+           default:
+               break;
+       }
 
        if (!Settings.debug) {
            if (numBTpackage == 0)
@@ -249,7 +253,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
                numBTpackage = 0;
            }
            if (data != null && data.length > 0) {
-               Log.w("WSD_BLE_DATA", "storageBtToNet.putData " + Decode.bytesToHexMark1(data));
+               Log.w("WSD_BLE_DATA", "storageFromBt.putData " + Decode.bytesToHexMark1(data));
            }
        }
        sendBroadcast(intent);
@@ -417,7 +421,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         res = new Resource(true, mtu);
         if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
             if (Settings.debug) Log.w(TAG, "object WriteCharacteristicThread is done");
-            wrt = new WriteCharacteristicThread("Write_one", res, storageNetToBt, mBluetoothGatt, characteristic);
+            wrt = new WriteCharacteristicThread("Write_one", res, storageToBt, mBluetoothGatt, characteristic);
             wrt.setPriority(Thread.MAX_PRIORITY);
             mCallbackWriteListener = wrt;
             wrt.addWriteListener(new WriterTransmitterCallbackListener() {

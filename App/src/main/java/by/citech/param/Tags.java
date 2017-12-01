@@ -32,7 +32,7 @@ public class Tags {
     public static final String TO_BLUETOOTH     = "WSD_TO_BLUETOOTH";
     public static final String FROM_MIC         = "WSD_FROM_MIC";
 
-    public static final String AUD2BT_LOOPER    = "WSD_AUD2BT_LOOPER";
+    public static final String MIC2BT_LOOPER    = "WSD_MIC2BT_LOOPER";
     public static final String BT2BT_LOOPER     = "WSD_BT2BT_LOOPER";
     public static final String NET2NET_LOOPER   = "WSD_NET2NET_LOOPER";
     public static final String BT2BT_RECORDER   = "WSD_BT2BT_RECORDER";

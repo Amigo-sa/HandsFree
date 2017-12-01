@@ -56,11 +56,11 @@ public class ToNet
             bufferedDataSize = baos.size();
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
             //TODO: добавить логику обрезки на случай вычитки большего количества данных
-            if (bufferedDataSize == Settings.btToNetSendSize) {
+            if (bufferedDataSize == Settings.toBtSendSize) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 iTransmitter.sendData(baos.toByteArray());
                 baos.reset();
-            } else if (bufferedDataSize > Settings.btToNetSendSize) {
+            } else if (bufferedDataSize > Settings.toBtSendSize) {
                 if (debug) Log.e(TAG, "run too much data in network output buffer");
                 return;
             }

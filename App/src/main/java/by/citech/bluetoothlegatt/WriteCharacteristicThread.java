@@ -47,44 +47,60 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
         boolean isArrayDataEmpty = true;
         isRunning = true;
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        while (isRunning){
-            if ((!isArrayDataEmpty || !storageToBt.isEmpty()) && (Callback || Notify)) {
-                if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageToBt.getData()");
-                if (isArrayDataEmpty) {
-                    if (!Settings.debug) prevTime = System.currentTimeMillis();
-                    arrayData = storageToBt.getData();
-                    isArrayDataEmpty = false;
-                }
-                if (numBTpackage < Settings.toBtFactor) {
-                    dataWrite = arrayData[numBTpackage];
-                    //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
-                    numBTpackage++;
-                    if (!Settings.debug && (numBTpackage == Settings.toBtFactor)) {
-                        deltaTime = System.currentTimeMillis() - prevTime;
-                        Log.i(TAG, "getFromArray latency = " + deltaTime);
+        while (isRunning) {
+            if (!Settings.singlePacket) {
+                if ((!isArrayDataEmpty || !storageToBt.isEmpty()) && (Callback || Notify)) {
+                    if (Settings.debug)
+                        Log.i(Tags.BLE_WRITETRANS, "startClient storageToBt.getData()");
+                    if (isArrayDataEmpty) {
+                        arrayData = storageToBt.getData();
+                        isArrayDataEmpty = false;
                     }
-                    characteristic.setValue(dataWrite);
-                    mBluetoothGatt.writeCharacteristic(characteristic);
-                    if (Settings.debug) Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
-                }else{
-                    numBTpackage = 0;
-                    isArrayDataEmpty = true;
-                }
+                    if (numBTpackage < Settings.toBtFactor) {
+                        dataWrite = arrayData[numBTpackage];
+                        //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
+                        numBTpackage++;
+                        if (!Settings.debug && (numBTpackage == Settings.toBtFactor)) {
+                            deltaTime = System.currentTimeMillis() - prevTime;
+                            Log.i(TAG, "getFromArray latency = " + deltaTime);
+                        }
+                        characteristic.setValue(dataWrite);
+                        mBluetoothGatt.writeCharacteristic(characteristic);
+                        if (Settings.debug)
+                            Log.w(Tags.BLE_WRITETRANS, "Data write numBTpackage = " + numBTpackage);
+                    } else {
+                        numBTpackage = 0;
+                        isArrayDataEmpty = true;
+                    }
 
-                if (Settings.debug) Log.i(TAG, "writeCharacteristic() ");
-                Callback = false;
-                Notify = false;
-            }
-            if (numBTpackage < Settings.toBtFactor)
+                    if (Settings.debug) Log.i(TAG, "writeCharacteristic() ");
+                    Callback = false;
+                    Notify = false;
+                }
+                if (numBTpackage < Settings.toBtFactor)
+                    try {
+                        Thread.sleep(Settings.btLatencyMs);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+            } else {
+                if (!storageToBt.isEmpty() && (Callback || Notify)) {
+                    characteristic.setValue(storageToBt.getData()[0]);
+                    mBluetoothGatt.writeCharacteristic(characteristic);
+                    Callback = false;
+                    Notify = false;
+                }
                 try {
                     Thread.sleep(Settings.btLatencyMs);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
         }
         if (listener != null)
             listener.doWriteCharacteristic("Write Characteristic ended");
     }
+
 
     public void cancel() {
         isRunning = false;

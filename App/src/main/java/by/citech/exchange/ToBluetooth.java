@@ -20,14 +20,14 @@ public class ToBluetooth
     private static final int toBtFactor = Settings.toBtFactor;
     private static final int btToBtSendSize = Settings.btToBtSendSize;
     private static final int btSignificantBytes = Settings.btSignificantBytes;
-    private static final int toBtSendSize = btSignificantBytes * toBtFactor;
+    private static final int toBtSendSize = Settings.toBtSendSize;
+    private static final boolean singlePacket = Settings.singlePacket;
 
     private IReceiverReg iReceiverReg;
     private TrafficInfo trafficInfo;
     private boolean isRedirecting = false;
     private StorageData<byte[][]> source;
     private byte[][] dataAssembled;
-    private byte[] dataChunk;
 
     public ToBluetooth(IReceiverReg iReceiverReg, StorageData<byte[][]> source) {
         if (iReceiverReg == null
@@ -38,7 +38,6 @@ public class ToBluetooth
         this.iReceiverReg = iReceiverReg;
         this.source = source;
         dataAssembled = new byte[toBtFactor][btToBtSendSize];
-        dataChunk = new byte[Settings.btSignificantBytes];
         trafficInfo = new TrafficInfo(TrafficNodes.NetIn, this);
         TrafficAnalyzer.getInstance().addTrafficInfo(trafficInfo);
     }
@@ -72,12 +71,15 @@ public class ToBluetooth
         if (data.length != toBtSendSize) return;
         if (debug) Log.i(TAG, "onReceiveData received correct amount of bytes");
         if (isRedirecting) {
-            for (int i = 0; i < toBtFactor; i++) {
+            if (singlePacket) {
+                dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
+            } else {
+                for (int i = 0; i < toBtFactor; i++) {
 //                if (debug) Log.i(TAG, String.format("chunk %d from %d", (i - 1), data.length));
-                dataChunk = Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes);
 //                if (debug) Log.i(TAG, String.format("onReceiveData dataChunk[btSignificantBytes] is %s", Decode.bytesToHexMark1(dataChunk)));
-                dataAssembled[i] = Arrays.copyOf(dataChunk, btToBtSendSize);
+                  dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
 //                if (debug) Log.i(TAG, String.format("onReceiveData dataAssembled[%d][btToBtSendSize] is %s", i, Decode.bytesToHexMark1(dataAssembled[i])));
+                }
             }
             source.putData(dataAssembled);
         }
