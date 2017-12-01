@@ -43,9 +43,11 @@ public class Tags {
 
     public static final String AUDPLA_CONNECTOR = "WSD_AUDPLA_CONNECTOR";
     public static final String AUDREC_CONNECTOR = "WSD_AUDREC_CONNECTOR";
+
     public static final String BT2AUD_STORE     = "WSD_BLE2AUD_STORE";
     public static final String MIC2AUD_STORE    = "WSD_MIC2AUD_STORE";
     public static final String MIC_STORE        = "WSD_MIC_STORE";
     public static final String AUD_SOURCE       = "WSD_AUD_SOURCE";
+    public static final String MIC2BT_STORE     = "WSD_MIC2BT_STORE";
 
 }

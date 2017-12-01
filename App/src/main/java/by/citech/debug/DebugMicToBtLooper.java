@@ -15,7 +15,7 @@ import by.citech.exchange.ToBluetooth;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugAudToBtLooper
+public class DebugMicToBtLooper
         implements IDebugListener, IDebugCtrl, ITransmitter, IReceiverReg {
 
     private static final String TAG = Tags.AUD2BT_LOOPER;
@@ -28,7 +28,7 @@ public class DebugAudToBtLooper
     private boolean isRunning;
     private IReceiver iReceiver;
 
-    public DebugAudToBtLooper(StorageData<byte[][]> micToBtStorage) {
+    public DebugMicToBtLooper(StorageData<byte[][]> micToBtStorage) {
         iTransmitterCtrl = new FromMic(this);
         iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
         audioCodec = new AudioCodec(codecType);
@@ -85,5 +85,5 @@ public class DebugAudToBtLooper
     public void registerReceiver(IReceiver iReceiver) {
         this.iReceiver = iReceiver;
     }
-    
+
 }

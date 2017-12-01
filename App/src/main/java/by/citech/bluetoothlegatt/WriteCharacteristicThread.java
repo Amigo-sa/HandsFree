@@ -15,7 +15,7 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
     public static final String TAG = "WRS_WRT";
 
     private Resource res;
-    private StorageData<byte[][]> storageNetToBt;
+    private StorageData<byte[][]> storageToBt;
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
     private WriterTransmitterCallbackListener listener;
@@ -24,14 +24,14 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
     private boolean Notify = false;
     private int callbackCnt = 0;
     private int rcvCnt = 0;
-    private byte[][] arrayData = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
+    private byte[][] arrayData = new byte[Settings.toBtFactor][Settings.btToBtSendSize];
     private long prevTime = 0L;
     private long deltaTime = 0L;
 
-    public WriteCharacteristicThread(String name, Resource res, StorageData<byte[][]> storageNetToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
+    public WriteCharacteristicThread(String name, Resource res, StorageData<byte[][]> storageToBt, BluetoothGatt mBluetoothGatt, BluetoothGattCharacteristic characteristic) {
         super(name);
         this.res = res;
-        this.storageNetToBt = storageNetToBt;
+        this.storageToBt = storageToBt;
         this.mBluetoothGatt = mBluetoothGatt;
         this.characteristic = characteristic;
     }
@@ -48,18 +48,18 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
         isRunning = true;
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         while (isRunning){
-            if ((!isArrayDataEmpty || !storageNetToBt.isEmpty()) && (Callback || Notify)) {
-                if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageNetToBt.getData()");
+            if ((!isArrayDataEmpty || !storageToBt.isEmpty()) && (Callback || Notify)) {
+                if (Settings.debug) Log.i(Tags.BLE_WRITETRANS, "startClient storageToBt.getData()");
                 if (isArrayDataEmpty) {
                     if (!Settings.debug) prevTime = System.currentTimeMillis();
-                    arrayData = storageNetToBt.getData();
+                    arrayData = storageToBt.getData();
                     isArrayDataEmpty = false;
                 }
-                if (numBTpackage < Settings.btToNetFactor) {
+                if (numBTpackage < Settings.toBtFactor) {
                     dataWrite = arrayData[numBTpackage];
                     //if (Settings.debug) Log.w(Tags.BLE_WRITETRANS,"from dataWrite " + Decode.bytesToHexMark1(dataWrite));
                     numBTpackage++;
-                    if (!Settings.debug && (numBTpackage == Settings.btToNetFactor)) {
+                    if (!Settings.debug && (numBTpackage == Settings.toBtFactor)) {
                         deltaTime = System.currentTimeMillis() - prevTime;
                         Log.i(TAG, "getFromArray latency = " + deltaTime);
                     }
@@ -75,7 +75,7 @@ public class WriteCharacteristicThread extends Thread implements ITrafficUpdate,
                 Callback = false;
                 Notify = false;
             }
-            if (numBTpackage < Settings.btToNetFactor)
+            if (numBTpackage < Settings.toBtFactor)
                 try {
                     Thread.sleep(Settings.btLatencyMs);
                 } catch (InterruptedException e) {

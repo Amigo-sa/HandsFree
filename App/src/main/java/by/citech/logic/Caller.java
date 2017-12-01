@@ -8,6 +8,7 @@ import by.citech.debug.DebugBtToAudLooper;
 import by.citech.debug.DebugBtToBtLooper;
 import by.citech.debug.DebugBtToBtRecorder;
 import by.citech.debug.DebugMicToAudLooper;
+import by.citech.debug.DebugMicToBtLooper;
 import by.citech.debug.IDebugCtrl;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
@@ -146,6 +147,9 @@ public class Caller {
             case Record:
                 buildDebugRecord();
                 break;
+            case MicToBt:
+                buildDebugMicToBt();
+                break;
             case BtToAudio:
                 buildDebugBtToAud();
                 break;
@@ -178,6 +182,36 @@ public class Caller {
         }
     }
 
+    //--------------------- data from microphone redirects to bluetooth
+
+    private void buildDebugMicToBt() {
+        if (debug) Log.i(TAG, "buildDebugMicToBt");
+        if (iDebugListener == null) {
+            if (debug) Log.e(TAG, "buildDebugMicToBt illegal parameters");
+            return;
+        }
+
+        StorageData<byte[][]> micToBtStorage = new StorageData<>(Tags.MIC2BT_STORE);
+
+        DebugMicToBtLooper debugMicToBtLooper = new DebugMicToBtLooper(micToBtStorage);
+        iDebugCtrl = debugMicToBtLooper;
+
+        connectorBluetooth = ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setStorageToBt(micToBtStorage)
+                .setmHandler(new Handler());
+
+        connectorBluetooth.build();
+
+        callUi = CallUi.getInstance()
+                .addiDebugListener(iDebugListener)
+                .addiDebugListener(debugMicToBtLooper)
+                .addiDebugListener(connectorBluetooth)
+                .addiCallUiListener(iCallUiListener);
+
+        iDebugCtrl.activate();
+    }
+
     //--------------------- data from bluetooth redirects to audio
 
     private void buildDebugBtToAud() {
@@ -190,7 +224,6 @@ public class Caller {
         DebugBtToAudLooper debugBtToAudLooper = new DebugBtToAudLooper();
         iDebugCtrl = debugBtToAudLooper;
 
-        //TODO: ConnectorBluetooth to iTransmitter
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(debugBtToAudLooper)
@@ -245,8 +278,8 @@ public class Caller {
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
-                .setStorageBtToNet(storageBtToNet)
-                .setStorageNetToBt(storageNetToBt);
+                .setStorageFromBt(storageBtToNet)
+                .setStorageToBt(storageNetToBt);
 
         connectorBluetooth.build();
 
@@ -278,8 +311,8 @@ public class Caller {
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
-                .setStorageBtToNet(storageBtToNet)
-                .setStorageNetToBt(storageNetToBt);
+                .setStorageFromBt(storageBtToNet)
+                .setStorageToBt(storageNetToBt);
 
         connectorBluetooth.build();
 
@@ -314,8 +347,8 @@ public class Caller {
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(handlerExtended)
-                .setStorageBtToNet(storageBtToNet)
-                .setStorageNetToBt(storageNetToBt);
+                .setStorageFromBt(storageBtToNet)
+                .setStorageToBt(storageNetToBt);
 
         connectorBluetooth.build();
 

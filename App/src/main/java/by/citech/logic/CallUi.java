@@ -81,6 +81,7 @@ public class CallUi
     public void onClickBtnGreen() {
         if (debug) Log.i(TAG, "onClickBtnGreen");
         switch (debugMode) {
+            case MicToBt:
             case BtToAudio:
             case MicToAudio:
             case LoopbackBtToBt:
@@ -140,6 +141,7 @@ public class CallUi
     public void onClickBtnRed() {
         if (debug) Log.i(TAG, "onClickBtnRed");
         switch (debugMode) {
+            case MicToBt:
             case BtToAudio:
             case MicToAudio:
             case LoopbackBtToBt:

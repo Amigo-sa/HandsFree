@@ -261,6 +261,7 @@ public class DeviceControlActivity
 
         switch (debugMode) {
             case BtToAudio:
+            case MicToBt:
             case MicToAudio:
                 btnSetEnabled(btnGreen, "PLAY");
                 btnSetDisabled(btnRed, "STOP");
@@ -1529,6 +1530,7 @@ public class DeviceControlActivity
     public void startDebug() {
         switch (debugMode) {
             case BtToAudio:
+            case MicToBt:
             case MicToAudio:
             case LoopbackBtToBt:
             case LoopbackNetToNet:
@@ -1560,6 +1562,7 @@ public class DeviceControlActivity
     public void stopDebug() {
         switch (debugMode) {
             case BtToAudio:
+            case MicToBt:
             case MicToAudio:
             case LoopbackBtToBt:
             case LoopbackNetToNet:

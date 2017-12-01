@@ -41,8 +41,8 @@ public class ConnectorBluetooth
     // сканер имеющихся по близости BLE устройств
     private LeScanner leScanner;
     // хранилища данных
-    private StorageData<byte[]> storageBtToNet;
-    private StorageData<byte[][]> storageNetToBt;
+    private StorageData<byte[]> storageFromBt;
+    private StorageData<byte[][]> storageToBt;
     // адаптер найденных устройств и управление для него
     private ControlAdapter controlAdapter;
     // список сервисов и характеристик устройства
@@ -157,13 +157,13 @@ public class ConnectorBluetooth
         return this;
     }
 
-    public ConnectorBluetooth setStorageBtToNet(StorageData<byte[]> storageBtToNet){
-        this.storageBtToNet = storageBtToNet;
+    public ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt){
+        this.storageFromBt = storageFromBt;
         return this;
     }
 
-    public ConnectorBluetooth setStorageNetToBt(StorageData<byte[][]> storageNetToBt){
-        this.storageNetToBt = storageNetToBt;
+    public ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt){
+        this.storageToBt = storageToBt;
         return this;
     }
 
@@ -278,8 +278,8 @@ public class ConnectorBluetooth
     @Override
     public void setStorages(){
         if (Settings.debug) Log.i(TAG, "setStorages()");
-        mBluetoothLeService.setStorageBtToNet(storageBtToNet);
-        mBluetoothLeService.setStorageNetToBt(storageNetToBt);
+        mBluetoothLeService.setStorageBtToNet(storageFromBt);
+        mBluetoothLeService.setStorageNetToBt(storageToBt);
     }
 
     //---------------------- dataexchange ---------------------------

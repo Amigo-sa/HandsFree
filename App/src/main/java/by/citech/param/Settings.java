@@ -13,7 +13,8 @@ public class Settings {
 
     public static final DataSource dataSource = DataSource.BLUETOOTH;
 //  public static final DataSource dataSource = DataSource.MICROPHONE;
-    public static final DebugMode debugMode = DebugMode.BtToAudio;
+    public static final DebugMode debugMode = DebugMode.MicToBt;
+//  public static final DebugMode debugMode = DebugMode.BtToAudio;
 //  public static final DebugMode debugMode = DebugMode.MicToAudio;
 //  public static final DebugMode debugMode = DebugMode.Normal;
 //  public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
