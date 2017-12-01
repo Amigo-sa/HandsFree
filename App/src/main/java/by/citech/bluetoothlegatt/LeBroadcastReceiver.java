@@ -29,7 +29,6 @@ public class LeBroadcastReceiver {
     private LeScanner leScanner;
     private Characteristics characteristics;
     private BluetoothLeService mBluetoothLeService;
-    private ArrayList<ITransmitter> iRxDataListeners;
 
     private IBluetoothListener mIBluetoothListener;
     private StorageListener storageListener;//this
@@ -45,7 +44,6 @@ public class LeBroadcastReceiver {
         this.characteristics = characteristics;
         this.mIBluetoothListener = mIBluetoothListener;
         this.storageListener = storageListener;
-        iRxDataListeners = new ArrayList<>();
     }
 
     public void setBTDevice(BluetoothDevice mBTDevice) {
@@ -95,8 +93,6 @@ public class LeBroadcastReceiver {
                 controlAdapter.setBTDevice(mBTDeviceConn);
                 controlAdapter.setConnected(mConnected);
                 controlAdapter.clearAllDevicesFromList();
-                //clearAllDevicesFromList();
-                //leScanner.startScanBluetoothDevice();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
                 // Show all the supported services and characteristics on the user interface.
@@ -104,27 +100,12 @@ public class LeBroadcastReceiver {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
-                if (Settings.debugMode != DebugMode.MicToBt) {
-                    if (Settings.debug) Log.i(TAG, intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA).toString());
-                    updateRxData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
-                }
             } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");
                 // displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));
             }
         }
     };
-
-    public void addIRxDataListener(ITransmitter iTransmitter) {
-        iRxDataListeners.add(iTransmitter);
-    }
-
-    private void updateRxData(byte[] data){
-        for (ITransmitter iRxDataListener : iRxDataListeners) {
-            iRxDataListener.sendData(data);
-        }
-    }
-
 
     // Обновление данных LeBroadcastReceiver
     public void updateBroadcastReceiveData(){

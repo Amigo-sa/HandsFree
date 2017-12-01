@@ -37,25 +37,17 @@ import by.citech.util.Decode;
 
 public class BluetoothLeService extends Service implements ITrafficUpdate {
     private final static String TAG = "WSD_BluetoothLeService";
-    private static final int CONNECTION_PRIORITY_HIGH = 1;
-    private static final int DEFAULT_MTU = 16;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
-    private WriteCharacteristicThread wrt;
-    private BluetoothGattCharacteristic write_characteristic;
     private CallbackWriteListener mCallbackWriteListener;
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
-
-    private int numBTpackage = 0;
-    private long prevTime;
-    private long deltaTime;
 
     //Создаём сообщения для LeBroadcastReceiver-а которые будут отправляться в качестве Callback-а
     public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
@@ -66,53 +58,11 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
     public final static String EXTRA_WDATA = "com.example.bluetooth.le.EXTRA_WDATA";
 
-    // UUID устройства HEART_RATE_MEASUREMENT
-    public final static UUID UUID_HEART_RATE_MEASUREMENT =
-            UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
-    // UUID устройства CIT_HANDS_FREE
-    public final static UUID UUID_CIT_HANDS_FREE =
-            UUID.fromString(SampleGattAttributes.CIT_HANDS_FREE);
-    // UUID характеристики READ_BYTES
+    public final static UUID READ_BYTES = UUID.fromString(SampleGattAttributes.READ_BYTES);
 
-
-    public final static UUID READ_BYTES =
-            UUID.fromString(SampleGattAttributes.READ_BYTES);
-
-    private StorageData<byte[]> storageFromBt;
-    private StorageData<byte[][]> storageToBt;
-
-    private boolean loopback = true;
-    public Resource res;
-    private String wrData;
-
-
-    public void setStorageFromBt(StorageData<byte[]> storageFromBt) {
-        this.storageFromBt = storageFromBt;
+    public void setCallbackWriteListener(CallbackWriteListener callbackWriteListener){
+        this.mCallbackWriteListener = callbackWriteListener;
     }
-
-    public void setStorageToBt(StorageData<byte[][]> storageToBt) {
-        this.storageToBt = storageToBt;
-    }
-
-
-
-    public void initStore(){
-        res = new Resource(true,20);
-        loopback = true;
-        // storageToBt = new StorageData();
-    }
-
-    public void closeStore(){
-        loopback = false;
-    }
-
-
-
-    // Методы для работы с потоком записи
-    public WriteCharacteristicThread getWriteThread(){
-        return wrt;
-    }
-    public void stopDataTransfer(){wrt.cancel();}
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -156,47 +106,35 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
 
-            synchronized(this)
-            {
                 super.onCharacteristicWrite(gatt, characteristic, status);
                 if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
                 if (mCallbackWriteListener != null)
                     mCallbackWriteListener.callbackIsDone();
-                if(status==BluetoothGatt.GATT_SUCCESS)
-                {
+                if(status==BluetoothGatt.GATT_SUCCESS) {
                     if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA :");
-
                 }
-                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
-                {
+                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");
                 }
-                if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED)
-                {
+                if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE not permitted");
                 }
-                if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH)
-                {
+                if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH) {
                     if (Settings.debug) Log.i(TAG,"GATT invalid attribute lenght");
                 }
-                if(status==BluetoothGatt.GATT_FAILURE)
-                {
+                if(status==BluetoothGatt.GATT_FAILURE) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE other errors");
                 }
-                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED)
-                {
+                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE congested");
                 }
-                if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION)
-                {
+                if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE authentication");
                 }
-                else
-                {
+                else {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
                 }
                 broadcastUpdate(ACTION_DATA_WRITE);
-            }
         }
 
         @Override
@@ -208,64 +146,30 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-            if (mCallbackWriteListener != null)
-                mCallbackWriteListener.rcvBtPktIsDone();
+            if (mCallbackWriteListener != null) {
+                final byte[] data = characteristic.getValue();
+                mCallbackWriteListener.rcvBtPktIsDone(data);
+            }
         }
+
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
-
             if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
-//            if (status == BluetoothGatt.GATT_SUCCESS) {
-//                enWriteCharacteristicThread(write_characteristic, mtu);
-//            }
+
         }
 
     };
-
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        return super.onStartCommand(intent, flags, startId);
-//
-//    }
-
     // строку загружаем в Intent и передаём в LeBroadcastReceiver-у
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
-        intent.putExtra(EXTRA_WDATA, wrData);
+       //intent.putExtra(EXTRA_WDATA, wrData);
         sendBroadcast(intent);
     }
    // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
    // и получаем данные
    private void broadcastUpdate(final String action,final BluetoothGattCharacteristic characteristic) {
        final Intent intent = new Intent(action);
-       final byte[] data = characteristic.getValue();
-       switch (Settings.debugMode) {
-           case BtToAudio:
-                intent.putExtra(EXTRA_DATA, data);
-               break;
-           case Normal:
-               storageFromBt.putData(data);
-               break;
-           case MicToBt:
-           default:
-               break;
-       }
-
-
-       if (!Settings.debug) {
-           if (numBTpackage == 0)
-               prevTime = System.currentTimeMillis();
-           numBTpackage++;
-           if (numBTpackage == Settings.btToNetFactor) {
-               deltaTime = System.currentTimeMillis() - prevTime;
-               Log.i("WRS_WRT", "PutToArray latency = " + deltaTime);
-               numBTpackage = 0;
-           }
-           if (data != null && data.length > 0) {
-               Log.w("WSD_BLE_DATA", "storageFromBt.putData " + Decode.bytesToHexMark1(data));
-           }
-       }
        sendBroadcast(intent);
    }
 
@@ -353,7 +257,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        mBluetoothGatt.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
+        mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
@@ -372,9 +276,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
             return;
         }
 
-        if (getWriteThread() != null)
-            wrt.cancel();
-
         mBluetoothGatt.disconnect();
     }
     /**
@@ -388,7 +289,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         mBluetoothGatt.close();
         mBluetoothGatt = null;
     }
-
     /**
      * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
      * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
@@ -411,14 +311,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      *
      * @param characteristic The characteristic write to.
      */
-    public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
-            return;
-        }
-        write_characteristic = characteristic;
-        enWriteCharacteristicThread(write_characteristic, DEFAULT_MTU);
-    }
 
     public void oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
         if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
@@ -428,49 +320,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
         mBluetoothGatt.writeCharacteristic(characteristic);
     }
-
-    private void singleWriteCharacteristic(BluetoothGattCharacteristic characteristic) {
-        byte[] dataWrite = "FFFFFFFFFFFFFFFF".getBytes();
-        characteristic.setValue(dataWrite);
-        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        mBluetoothGatt.writeCharacteristic(characteristic);
-    }
-
-    private void enWriteCharacteristicThread(BluetoothGattCharacteristic characteristic, int mtu){//16
-        res = new Resource(true, mtu);
-        if (SampleGattAttributes.WRITE_BYTES.equals(characteristic.getUuid().toString())) {
-            if (Settings.debug) Log.w(TAG, "object WriteCharacteristicThread is done");
-            wrt = new WriteCharacteristicThread("Write_one", res, storageToBt, mBluetoothGatt, characteristic);
-            wrt.setPriority(Thread.MAX_PRIORITY);
-            mCallbackWriteListener = wrt;
-            wrt.addWriteListener(new WriterTransmitterCallbackListener() {
-                @Override
-                public void doWriteCharacteristic(String str) {
-                    System.out.println(str);
-                }
-            });
-            if (Settings.debug) Log.w(TAG, "add WriteListener");
-            wrt.start();
-            if (Settings.debug) Log.w(TAG, "Write Thread START");
-        }
-    }
-
-    /**
-     * Stop the Write Thread
-     */
-    public void stopWriteThread() {
-        wrt.cancel();
-    }
-
-
-
-
-
-
-
-
-
-
     /**
      * Enables or disables notification on a give characteristic.
      *
@@ -484,14 +333,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
 
-        // This is specific to Heart Rate Measurement.
-        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mBluetoothGatt.writeDescriptor(descriptor);
-        }
-
         if (READ_BYTES.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
                     UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
@@ -504,7 +345,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
                 if (Settings.debug) Log.w(TAG, "characteristic is null");
             }
         }
-
     }
 
     /**

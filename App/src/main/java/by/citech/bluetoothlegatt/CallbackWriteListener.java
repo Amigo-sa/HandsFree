@@ -5,6 +5,6 @@ package by.citech.bluetoothlegatt;
  */
 
 public interface CallbackWriteListener {
-    public void callbackIsDone();
-    public void rcvBtPktIsDone();
+    void callbackIsDone();
+    void rcvBtPktIsDone(byte[] data);
 }

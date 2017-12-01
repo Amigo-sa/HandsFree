@@ -94,7 +94,6 @@ public class ConnectorBluetooth
                 characteristics,
                 mIBluetoothListener,
                 this);
-        leBroadcastReceiver.addIRxDataListener(iTransmitter);
         leConnector = new LeConnector(
                 leScanner,
                 leBroadcastReceiver,
@@ -102,6 +101,7 @@ public class ConnectorBluetooth
         leDataTransmitter = new LeDataTransmitter(
                 characteristics,
                 mIBluetoothListener);
+        leDataTransmitter.addIRxDataListener(iTransmitter);
     }
 
     //--------------------- getters and setters
@@ -254,9 +254,8 @@ public class ConnectorBluetooth
 
     public void closeLeService(){
         if (Settings.debug) Log.i(TAG, "closeLeService()");
-        if(mBluetoothLeService.getWriteThread() != null)
-            mBluetoothLeService.stopWriteThread();
-        mBluetoothLeService = null;
+        if (leDataTransmitter != null)
+            leDataTransmitter.disableTransmitData();
     }
 
     //----------------------- BroadcastReceiver ---------------------
@@ -278,8 +277,11 @@ public class ConnectorBluetooth
     @Override
     public void setStorages(){
         if (Settings.debug) Log.i(TAG, "setStorages()");
-        mBluetoothLeService.setStorageFromBt(storageFromBt);
-        mBluetoothLeService.setStorageToBt(storageToBt);
+//        mBluetoothLeService.setStorageFromBt(storageFromBt);
+//        mBluetoothLeService.setStorageToBt(storageToBt);
+        leDataTransmitter.setStorageFromBt((storageFromBt));
+        leDataTransmitter.setStorageToBt(storageToBt);
+        mBluetoothLeService.setCallbackWriteListener(leDataTransmitter);
     }
 
     //---------------------- dataexchange ---------------------------
@@ -330,6 +332,11 @@ public class ConnectorBluetooth
         if (Settings.debug) Log.i(TAG, currentState.getName());
         switch (debugMode) {
             case MicToBt:
+                if (!isDebugRunning) {
+                    isDebugRunning = true;
+                    enableTransmitData();
+                }
+            case LoopbackBtToBt:
                 if (!isDebugRunning) {
                     isDebugRunning = true;
                     enableTransmitData();
