@@ -13,15 +13,18 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
 import by.citech.data.StorageData;
 import by.citech.debug.ITrafficUpdate;
+import by.citech.exchange.ITransmitter;
 import by.citech.logic.Resource;
 import by.citech.param.DebugMode;
 import by.citech.param.Settings;
@@ -70,6 +73,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public final static UUID UUID_CIT_HANDS_FREE =
             UUID.fromString(SampleGattAttributes.CIT_HANDS_FREE);
     // UUID характеристики READ_BYTES
+
+
     public final static UUID READ_BYTES =
             UUID.fromString(SampleGattAttributes.READ_BYTES);
 
@@ -80,6 +85,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public Resource res;
     private String wrData;
 
+
     public void setStorageFromBt(StorageData<byte[]> storageFromBt) {
         this.storageFromBt = storageFromBt;
     }
@@ -87,6 +93,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public void setStorageToBt(StorageData<byte[][]> storageToBt) {
         this.storageToBt = storageToBt;
     }
+
+
 
     public void initStore(){
         res = new Resource(true,20);
@@ -97,6 +105,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public void closeStore(){
         loopback = false;
     }
+
 
 
     // Методы для работы с потоком записи
@@ -243,6 +252,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
                break;
        }
 
+
        if (!Settings.debug) {
            if (numBTpackage == 0)
                prevTime = System.currentTimeMillis();
@@ -342,10 +352,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        synchronized (this) {
-            mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-            mBluetoothGatt.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
-        }
+        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        mBluetoothGatt.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
@@ -363,8 +371,10 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+
         if (getWriteThread() != null)
             wrt.cancel();
+
         mBluetoothGatt.disconnect();
     }
     /**
@@ -410,6 +420,15 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         enWriteCharacteristicThread(write_characteristic, DEFAULT_MTU);
     }
 
+    public void oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
+        if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
+            return;
+        }
+        mBluetoothGatt.writeCharacteristic(characteristic);
+    }
+
     private void singleWriteCharacteristic(BluetoothGattCharacteristic characteristic) {
         byte[] dataWrite = "FFFFFFFFFFFFFFFF".getBytes();
         characteristic.setValue(dataWrite);
@@ -442,6 +461,16 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     public void stopWriteThread() {
         wrt.cancel();
     }
+
+
+
+
+
+
+
+
+
+
     /**
      * Enables or disables notification on a give characteristic.
      *
