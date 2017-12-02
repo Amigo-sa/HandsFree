@@ -7,12 +7,24 @@ import by.citech.logic.CallerState;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugBtToBtRecorder
+public class Bt2BtRecorder
         implements IDebugListener, IDebugCtrl {
 
-    private static final String TAG = Tags.BT2BT_RECORDER;
-    private static final boolean debug = Settings.debug;
-    private static final int initialSize = 100;
+    private final String TAG;
+    private final boolean debug;
+
+    private final int recordSize;
+    private final int toBtFactor;
+    private final int bt2btPacketSize;
+
+    {
+        TAG = Tags.BT2BT_RECORDER;
+        debug = Settings.debug;
+
+        recordSize = 100;
+        toBtFactor = Settings.btFactor;
+        bt2btPacketSize = Settings.bt2btPacketSize;
+    }
 
     private byte[][] dataAssembled;
     private int dataSavedCount;
@@ -23,11 +35,11 @@ public class DebugBtToBtRecorder
     private boolean isRecording;
     private boolean isActive;
 
-    public DebugBtToBtRecorder(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
+    public Bt2BtRecorder(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
         this.storageBtToNet = storageBtToNet;
         this.storageNetToBt = storageNetToBt;
-        dataAssembled = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
-        dataSaved = new byte[initialSize][Settings.btToNetFactor][Settings.btToBtSendSize];
+        dataAssembled = new byte[toBtFactor][bt2btPacketSize];
+        dataSaved = new byte[recordSize][toBtFactor][bt2btPacketSize];
         isPlaying = false;
         isRecording = false;
         isActive = false;
@@ -72,11 +84,11 @@ public class DebugBtToBtRecorder
             }
             dataAssembled[dataAssembledCount] = storageBtToNet.getData();
             dataAssembledCount++;
-            if (dataAssembledCount == Settings.btToNetFactor) {
+            if (dataAssembledCount == Settings.bt2NetFactor) {
                 if (debug) Log.i(TAG, "run recorder output buffer contains enough data, saving");
                 dataSaved[dataSavedCount] = dataAssembled;
                 dataSavedCount++;
-                if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.btToBtSendSize));
+                if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.bt2btPacketSize));
                 dataAssembledCount = 0;
             }
         }

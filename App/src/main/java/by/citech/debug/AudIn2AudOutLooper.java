@@ -6,37 +6,52 @@ import java.util.Arrays;
 
 import by.citech.codec.audio.AudioCodec;
 import by.citech.codec.audio.AudioCodecType;
-import by.citech.exchange.FromMic;
+import by.citech.exchange.FromAudioIn;
 import by.citech.exchange.IReceiver;
 import by.citech.exchange.IReceiverCtrl;
 import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
 import by.citech.exchange.ITransmitterCtrl;
-import by.citech.exchange.ToAudio;
+import by.citech.exchange.ToAudioOut;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugMicToAudLooper
+public class AudIn2AudOutLooper
         implements IDebugListener, IReceiverReg, ITransmitter, IDebugCtrl {
 
-    private static final String TAG = Tags.MIC2AUD_LOOPER;
-    private static final boolean debug = Settings.debug;
-    private static final AudioCodecType codecType = Settings.codecType;
-    private static final int codecFactor = codecType.getDecodedShortCnt();
-    private static final int buffersize = Settings.audioBufferSize;
-    private static final int bufferToCodecFactor = buffersize / codecFactor;
+    private String TAG;
+    private boolean debug;
+
+    private AudioCodecType codecType;
+    private int codecFactor;
+    private int audioBuffSizeBytes;
+    private int audioBuffSizeShorts;
+    private int buff2CodecFactor;
+    private boolean audioSinglePacket;
+
+    {
+        TAG = Tags.AUDIN2AUDOUT_LOOPER;
+        debug = Settings.debug;
+
+        codecType = Settings.codecType;
+        codecFactor = codecType.getDecodedShortsSize();
+        audioBuffSizeBytes = Settings.audioBuffSizeBytes;
+        audioBuffSizeShorts = audioBuffSizeBytes / 2;
+        buff2CodecFactor = audioBuffSizeShorts / codecFactor;
+        audioSinglePacket = Settings.audioSinglePacket;
+    }
 
     private AudioCodec audioCodec;
     private IReceiver iReceiver;
     private ITransmitterCtrl iTransmitterCtrl;
     private IReceiverCtrl iReceiverCtrl;
-    private short[] dataBuffer;
+    private short[] dataBuff;
 
-    public DebugMicToAudLooper() {
-        iReceiverCtrl = new ToAudio(this);
-        iTransmitterCtrl = new FromMic(this);
+    public AudIn2AudOutLooper() {
+        iReceiverCtrl = new ToAudioOut(this);
+        iTransmitterCtrl = new FromAudioIn(this);
         audioCodec = new AudioCodec(codecType);
-        dataBuffer = new short[buffersize];
+        dataBuff = new short[audioBuffSizeShorts];
     }
 
     @Override
@@ -47,7 +62,7 @@ public class DebugMicToAudLooper
         iReceiverCtrl.prepareRedirect();
         iTransmitterCtrl.prepareStream();
         iReceiverCtrl.redirectOn();
-        iTransmitterCtrl.streamOn();
+        new Thread(() -> iTransmitterCtrl.streamOn()).start();
     }
 
     @Override
@@ -90,17 +105,20 @@ public class DebugMicToAudLooper
     @Override
     public void sendData(short[] data) {
         if (debug) Log.i(TAG, "sendData short[]");
-        dataBuffer = data;
-        int from;
         if (iReceiver != null) {
-            for (int i = 0; i < bufferToCodecFactor; i++) {
-                from = i*codecFactor;
-                if (debug) Log.i(TAG, "sendData from is " + from);
-                System.arraycopy(audioCodec.getDecodedData(audioCodec.getEncodedData(Arrays.copyOfRange(dataBuffer, from, from + codecFactor))), 0, dataBuffer, from, codecFactor);
+            if (audioSinglePacket) {
+//              iReceiver.onReceiveData(data);
+                iReceiver.onReceiveData(audioCodec.getDecodedData(audioCodec.getEncodedData(data)));
+            } else {
+                dataBuff = data;
+                int from;
+                for (int i = 0; i < buff2CodecFactor; i++) {
+                    from = i * codecFactor;
+                    if (debug) Log.i(TAG, "sendData from is " + from);
+                    System.arraycopy(audioCodec.getDecodedData(audioCodec.getEncodedData(Arrays.copyOfRange(dataBuff, from, from + codecFactor))), 0, dataBuff, from, codecFactor);
+                }
+                iReceiver.onReceiveData(dataBuff);
             }
-            iReceiver.onReceiveData(dataBuffer);
-//          iReceiver.onReceiveData(data);
-//          iReceiver.onReceiveData(audioCodec.getDecodedData(audioCodec.getEncodedData(data)));
         }
     }
 

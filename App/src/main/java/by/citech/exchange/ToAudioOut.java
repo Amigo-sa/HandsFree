@@ -8,18 +8,40 @@ import android.util.Log;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class ToAudio
+public class ToAudioOut
         implements IReceiverCtrl, IReceiver {
 
-    private static final String TAG = Tags.TO_AUDIO;
-    private static final boolean debug = Settings.debug;
+    private final String TAG;
+    private final boolean debug;
 
-    private int bufferSize = Settings.audioBufferSize;
+    private final int audioUsage;
+    private final int audioContentType;
+    private final int audioEncoding;
+    private final int audioRate;
+    private final int audioOutChannel;
+    private final int audioMode;
+    private final int audioBuffSizeBytes;
+    private final int audioBuffSizeShorts;
+
+    {
+        TAG = Tags.TO_AUDOUT;
+        debug = Settings.debug;
+
+        audioUsage = Settings.audioUsage;
+        audioContentType = Settings.audioContentType;
+        audioEncoding = Settings.audioEncoding;
+        audioRate = Settings.audioRate;
+        audioOutChannel = Settings.audioOutChannel;
+        audioMode = Settings.audioMode;
+        audioBuffSizeBytes = Settings.audioBuffSizeBytes;
+        audioBuffSizeShorts = audioBuffSizeBytes / 2;
+    }
+
     private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
-    private boolean isRedirecting = false;
+    private boolean isRedirecting;
 
-    public ToAudio(IReceiverReg iReceiverReg) {
+    public ToAudioOut(IReceiverReg iReceiverReg) {
         this.iReceiverReg = iReceiverReg;
     }
 
@@ -29,18 +51,17 @@ public class ToAudio
         redirectOff();
         audioTrack = new AudioTrack.Builder()
                 .setAudioAttributes(new AudioAttributes.Builder()
-                        .setUsage(Settings.audioUsage)
-                        .setContentType(Settings.audioContentType)
+                        .setUsage(audioUsage)
+                        .setContentType(audioContentType)
                         .build())
                 .setAudioFormat(new AudioFormat.Builder()
-                        .setEncoding(Settings.audioEncoding)
-                        .setSampleRate(Settings.audioRate)
-                        .setChannelMask(Settings.audioOutChannel)
+                        .setEncoding(audioEncoding)
+                        .setSampleRate(audioRate)
+                        .setChannelMask(audioOutChannel)
                         .build())
-                .setBufferSizeInBytes(bufferSize)
-                .setTransferMode(Settings.audioMode)
+                .setBufferSizeInBytes(audioBuffSizeBytes)
+                .setTransferMode(audioMode)
                 .build();
-
         if (debug) Log.i(TAG, "prepareStream done");
     }
 
@@ -72,7 +93,7 @@ public class ToAudio
     public void onReceiveData(byte[] data) {
         if (debug) Log.i(TAG, "onReceiveData byte[]");
         if (isRedirecting) {
-            audioTrack.write(data, 0, bufferSize);
+            audioTrack.write(data, 0, audioBuffSizeBytes);
         }
     }
 
@@ -80,7 +101,7 @@ public class ToAudio
     public void onReceiveData(short[] data) {
         if (debug) Log.i(TAG, "onReceiveData short[]");
         if (isRedirecting) {
-            audioTrack.write(data, 0, bufferSize);
+            audioTrack.write(data, 0, audioBuffSizeShorts);
         }
     }
 

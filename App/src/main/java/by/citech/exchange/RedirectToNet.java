@@ -10,7 +10,7 @@ import by.citech.param.Tags;
 public class RedirectToNet
         extends AsyncTask<String, ITransmitterCtrl, Void> {
 
-    private static final String TAG = Tags.REDIRECT2NET;
+    private static final String TAG = Tags.REDIR2NET;
     private static final boolean debug = Settings.debug;
 
     private ITransmitterCtrlReg iTransmitterCtrlReg;
@@ -30,7 +30,7 @@ public class RedirectToNet
         switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
-                iTransmitterCtrl = new FromMic(iTransmitter);
+                iTransmitterCtrl = new FromAudioIn(iTransmitter);
                 iTransmitterCtrl.prepareStream();
                 publishProgress(iTransmitterCtrl);
                 new Thread(iTransmitterCtrl::streamOn).start();

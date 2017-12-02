@@ -5,7 +5,7 @@ import android.util.Log;
 import by.citech.codec.audio.AudioCodec;
 import by.citech.codec.audio.AudioCodecType;
 import by.citech.data.StorageData;
-import by.citech.exchange.FromMic;
+import by.citech.exchange.FromAudioIn;
 import by.citech.exchange.IReceiver;
 import by.citech.exchange.IReceiverCtrl;
 import by.citech.exchange.IReceiverReg;
@@ -15,10 +15,10 @@ import by.citech.exchange.ToBluetooth;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugMicToBtLooper
+public class AudIn2BtLooper
         implements IDebugListener, IDebugCtrl, ITransmitter, IReceiverReg {
 
-    private static final String TAG = Tags.MIC2BT_LOOPER;
+    private static final String TAG = Tags.AUDINBT_LOOPER;
     private static final boolean debug = Settings.debug;
     private static final AudioCodecType codecType = Settings.codecType;
 
@@ -28,8 +28,8 @@ public class DebugMicToBtLooper
     private boolean isRunning;
     private IReceiver iReceiver;
 
-    public DebugMicToBtLooper(StorageData<byte[][]> micToBtStorage) {
-        iTransmitterCtrl = new FromMic(this);
+    public AudIn2BtLooper(StorageData<byte[][]> micToBtStorage) {
+        iTransmitterCtrl = new FromAudioIn(this);
         iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
         audioCodec = new AudioCodec(codecType);
     }

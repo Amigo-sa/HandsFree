@@ -113,15 +113,15 @@ public class LeDataTransmitter implements CallbackWriteListener{
     public void rcvBtPktIsDone(byte[] data) {
         if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone()");
         if (storageFromBt != null)
-            switch (Settings.debugMode) {
-                case BtToAudio:
+            switch (Settings.opMode) {
+                case Bt2AudOut:
                     updateRxData(data);
                     break;
-                case LoopbackBtToBt:
+                case Bt2Bt:
                 case Normal:
                     storageFromBt.putData(data);
                     break;
-                case MicToBt:
+                case AudIn2Bt:
                 default:
                     break;
             }
@@ -133,10 +133,10 @@ public class LeDataTransmitter implements CallbackWriteListener{
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[][] arrayData = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
+                byte[][] arrayData = new byte[Settings.bt2NetFactor][Settings.bt2btPacketSize];
                 int numBtPkt = 0;
                 isRunning = true;
-                int pktSize = (Settings.singlePacket) ? Settings.btToMicFactor : Settings.btToNetFactor;
+                int pktSize = (Settings.btSinglePacket) ? Settings.audioIn2BtFactor : Settings.bt2NetFactor;
                 while (isRunning) {
 
                     if (!storageToBt.isEmpty() && numBtPkt == 0) {

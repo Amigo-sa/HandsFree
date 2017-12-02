@@ -2,8 +2,8 @@
 
 <resources>
     <string name="ble_not_supported">BLE is not supported</string>
-    <string name="label_data">Read Data: </string>
-    <string name="label_wdata">Write Data:</string>
+    <string name="label_data">Readed data: </string>
+    <string name="label_wdata">Writed data: </string>
     <string name="label_garniture">Unknown device</string>
     <string name="label_local_ip_address">Local IP: </string>
     <string name="label_local_ip_text">Local IP </string>
@@ -11,23 +11,23 @@
     <string name="label_local_port">Local port: </string>
     <string name="label_remote_port">Remote port: </string>
     <string name="label_port_number">Port number</string>
-    <string name="label_insert_ip">Введите IP-адрес</string>
+    <string name="label_insert_ip">Type IP-address…</string>
     <string name="label_buttonCallOut">Call Out</string>
     <string name="label_buttonCallIn">Call In</string>
     <string name="label_buttonChDevice">Change</string>
     <string name="label_buttonReturn">Return</string>
-    <string name="label_list_devices">Доступные устройства</string>
-    <string name="label_device_address">Device address:</string>
-    <string name="label_device_name">Device name:</string>
+    <string name="label_list_devices">Available devices</string>
+    <string name="label_device_address">Device\'s address: </string>
+    <string name="label_device_name">Device\' name: </string>
     <string name="label_state">State:</string>
-    <string name="label_abonent">Вызываемый абонент:</string>
+    <string name="label_abonent">Call destination:</string>
     <string name="no_data">No data</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
     <string name="title_devices">BLE HandsFree</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported</string>
 
-    <string name="unknown_device">Неизвестное устройство</string>
+    <string name="unknown_device">Unknown device</string>
     <string name="unknown_characteristic">Unknown characteristic</string>
     <string name="unknown_service">Unknown service</string>
 
@@ -38,13 +38,13 @@
     <string name="menu_stop">Stop</string>
 
     <string name="menu_refresh"> </string>
-    <string name="menu_settings">Настройки</string>
+    <string name="menu_settings">Settings</string>
     <!-- Button chnage device names -->
-    <string name="connect_device">ПОДКЛЮЧИТЬ ГАРНИТУРУ</string>
-    <string name="change_device">СМЕНИТЬ ГАРНИТУРУ</string>
+    <string name="connect_device">Connect device</string>
+    <string name="change_device">Change device</string>
 
     <!-- Dialog message -->
-    <string name="connect_message">Устанавливается BT-соединение ...</string>
+    <string name="connect_message">Устанавливается BT-соединение…</string>
     <string name="connected_message">BT-соединение с устройcтвом установлено.</string>
     <string name="click_connected_device_message">Это BT-устройство в настоящий момент подключено к Вашему смартфону.
         Нажмите "Отключить", чтобы завершить BT-соединение, или "Отменить", чтобы продолжить работу с устройством.</string>
@@ -69,5 +69,8 @@
     <string name="hero_universe">DC UNIVERSE</string>
     <string name="hero_image">The Chosen One</string>
     <string name="hint_id">Contact\'s ID…</string>
+
+    <!-- Settings -->
+    <string name="appMode">appMode</string>
 
 </resources>

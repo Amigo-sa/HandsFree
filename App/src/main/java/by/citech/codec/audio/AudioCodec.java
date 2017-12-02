@@ -7,17 +7,17 @@ public class AudioCodec implements ICodec {
     private static final String TAG = "WSD_AudioCodec";
     private static final boolean debug = true;
 
-    private AudioCodecType audioCodecType;
     private ICodec codec;
 
     public AudioCodec(AudioCodecType audioCodecType) {
-        this.audioCodecType = audioCodecType;
-        switch (this.audioCodecType) {
-            case Sit:
+        switch (audioCodecType) {
+            case Sit_3_0_java:
+                Log.i(TAG, "AudioCodec audioCodecType default Sit_3_0_java");
+                codec = new SitAudioCodec_3_0_java();
+            case Sit_2_1_java:
             default:
-                Log.i(TAG, "AudioCodec audioCodecType default Sit");
-                codec = new TrashSitAudioCodec();
-                this.audioCodecType = AudioCodecType.Sit;
+                Log.i(TAG, "AudioCodec audioCodecType default Sit_2_1_java");
+                codec = new SitAudioCodec_2_1_java();
                 break;
         }
     }

@@ -1,13 +1,13 @@
 package by.citech.codec.audio;
 
-public class SitAudioCodec implements ICodec {
+public class SitAudioCodec_2_1_native implements ICodec {
 
 //    static {
 //        System.loadLibrary("SitCodecWrapper");
 //    }
 
-    private static final int decodedShortCnt = AudioCodecType.Sit.getDecodedShortCnt();
-    private static final int encodedByteCnt = AudioCodecType.Sit.getEncodedByteCnt();
+    private static final int decodedShortCnt = AudioCodecType.Sit_2_1_java.getDecodedShortsSize();
+    private static final int encodedByteCnt = AudioCodecType.Sit_2_1_java.getEncodedBytesSize();
 
     private CodecState decoderState;
     private CodecState encoderState;
@@ -17,7 +17,7 @@ public class SitAudioCodec implements ICodec {
 //    public native void nativeEncode(short[] dataToEncode, byte[] encodedData, CodecState codecState);
 //    public native void nativeDecode(byte[] dataToDecode, short[] decodedData, CodecState codecState);
 
-    public SitAudioCodec() {
+    public SitAudioCodec_2_1_native() {
         decodedData = new short[decodedShortCnt];
         encodedData = new byte[encodedByteCnt];
     }

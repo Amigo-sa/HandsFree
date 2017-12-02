@@ -7,16 +7,22 @@ import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiExchangeListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
-import by.citech.param.DebugMode;
+import by.citech.param.OpMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class CallUi
         implements IUiBtnGreenRedListener {
 
-    private static final String TAG = Tags.CALL_UI;
-    private static final boolean debug = Settings.debug;
-    private static final DebugMode debugMode = Settings.debugMode;
+    private String TAG;
+    private boolean debug;
+    private OpMode opMode;
+
+    {
+        TAG = Tags.CALL_UI;
+        debug = Settings.debug;
+        opMode = Settings.opMode;
+    }
 
     private ArrayList<ICallUiListener> iCallUiListeners;
     private ArrayList<ICallUiExchangeListener> iCallUiExchangeListeners;
@@ -80,12 +86,12 @@ public class CallUi
     @Override
     public void onClickBtnGreen() {
         if (debug) Log.i(TAG, "onClickBtnGreen");
-        switch (debugMode) {
-            case MicToBt:
-            case BtToAudio:
-            case MicToAudio:
-            case LoopbackBtToBt:
-            case LoopbackNetToNet:
+        switch (opMode) {
+            case AudIn2Bt:
+            case Bt2AudOut:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
                 switch (getCallerState()) {
                     case Null:
                         if (setCallerState(CallerState.Null, CallerState.DebugLoopBack))
@@ -140,12 +146,12 @@ public class CallUi
     @Override
     public void onClickBtnRed() {
         if (debug) Log.i(TAG, "onClickBtnRed");
-        switch (debugMode) {
-            case MicToBt:
-            case BtToAudio:
-            case MicToAudio:
-            case LoopbackBtToBt:
-            case LoopbackNetToNet:
+        switch (opMode) {
+            case AudIn2Bt:
+            case Bt2AudOut:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
                 switch (getCallerState()) {
                     case DebugLoopBack:
                         if (setCallerState(CallerState.DebugLoopBack, CallerState.Null))

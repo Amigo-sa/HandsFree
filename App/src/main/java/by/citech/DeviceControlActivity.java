@@ -8,13 +8,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -74,7 +75,8 @@ import by.citech.network.INetInfoListener;
 import by.citech.network.INetListener;
 import by.citech.logic.CallerState;
 import by.citech.param.Colors;
-import by.citech.param.DebugMode;
+import by.citech.param.OpMode;
+import by.citech.param.Presetter;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.util.Buttons;
@@ -93,28 +95,33 @@ public class DeviceControlActivity
         IContactsListener,
         LocationListener {
 
-    private static final String TAG = Tags.ACT_DEVICECTRL;
-    private static final boolean debug = Settings.debug;
-    private static final DebugMode debugMode = Settings.debugMode;
+    private String TAG;
+    private boolean debug;
+    private OpMode opMode;
+
+    {
+        TAG = Tags.ACT_DEVICECTRL;
+        debug = Settings.debug;
+    }
+
     public static final int REQUEST_LOCATION = 99;
     public static final int REQUEST_MICROPHONE = 98;
-
-    private IUiBtnGreenRedListener iUiBtnGreenRedListener;
-    private INetListener iNetworkListener;
 
     private static final int DEVICE_CONNECT = 1;
     private static final int THIS_CONNECTED_DEVICE = 4;
     private static final int OTHER_CONNECTED_DEVICE = 5;
 
-    // цвета кнопок
-    private static final int GREEN = Color.rgb(0x00, 0x66, 0x33);
-    private static final int GRAY = Color.GRAY;
-    private static final int RED = Color.rgb(0xCC, 0x00, 0x00);
-    private static final int DARKCYAN = Color.rgb(0, 139, 139);
-    private static final int DARKKHAKI = Color.rgb(189, 183, 107);
-    // Вьюхи для соединения с интернетом
+    // цвета
+    private static final int GREEN = Colors.GREEN;
+    private static final int GRAY = Colors.GRAY;
+    private static final int RED = Colors.RED;
+    private static final int DARKCYAN = Colors.DARKCYAN;
+    private static final int DARKKHAKI = Colors.DARKKHAKI;
+
+    // основные элементы управления
     private Animation animCall;
     private Button btnGreen, btnRed, btnChangeDevice;
+
     // TODO: отображение траффика для дебага
     TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
@@ -132,11 +139,14 @@ public class DeviceControlActivity
     private AlertDialog alertDialog;
     private boolean visiblityMain = true;
 
+    // основная логика
+    private IUiBtnGreenRedListener iUiBtnGreenRedListener;
+    private INetListener iNetworkListener;
     private Caller caller;
     private ConnectorBluetooth connectorBluetooth;
+
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
-
     private View viewContacts, viewContactEditor, viewChosenContact;
     private IElementAdd<Contact> iContactAdd;
     private IElementDel<Contact> iContactDel;
@@ -154,6 +164,7 @@ public class DeviceControlActivity
     ChosenContactHelper chosenContactHelper;
     ViewHelper viewHelper;
     Buttons buttons;
+
     // для включения разрешения местоположения
     private LocationManager locationManager;
     private String provider;
@@ -174,10 +185,27 @@ public class DeviceControlActivity
     public void onStart() {
         super.onStart();
         if (debug) Log.i(TAG, "onStart");
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String currentAppMode = prefs.getString(getString(R.string.appMode), getResources().getStringArray(R.array.appMode)[0]);
+        for (OpMode mode : OpMode.values()) {
+            if (currentAppMode.matches(mode.getName())) {
+                if (debug) Log.i(TAG, "onStart found matches opMode: " + mode.getName());
+                opMode = mode;
+                Presetter.setMode(opMode);
+                break;
+            }
+        }
+        if (opMode == null) {
+            Log.e(TAG, "no matches for opMode, set to Normal");
+            opMode = OpMode.Normal;
+            Presetter.setMode(opMode);
+        }
+
         // Для проверки разрешения местоположения
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
-        setContentView(R.layout.device_control_activity);
+        setContentView(R.layout.activity_device_control);
 
         // Проверяем поддерживается ли технология Bluetooth Le
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -259,24 +287,28 @@ public class DeviceControlActivity
         btnRed = findViewById(R.id.btnRed);
         animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
 
-        switch (debugMode) {
-            case BtToAudio:
-            case MicToBt:
-            case MicToAudio:
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+                if (debug) Log.w(TAG, "onStart opMode is Bt2AudOut or AudIn2Bt or AudIn2AudOut");
                 btnSetEnabled(btnGreen, "PLAY");
                 btnSetDisabled(btnRed, "STOP");
                 break;
-            case LoopbackBtToBt:
-            case LoopbackNetToNet:
+            case Bt2Bt:
+            case Net2Net:
+                if (debug) Log.w(TAG, "onStart opMode is Bt2Bt or Net2Net");
                 btnSetEnabled(btnGreen, "LBACK ON");
                 btnSetDisabled(btnRed, "LBACK OFF");
                 break;
             case Record:
+                if (debug) Log.w(TAG, "onStart opMode is Record");
                 btnSetEnabled(btnGreen, "RECORD");
                 btnSetDisabled(btnRed, "PLAY");
                 break;
             case Normal:
             default:
+                if (debug) Log.w(TAG, "onStart opMode is Normal");
                 btnSetDisabled(btnGreen, "IDLE");
                 btnSetDisabled(btnRed, "IDLE");
                 break;
@@ -393,6 +425,8 @@ public class DeviceControlActivity
                 connectorBluetooth.stopScanBTDevice();
                 break;
             case R.id.menu_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 if (debug) Log.i(TAG, "menu settings");
                 break;
         }
@@ -1528,12 +1562,12 @@ public class DeviceControlActivity
 
     @Override
     public void startDebug() {
-        switch (debugMode) {
-            case BtToAudio:
-            case MicToBt:
-            case MicToAudio:
-            case LoopbackBtToBt:
-            case LoopbackNetToNet:
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
                 Buttons.disable(btnGreen);
                 Buttons.enable(btnRed);
                 break;
@@ -1560,12 +1594,12 @@ public class DeviceControlActivity
 
     @Override
     public void stopDebug() {
-        switch (debugMode) {
-            case BtToAudio:
-            case MicToBt:
-            case MicToAudio:
-            case LoopbackBtToBt:
-            case LoopbackNetToNet:
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
                 Buttons.enable(btnGreen);
                 Buttons.disable(btnRed);
                 break;

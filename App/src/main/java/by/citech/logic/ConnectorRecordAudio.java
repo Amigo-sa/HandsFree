@@ -3,7 +3,7 @@ package by.citech.logic;
 import android.util.Log;
 
 import by.citech.data.StorageData;
-import by.citech.exchange.FromMic;
+import by.citech.exchange.FromAudioIn;
 import by.citech.exchange.ITransmitter;
 import by.citech.exchange.ITransmitterCtrl;
 import by.citech.param.Settings;
@@ -30,7 +30,7 @@ public class ConnectorRecordAudio
             Log.e(TAG, "prepareStream illegal parameters");
             return;
         }
-        iTransmitterCtrl = new FromMic(this);
+        iTransmitterCtrl = new FromAudioIn(this);
         iTransmitterCtrl.prepareStream();
         new Thread(iTransmitterCtrl::streamOn).start();
     }

@@ -4,26 +4,32 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.util.Log;
 import by.citech.data.StorageData;
-import by.citech.debug.DebugBtToAudLooper;
-import by.citech.debug.DebugBtToBtLooper;
-import by.citech.debug.DebugBtToBtRecorder;
-import by.citech.debug.DebugMicToAudLooper;
-import by.citech.debug.DebugMicToBtLooper;
+import by.citech.debug.Bt2AudOutLooper;
+import by.citech.debug.Bt2BtLooper;
+import by.citech.debug.Bt2BtRecorder;
+import by.citech.debug.AudIn2AudOutLooper;
+import by.citech.debug.AudIn2BtLooper;
 import by.citech.debug.IDebugCtrl;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
 import by.citech.network.INetListener;
-import by.citech.param.DebugMode;
+import by.citech.param.OpMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class Caller {
 
-    private static final String TAG = Tags.CALLER;
-    private static final boolean debug = Settings.debug;
-    private static final DebugMode debugMode = Settings.debugMode;
+    private final String TAG;
+    private final boolean debug;
+    private final OpMode opMode;
+
+    {
+       TAG = Tags.CALLER;
+       debug = Settings.debug;
+       opMode = Settings.opMode;
+    }
 
     private volatile CallerState callerState;
     private ICallUiListener iCallUiListener;
@@ -137,24 +143,24 @@ public class Caller {
             return;
         }
 
-        switch (debugMode) {
-            case LoopbackBtToBt:
-                buildDebugLoopbackBtToBt();
+        switch (opMode) {
+            case Bt2Bt:
+                buildDebugBt2Bt();
                 break;
-            case LoopbackNetToNet:
-                buildDebugLoopbackNetToNet();
+            case Net2Net:
+                buildDebugNet2Net();
                 break;
             case Record:
                 buildDebugRecord();
                 break;
-            case MicToBt:
-                buildDebugMicToBt();
+            case AudIn2Bt:
+                buildDebugAudIn2Bt();
                 break;
-            case BtToAudio:
-                buildDebugBtToAud();
+            case Bt2AudOut:
+                buildBt2AudOut();
                 break;
-            case MicToAudio:
-                buildDebugMicToAud();
+            case AudIn2AudOut:
+                buildDebugAudIn2AudOut();
                 break;
             case Normal:
             default:
@@ -184,77 +190,77 @@ public class Caller {
 
     //--------------------- data from microphone redirects to bluetooth
 
-    private void buildDebugMicToBt() {
-        if (debug) Log.i(TAG, "buildDebugMicToBt");
+    private void buildDebugAudIn2Bt() {
+        if (debug) Log.i(TAG, "buildDebugAudIn2Bt");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugMicToBt illegal parameters");
+            if (debug) Log.e(TAG, "buildDebugAudIn2Bt illegal parameters");
             return;
         }
 
-        StorageData<byte[][]> micToBtStorage = new StorageData<>(Tags.MIC2BT_STORE);
+        StorageData<byte[][]> audIn2BtStorage = new StorageData<>(Tags.AUDIN2BT_STORE);
 
-        DebugMicToBtLooper debugMicToBtLooper = new DebugMicToBtLooper(micToBtStorage);
-        iDebugCtrl = debugMicToBtLooper;
+        AudIn2BtLooper audIn2BtLooper = new AudIn2BtLooper(audIn2BtStorage);
+        iDebugCtrl = audIn2BtLooper;
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
-                .setStorageToBt(micToBtStorage)
+                .setStorageToBt(audIn2BtStorage)
                 .setmHandler(new Handler());
 
         connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
-                .addiDebugListener(debugMicToBtLooper)
+                .addiDebugListener(audIn2BtLooper)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
         iDebugCtrl.activate();
     }
 
-    //--------------------- data from bluetooth redirects to audio
+    //--------------------- data from bluetooth redirects to dynamic
 
-    private void buildDebugBtToAud() {
-        if (debug) Log.i(TAG, "buildDebugBtToAud");
+    private void buildBt2AudOut() {
+        if (debug) Log.i(TAG, "buildBt2AudOut");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugBtToAud illegal parameters");
+            if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
             return;
         }
 
-        DebugBtToAudLooper debugBtToAudLooper = new DebugBtToAudLooper();
-        iDebugCtrl = debugBtToAudLooper;
+        Bt2AudOutLooper bt2AudOutLooper = new Bt2AudOutLooper();
+        iDebugCtrl = bt2AudOutLooper;
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
-                .addIRxDataListener(debugBtToAudLooper)
+                .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler());
 
         connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
-                .addiDebugListener(debugBtToAudLooper)
+                .addiDebugListener(bt2AudOutLooper)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
         iDebugCtrl.activate();
     }
 
-    //--------------------- data from microphone redirects to audio
+    //--------------------- data from microphone redirects to dynamic
 
-    private void buildDebugMicToAud() {
-        if (debug) Log.i(TAG, "buildDebugMicToAud");
+    private void buildDebugAudIn2AudOut() {
+        if (debug) Log.i(TAG, "buildDebugAudIn2AudOut");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugMicToAud illegal parameters");
+            if (debug) Log.e(TAG, "buildDebugAudIn2AudOut illegal parameters");
             return;
         }
 
-        DebugMicToAudLooper debugMicToAudLooper = new DebugMicToAudLooper();
-        iDebugCtrl = debugMicToAudLooper;
+        AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper();
+        iDebugCtrl = audIn2AudOutLooper;
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
-                .addiDebugListener(debugMicToAudLooper)
+                .addiDebugListener(audIn2AudOutLooper)
                 .addiCallUiListener(iCallUiListener);
 
         iDebugCtrl.activate();
@@ -262,29 +268,29 @@ public class Caller {
 
     //--------------------- data from bluetooth loops back to bluetooth
 
-    private void buildDebugLoopbackBtToBt() {
-        if (debug) Log.i(TAG, "buildDebugLoopbackBtToBt");
+    private void buildDebugBt2Bt() {
+        if (debug) Log.i(TAG, "buildDebugBt2Bt");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt illegal parameters");
+            if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
 
-        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
-        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+        StorageData<byte[]> storageBt2Net = new StorageData<>(Tags.BLE2NET_STORE);
+        StorageData<byte[][]> storageNet2Bt = new StorageData<>(Tags.NET2BLE_STORE);
 
-        DebugBtToBtLooper debugBtToBtLooper = new DebugBtToBtLooper(storageBtToNet, storageNetToBt);
-        iDebugCtrl = debugBtToBtLooper;
+        Bt2BtLooper bt2BtLooper = new Bt2BtLooper(storageBt2Net, storageNet2Bt);
+        iDebugCtrl = bt2BtLooper;
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
-                .setStorageFromBt(storageBtToNet)
-                .setStorageToBt(storageNetToBt);
+                .setStorageFromBt(storageBt2Net)
+                .setStorageToBt(storageNet2Bt);
 
         connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
-                .addiDebugListener(debugBtToBtLooper)
+                .addiDebugListener(bt2BtLooper)
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener)
@@ -298,15 +304,15 @@ public class Caller {
     private void buildDebugRecord() {
         if (debug) Log.i(TAG, "buildDebugRecord");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugLoopbackBtToBt illegal parameters");
+            if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
 
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
 
-        DebugBtToBtRecorder debugBtToBtRecorder = new DebugBtToBtRecorder(storageBtToNet, storageNetToBt);
-        iDebugCtrl = debugBtToBtRecorder;
+        Bt2BtRecorder bt2BtRecorder = new Bt2BtRecorder(storageBtToNet, storageNetToBt);
+        iDebugCtrl = bt2BtRecorder;
 
         connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -317,7 +323,7 @@ public class Caller {
         connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
-                .addiDebugListener(debugBtToBtRecorder)
+                .addiDebugListener(bt2BtRecorder)
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener)
@@ -328,10 +334,10 @@ public class Caller {
 
     //--------------------- data from network looped back to network
 
-    private void buildDebugLoopbackNetToNet() {
-        if (debug) Log.i(TAG, "buildDebugLoopbackNetToNet");
+    private void buildDebugNet2Net() {
+        if (debug) Log.i(TAG, "buildDebugNet2Net");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugLoopbackNetToNet illegal parameters");
+            if (debug) Log.e(TAG, "buildDebugNet2Net illegal parameters");
             return;
         }
     }

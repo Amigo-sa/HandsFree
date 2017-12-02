@@ -11,9 +11,9 @@ import by.citech.param.Tags;
 public class ToNet
         implements ITransmitterCtrl {
 
-    private static final String TAG = Tags.NET_TRANSMIT;
+    private static final String TAG = Tags.TO_NET;
     private static final boolean debug = Settings.debug;
-    private static final int dataChunkSize = Settings.btToBtSendSize;
+    private static final int dataChunkSize = Settings.bt2btPacketSize;
 
     private ITransmitter iTransmitter;
     private boolean isStreaming = false;
@@ -56,11 +56,11 @@ public class ToNet
             bufferedDataSize = baos.size();
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
             //TODO: добавить логику обрезки на случай вычитки большего количества данных
-            if (bufferedDataSize == Settings.toBtSendSize) {
+            if (bufferedDataSize == Settings.btSendSize) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 iTransmitter.sendData(baos.toByteArray());
                 baos.reset();
-            } else if (bufferedDataSize > Settings.toBtSendSize) {
+            } else if (bufferedDataSize > Settings.btSendSize) {
                 if (debug) Log.e(TAG, "run too much data in network output buffer");
                 return;
             }

@@ -17,11 +17,11 @@ public class ToBluetooth
 
     private static final String TAG = Tags.TO_BLUETOOTH;
     private static final boolean debug = Settings.debug;
-    private static final int toBtFactor = Settings.toBtFactor;
-    private static final int btToBtSendSize = Settings.btToBtSendSize;
+    private static final int toBtFactor = Settings.btFactor;
+    private static final int btToBtSendSize = Settings.bt2btPacketSize;
     private static final int btSignificantBytes = Settings.btSignificantBytes;
-    private static final int toBtSendSize = Settings.toBtSendSize;
-    private static final boolean singlePacket = Settings.singlePacket;
+    private static final int toBtSendSize = Settings.btSendSize;
+    private static final boolean singlePacket = Settings.btSinglePacket;
 
     private IReceiverReg iReceiverReg;
     private TrafficInfo trafficInfo;

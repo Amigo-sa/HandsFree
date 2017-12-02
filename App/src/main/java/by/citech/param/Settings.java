@@ -11,77 +11,78 @@ public class Settings {
 
     //---------------- COMMON
 
-    public static final DataSource dataSource = DataSource.BLUETOOTH;
-//  public static final DataSource dataSource = DataSource.MICROPHONE;
-    public static final DebugMode debugMode = DebugMode.MicToBt;
-//  public static final DebugMode debugMode = DebugMode.BtToAudio;
-//  public static final DebugMode debugMode = DebugMode.MicToAudio;
-//  public static final DebugMode debugMode = DebugMode.Normal;
-//  public static final DebugMode debugMode = DebugMode.LoopbackBtToBt;
-//  public static final DebugMode debugMode = DebugMode.LoopbackNetToNet; //TODO: реализовать
-//  public static final DebugMode debugMode = DebugMode.Record;
-    public static final boolean showTraffic = true;
-//  public static final boolean debug = true;
-    public static final boolean debug = true;
-    public static final boolean testSendOneOnCall = false;
+    public static DataSource dataSource = DataSource.BLUETOOTH;
+//  public static DataSource dataSource = DataSource.MICROPHONE;
+    public static OpMode opMode;
+//  public static OpMode opMode = OpMode.AudIn2Bt;
+//  public static OpMode opMode = OpMode.Bt2AudOut;
+//  public static OpMode opMode = OpMode.AudIn2AudOut;
+//  public static OpMode opMode = OpMode.Normal;
+//  public static OpMode opMode = OpMode.Bt2Bt;
+//  public static OpMode opMode = OpMode.Net2Net; //TODO: реализовать
+//  public static OpMode opMode = OpMode.Record;
+    public static boolean showTraffic = true;
+    public static boolean debug = true;
+    public static boolean testSendOneOnCall = false;
 
     //---------------- BLUETOOTH
 
-    public static final int btMsPerBtToBtSendSize = 10;
-    public static final int btToBtSendSize = 16; // bytes in one BT message
-    public static final int btSignificantBytes = 10;
-    public static final int btRsvdBytesOffset = 10;
-    public static final int btToNetFactor = 90;
-    public static final int btToMicFactor = 1;
-    public static final int btToAudFactor = 1;
-    public static final int toBtFactor = btToMicFactor;
-    public static final boolean singlePacket = true;
-    public static final int btLatencyMs = 9;
-    public static final int btMsPerNetSendSize = btMsPerBtToBtSendSize * btToNetFactor;
-    public static final int toBtSendSize = btSignificantBytes * toBtFactor;
-    public static final int btToNetSendSizeUncut = btToBtSendSize * btToNetFactor;
-    // WriteCharacteristic
-    public static final int MTU = 80;
+    public static boolean btSinglePacket = true;  // если возможно, не используем буфферизацию
+    public static int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете
+    public static int bt2btPacketSize = 16;  // bytes in one BT message
+    public static int btSignificantBytes = 10;  // кол-во значащих байтов данных в BT2BT-пакете
+    public static int btRsvdBytesOffset = 10;  // позиция начала незначащих байтов данных в BT2BT-пакете
+    public static int bt2NetFactor = 90;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
+    public static int audioIn2BtFactor = 1;  // кол-во буфферизированных пакетов BT2BT, принимаемое от аудиовхода
+    public static int bt2AudioOutFactor = 1;  // кол-во буфферизированных пакетов BT2BT, отправляемое на аудиовыход
+    public static int btFactor = bt2AudioOutFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
+    public static int btLatencyMs = 9;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
+    public static int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
+    public static int btAudioMsPerNetSendSize = btAudioMsPerPacket * bt2NetFactor;  // миллисекунд звука в одном BT2NET-пакете
+    public static int bt2NetSendSizeUncut = bt2btPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
+    public static int btMtuSize = 80;  // запрашиваемый размер BT2BT-пакета
 
     //---------------- AUDIO COMMON
 
-    public static final AudioCodecType codecType = AudioCodecType.Sit;
-    public static final int audioRate = 8000;
-    public static final int audioBufferSize = codecType.getDecodedShortCnt();
-    public static final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
-//  public static final int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
+    public static boolean audioSinglePacket = false;
+    public static boolean audioBuffIsShorts = true;
+    public static AudioCodecType codecType = AudioCodecType.Sit_2_1_java;
+    public static int audioRate = 8000;
+    public static int audioBuffSizeBytes = audioSinglePacket ? (codecType.getDecodedShortsSize() * 2) : 24000;
+    public static int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+//  public static int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
 
     //---------------- AUDIO IN
 
-    public static final int audioInChannel = AudioFormat.CHANNEL_IN_MONO;
-//  public static final int audioInBuffersize = AudioTrack.getMinBufferSize(audioRate, AUDIO_CHANNEL, audioEncoding) * 12;
-//  public static final int audioInBuffersize = audioOutBuffersize;
-    public static final int audioInBuffersize = 10000;
-    public static final int audioSource = MediaRecorder.AudioSource.MIC;
+    public static int audioInChannel = AudioFormat.CHANNEL_IN_MONO;
+//  public static int audioInBuffersize = AudioTrack.getMinBufferSize(audioRate, AUDIO_CHANNEL, audioEncoding) * 12;
+//  public static int audioInBuffersize = audioOutBuffersize;
+    public static int audioInBuffersize = 10000;
+    public static int audioSource = MediaRecorder.AudioSource.MIC;
 
     //---------------- AUDIO OUT
 
-    public static final int audioOutChannel = AudioFormat.CHANNEL_OUT_MONO;
-//  public static final int audioOutBuffersize = AudioRecord.getMinBufferSize(audioRate, AUDIO_CHANNEL, audioEncoding) * 12;
-    public static final int audioOutBuffersize = 10000;
-    public static final int audioMode = AudioTrack.MODE_STREAM;
-    public static final int audioContentType = AudioAttributes.CONTENT_TYPE_SPEECH;
-//  public static final int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
-//  public static final int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
-    public static final int audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION;  // динамик
-//  public static final int audioUsage = AudioAttributes.USAGE_MEDIA;  // спикер
+    public static int audioOutChannel = AudioFormat.CHANNEL_OUT_MONO;
+//  public static int audioOutBuffersize = AudioRecord.getMinBufferSize(audioRate, AUDIO_CHANNEL, audioEncoding) * 12;
+    public static int audioOutBuffersize = 10000;
+    public static int audioMode = AudioTrack.MODE_STREAM;
+    public static int audioContentType = AudioAttributes.CONTENT_TYPE_SPEECH;
+//  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
+//  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
+    public static int audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION;  // разговорный динамик
+//  public static int audioUsage = AudioAttributes.USAGE_MEDIA;  // громкая связь
 
     //---------------- NETWORK
 
-    public static final String serverRemoteIpAddress = "192.168.0.126";
-    public static final int serverLocalPortNumber = 8080;
-    public static final int serverRemotePortNumber = 8080;
-    public static final boolean reconnect = false;
-    public static final long clientReadTimeout = 500000;
-    public static final int serverTimeout = 500000;
-    public static final long connectTimeout = 500000;
-    public static final int storageMaxSize = 100;
-    public static final boolean ipv4 = true;
-    public static final boolean storageWriteOnOverflow = true;
+    public static String serverRemoteIpAddress = "192.168.0.126";
+    public static int serverLocalPortNumber = 8080;
+    public static int serverRemotePortNumber = 8080;
+    public static boolean reconnect = false;
+    public static long clientReadTimeout = 500000;
+    public static int serverTimeout = 500000;
+    public static long connectTimeout = 500000;
+    public static int storageMaxSize = 100;
+    public static boolean ipv4 = true;
+    public static boolean storageWriteOnOverflow = true;
 
 }

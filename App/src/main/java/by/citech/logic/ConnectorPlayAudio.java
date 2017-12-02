@@ -6,7 +6,7 @@ import by.citech.data.StorageData;
 import by.citech.exchange.IReceiver;
 import by.citech.exchange.IReceiverCtrl;
 import by.citech.exchange.IReceiverReg;
-import by.citech.exchange.ToAudio;
+import by.citech.exchange.ToAudioOut;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -31,7 +31,7 @@ public class ConnectorPlayAudio implements IReceiverReg {
             Log.e(TAG, "prepareStream illegal parameters");
             return;
         }
-        iReceiverCtrl = new ToAudio(this);
+        iReceiverCtrl = new ToAudioOut(this);
         iReceiverCtrl.prepareRedirect();
         new Thread(iReceiverCtrl::redirectOn).start();
         run();

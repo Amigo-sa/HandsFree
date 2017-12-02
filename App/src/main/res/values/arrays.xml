@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="appMode">
+        <item>Normal</item>
+        <item>Bt2AudOut</item>
+        <item>AudIn2Bt</item>
+        <item>Bt2Bt</item>
+    </string-array>
+</resources>

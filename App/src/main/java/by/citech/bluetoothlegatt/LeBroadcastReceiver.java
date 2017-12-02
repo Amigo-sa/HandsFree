@@ -7,11 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import java.util.ArrayList;
-
-import by.citech.exchange.ITransmitter;
 import by.citech.logic.IBluetoothListener;
-import by.citech.param.DebugMode;
 import by.citech.param.Settings;
 
 /**

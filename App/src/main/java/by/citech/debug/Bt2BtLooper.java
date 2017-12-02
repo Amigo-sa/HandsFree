@@ -5,7 +5,7 @@ import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugBtToBtLooper
+public class Bt2BtLooper
         implements IDebugListener, IDebugCtrl {
 
     private static final String TAG = Tags.BT2BT_LOOPER;
@@ -17,10 +17,10 @@ public class DebugBtToBtLooper
     private boolean isRunning;
     private boolean isActive;
 
-    public DebugBtToBtLooper(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
+    public Bt2BtLooper(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
         this.storageBtToNet = storageBtToNet;
         this.storageNetToBt = storageNetToBt;
-        dataAssembled = new byte[Settings.btToNetFactor][Settings.btToBtSendSize];
+        dataAssembled = new byte[Settings.bt2NetFactor][Settings.bt2btPacketSize];
         isRunning = false;
         isActive = false;
     }
@@ -58,8 +58,8 @@ public class DebugBtToBtLooper
             }
             dataAssembled[btCount] = storageBtToNet.getData();
             btCount++;
-            if (debug) Log.i(TAG, String.format("run network output buffer contains %d arrays of %d bytes each", btCount, Settings.btToBtSendSize));
-            if (btCount == Settings.btToNetFactor) {
+            if (debug) Log.i(TAG, String.format("run network output buffer contains %d arrays of %d bytes each", btCount, Settings.bt2btPacketSize));
+            if (btCount == Settings.bt2NetFactor) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 btCount = 0;
                 storageNetToBt.putData(dataAssembled);

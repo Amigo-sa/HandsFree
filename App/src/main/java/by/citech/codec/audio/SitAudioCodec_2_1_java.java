@@ -1,20 +1,91 @@
 package by.citech.codec.audio;
 
-public class TrashSitAudioCodec implements ICodec {
+public class SitAudioCodec_2_1_java implements ICodec {
 
     //------------------- AHTUNG ГОВНОКОД НАЧАЛО
 
-    public static final int SHORT_CNT_DECODED = 80;
-    public static final int BYTE_CNT_ENCODED = 10;
+    private static final AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
+    private static final int decodedShortsSize = audioCodecType.getDecodedShortsSize();
+    private static final int encodedBytesSize = audioCodecType.getEncodedBytesSize();
+    private static final short[] decodedData = new short[decodedShortsSize];
+    private static final byte[] encodedData = new byte[encodedBytesSize];
 
     private CodecState decoderState;
     private CodecState encoderState;
-    private byte[] encodedData;
-    private short[] decodedData;
 
-    public TrashSitAudioCodec() {
-        decodedData = new short[SHORT_CNT_DECODED];
-        encodedData = new byte[BYTE_CNT_ENCODED];
+
+    @Override
+    public void initiateDecoder() {
+        if (decoderState == null) {
+            decoderState = new CodecState();
+        } else {
+            decoderState.initiate();
+        }
+    }
+
+    @Override
+    public void initiateEncoder() {
+        if (encoderState == null) {
+            encoderState = new CodecState();
+        } else {
+            encoderState.initiate();
+        }
+    }
+
+    @Override
+    public short[] getDecodedData(byte[] dataToDecode) {
+        if (decoderState == null) {
+            initiateDecoder();
+        }
+        SitDecoder(dataToDecode, decodedData, decoderState);
+        return decodedData;
+    }
+
+    @Override
+    public byte[] getEncodedData(short[] dataToEncode) {
+        if (encoderState == null) {
+            initiateDecoder();
+        }
+        SitEncoder(dataToEncode, encodedData, encoderState);
+        return encodedData;
+    }
+
+    private class CodecState {
+
+        private int   yl   ;
+        private int   yu   ;
+        private int   dms  ;
+        private int   dml  ;
+        private int   ap   ;
+        private int   a  [];
+        private int   b  [];
+        private int   pk [];
+        private short dq [];
+        private int   sr [];
+        private int   td   ;
+
+        private CodecState() {
+            a     = new int  [2];
+            b     = new int  [6];
+            pk    = new int  [2];
+            dq    = new short[6];
+            sr    = new int  [2];
+            initiate();
+        }
+
+        private void initiate() {
+            yl                   = 34816;
+            yu                   = 544  ;
+            dms                  = 0    ;
+            dml                  = 0    ;
+            ap                   = 0    ;
+            for (int   i : a ) i = 0    ;
+            for (int   i : b ) i = 0    ;
+            for (int   i : pk) i = 0    ;
+            for (short i : dq) i = 32   ;
+            for (int   i : sr) i = 32   ;
+            td                   = 0    ;
+        }
     }
 
     //------------------- AHTUNG ГОВНОКОД ОКОНЧАНИЕ
@@ -476,83 +547,5 @@ public class TrashSitAudioCodec implements ICodec {
 
         return (i);
     }
-
-    //------------------- AHTUNG ГОВНОКОД НАЧАЛО
-
-    @Override
-    public void initiateDecoder() {
-        if (decoderState == null) {
-            decoderState = new CodecState();
-        } else {
-            decoderState.initiate();
-        }
-    }
-
-    @Override
-    public void initiateEncoder() {
-        if (encoderState == null) {
-            encoderState = new CodecState();
-        } else {
-            encoderState.initiate();
-        }
-    }
-
-    @Override
-    public short[] getDecodedData(byte[] dataToDecode) {
-        if (decoderState == null) {
-            initiateDecoder();
-        }
-        SitDecoder(dataToDecode, decodedData, decoderState);
-        return decodedData;
-    }
-
-    @Override
-    public byte[] getEncodedData(short[] dataToEncode) {
-        if (encoderState == null) {
-            initiateDecoder();
-        }
-        SitEncoder(dataToEncode, encodedData, encoderState);
-        return encodedData;
-    }
-
-    private class CodecState {
-
-        private int   yl   ;
-        private int   yu   ;
-        private int   dms  ;
-        private int   dml  ;
-        private int   ap   ;
-        private int   a  [];
-        private int   b  [];
-        private int   pk [];
-        private short dq [];
-        private int   sr [];
-        private int   td   ;
-
-        private CodecState() {
-            a     = new int  [2];
-            b     = new int  [6];
-            pk    = new int  [2];
-            dq    = new short[6];
-            sr    = new int  [2];
-            initiate();
-        }
-
-        private void initiate() {
-            yl                   = 34816;
-            yu                   = 544  ;
-            dms                  = 0    ;
-            dml                  = 0    ;
-            ap                   = 0    ;
-            for (int   i : a ) i = 0    ;
-            for (int   i : b ) i = 0    ;
-            for (int   i : pk) i = 0    ;
-            for (short i : dq) i = 32   ;
-            for (int   i : sr) i = 32   ;
-            td                   = 0    ;
-        }
-    }
-
-    //------------------- AHTUNG ГОВНОКОД ОКОНЧАНИЕ
 
 }

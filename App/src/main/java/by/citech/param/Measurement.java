@@ -2,10 +2,6 @@ package by.citech.param;
 
 import android.util.Log;
 
-/**
- * Created by tretyak on 01.12.2017.
- */
-
 public class Measurement {
 
     public static void timeStamp(final String TAG, boolean eventOne, boolean eventTwo){
@@ -14,8 +10,9 @@ public class Measurement {
             if (eventOne)
                 prevTime = System.currentTimeMillis();
             if (eventTwo) {
-                deltaTime = System.currentTimeMillis() - prevTime;
-                Log.i(TAG, "timeStamp = " + deltaTime);
+                //TODO: это статический метод, инициилизируй переменные
+//                deltaTime = System.currentTimeMillis() - prevTime;
+//                Log.i(TAG, "timeStamp = " + deltaTime);
             }
         }
     }

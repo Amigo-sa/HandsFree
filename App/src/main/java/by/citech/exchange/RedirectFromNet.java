@@ -10,7 +10,7 @@ import by.citech.param.Tags;
 public class RedirectFromNet
         extends AsyncTask<String, IReceiverCtrl, Void> {
 
-    private static final String TAG = Tags.REDIRECT4NET;
+    private static final String TAG = Tags.REDIR4NET;
     private static final boolean debug = Settings.debug;
 
     private IReceiverCtrlReg iReceiverCtrlReg;
@@ -31,7 +31,7 @@ public class RedirectFromNet
         switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
-                iReceiverCtrl = new ToAudio(iReceiverReg);
+                iReceiverCtrl = new ToAudioOut(iReceiverReg);
                 iReceiverCtrl.prepareRedirect();
                 publishProgress(iReceiverCtrl);
                 new Thread(iReceiverCtrl::redirectOn).start();

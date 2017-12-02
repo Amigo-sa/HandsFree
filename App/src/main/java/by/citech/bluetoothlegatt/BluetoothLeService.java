@@ -13,22 +13,15 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import by.citech.data.SampleGattAttributes;
-import by.citech.data.StorageData;
 import by.citech.debug.ITrafficUpdate;
-import by.citech.exchange.ITransmitter;
-import by.citech.logic.Resource;
-import by.citech.param.DebugMode;
 import by.citech.param.Settings;
-import by.citech.util.Decode;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

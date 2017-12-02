@@ -22,14 +22,14 @@ import by.citech.data.StorageData;
 import by.citech.debug.IDebugListener;
 import by.citech.exchange.ITransmitter;
 import by.citech.gui.ICallUiExchangeListener;
-import by.citech.param.DebugMode;
+import by.citech.param.OpMode;
 import by.citech.param.Settings;
 
 public class ConnectorBluetooth
         implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener{
 
     private final static String TAG = "WSD_ConnectorBluetooth";
-    private final static DebugMode debugMode = Settings.debugMode;
+    private final static OpMode opMode = Settings.opMode;
 
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
     private BluetoothLeService mBluetoothLeService;
@@ -330,13 +330,13 @@ public class ConnectorBluetooth
         if (Settings.debug) Log.i(TAG, "startDebug");
         CallerState currentState = getCallerState();
         if (Settings.debug) Log.i(TAG, currentState.getName());
-        switch (debugMode) {
-            case MicToBt:
+        switch (opMode) {
+            case AudIn2Bt:
                 if (!isDebugRunning) {
                     isDebugRunning = true;
                     enableTransmitData();
                 }
-            case LoopbackBtToBt:
+            case Bt2Bt:
                 if (!isDebugRunning) {
                     isDebugRunning = true;
                     enableTransmitData();
@@ -346,7 +346,7 @@ public class ConnectorBluetooth
                     enableTransmitData();
                 }
                 break;
-            case BtToAudio:
+            case Bt2AudOut:
                 if (!isDebugRunning) {
                     isDebugRunning = true;
                     onlyReceiveData();
@@ -360,7 +360,7 @@ public class ConnectorBluetooth
     @Override
     public void stopDebug() {
         if (Settings.debug) Log.i(TAG, "stopDebug");
-        switch (debugMode) {
+        switch (opMode) {
             case Record:
                 disableTransmitData();
                 break;

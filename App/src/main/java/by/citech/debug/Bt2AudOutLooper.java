@@ -4,33 +4,28 @@ import android.util.Log;
 
 import by.citech.codec.audio.AudioCodec;
 import by.citech.codec.audio.AudioCodecType;
-import by.citech.data.StorageData;
-import by.citech.exchange.FromMic;
 import by.citech.exchange.IReceiver;
 import by.citech.exchange.IReceiverCtrl;
 import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
-import by.citech.exchange.ITransmitterCtrl;
-import by.citech.exchange.ToBluetooth;
+import by.citech.exchange.ToAudioOut;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class DebugMicToBtLooperAlter
+public class Bt2AudOutLooper
         implements IDebugListener, IDebugCtrl, ITransmitter, IReceiverReg {
 
-    private static final String TAG = Tags.MIC2BT_LOOPER;
+    private static final String TAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
     private static final AudioCodecType codecType = Settings.codecType;
 
     private AudioCodec audioCodec;
-    private IReceiverCtrl iReceiverCtrl;
-    private ITransmitterCtrl iTransmitterCtrl;
-    private boolean isRunning;
     private IReceiver iReceiver;
+    private IReceiverCtrl iReceiverCtrl;
+    private boolean isRunning;
 
-    public DebugMicToBtLooperAlter(StorageData<byte[][]> micToBtStorage) {
-        iTransmitterCtrl = new FromMic(this);
-        iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
+    public Bt2AudOutLooper() {
+        iReceiverCtrl = new ToAudioOut(this);
         audioCodec = new AudioCodec(codecType);
     }
 
@@ -39,8 +34,6 @@ public class DebugMicToBtLooperAlter
         if (debug) Log.i(TAG, "run");
         iReceiverCtrl.prepareRedirect();
         iReceiverCtrl.redirectOn();
-        iTransmitterCtrl.prepareStream();
-        new Thread(() -> iTransmitterCtrl.streamOn()).start();
     }
 
     @Override
@@ -48,7 +41,6 @@ public class DebugMicToBtLooperAlter
         if (debug) Log.i(TAG, "deactivate");
         isRunning = false;
         iReceiverCtrl.redirectOff();
-        iTransmitterCtrl.streamOff();
     }
 
     @Override
@@ -66,26 +58,27 @@ public class DebugMicToBtLooperAlter
     }
 
     @Override
+    public void registerReceiver(IReceiver iReceiver) {
+        if (debug) Log.i(TAG, "registerReceiver");
+        this.iReceiver = iReceiver;
+    }
+
+    @Override
     public void sendMessage(String message) {
         Log.e(TAG, "sendMessage");
     }
 
     @Override
     public void sendData(byte[] data) {
-        Log.e(TAG, "sendData byte[]");
-    }
-
-    @Override
-    public void sendData(short[] data) {
-        if (debug) Log.i(TAG, "sendData short[]");
+        if (debug) Log.i(TAG, "sendData byte[]");
         if (isRunning && (iReceiver != null)) {
-            iReceiver.onReceiveData(audioCodec.getEncodedData(data));
+            iReceiver.onReceiveData(audioCodec.getDecodedData(data));
         }
     }
 
     @Override
-    public void registerReceiver(IReceiver iReceiver) {
-        this.iReceiver = iReceiver;
+    public void sendData(short[] data) {
+        Log.e(TAG, "sendData short[]");
     }
 
 }
