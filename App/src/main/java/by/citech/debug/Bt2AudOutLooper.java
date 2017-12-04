@@ -17,16 +17,33 @@ public class Bt2AudOutLooper
 
     private static final String TAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
-    private static final AudioCodecType codecType = Settings.codecType;
 
+    //--------------------- settings
+
+    private AudioCodecType codecType;
     private AudioCodec audioCodec;
+
+    {
+        takeSettings();
+        applySettings();
+    }
+
+    private void applySettings() {
+        audioCodec = new AudioCodec(codecType);
+    }
+
+    private void takeSettings() {
+        codecType = Settings.codecType;
+    }
+
+    //--------------------- non-settings
+
     private IReceiver iReceiver;
     private IReceiverCtrl iReceiverCtrl;
     private boolean isRunning;
 
     public Bt2AudOutLooper() {
         iReceiverCtrl = new ToAudioOut(this);
-        audioCodec = new AudioCodec(codecType);
     }
 
     @Override

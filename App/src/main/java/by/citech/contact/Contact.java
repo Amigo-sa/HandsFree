@@ -3,6 +3,8 @@ package by.citech.contact;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 import by.citech.util.InetAddress;
 import by.citech.util.Name;
 
@@ -10,8 +12,9 @@ import by.citech.util.Name;
 public class Contact
         implements Comparable<Contact>, IIdentifier, ICopy<Contact>, IContactState {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_Contact";
+    private static final String TAG = Tags.CONTACT;
+    private static final boolean debug = Settings.debug;
+
     private static final String VALID = "valid";
     private static final String INVALID = "invalid";
     private static int contactTrunkCount = 0;

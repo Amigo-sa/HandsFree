@@ -14,15 +14,27 @@ import by.citech.param.Tags;
 public class CallUi
         implements IUiBtnGreenRedListener {
 
-    private String TAG;
-    private boolean debug;
+    private static final String TAG = Tags.CALL_UI;
+    private static final boolean debug = Settings.debug;
+
+    //--------------------- settings
+
     private OpMode opMode;
 
     {
-        TAG = Tags.CALL_UI;
-        debug = Settings.debug;
+        takeSettings();
+        applySettings();
+    }
+
+    private void takeSettings() {
         opMode = Settings.opMode;
     }
+
+
+    private void applySettings() {
+    }
+
+    //--------------------- non-settings
 
     private ArrayList<ICallUiListener> iCallUiListeners;
     private ArrayList<ICallUiExchangeListener> iCallUiExchangeListeners;

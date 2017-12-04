@@ -2,12 +2,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
-        android:key="@string/appMode"
+        android:key="@string/opMode"
         android:title="Mode"
         android:summary="Set application's operation mode"
         android:defaultValue="1"
-        android:entries="@array/appMode"
-        android:entryValues="@array/appMode"
+        android:entries="@array/opMode"
+        android:entryValues="@array/opMode"
         android:dialogTitle="Choose operation mode" />
 
     <EditTextPreference

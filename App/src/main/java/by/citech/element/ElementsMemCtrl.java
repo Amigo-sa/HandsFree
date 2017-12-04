@@ -7,11 +7,14 @@ import java.util.List;
 
 import by.citech.contact.ICopy;
 import by.citech.contact.IIdentifier;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_ElementsMemCtrl";
+    private static final boolean debug = Settings.debug;
+    private static final String TAG = Tags.ELEMENTS_MEM_CTRL;
+
     private List<T> elements;
 
     public ElementsMemCtrl(List<T> elements) {

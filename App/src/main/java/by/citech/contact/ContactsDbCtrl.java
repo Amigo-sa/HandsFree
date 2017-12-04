@@ -10,10 +10,14 @@ import android.util.Log;
 
 import java.util.List;
 
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+
 public class ContactsDbCtrl extends SQLiteOpenHelper {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_ContactsDbCtrl";
+    private static final boolean debug = Settings.debug;
+    private static final String TAG = Tags.CONTACTS_DB_CTRL;
+
     private static final int DB_CONTACTS_VERSION = 1;
     private static final String DB_CONTACTS_NAME = "DB_CONTACTS";
 

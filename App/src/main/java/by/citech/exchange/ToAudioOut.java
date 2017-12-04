@@ -11,22 +11,26 @@ import by.citech.param.Tags;
 public class ToAudioOut
         implements IReceiverCtrl, IReceiver {
 
-    private final String TAG;
-    private final boolean debug;
+    private static final String TAG = Tags.TO_AUDOUT;
+    private static final boolean debug = Settings.debug;
 
-    private final int audioUsage;
-    private final int audioContentType;
-    private final int audioEncoding;
-    private final int audioRate;
-    private final int audioOutChannel;
-    private final int audioMode;
-    private final int audioBuffSizeBytes;
-    private final int audioBuffSizeShorts;
+    //--------------------- settings
+
+    private int audioUsage;
+    private int audioContentType;
+    private int audioEncoding;
+    private int audioRate;
+    private int audioOutChannel;
+    private int audioMode;
+    private int audioBuffSizeBytes;
+    private int audioBuffSizeShorts;
 
     {
-        TAG = Tags.TO_AUDOUT;
-        debug = Settings.debug;
+        takeSettings();
+        applySettings();
+    }
 
+    private void takeSettings() {
         audioUsage = Settings.audioUsage;
         audioContentType = Settings.audioContentType;
         audioEncoding = Settings.audioEncoding;
@@ -36,6 +40,11 @@ public class ToAudioOut
         audioBuffSizeBytes = Settings.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
     }
+
+    private void applySettings() {
+    }
+
+    //--------------------- non-settings
 
     private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
@@ -47,7 +56,7 @@ public class ToAudioOut
 
     @Override
     public void prepareRedirect() {
-        if (debug) Log.i(TAG, "prepareStream");
+        if (debug) Log.i(TAG, "prepareRedirect");
         redirectOff();
         audioTrack = new AudioTrack.Builder()
                 .setAudioAttributes(new AudioAttributes.Builder()
@@ -62,7 +71,7 @@ public class ToAudioOut
                 .setBufferSizeInBytes(audioBuffSizeBytes)
                 .setTransferMode(audioMode)
                 .build();
-        if (debug) Log.i(TAG, "prepareStream done");
+        if (debug) Log.i(TAG, "prepareRedirect done");
     }
 
     @Override
@@ -82,11 +91,14 @@ public class ToAudioOut
 
     @Override
     public void redirectOn() {
-        if (debug) Log.i(TAG, "run");
+        if (isRedirecting || (audioTrack == null)) {
+            Log.e(TAG, "redirectOn already redirecting or audioTrack is null");
+            return;
+        }
         isRedirecting = true;
         audioTrack.play();
         iReceiverReg.registerReceiver(this);
-        if (debug) Log.i(TAG, "run done");
+        if (debug) Log.i(TAG, "redirectOn done");
     }
 
     @Override

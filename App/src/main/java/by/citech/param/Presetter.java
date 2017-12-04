@@ -1,7 +1,7 @@
 package by.citech.param;
 
 public class Presetter {
-    public static void setMode(OpMode opMode) {
+    public static void setOpMode(OpMode opMode) {
         switch (opMode) {
             case Bt2Bt:
                 Settings.opMode = OpMode.Bt2Bt;
@@ -20,5 +20,9 @@ public class Presetter {
                 Settings.opMode = OpMode.Normal;
                 break;
         }
+    }
+
+    public static void setOpModeDefault() {
+        Settings.opMode = OpMode.Normal;
     }
 }

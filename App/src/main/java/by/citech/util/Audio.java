@@ -8,6 +8,7 @@ import android.util.Log;
 import by.citech.param.Tags;
 
 public class Audio {
+
     private AudioRecord findAudioRecord(boolean debug) {
         int[] mSampleRates = new int[] {
                 8000,

@@ -71,6 +71,6 @@
     <string name="hint_id">Contact\'s ID…</string>
 
     <!-- Settings -->
-    <string name="appMode">appMode</string>
+    <string name="opMode">appMode</string>
 
 </resources>

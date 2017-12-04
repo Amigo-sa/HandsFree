@@ -20,9 +20,27 @@ public class AudIn2BtLooper
 
     private static final String TAG = Tags.AUDINBT_LOOPER;
     private static final boolean debug = Settings.debug;
-    private static final AudioCodecType codecType = Settings.codecType;
 
+    //--------------------- settings
+
+    private AudioCodecType codecType;
     private AudioCodec audioCodec;
+
+    {
+        takeSettings();
+        applySettings();
+    }
+
+    private void applySettings() {
+        audioCodec = new AudioCodec(codecType);
+    }
+
+    private void takeSettings() {
+        codecType = Settings.codecType;
+    }
+
+    //--------------------- non-settings
+
     private IReceiverCtrl iReceiverCtrl;
     private ITransmitterCtrl iTransmitterCtrl;
     private boolean isRunning;
@@ -31,7 +49,6 @@ public class AudIn2BtLooper
     public AudIn2BtLooper(StorageData<byte[][]> micToBtStorage) {
         iTransmitterCtrl = new FromAudioIn(this);
         iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
-        audioCodec = new AudioCodec(codecType);
     }
 
     @Override

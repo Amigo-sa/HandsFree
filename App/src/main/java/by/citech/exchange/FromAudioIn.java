@@ -11,21 +11,33 @@ import by.citech.param.Tags;
 public class FromAudioIn
         implements ITransmitterCtrl {
 
-    private final String TAG;
-    private final boolean debug;
+    private final String TAG = Tags.FROM_AUDIN;
+    private final boolean debug = Settings.debug;
 
-    private final boolean audioBuffIsShorts;
-    private final int audioSource;
-    private final int audioRate;
-    private final int audioInChannel;
-    private final int audioEncoding;
-    private final int audioBuffSizeBytes;
-    private final int audioBuffSizeShorts;
+    //--------------------- settings
+
+
+    private boolean audioBuffIsShorts;
+    private int audioSource;
+    private int audioRate;
+    private int audioInChannel;
+    private int audioEncoding;
+    private int audioBuffSizeBytes;
+    private int audioBuffSizeShorts;
+    private byte[] bytesBuffer;
+    private short[] shortsBuffer;
 
     {
-        TAG = Tags.FROM_AUDIN;
-        debug = Settings.debug;
+        takeSettings();
+        applySettings();
+    }
 
+    private void applySettings() {
+        bytesBuffer = new byte[audioBuffSizeBytes];
+        shortsBuffer = new short[audioBuffSizeShorts];
+    }
+
+    private void takeSettings() {
         audioBuffIsShorts = Settings.audioBuffIsShorts;
         audioSource = Settings.audioSource;
         audioRate = Settings.audioRate;
@@ -35,21 +47,18 @@ public class FromAudioIn
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
     }
 
-    private byte[] bytesBuffer;
-    private short[] shortsBuffer;
+    //--------------------- non-settings
+
     private AudioRecord recorder;
     private boolean isStreaming;
     private ITransmitter iTransmitter;
 
     public FromAudioIn(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
-        bytesBuffer = new byte[audioBuffSizeBytes];
-        shortsBuffer = new short[audioBuffSizeShorts];
     }
 
     @Override
     public void prepareStream() {
-        if (debug) Log.i(TAG, "prepareStream");
         if (debug) Log.i(TAG, String.format("prepareStream audioOutBuffersize is %d", audioBuffSizeBytes));
         streamOff();
         recorder = new AudioRecord(
@@ -62,10 +71,13 @@ public class FromAudioIn
 
     @Override
     public void streamOn() {
-        if (debug) Log.i(TAG, "run");
-        if (isStreaming) return;
-        recorder.startRecording();
+        if (debug) Log.i(TAG, "streamOn");
+        if (isStreaming || (recorder == null)) {
+            Log.e(TAG, "streamOn already streaming or recorder is null");
+            return;
+        }
         isStreaming = true;
+        recorder.startRecording();
         while (isStreaming) {
             if (audioBuffIsShorts) {
                 streamShorts();
@@ -73,7 +85,7 @@ public class FromAudioIn
                 streamBytes();
             }
         }
-        if (debug) Log.w(TAG, "run done");
+        if (debug) Log.w(TAG, "streamOn done");
     }
 
     private void streamShorts() {

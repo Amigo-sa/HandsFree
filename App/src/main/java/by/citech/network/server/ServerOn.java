@@ -14,6 +14,9 @@ import by.citech.param.Tags;
 public class ServerOn
         extends AsyncTask<String, IServerCtrl, Void> {
 
+    private static final String TAG = Tags.SRV_SRVON;
+    private static final boolean debug = Settings.debug;
+
     private IServerCtrlReg iServerCtrlReg;
     private Handler handler;
     private IServerCtrl iServerCtrl;
@@ -25,9 +28,9 @@ public class ServerOn
 
     @Override
     protected Void doInBackground(String... port) {
-        Log.i(Tags.SRV_SRVON, "doInBackground");
+        if (debug) Log.i(TAG, "doInBackground");
         int portNum = Integer.parseInt(port[0]);
-        Log.i(Tags.SRV_SRVON, String.format("%d", portNum));
+        if (debug) Log.i(TAG, String.format("%d", portNum));
         ServerCtrlNanoWebSocket serverCtrlNanoWebSocket = new ServerCtrlNanoWebSocket(portNum, handler);
 
         if (!serverCtrlNanoWebSocket.isAliveServer()) {
@@ -52,7 +55,7 @@ public class ServerOn
 
     @Override
     protected void onProgressUpdate(IServerCtrl... iServerCtrl) {
-        Log.i(Tags.SRV_SRVON, "onProgressUpdate");
+        if (debug) Log.i(TAG, "onProgressUpdate");
         iServerCtrlReg.serverStarted(iServerCtrl[0]);
     }
 

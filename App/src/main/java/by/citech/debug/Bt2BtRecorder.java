@@ -10,25 +10,36 @@ import by.citech.param.Tags;
 public class Bt2BtRecorder
         implements IDebugListener, IDebugCtrl {
 
-    private final String TAG;
-    private final boolean debug;
+    private final String TAG = Tags.BT2BT_RECORDER;
+    private final boolean debug = Settings.debug;
 
-    private final int recordSize;
-    private final int toBtFactor;
-    private final int bt2btPacketSize;
+    //--------------------- settings
+
+    private int recordSize;
+    private int btFactor;
+    private int bt2btPacketSize;
+    private byte[][] dataAssembled;
+    private byte[][][] dataSaved;
 
     {
-        TAG = Tags.BT2BT_RECORDER;
-        debug = Settings.debug;
+        takeSettings();
+        applySettings();
+    }
 
+    private void applySettings() {
+        dataAssembled = new byte[btFactor][bt2btPacketSize];
+        dataSaved = new byte[recordSize][btFactor][bt2btPacketSize];
+    }
+
+    private void takeSettings() {
         recordSize = 100;
-        toBtFactor = Settings.btFactor;
+        btFactor = Settings.btFactor;
         bt2btPacketSize = Settings.bt2btPacketSize;
     }
 
-    private byte[][] dataAssembled;
+    //--------------------- non-settings
+
     private int dataSavedCount;
-    private byte[][][] dataSaved;
     private StorageData<byte[]> storageBtToNet;
     private StorageData<byte[][]> storageNetToBt;
     private boolean isPlaying;
@@ -38,12 +49,6 @@ public class Bt2BtRecorder
     public Bt2BtRecorder(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
         this.storageBtToNet = storageBtToNet;
         this.storageNetToBt = storageNetToBt;
-        dataAssembled = new byte[toBtFactor][bt2btPacketSize];
-        dataSaved = new byte[recordSize][toBtFactor][bt2btPacketSize];
-        isPlaying = false;
-        isRecording = false;
-        isActive = false;
-        dataSavedCount = 0;
     }
 
     @Override
@@ -84,7 +89,7 @@ public class Bt2BtRecorder
             }
             dataAssembled[dataAssembledCount] = storageBtToNet.getData();
             dataAssembledCount++;
-            if (dataAssembledCount == Settings.bt2NetFactor) {
+            if (dataAssembledCount == btFactor) {
                 if (debug) Log.i(TAG, "run recorder output buffer contains enough data, saving");
                 dataSaved[dataSavedCount] = dataAssembled;
                 dataSavedCount++;

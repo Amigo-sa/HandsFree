@@ -12,13 +12,16 @@ import java.util.List;
 import java.util.Locale;
 
 import by.citech.R;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 
 public class ContactsRecyclerAdapter
         extends RecyclerView.Adapter<ContactsRecyclerAdapter.ViewHolder> {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_ContactsAdapter";
+    private static final boolean debug = Settings.debug;
+    private static final String TAG = Tags.CONTACTS_ADAPTER;
+
     private List<Contact> contacts, contactsCleanCopy;
     private OnClickViewListener onClickViewListener;
 

@@ -21,15 +21,32 @@ import by.citech.param.Tags;
 
 public class Caller {
 
-    private final String TAG;
-    private final boolean debug;
-    private final OpMode opMode;
+    private final String TAG = Tags.CALLER;
+    private final boolean debug = Settings.debug;
+
+    //--------------------- settings
+
+    private boolean isInitiated;
+    private OpMode opMode;
 
     {
-       TAG = Tags.CALLER;
-       debug = Settings.debug;
-       opMode = Settings.opMode;
+        initiate();
+        isInitiated = true;
     }
+
+    private void initiate() {
+        takeSettings();
+        applySettings();
+    }
+
+    private void takeSettings() {
+        opMode = Settings.opMode;
+    }
+
+    private void applySettings() {
+    }
+
+    //--------------------- non-settings
 
     private volatile CallerState callerState;
     private ICallUiListener iCallUiListener;
@@ -84,7 +101,7 @@ public class Caller {
         return this;
     }
 
-    public Caller setiCallNetworkListener(ICallNetListener listener) {
+    public Caller setiCallNetListener(ICallNetListener listener) {
         iCallNetworkListener = listener;
         return this;
     }
@@ -135,6 +152,9 @@ public class Caller {
 
     public void build() {
         if (debug) Log.i(TAG, "build");
+        if (!isInitiated) {
+            initiate();
+        }
         if (iCallUiListener == null
                 || iCallNetworkListener == null
                 || iNetInfoListener == null
@@ -171,6 +191,7 @@ public class Caller {
 
     public void stop() {
         if (debug) Log.i(TAG, "stop");
+        isInitiated = false;
         callerState = CallerState.Null;
         if (iDebugCtrl != null) {
             iDebugCtrl.deactivate();

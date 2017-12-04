@@ -33,11 +33,14 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.util.InetAddress;
 
-import static by.citech.util.NetworkInfo.getIpAddr;
+import static by.citech.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg,
         IMessage, IServerOff, IDisc, INetListener, ICallUiListener {
+
+    private static final String TAG = Tags.NET_CONNECTOR;
+    private static final boolean debug = Settings.debug;
 
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
@@ -136,24 +139,24 @@ public class ConnectorNet
 
     @Override
     public void callEndedInternally() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callEndedInternally");
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callEndedInternally iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callEndedInternally iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
+        if (debug) Log.i(TAG, "callEndedInternally");
+        if (debug) Log.i(TAG, "callEndedInternally iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
+        if (debug) Log.i(TAG, "callEndedInternally iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
         exchangeStop();
         disconnect(iConnCtrl);
     }
 
     @Override
     public void callOutcomingCanceled() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callOutcomingCanceled");
+        if (debug) Log.i(TAG, "callOutcomingCanceled");
         disconnect(iClientCtrl);
     }
 
     @Override
     public void callOutcomingStarted() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callOutcomingStarted");
+        if (debug) Log.i(TAG, "callOutcomingStarted");
         if (!isValidIp()) {
-            if (Settings.debug) Log.w(Tags.NET_CONNECTOR, "callOutcomingStarted isValidIp()");
+            if (debug) Log.w(TAG, "callOutcomingStarted isValidIp()");
             if (setState(CallerState.OutcomingStarted, CallerState.Idle))
                 for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingInvalid();
             return;
@@ -163,13 +166,13 @@ public class ConnectorNet
 
     @Override
     public void callIncomingRejected() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callIncomingRejected");
+        if (debug) Log.i(TAG, "callIncomingRejected");
         disconnect(iServerCtrl);
     }
 
     @Override
     public void callIncomingAccepted() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "callIncomingAccepted");
+        if (debug) Log.i(TAG, "callIncomingAccepted");
         setiConnCtrl(iServerCtrl);
         responseAccept();
         exchangeStart();
@@ -179,94 +182,94 @@ public class ConnectorNet
 
     @Override
     public void srvOnOpen() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnOpen");
+        if (debug) Log.i(TAG, "srvOnOpen");
         switch (getState()) {
             case Idle:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnOpen Idle");
+                if (debug) Log.i(TAG, "srvOnOpen Idle");
                 if (setState(CallerState.Idle, CallerState.IncomingDetected))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingDetected();
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "srvOnOpen " + getStateName());
+                if (debug) Log.e(TAG, "srvOnOpen " + getStateName());
                 disconnect(iServerCtrl); // TODO: обрываем, если не ждём звонка?
         }
     }
 
     @Override
     public void srvOnFailure() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnFailure");
+        if (debug) Log.i(TAG, "srvOnFailure");
         switch (getState()) {
             case IncomingDetected:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnFailure IncomingDetected");
+                if (debug) Log.i(TAG, "srvOnFailure IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Error))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingFailed();
                 break;
             case Call:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnFailure Call");
+                if (debug) Log.i(TAG, "srvOnFailure Call");
                 if (setState(CallerState.Call, CallerState.Error))
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "srvOnFailure " + getStateName());
+                if (debug) Log.e(TAG, "srvOnFailure " + getStateName());
         }
     }
 
     @Override
     public void srvOnClose() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnClose");
+        if (debug) Log.i(TAG, "srvOnClose");
         switch (getState()) {
             case IncomingDetected:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnClose IncomingDetected");
+                if (debug) Log.i(TAG, "srvOnClose IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Idle))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingCanceled();
                 break;
             case Call:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "srvOnClose Call");
+                if (debug) Log.i(TAG, "srvOnClose Call");
                 if (setState(CallerState.Call, CallerState.Idle))
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callEndedExternally();
                 exchangeStop();
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "srvOnClose " + getStateName());
+                if (debug) Log.e(TAG, "srvOnClose " + getStateName());
         }
     }
 
     @Override
     public void cltOnOpen() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnOpen");
+        if (debug) Log.i(TAG, "cltOnOpen");
         switch (getState()) {
             case OutcomingStarted:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnOpen Call");
+                if (debug) Log.i(TAG, "cltOnOpen Call");
                 if (setState(CallerState.OutcomingStarted, CallerState.OutcomingConnected))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingConnected();
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnOpen " + getStateName());
+                if (debug) Log.e(TAG, "cltOnOpen " + getStateName());
                 disconnect(iClientCtrl); // TODO: обрываем, если не звонили?
         }
     }
 
     @Override
     public void cltOnFailure() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure");
+        if (debug) Log.i(TAG, "cltOnFailure");
         switch (getState()) {
             case OutcomingConnected:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure OutcomingConnected");
+                if (debug) Log.i(TAG, "cltOnFailure OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                 break;
             case OutcomingStarted:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure OutcomingStarted");
+                if (debug) Log.i(TAG, "cltOnFailure OutcomingStarted");
                 if (setState(CallerState.OutcomingStarted, CallerState.Error))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingFailed();
                 break;
             case Call:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnFailure Call");
+                if (debug) Log.i(TAG, "cltOnFailure Call");
                 if (setState(CallerState.Call, CallerState.Error))
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnFailure " + getStateName());
+                if (debug) Log.e(TAG, "cltOnFailure " + getStateName());
         }
     }
 
@@ -274,15 +277,15 @@ public class ConnectorNet
     public void cltOnMessageText(String message) {
         switch (getState()) {
             case OutcomingConnected:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText OutcomingConnected");
+                if (debug) Log.i(TAG, "cltOnMessageText OutcomingConnected");
                 if (message.equals(Messages.RESPONSE_ACCEPT)) {
-                    if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText ACCEPT");
+                    if (debug) Log.i(TAG, "cltOnMessageText ACCEPT");
                     if (setState(CallerState.OutcomingConnected, CallerState.Call))
                         for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callOutcomingAccepted();
                     setiConnCtrl(iClientCtrl);
                     exchangeStart();
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
-                    if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnMessageText REJECT");
+                    if (debug) Log.i(TAG, "cltOnMessageText REJECT");
                     if (setState(CallerState.OutcomingConnected, CallerState.Idle))
                         for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                     disconnect(iClientCtrl);
@@ -292,32 +295,32 @@ public class ConnectorNet
 
     @Override
     public void cltOnClose() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose");
+        if (debug) Log.i(TAG, "cltOnClose");
         switch (getState()) {
             case OutcomingConnected:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose OutcomingConnected");
+                if (debug) Log.i(TAG, "cltOnClose OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
                     for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
                 break;
             case Call:
-                if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "cltOnClose Call");
+                if (debug) Log.i(TAG, "cltOnClose Call");
                 if (setState(CallerState.Call, CallerState.Idle))
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callEndedExternally();
                 break;
             default:
-                if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "cltOnClose " + getStateName());
+                if (debug) Log.e(TAG, "cltOnClose " + getStateName());
         }
     }
 
     //--------------------- network
 
     private void responseAccept() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "responseAccept");
+        if (debug) Log.i(TAG, "responseAccept");
         new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_ACCEPT);
     }
 
     private boolean isValidIp() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "isValidIp");
+        if (debug) Log.i(TAG, "isValidIp");
         String remAddr = iNetInfoListener.getRemAddr();
         return !(remAddr.matches(getIpAddr(Settings.ipv4))
                 || remAddr.matches("127.0.0.1")
@@ -325,31 +328,31 @@ public class ConnectorNet
     }
 
     private void connect() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "connect");
+        if (debug) Log.i(TAG, "connect");
         new ClientConn(this, handler).execute(String.format("ws://%s:%s",
                 iNetInfoListener.getRemAddr(),
                 iNetInfoListener.getRemPort()));
     }
 
     private void disconnect(IConnCtrl iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "disconnect");
+        if (debug) Log.i(TAG, "disconnect");
         if (iConnCtrl != null) {
             new Disc(this).execute(iConnCtrl);
         } else {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "disconnect iConnCtrl is null");
+            if (debug) Log.e(TAG, "disconnect iConnCtrl is null");
         }
     }
 
     private void exchangeStart() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart");
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
+        if (debug) Log.i(TAG, "exchangeStart");
+        if (debug) Log.i(TAG, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
+        if (debug) Log.i(TAG, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
         new RedirectToNet(this, iConnCtrl.getTransmitter(), storageBtToNet).execute();
         new RedirectFromNet(this, iConnCtrl.getReceiverReg(), storageNetToBt).execute();
     }
 
     private void exchangeStop() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "exchangeStop");
+        if (debug) Log.i(TAG, "exchangeStop");
         new ThreadExchangeStop().start();
     }
 
@@ -359,7 +362,7 @@ public class ConnectorNet
             extends Thread {
         @Override
         public void run() {
-            if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadExchangeStop");
+            if (debug) Log.i(TAG, "ThreadExchangeStop");
             streamOff();
             redirectOff();
         }
@@ -369,7 +372,7 @@ public class ConnectorNet
             extends Thread {
         @Override
         public void run() {
-            if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop");
+            if (debug) Log.i(TAG, "ThreadNetStop");
             streamOff();
             redirectOff();
             disconnect(iClientCtrl);
@@ -379,7 +382,7 @@ public class ConnectorNet
     }
 
     private void serverOff() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "serverOff");
+        if (debug) Log.i(TAG, "serverOff");
         if (iServerCtrl != null) {
             new ServerOff(this).execute(iServerCtrl);
             iServerCtrl = null;
@@ -387,7 +390,7 @@ public class ConnectorNet
     }
 
     private void redirectOff() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "redirectOff");
+        if (debug) Log.i(TAG, "redirectOff");
         if (iReceiverCtrl != null) {
             iReceiverCtrl.redirectOff();
             iReceiverCtrl = null;
@@ -395,22 +398,22 @@ public class ConnectorNet
     }
 
     private void streamOff() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "streamOff");
+        if (debug) Log.i(TAG, "streamOff");
         if (iTransmitterCtrl != null) {
             iTransmitterCtrl.streamOff();
             iTransmitterCtrl = null;
         }
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "ThreadNetStop iTransmitterCtrl.streamOff() done");
+        if (debug) Log.i(TAG, "ThreadNetStop iTransmitterCtrl.streamOff() done");
     }
 
     @Override
     public void serverStopped() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "serverStopped");
+        if (debug) Log.i(TAG, "serverStopped");
     }
 
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "serverStarted");
+        if (debug) Log.i(TAG, "serverStarted");
         if (iServerCtrl == null) {
             if (setState(CallerState.Null, CallerState.GeneralFailure))
                 for (ICallNetListener listener : iCallNetworkListeners) listener.connectorFailure();
@@ -423,9 +426,9 @@ public class ConnectorNet
 
     @Override
     public void registerReceiverCtrl(IReceiverCtrl iReceiverCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerReceiverCtrl");
+        if (debug) Log.i(TAG, "registerReceiverCtrl");
         if (iReceiverCtrl == null) {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerReceiverCtrl iReceiverCtrl is null");
+            if (debug) Log.e(TAG, "registerReceiverCtrl iReceiverCtrl is null");
         } else {
             this.iReceiverCtrl = iReceiverCtrl;
         }
@@ -433,9 +436,9 @@ public class ConnectorNet
 
     @Override
     public void registerTransmitterCtrl(ITransmitterCtrl iTransmitterCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerTransmitterCtrl");
+        if (debug) Log.i(TAG, "registerTransmitterCtrl");
         if (iTransmitterCtrl == null) {
-            if (Settings.debug) Log.e(Tags.NET_CONNECTOR, "registerTransmitterCtrl iTransmitterCtrl is null");
+            if (debug) Log.e(TAG, "registerTransmitterCtrl iTransmitterCtrl is null");
         } else {
             this.iTransmitterCtrl = iTransmitterCtrl;
         }
@@ -443,9 +446,9 @@ public class ConnectorNet
 
     @Override
     public void registerClientCtrl(IClientCtrl iClientCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerClientCtrl");
+        if (debug) Log.i(TAG, "registerClientCtrl");
         if (iClientCtrl == null) {
-            if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "registerClientCtrl iClientCtrl is null");
+            if (debug) Log.i(TAG, "registerClientCtrl iClientCtrl is null");
         } else {
             this.iClientCtrl = iClientCtrl;
         }
@@ -454,17 +457,17 @@ public class ConnectorNet
     //TODO: нафиг это здесь?
     @Override
     public void messageSended() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "messageSended");
+        if (debug) Log.i(TAG, "messageSended");
     }
 
     @Override
     public void messageCantSend() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "messageCantSend");
+        if (debug) Log.i(TAG, "messageCantSend");
     }
 
     @Override
     public void disconnected() {
-        if (Settings.debug) Log.i(Tags.NET_CONNECTOR, "disconnected");
+        if (debug) Log.i(TAG, "disconnected");
     }
 
 }

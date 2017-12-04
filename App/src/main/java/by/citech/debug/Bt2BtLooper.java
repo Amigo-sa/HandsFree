@@ -1,6 +1,7 @@
 package by.citech.debug;
 
 import android.util.Log;
+
 import by.citech.data.StorageData;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
@@ -11,7 +12,28 @@ public class Bt2BtLooper
     private static final String TAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
 
+    //--------------------- settings
+
+    private int btFactor;
+    private int bt2btPacketSize;
     private byte[][] dataAssembled;
+
+    {
+        takeSettings();
+        applySettings();
+    }
+
+    private void applySettings() {
+        dataAssembled = new byte[btFactor][bt2btPacketSize];
+    }
+
+    private void takeSettings() {
+        btFactor = Settings.btFactor;
+        bt2btPacketSize = Settings.bt2btPacketSize;
+    }
+
+    //--------------------- non-settings
+
     private StorageData<byte[]> storageBtToNet;
     private StorageData<byte[][]> storageNetToBt;
     private boolean isRunning;
@@ -20,15 +42,12 @@ public class Bt2BtLooper
     public Bt2BtLooper(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
         this.storageBtToNet = storageBtToNet;
         this.storageNetToBt = storageNetToBt;
-        dataAssembled = new byte[Settings.bt2NetFactor][Settings.bt2btPacketSize];
         isRunning = false;
         isActive = false;
     }
 
     @Override
     public void activate() {
-        //TODO: разве не должно быть по умолчанию isRunning=false, чтобы вызывать из интерфейса?
-//      isRunning = true;
         isRunning = false;
         isActive = true;
         new Thread(() -> {
@@ -59,7 +78,7 @@ public class Bt2BtLooper
             dataAssembled[btCount] = storageBtToNet.getData();
             btCount++;
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d arrays of %d bytes each", btCount, Settings.bt2btPacketSize));
-            if (btCount == Settings.bt2NetFactor) {
+            if (btCount == btFactor) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 btCount = 0;
                 storageNetToBt.putData(dataAssembled);

@@ -74,6 +74,9 @@ public class Settings {
 
     //---------------- NETWORK
 
+    public static int netChunkSignificantBytes = btSignificantBytes;
+    public static int netChunkRsvdBytesOffset = btRsvdBytesOffset;
+    public static int netSendSize = btSendSize;
     public static String serverRemoteIpAddress = "192.168.0.126";
     public static int serverLocalPortNumber = 8080;
     public static int serverRemotePortNumber = 8080;

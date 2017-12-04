@@ -1,4 +1,4 @@
-package by.citech.util;
+package by.citech.gui;
 
 import android.widget.Button;
 
@@ -6,27 +6,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 import by.citech.param.Colors;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+import by.citech.util.Pair;
 
-public class Buttons {
+public class ButtonHelper {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_Buttons";
+    private static final boolean debug = Settings.debug;
+    private static final String TAG = Tags.BUTTON_HELPER;
 
     private static Map<String, Pair<Button[], boolean[]>> pairMap;
 
     //--------------------- singleton
 
-    private static volatile Buttons instance = null;
+    private static volatile ButtonHelper instance = null;
 
-    private Buttons() {
+    private ButtonHelper() {
         pairMap = new HashMap<>();
     }
 
-    public static Buttons getInstance() {
+    public static ButtonHelper getInstance() {
         if (instance == null) {
-            synchronized (Buttons.class) {
+            synchronized (ButtonHelper.class) {
                 if (instance == null) {
-                    instance = new Buttons();
+                    instance = new ButtonHelper();
                 }
             }
         }
@@ -57,17 +60,32 @@ public class Buttons {
         pairMap.remove(key);
     }
 
-    public static void disable(Button... buttons) {
-        for (Button button : buttons) {
-            button.setEnabled(false);
-            button.setBackgroundColor(Colors.GRAY);
-        }
+    public static void setColorLabel(Button button, String label, int color) {
+        button.setText(label);
+        button.setBackgroundColor(color);
+    }
+
+    public static void enable(Button button, String label, int color) {
+        button.setEnabled(true);
+        setColorLabel(button, label, color);
     }
 
     public static void enable(Button... buttons) {
         for (Button button : buttons) {
             button.setEnabled(true);
             button.setBackgroundColor(Colors.GREEN);
+        }
+    }
+
+    public static void disable(Button button, String label) {
+        button.setEnabled(false);
+        ButtonHelper.setColorLabel(button, label, Colors.GRAY);
+    }
+
+    public static void disable(Button... buttons) {
+        for (Button button : buttons) {
+            button.setEnabled(false);
+            button.setBackgroundColor(Colors.GRAY);
         }
     }
 

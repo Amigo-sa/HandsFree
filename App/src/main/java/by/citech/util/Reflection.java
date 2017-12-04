@@ -53,7 +53,7 @@ public class Reflection {
                         wasAccessible = field.isAccessible();
                         field.setAccessible(true);
                         cNames.put((T) field.get(null), field.getName());
-//                      result = field.getName();
+//                      result = field.getSettingName();
                         field.setAccessible(wasAccessible);
                         break;
                     } else {
@@ -87,7 +87,7 @@ public class Reflection {
                         if (debug) System.out.println("Value is matching. Got it!");
                         wasAccessible = field.isAccessible();
                         field.setAccessible(true);
-//                      cNames.put((T) field.get(null), field.getName());
+//                      cNames.put((T) field.get(null), field.getSettingName());
                         result = field.getName();
                         field.setAccessible(wasAccessible);
                         break;

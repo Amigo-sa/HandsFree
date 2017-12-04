@@ -11,12 +11,15 @@ import by.citech.element.ElementsMemCtrl;
 import by.citech.element.IElementAdd;
 import by.citech.element.IElementDel;
 import by.citech.element.IElementUpd;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 public class Contactor
         implements IElementDel<Contact>, IElementAdd<Contact>, IElementUpd<Contact> {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_Contactor";
+    private static final boolean debug = Settings.debug;
+    private static final String TAG = Tags.CONTACTOR;
+
     private ContactsDbCtrl dbCtrl;
     private IContactsListener iContactsListener;
     private ElementsMemCtrl<Contact> memCtrl;

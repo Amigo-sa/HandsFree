@@ -49,4 +49,18 @@ public class Tags {
     public static final String NET2BLE_STORE       = "WSD_NET2BLE_STORE";
     public static final String BLE2NET_STORE       = "WSD_BLE2NET_STORE";
 
+    public static final String AUDCODEC            = "WSD_AUDIOCODEC";
+    public static final String CONTACT             = "WSD_CONTACT";
+    public static final String CONTACTOR           = "WSD_CONTACTOR";
+    public static final String CONTACTS_DB_CTRL    = "WSD_CONTACTS_DB_CTRL";
+    public static final String CONTACTS_ADAPTER    = "WSD_CONTACTS_ADAPTER";
+    public static final String DIALOG_PROC         = "WSD_DIALOG_PROC";
+    public static final String ELEMENTS_MEM_CTRL   = "WSD_ELEMENTS_MEM_CTRL";
+    public static final String PREF_PROCESSOR      = "WSD_PREF_PROCESSOR";
+    public static final String CHOSEN_HELPER       = "WSD_CHOSEN_HELPER";
+    public static final String VIEW_HELPER         = "WSD_VIEW_HELPER";
+    public static final String EDITOR_HELPER       = "WSD_EDITOR_HELPER";
+    public static final String BUTTON_HELPER       = "WSD_BUTTON_HELPER";
+    public static final String ACTIVE_HELPER       = "WSD_ACTIVE_HELPER";
+
 }

@@ -27,6 +27,7 @@ public class ClientCtrlOkWebSocket
 
     private static final String TAG = Tags.CLT_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
+
     private WebSocket webSocket;
     private String status = "";
     private String url = "";

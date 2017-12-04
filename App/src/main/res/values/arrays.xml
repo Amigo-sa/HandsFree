@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="appMode">
+    <string-array name="opMode">
         <item>Normal</item>
         <item>Bt2AudOut</item>
         <item>AudIn2Bt</item>

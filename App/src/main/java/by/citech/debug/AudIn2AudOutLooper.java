@@ -19,20 +19,31 @@ import by.citech.param.Tags;
 public class AudIn2AudOutLooper
         implements IDebugListener, IReceiverReg, ITransmitter, IDebugCtrl {
 
-    private String TAG;
-    private boolean debug;
+    private static final String TAG = Tags.AUDIN2AUDOUT_LOOPER;
+    private static final boolean debug = Settings.debug;
+
+    //--------------------- settings
 
     private AudioCodecType codecType;
+    private AudioCodec audioCodec;
     private int codecFactor;
     private int audioBuffSizeBytes;
     private int audioBuffSizeShorts;
     private int buff2CodecFactor;
     private boolean audioSinglePacket;
+    private short[] dataBuff;
 
     {
-        TAG = Tags.AUDIN2AUDOUT_LOOPER;
-        debug = Settings.debug;
+        takeSettings();
+        applySettings();
+    }
 
+    private void applySettings() {
+        dataBuff = new short[audioBuffSizeShorts];
+        audioCodec = new AudioCodec(codecType);
+    }
+
+    private void takeSettings() {
         codecType = Settings.codecType;
         codecFactor = codecType.getDecodedShortsSize();
         audioBuffSizeBytes = Settings.audioBuffSizeBytes;
@@ -41,17 +52,15 @@ public class AudIn2AudOutLooper
         audioSinglePacket = Settings.audioSinglePacket;
     }
 
-    private AudioCodec audioCodec;
+    //--------------------- non-settings
+
     private IReceiver iReceiver;
     private ITransmitterCtrl iTransmitterCtrl;
     private IReceiverCtrl iReceiverCtrl;
-    private short[] dataBuff;
 
     public AudIn2AudOutLooper() {
         iReceiverCtrl = new ToAudioOut(this);
         iTransmitterCtrl = new FromAudioIn(this);
-        audioCodec = new AudioCodec(codecType);
-        dataBuff = new short[audioBuffSizeShorts];
     }
 
     @Override

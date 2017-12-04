@@ -2,10 +2,13 @@ package by.citech.codec.audio;
 
 import android.util.Log;
 
+import by.citech.param.Settings;
+import by.citech.param.Tags;
+
 public class AudioCodec implements ICodec {
 
-    private static final String TAG = "WSD_AudioCodec";
-    private static final boolean debug = true;
+    private static final String TAG = Tags.AUDCODEC;
+    private static final boolean debug = Settings.debug;
 
     private ICodec codec;
 

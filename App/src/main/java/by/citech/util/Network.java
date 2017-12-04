@@ -9,7 +9,7 @@ import java.util.*;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class NetworkInfo {
+public class Network {
 
     private static final String TAG = Tags.NET_INFO;
     private static final boolean debug = Settings.debug;

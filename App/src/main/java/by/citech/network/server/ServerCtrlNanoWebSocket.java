@@ -27,6 +27,7 @@ public class ServerCtrlNanoWebSocket
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
     private static final String TAG = Tags.SRV_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
+
     private WebSocket webSocket;
     private Handler handler;
     private IReceiver listener;

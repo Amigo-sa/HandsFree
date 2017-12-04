@@ -13,17 +13,38 @@ public class ToNet
 
     private static final String TAG = Tags.TO_NET;
     private static final boolean debug = Settings.debug;
-    private static final int dataChunkSize = Settings.bt2btPacketSize;
+
+    //--------------------- settings
+
+    private int dataChunkSize;
+    private int netSendSize;
+    private int netChunkSignificantBytes;
+    private byte[] dataChunk;
+
+    {
+        takeSettings();
+        applySettings();
+    }
+
+    private void takeSettings() {
+        dataChunkSize = Settings.bt2btPacketSize;
+        netSendSize = Settings.netSendSize;
+        netChunkSignificantBytes = Settings.netChunkSignificantBytes;
+    }
+
+    private void applySettings() {
+        dataChunk = new byte[dataChunkSize];
+    }
+
+    //--------------------- non-settings
 
     private ITransmitter iTransmitter;
-    private boolean isStreaming = false;
+    private boolean isStreaming;
     private StorageData<byte[]> source;
-    private byte[] dataChunk;
 
     public ToNet(ITransmitter iTransmitter, StorageData<byte[]> source) {
         this.iTransmitter = iTransmitter;
         this.source = source;
-        dataChunk = new byte[dataChunkSize];
     }
 
     public void prepareStream() {
@@ -48,7 +69,7 @@ public class ToNet
             }
             dataChunk = source.getData();
             if (dataChunk != null && dataChunk.length != 0) {
-                baos.write(dataChunk, 0, Settings.btSignificantBytes);
+                baos.write(dataChunk, 0, netChunkSignificantBytes);
             } else {
                 Log.e(TAG, "readed null from storage");
             }
@@ -56,13 +77,13 @@ public class ToNet
             bufferedDataSize = baos.size();
             if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
             //TODO: добавить логику обрезки на случай вычитки большего количества данных
-            if (bufferedDataSize == Settings.btSendSize) {
+            if (bufferedDataSize == netSendSize) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 iTransmitter.sendData(baos.toByteArray());
                 baos.reset();
-            } else if (bufferedDataSize > Settings.btSendSize) {
-                if (debug) Log.e(TAG, "run too much data in network output buffer");
-                return;
+            } else if (bufferedDataSize > netSendSize) {
+                Log.e(TAG, "run too much data in network output buffer");
+                baos.reset();
             }
         }
         if (debug) Log.i(TAG, "run done");

@@ -9,11 +9,14 @@ import android.view.View;
 import java.util.Map;
 
 import by.citech.R;
+import by.citech.param.Settings;
+import by.citech.param.Tags;
 
 public class DialogProcessor {
 
-    private static final boolean debug = true;
-    private static final String TAG = "WSD_DialogConstructor";
+    private static final boolean debug = Settings.debug;
+    private static final String TAG = Tags.DIALOG_PROC;
+
     private AppCompatActivity activity;
     private DialogState state;
 

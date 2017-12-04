@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+import by.citech.codec.audio.AudioCodec;
+import by.citech.codec.audio.AudioCodecType;
 import by.citech.data.StorageData;
 import by.citech.debug.TrafficAnalyzer;
 import by.citech.debug.ITrafficUpdate;
@@ -17,17 +19,39 @@ public class ToBluetooth
 
     private static final String TAG = Tags.TO_BLUETOOTH;
     private static final boolean debug = Settings.debug;
-    private static final int toBtFactor = Settings.btFactor;
-    private static final int btToBtSendSize = Settings.bt2btPacketSize;
-    private static final int btSignificantBytes = Settings.btSignificantBytes;
-    private static final int toBtSendSize = Settings.btSendSize;
-    private static final boolean singlePacket = Settings.btSinglePacket;
+
+    //--------------------- settings
+
+    private int toBtFactor;
+    private int btToBtSendSize;
+    private int btSignificantBytes;
+    private int toBtSendSize;
+    private boolean singlePacket;
+    private byte[][] dataAssembled;
+
+    {
+        takeSettings();
+        applySettings();
+    }
+
+    private void takeSettings() {
+        toBtFactor = Settings.btFactor;
+        btToBtSendSize = Settings.bt2btPacketSize;
+        btSignificantBytes = Settings.btSignificantBytes;
+        toBtSendSize = Settings.btSendSize;
+        singlePacket = Settings.btSinglePacket;
+    }
+
+    private void applySettings() {
+        dataAssembled = new byte[toBtFactor][btToBtSendSize];
+    }
+
+    //--------------------- non-settings
 
     private IReceiverReg iReceiverReg;
     private TrafficInfo trafficInfo;
     private boolean isRedirecting = false;
     private StorageData<byte[][]> source;
-    private byte[][] dataAssembled;
 
     public ToBluetooth(IReceiverReg iReceiverReg, StorageData<byte[][]> source) {
         if (iReceiverReg == null
@@ -37,7 +61,6 @@ public class ToBluetooth
         }
         this.iReceiverReg = iReceiverReg;
         this.source = source;
-        dataAssembled = new byte[toBtFactor][btToBtSendSize];
         trafficInfo = new TrafficInfo(TrafficNodes.NetIn, this);
         TrafficAnalyzer.getInstance().addTrafficInfo(trafficInfo);
     }

@@ -4,10 +4,14 @@ import android.os.AsyncTask;
 import android.util.Log;
 import by.citech.network.server.IServerCtrl;
 import by.citech.network.server.IServerOff;
+import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class ServerOff
         extends AsyncTask<IServerCtrl, Void, Void> {
+
+    private static final String TAG = Tags.SRV_SRVOFF;
+    private static final boolean debug = Settings.debug;
 
     private IServerOff iServerOff;
 
@@ -17,7 +21,7 @@ public class ServerOff
 
     @Override
     protected Void doInBackground(IServerCtrl... iServerCtrl) {
-        Log.i(Tags.SRV_SRVOFF, "doInBackground");
+        if (debug) Log.i(TAG, "doInBackground");
         if (iServerCtrl[0].isAliveServer()) {
             iServerCtrl[0].stopServer();
             while (iServerCtrl[0].isAliveServer()) {
@@ -27,9 +31,9 @@ public class ServerOff
                     e.printStackTrace();
                 }
             }
-            Log.i(Tags.SRV_SRVOFF, "doInBackground server stopped");
+            if (debug) Log.i(TAG, "doInBackground server stopped");
         } else {
-            Log.i(Tags.SRV_SRVOFF, "doInBackground server already stopped");
+            if (debug) Log.i(TAG, "doInBackground server already stopped");
         }
 
         return null;
@@ -37,7 +41,7 @@ public class ServerOff
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        Log.i(Tags.SRV_SRVOFF, "onPostExecute");
+        if (debug) Log.i(TAG, "onPostExecute");
         iServerOff.serverStopped();
     }
 
