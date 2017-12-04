@@ -1,4 +1,4 @@
-package by.citech.bluetoothlegatt;
+package by.citech.bluetoothlegatt.adapters;
 
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;

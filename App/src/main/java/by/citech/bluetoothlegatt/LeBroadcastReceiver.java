@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import by.citech.bluetoothlegatt.adapters.ControlAdapter;
+import by.citech.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.logic.IBluetoothListener;
 import by.citech.param.Settings;
 

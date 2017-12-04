@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.util.Log;
 
+import by.citech.bluetoothlegatt.adapters.ControlAdapter;
+import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.logic.IBluetoothListener;
 import by.citech.param.Settings;
 

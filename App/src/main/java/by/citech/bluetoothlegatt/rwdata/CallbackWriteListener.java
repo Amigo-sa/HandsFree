@@ -1,4 +1,4 @@
-package by.citech.bluetoothlegatt;
+package by.citech.bluetoothlegatt.rwdata;
 
 /**
  * Created by tretyak on 17.11.2017.
@@ -7,4 +7,5 @@ package by.citech.bluetoothlegatt;
 public interface CallbackWriteListener {
     void callbackIsDone();
     void rcvBtPktIsDone(byte[] data);
+    void MtuChangedDone(int mtu);
 }

@@ -4,7 +4,8 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 
-import by.citech.bluetoothlegatt.LeDeviceListAdapter;
+import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
+
 
 public interface IBluetoothListener {
     void changeOptionMenu();

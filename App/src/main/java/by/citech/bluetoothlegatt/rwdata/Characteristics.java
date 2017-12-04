@@ -1,4 +1,4 @@
-package by.citech.bluetoothlegatt;
+package by.citech.bluetoothlegatt.rwdata;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;

@@ -19,6 +19,8 @@ import android.util.Log;
 import java.util.List;
 import java.util.UUID;
 
+import by.citech.bluetoothlegatt.rwdata.CallbackWriteListener;
+import by.citech.bluetoothlegatt.rwdata.Requestable;
 import by.citech.data.SampleGattAttributes;
 import by.citech.debug.ITrafficUpdate;
 import by.citech.param.Settings;
@@ -28,7 +30,7 @@ import by.citech.param.Settings;
  * given Bluetooth LE device.
  */
 
-public class BluetoothLeService extends Service implements ITrafficUpdate {
+public class BluetoothLeService extends Service implements ITrafficUpdate, Requestable {
     private final static String TAG = "WSD_BluetoothLeService";
 
     private BluetoothManager mBluetoothManager;
@@ -98,7 +100,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-
                 super.onCharacteristicWrite(gatt, characteristic, status);
                 if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
                 if (mCallbackWriteListener != null)
@@ -149,7 +150,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
             if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
-
+            if(status==BluetoothGatt.GATT_SUCCESS)
+                mCallbackWriteListener.MtuChangedDone(mtu);
         }
 
     };
@@ -165,6 +167,11 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
        final Intent intent = new Intent(action);
        sendBroadcast(intent);
    }
+
+    @Override
+    public void requestMtu() {
+        mBluetoothGatt.requestMtu(80);//TODO: изменить на параметр или переменную
+    }
 
     public class LocalBinder extends Binder {
         public BluetoothLeService getService() {
@@ -215,9 +222,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
 
     /**
      * Connects to the GATT server hosted on the Bluetooth LE device.
-     *
      * @param address The device address of the destination device.
-     *
      * @return Return true if the connection is initiated successfully. The connection result
      *         is reported asynchronously through the
      *         {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
@@ -251,6 +256,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
         mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
@@ -286,7 +292,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
      * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
      * callback.
-     *
      * @param characteristic The characteristic to read from.
      */
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
@@ -301,11 +306,10 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
      * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt,
      * android.bluetooth.BluetoothGattCharacteristic, int)}
      * callback.
-     *
      * @param characteristic The characteristic write to.
      */
 
-    public void oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
+    public void  oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
         if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
@@ -315,7 +319,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     }
     /**
      * Enables or disables notification on a give characteristic.
-     *
      * @param characteristic Characteristic to act on.
      * @param enabled If true, enable notification.  False otherwise.
      */
@@ -343,7 +346,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate {
     /**
      * Retrieves a list of supported GATT services on the connected device. This should be
      * invoked only after {@code BluetoothGatt#discoverServices()} completes successfully.
-     *
      * @return A {@code List} of supported services.
      */
     public List<BluetoothGattService> getSupportedGattServices() {

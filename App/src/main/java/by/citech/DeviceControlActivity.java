@@ -45,8 +45,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.BluetoothLeService;
-import by.citech.bluetoothlegatt.LeDeviceListAdapter;
 import by.citech.contact.ActiveContactState;
 import by.citech.contact.Contact;
 import by.citech.contact.ContactState;

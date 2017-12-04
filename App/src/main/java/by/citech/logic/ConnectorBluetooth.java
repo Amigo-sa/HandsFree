@@ -9,14 +9,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import by.citech.bluetoothlegatt.adapters.ControlAdapter;
+import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.BluetoothLeService;
-import by.citech.bluetoothlegatt.Characteristics;
-import by.citech.bluetoothlegatt.ControlAdapter;
 import by.citech.bluetoothlegatt.LeBroadcastReceiver;
 import by.citech.bluetoothlegatt.LeConnector;
-import by.citech.bluetoothlegatt.LeDataTransmitter;
-import by.citech.bluetoothlegatt.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.LeScanner;
+import by.citech.bluetoothlegatt.rwdata.Characteristics;
+import by.citech.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.bluetoothlegatt.StorageListener;
 import by.citech.data.StorageData;
 import by.citech.debug.IDebugListener;

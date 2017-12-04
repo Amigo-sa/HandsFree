@@ -1,10 +1,11 @@
-package by.citech.bluetoothlegatt;
+package by.citech.bluetoothlegatt.rwdata;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
 import java.util.ArrayList;
 
+import by.citech.bluetoothlegatt.BluetoothLeService;
 import by.citech.data.StorageData;
 import by.citech.exchange.ITransmitter;
 import by.citech.logic.IBluetoothListener;
@@ -14,23 +15,24 @@ import by.citech.param.Settings;
  * Created by tretyak on 22.11.2017.
  */
 
-public class LeDataTransmitter implements CallbackWriteListener{
+public class LeDataTransmitter implements CallbackWriteListener {
 
     private final static String TAG = "WSD_LeDataTransmitter";
 
     private BluetoothLeService mBluetoothLeService;
     private Characteristics characteristics;
     // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
+    private BluetoothGattCharacteristic characteristic_write;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private IBluetoothListener mIBluetoothListener;
-
     private StorageData<byte[][]> storageToBt;
     private StorageData<byte[]> storageFromBt;
     private boolean isRunning;
     private boolean Callback = true;
     private int lostWritePkt = 0;
     private ArrayList<ITransmitter> iRxDataListeners;
-    private BluetoothGattCharacteristic characteristic_write;
+    private boolean isMtuChanged = false;
+
 
     public LeDataTransmitter(Characteristics characteristics,
                              IBluetoothListener mIBluetoothListener) {
@@ -65,6 +67,8 @@ public class LeDataTransmitter implements CallbackWriteListener{
         }
     }
 
+    //-----------------Trasmit data -----------------------------
+
     //нотификацию с устройства
     public void onlyReceiveData() {
         if (Settings.debug) Log.i(TAG, "onlyReceiveData()");
@@ -78,7 +82,15 @@ public class LeDataTransmitter implements CallbackWriteListener{
 
     public void enableTransmitData() {
         if (Settings.debug) Log.i(TAG, "enableTransmitData()");
+        mBluetoothLeService.requestMtu();
         if(characteristics.isEmpty()){
+            while (!isMtuChanged){
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             notifyCharacteristicStart();
             characteristic_write = characteristics.getWriteCharacteristic();
             writeThreadStart();
@@ -127,7 +139,15 @@ public class LeDataTransmitter implements CallbackWriteListener{
             }
     }
 
+
     //---------------------- Methods for write -------------------------
+
+    // Прослушка  калбэка onMtuChanged
+    @Override
+    public void MtuChangedDone(int mtu) {
+        if (Settings.debug) Log.i(TAG, "MtuChangedDone() = " + mtu);
+        isMtuChanged = true;
+    }
 
     private void writeThreadStart() {
         new Thread(new Runnable() {
@@ -136,7 +156,7 @@ public class LeDataTransmitter implements CallbackWriteListener{
                 byte[][] arrayData = new byte[Settings.bt2NetFactor][Settings.bt2btPacketSize];
                 int numBtPkt = 0;
                 isRunning = true;
-                int pktSize = (Settings.btSinglePacket) ? Settings.audioIn2BtFactor : Settings.bt2NetFactor;
+                int pktSize = (Settings.btSinglePacket) ? 1 : Settings.bt2NetFactor;
                 while (isRunning) {
 
                     if (!storageToBt.isEmpty() && numBtPkt == 0) {
@@ -172,28 +192,6 @@ public class LeDataTransmitter implements CallbackWriteListener{
             }
         }).start();
     }
-
-
-//    if (!storageToBt.isEmpty() && Callback) {
-//        writeByteArrayData(storageToBt.getData()[0]);
-//        Callback = false;
-//    }
-//
-//                        try {
-//        Thread.sleep(Settings.btLatencyMs);
-//    } catch (InterruptedException e) {
-//        e.printStackTrace();
-//    }
-//
-//    // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
-//                        if (!Callback) {
-//        Callback = true;
-//        if (Settings.debug)
-//            Log.e(TAG, "num lost write package is " + lostWritePkt++);
-//    }
-
-
-
     // Прослушка  калбэка onWriteCharacteristic
     @Override
     public void callbackIsDone() {
