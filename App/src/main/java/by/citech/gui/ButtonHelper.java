@@ -45,19 +45,25 @@ public class ButtonHelper {
             isEnabledArr[i] = buttonArr[i].isEnabled();
         }
         pairMap.put(key, new Pair<>(buttonArr, isEnabledArr));
-        disable(buttonArr);
+        disableGray(buttonArr);
     }
 
     public void releaseState(String key) {
         Pair<Button[], boolean[]> pair = pairMap.get(key);
         for (int i = 0; i < pair.getX().length; i++) {
             if (pair.getY()[i]) {
-                enable(pair.getX()[i]);
+                enableGreen(pair.getX()[i]);
             } else {
-                disable(pair.getX()[i]);
+                disableGray(pair.getX()[i]);
             }
         }
         pairMap.remove(key);
+    }
+
+    //--------------------- set
+
+    public static void setColor(Button button, int color) {
+        button.setBackgroundColor(color);
     }
 
     public static void setColorLabel(Button button, String label, int color) {
@@ -65,24 +71,33 @@ public class ButtonHelper {
         button.setBackgroundColor(color);
     }
 
-    public static void enable(Button button, String label, int color) {
+    //--------------------- enableGreen
+
+    public static void enable(Button button, int color) {
+        button.setEnabled(true);
+        setColor(button, color);
+    }
+
+    public static void enable(Button button, int color, String label) {
         button.setEnabled(true);
         setColorLabel(button, label, color);
     }
 
-    public static void enable(Button... buttons) {
+    public static void enableGreen(Button... buttons) {
         for (Button button : buttons) {
             button.setEnabled(true);
             button.setBackgroundColor(Colors.GREEN);
         }
     }
 
-    public static void disable(Button button, String label) {
+    //--------------------- disableGray
+
+    public static void disableGray(Button button, String label) {
         button.setEnabled(false);
         ButtonHelper.setColorLabel(button, label, Colors.GRAY);
     }
 
-    public static void disable(Button... buttons) {
+    public static void disableGray(Button... buttons) {
         for (Button button : buttons) {
             button.setEnabled(false);
             button.setBackgroundColor(Colors.GRAY);

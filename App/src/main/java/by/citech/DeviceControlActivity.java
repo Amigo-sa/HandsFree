@@ -38,6 +38,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,7 +82,7 @@ import static by.citech.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, IDebugListener, IContactsListener, LocationListener {
+        implements INetInfoListener, IBluetoothListener, IContactsListener, LocationListener {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -184,15 +185,17 @@ public class DeviceControlActivity
         editTextSearch = findViewById(R.id.editTextSearch);
         editTextContactName = findViewById(R.id.editTextContactName);
         editTextContactIp = findViewById(R.id.editTextContactIp);
+        btnGreen = findViewById(R.id.btnGreen);
+        btnRed = findViewById(R.id.btnRed);
+        animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
 
         findViewById(R.id.btnClearContact).setOnClickListener((v) -> clickBtnClearContact());
         findViewById(R.id.btnAddContact).setOnClickListener((v) -> clickBtnAddContact());
         btnDelContact.setOnClickListener((v) -> clickBtnDelContact());
         btnSaveContact.setOnClickListener((v) -> clickBtnSaveContact());
         btnCancelContact.setOnClickListener((v) -> clickBtnCancelContact());
-        btnGreen = findViewById(R.id.btnGreen);
-        btnRed = findViewById(R.id.btnRed);
-        animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
+        btnGreen.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
+        btnRed.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
 
         buttonHelper = ButtonHelper.getInstance();
         viewHelper = new ViewHelper(scanView, mainView, viewContactEditor, viewChosenContact, editTextSearch,
@@ -205,7 +208,7 @@ public class DeviceControlActivity
 
         caller = Caller.getInstance()
                 .setiCallUiListener(viewHelper)
-                .setiDebugListener(this)
+                .setiDebugListener(viewHelper)
                 .setiCallNetListener(viewHelper)
                 .setiNetInfoListener(this)
                 .setiBluetoothListener(this);
@@ -259,14 +262,6 @@ public class DeviceControlActivity
         // привязываем сервис
         bindService(gattServiceIntent, caller.getServiceConnection(), BIND_AUTO_CREATE);
 
-        btnGreen.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
-        btnRed.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
-        animCall.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation animation) {}
-            @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {viewHelper.startCallAnim();}}
-            @Override public void onAnimationRepeat(Animation animation) {}
-        });
-
         caller.build();
     }
 
@@ -306,14 +301,14 @@ public class DeviceControlActivity
     protected void onStop() {
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
+        unbindService(connectorBluetooth.mServiceConnection);
+        connectorBluetooth.closeLeService();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (debug) Log.w(TAG, "onDestroy");
-        unbindService(connectorBluetooth.mServiceConnection);
-        connectorBluetooth.closeLeService();
     }
 
     //-------------------------- menu
@@ -346,6 +341,7 @@ public class DeviceControlActivity
             getSupportActionBar().setCustomView(R.layout.actionbar);
         }
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -937,64 +933,6 @@ public class DeviceControlActivity
                 }
             }
 //        });
-    }
-
-    //--------------------- debug
-
-    private CallerState getCallerState() {
-        return Caller.getInstance().getCallerState();
-    }
-
-    private String getCallerStateName() {
-        return Caller.getInstance().getCallerState().getName();
-    }
-
-    @Override
-    public void startDebug() {
-        switch (opMode) {
-            case Bt2AudOut:
-            case AudIn2Bt:
-            case AudIn2AudOut:
-            case Bt2Bt:
-            case Net2Net:
-                viewHelper.setStartDebug();
-                break;
-            case Record:
-                switch (getCallerState()) {
-                    case DebugPlay:
-                        viewHelper.setRecordPlaying();
-                        break;
-                    case DebugRecord:
-                        viewHelper.setRecordRecording();
-                        break;
-                    default:
-                        if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
-                        break;
-                }
-                break;
-            case Normal:
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void stopDebug() {
-        switch (opMode) {
-            case Bt2AudOut:
-            case AudIn2Bt:
-            case AudIn2AudOut:
-            case Bt2Bt:
-            case Net2Net:
-                viewHelper.setStopDebug();
-                break;
-            case Record:
-                viewHelper.setRecordStop();
-                break;
-            case Normal:
-            default:
-                break;
-        }
     }
 
 }

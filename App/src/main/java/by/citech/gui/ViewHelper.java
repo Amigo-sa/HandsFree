@@ -8,6 +8,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import by.citech.contact.Contact;
+import by.citech.debug.IDebugListener;
+import by.citech.logic.Caller;
+import by.citech.logic.CallerState;
 import by.citech.logic.ICallNetListener;
 import by.citech.param.Colors;
 import by.citech.param.OpMode;
@@ -15,7 +18,7 @@ import by.citech.param.Settings;
 import by.citech.param.Tags;
 import by.citech.util.Contacts;
 
-public class ViewHelper implements ICallUiListener, ICallNetListener {
+public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugListener {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.VIEW_HELPER;
@@ -88,24 +91,33 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
             case Bt2AudOut:
             case AudIn2Bt:
             case AudIn2AudOut:
-                btnCallSetEnabled(btnGreen, "PLAY");
-                ButtonHelper.disable(btnRed, "STOP");
+                enableBtnCall(btnGreen, "PLAY");
+                ButtonHelper.disableGray(btnRed, "STOP");
                 break;
             case Bt2Bt:
             case Net2Net:
-                btnCallSetEnabled(btnGreen, "LBACK ON");
-                ButtonHelper.disable(btnRed, "LBACK OFF");
+                enableBtnCall(btnGreen, "LBACK ON");
+                ButtonHelper.disableGray(btnRed, "LBACK OFF");
                 break;
             case Record:
-                btnCallSetEnabled(btnGreen, "RECORD");
-                ButtonHelper.disable(btnRed, "PLAY");
+                enableBtnCall(btnGreen, "RECORD");
+                ButtonHelper.disableGray(btnRed, "PLAY");
                 break;
             case Normal:
             default:
-                ButtonHelper.disable(btnGreen, "IDLE");
-                ButtonHelper.disable(btnRed, "IDLE");
+                ButtonHelper.disableGray(btnGreen, "IDLE");
+                ButtonHelper.disableGray(btnRed, "IDLE");
                 break;
         }
+
+        prepare();
+    }
+
+    private void prepare() {
+        animCall.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationStart(Animation animation) {}
+            @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {startCallAnim();}}
+            @Override public void onAnimationRepeat(Animation animation) {}});
     }
 
     public boolean isMainViewHidden() {
@@ -176,14 +188,14 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
         btnDelContact.setVisibility(View.GONE);
         btnSaveContact.setText("ADD");
         Contacts.setContactInfo(editTextContactName, editTextContactIp);
-        ButtonHelper.disable(btnDelContact, btnSaveContact, btnCancelContact);
+        ButtonHelper.disableGray(btnDelContact, btnSaveContact, btnCancelContact);
     }
 
     public void setEditorEdit(Contact contactToEdit) {
         btnSaveContact.setText("SAVE");
         Contacts.setContactInfo(contactToEdit, editTextContactName, editTextContactIp);
-        ButtonHelper.enable(btnDelContact);
-        ButtonHelper.disable(btnSaveContact, btnCancelContact);
+        ButtonHelper.enableGreen(btnDelContact);
+        ButtonHelper.disableGray(btnSaveContact, btnCancelContact);
         btnDelContact.setVisibility(View.VISIBLE);
     }
 
@@ -196,7 +208,7 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
     }
 
     public void setEditorFieldChanged() {
-        ButtonHelper.enable(btnSaveContact, btnCancelContact);
+        ButtonHelper.enableGreen(btnSaveContact, btnCancelContact);
     }
 
     //--------------------- ICallNetListener
@@ -204,92 +216,92 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
     @Override
     public void callFailed() {
         if (debug) Log.i(TAG, "callFailed");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "FAIL");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "FAIL");
     }
 
     @Override
     public void callEndedExternally() {
         if (debug) Log.i(TAG, "callEndedExternally");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "ENDED");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "ENDED");
     }
 
     @Override
     public void callOutcomingConnected() {
         if (debug) Log.i(TAG, "callOutcomingConnected");
-        btnCallSetEnabled(btnGreen, "CALLING...");
-        btnCallSetEnabled(btnRed, "CANCEL");
+        enableBtnCall(btnGreen, "CALLING...");
+        enableBtnCall(btnRed, "CANCEL");
     }
 
     @Override
     public void callOutcomingAccepted() {
         if (debug) Log.i(TAG, "callOutcomingAccepted");
-        ButtonHelper.disable(btnGreen, "ON CALL");
-        btnCallSetEnabled(btnRed, "END CALL");
+        ButtonHelper.disableGray(btnGreen, "ON CALL");
+        enableBtnCall(btnRed, "END CALL");
         stopCallAnim();
     }
 
     @Override
     public void callOutcomingRejected() {
         if (debug) Log.i(TAG, "callOutcomingRejected");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "BUSY");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "BUSY");
         stopCallAnim();
     }
 
     @Override
     public void callOutcomingFailed() {
         if (debug) Log.i(TAG, "callOutcomingFailed");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "OFFLINE");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "OFFLINE");
         stopCallAnim();
     }
 
     @Override
     public void callOutcomingInvalid() {
         if (debug) Log.i(TAG, "callOutcomingInvalid");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "INVALID");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "INVALID");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingDetected() {
         if (debug) Log.i(TAG, "callIncomingDetected");
-        btnCallSetEnabled(btnGreen, "INCOMING...");
-        btnCallSetEnabled(btnRed, "REJECT");
+        enableBtnCall(btnGreen, "INCOMING...");
+        enableBtnCall(btnRed, "REJECT");
         startCallAnim();
     }
 
     @Override
     public void callIncomingCanceled() {
         if (debug) Log.i(TAG, "callIncomingCanceled");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "CANCELED");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "CANCELED");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingFailed() {
         if (debug) Log.i(TAG, "callIncomingFailed");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "INCOME FAIL");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "INCOME FAIL");
         stopCallAnim();
     }
 
     @Override
     public void connectorFailure() {
         if (debug) Log.e(TAG, "connectorFailure");
-        ButtonHelper.disable(btnGreen, "ERROR");
-        ButtonHelper.disable(btnRed, "ERROR");
+        ButtonHelper.disableGray(btnGreen, "ERROR");
+        ButtonHelper.disableGray(btnRed, "ERROR");
     }
 
     @Override
     public void connectorReady() {
         if (debug) Log.i(TAG, "connectorReady");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "IDLE");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "IDLE");
     }
 
     //--------------------- ICallUiListener
@@ -297,88 +309,61 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
     @Override
     public void callOutcomingStarted() {
         if (debug) Log.i(TAG, "callOutcomingStarted");
-        ButtonHelper.disable(btnGreen, "CALLING...");
-        btnCallSetEnabled(btnRed, "CANCEL");
+        ButtonHelper.disableGray(btnGreen, "CALLING...");
+        enableBtnCall(btnRed, "CANCEL");
         startCallAnim();
     }
 
     @Override
     public void callEndedInternally() {
         if (debug) Log.i(TAG, "callEndedInternally");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "ENDED");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "ENDED");
     }
 
     @Override
     public void callOutcomingCanceled() {
         if (debug) Log.i(TAG, "callOutcomingCanceled");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "CANCELED");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "CANCELED");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingRejected() {
         if (debug) Log.i(TAG, "callIncomingRejected");
-        btnCallSetEnabled(btnGreen, "CALL");
-        ButtonHelper.disable(btnRed, "REJECTED");
+        enableBtnCall(btnGreen, "CALL");
+        ButtonHelper.disableGray(btnRed, "REJECTED");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingAccepted() {
         if (debug) Log.i(TAG, "callIncomingAccepted");
-        ButtonHelper.disable(btnGreen, "ON CALL");
-        btnCallSetEnabled(btnRed, "END CALL");
+        ButtonHelper.disableGray(btnGreen, "ON CALL");
+        enableBtnCall(btnRed, "END CALL");
         stopCallAnim();
-    }
-
-    //--------------------- stopDebug
-
-
-    public void setStopDebug() {
-        ButtonHelper.enable(btnGreen);
-        ButtonHelper.disable(btnRed);
-    }
-
-    //--------------------- startDebug
-
-    public void setStartDebug() {
-        ButtonHelper.disable(btnGreen);
-        ButtonHelper.enable(btnRed);
-    }
-
-    //--------------------- record
-
-    public void setRecordPlaying() {
-        ButtonHelper.disable(btnGreen, "PLAYING");
-        btnCallSetEnabled(btnRed, "STOP");
-    }
-
-
-    public void setRecordRecording() {
-        ButtonHelper.disable(btnGreen, "RECORDING");
-        btnCallSetEnabled(btnRed, "STOP");
-    }
-
-    public void setRecordStop() {
-        btnCallSetEnabled(btnGreen, "PLAY");
-        ButtonHelper.disable(btnRed, "RECORDED");
     }
 
     //--------------------- call buttons
 
-    public void btnCallSetEnabled(Button button, String label) {
-        int color;
+    private int getColorBtnCall(Button button) {
         if (button == btnGreen) {
-            color = Colors.GREEN;
+            return Colors.GREEN;
         } else if (button == btnRed) {
-            color = Colors.RED;
+            return Colors.RED;
         } else {
-            color = Colors.GRAY;
-            Log.e(TAG, "btnCallSetEnabled color not defined");
+            Log.e(TAG, "enableBtnCall color not defined");
+            return Colors.GRAY;
         }
-        ButtonHelper.enable(button, label, color);
+    }
+
+    public void enableBtnCall(Button button) {
+        ButtonHelper.enable(button, getColorBtnCall(button));
+    }
+
+    public void enableBtnCall(Button button, String label) {
+        ButtonHelper.enable(button, getColorBtnCall(button), label);
     }
 
     public void startCallAnim() {
@@ -391,6 +376,69 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
         if (debug) Log.i(TAG, "stopCallAnim");
         btnGreen.clearAnimation();
         isCallAnim = false;
+    }
+
+    //--------------------- IDebugListener
+
+    private CallerState getCallerState() {
+        return Caller.getInstance().getCallerState();
+    }
+
+    private String getCallerStateName() {
+        return Caller.getInstance().getCallerState().getName();
+    }
+
+    @Override
+    public void startDebug() {
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
+                ButtonHelper.disableGray(btnGreen);
+                enableBtnCall(btnRed);
+                break;
+            case Record:
+                switch (getCallerState()) {
+                    case DebugPlay:
+                        ButtonHelper.disableGray(btnGreen, "PLAYING");
+                        enableBtnCall(btnRed, "STOP");
+                        break;
+                    case DebugRecord:
+                        ButtonHelper.disableGray(btnGreen, "RECORDING");
+                        enableBtnCall(btnRed, "STOP");
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
+                        break;
+                }
+                break;
+            case Normal:
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void stopDebug() {
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
+                ButtonHelper.enableGreen(btnGreen);
+                ButtonHelper.disableGray(btnRed);
+                break;
+            case Record:
+                enableBtnCall(btnGreen, "PLAY");
+                ButtonHelper.disableGray(btnRed, "RECORDED");
+                break;
+            case Normal:
+            default:
+                break;
+        }
     }
 
 }

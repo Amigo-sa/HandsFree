@@ -13,11 +13,10 @@ public class Settings {
 
     public static DataSource dataSource = DataSource.BLUETOOTH;
 //  public static DataSource dataSource = DataSource.MICROPHONE;
-    public static OpMode opMode;
+    public static OpMode opMode = OpMode.Normal;
 //  public static OpMode opMode = OpMode.AudIn2Bt;
 //  public static OpMode opMode = OpMode.Bt2AudOut;
 //  public static OpMode opMode = OpMode.AudIn2AudOut;
-//  public static OpMode opMode = OpMode.Normal;
 //  public static OpMode opMode = OpMode.Bt2Bt;
 //  public static OpMode opMode = OpMode.Net2Net; //TODO: реализовать
 //  public static OpMode opMode = OpMode.Record;

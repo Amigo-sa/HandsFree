@@ -71,6 +71,7 @@
     <string name="hint_id">Contact\'s ID…</string>
 
     <!-- Settings -->
-    <string name="opMode">appMode</string>
+    <string name="opMode">opMode</string>
+    <string name="btLatencyMs">btLatencyMs</string>
 
 </resources>

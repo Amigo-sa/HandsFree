@@ -20,10 +20,19 @@ public class CallUi
     //--------------------- settings
 
     private OpMode opMode;
+    private boolean isInitiated;
 
     {
+        initiate();
+    }
+
+    private void initiate() {
         takeSettings();
         applySettings();
+        iCallUiListeners = new ArrayList<>();
+        iCallUiExchangeListeners = new ArrayList<>();
+        iDebugListeners = new ArrayList<>();
+        isInitiated = true;
     }
 
     private void takeSettings() {
@@ -45,9 +54,6 @@ public class CallUi
     private static volatile CallUi instance = null;
 
     private CallUi() {
-        iCallUiListeners = new ArrayList<>();
-        iCallUiExchangeListeners = new ArrayList<>();
-        iDebugListeners = new ArrayList<>();
     }
 
     public static CallUi getInstance() {
@@ -57,6 +63,8 @@ public class CallUi
                     instance = new CallUi();
                 }
             }
+        } else if (!instance.isInitiated) {
+            instance.initiate();
         }
         return instance;
     }
@@ -93,11 +101,23 @@ public class CallUi
          return Caller.getInstance().setState(fromCallerState, toCallerState);
     }
 
+
+    public void destruct() {
+        isInitiated = false;
+        iCallUiListeners.clear();
+        iCallUiListeners = null;
+        iCallUiExchangeListeners.clear();
+        iCallUiExchangeListeners = null;
+        iDebugListeners.clear();
+        iDebugListeners = null;
+    }
+
+
     //--------------------- main
 
     @Override
     public void onClickBtnGreen() {
-        if (debug) Log.i(TAG, "onClickBtnGreen");
+        if (debug) Log.w(TAG, "onClickBtnGreen opMode is " + opMode.getSettingName());
         switch (opMode) {
             case AudIn2Bt:
             case Bt2AudOut:

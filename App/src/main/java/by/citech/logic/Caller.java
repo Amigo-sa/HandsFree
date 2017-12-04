@@ -31,10 +31,10 @@ public class Caller {
 
     {
         initiate();
-        isInitiated = true;
     }
 
     private void initiate() {
+        isInitiated = true;
         takeSettings();
         applySettings();
     }
@@ -201,6 +201,7 @@ public class Caller {
             connectorBluetooth = null;
         }
         if (callUi != null) {
+            callUi.destruct();
             callUi = null;
         }
         if (connectorNet != null) {
@@ -228,7 +229,6 @@ public class Caller {
                 .setStorageToBt(audIn2BtStorage)
                 .setmHandler(new Handler());
 
-        connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -236,6 +236,7 @@ public class Caller {
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
+        connectorBluetooth.build();
         iDebugCtrl.activate();
     }
 
@@ -256,7 +257,6 @@ public class Caller {
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler());
 
-        connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -264,6 +264,7 @@ public class Caller {
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
+        connectorBluetooth.build();
         iDebugCtrl.activate();
     }
 
@@ -308,8 +309,6 @@ public class Caller {
                 .setStorageFromBt(storageBt2Net)
                 .setStorageToBt(storageNet2Bt);
 
-        connectorBluetooth.build();
-
         callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
                 .addiDebugListener(iDebugListener)
@@ -317,6 +316,7 @@ public class Caller {
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
+        connectorBluetooth.build();
         iDebugCtrl.activate();
     }
 
@@ -341,7 +341,6 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt);
 
-        connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
@@ -350,6 +349,7 @@ public class Caller {
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
+        connectorBluetooth.build();
         iDebugCtrl.activate();
     }
 
@@ -377,7 +377,6 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt);
 
-        connectorBluetooth.build();
 
         callUi = CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
@@ -392,6 +391,7 @@ public class Caller {
                 .setiNetInfoListener(iNetInfoListener)
                 .setHandler(handlerExtended);
 
+        connectorBluetooth.build();
         connectorNet.build();
     }
 
