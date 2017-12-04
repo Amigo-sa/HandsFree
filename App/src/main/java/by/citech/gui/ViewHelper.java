@@ -122,20 +122,12 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
         ScanView.setVisibility(View.GONE);
     }
 
-    public void showEditor() {
-        MainView.setVisibility(View.GONE);
-        viewContactEditor.setVisibility(View.VISIBLE);
-    }
-
     public void showScaner() {
         MainView.setVisibility(View.GONE);
         ScanView.setVisibility(View.VISIBLE);
     }
 
-    public void hideEditor() {
-        MainView.setVisibility(View.VISIBLE);
-        viewContactEditor.setVisibility(View.GONE);
-    }
+    //--------------------- chosen
 
     public void showChosen() {
         viewChosenContact.setVisibility(View.VISIBLE);
@@ -161,6 +153,16 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
     }
 
     //--------------------- editor
+
+    public void showEditor() {
+        MainView.setVisibility(View.GONE);
+        viewContactEditor.setVisibility(View.VISIBLE);
+    }
+
+    public void hideEditor() {
+        MainView.setVisibility(View.VISIBLE);
+        viewContactEditor.setVisibility(View.GONE);
+    }
 
     public String getEditorContactNameText() {
         return editTextContactName.getText().toString();
@@ -196,7 +198,6 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
     public void setEditorFieldChanged() {
         ButtonHelper.enable(btnSaveContact, btnCancelContact);
     }
-
 
     //--------------------- ICallNetListener
 
@@ -340,12 +341,12 @@ public class ViewHelper implements ICallUiListener, ICallNetListener {
         ButtonHelper.disable(btnRed);
     }
 
+    //--------------------- startDebug
+
     public void setStartDebug() {
         ButtonHelper.disable(btnGreen);
         ButtonHelper.enable(btnRed);
     }
-
-    //--------------------- startDebug
 
     //--------------------- record
 

@@ -95,9 +95,6 @@ public class DeviceControlActivity
     private static final int OTHER_CONNECTED_DEVICE = 5;
 
     // цвета
-    private static final int GREEN = Colors.GREEN;
-    private static final int GRAY = Colors.GRAY;
-    private static final int RED = Colors.RED;
     private static final int DARKCYAN = Colors.DARKCYAN;
     private static final int DARKKHAKI = Colors.DARKKHAKI;
 
