@@ -14,30 +14,22 @@ public class Presetter {
             switch (opMode) {
                 case Bt2Bt:
                     Settings.opMode = OpMode.Bt2Bt;
-                    Settings.btSinglePacket = false;
-                    Settings.btFactor = Settings.bt2NetFactor;
                     break;
                 case AudIn2Bt:
                     Settings.opMode = OpMode.AudIn2Bt;
                     Settings.btSinglePacket = true;
-                    Settings.audioSingleFrame = true;
-                    Settings.audioBuffIsShorts = true;
+                    Settings.audioSinglePacket = true;
                     break;
                 case Bt2AudOut:
                     Settings.opMode = OpMode.Bt2AudOut;
                     Settings.btSinglePacket = true;
-                    Settings.audioSingleFrame = true;
-                    Settings.audioBuffIsShorts = true;
+                    Settings.audioSinglePacket = true;
                     break;
                 case AudIn2AudOut:
                     Settings.opMode = OpMode.AudIn2AudOut;
-                    Settings.audioSingleFrame = false;
-                    Settings.audioBuffSizeBytes = 24000;
-                    Settings.audioBuffIsShorts = true;
+                    Settings.audioSinglePacket = false;
                     break;
                 case Normal:
-                    Settings.opMode = OpMode.Normal;
-                    Settings.btSinglePacket = false;
                     break;
                 default:
                     Log.e(TAG, "no matches for opMode, set to default");

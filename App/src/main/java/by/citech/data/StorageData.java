@@ -18,6 +18,9 @@ public class StorageData<T> {
     public StorageData(String TAG) {
         this.TAG = TAG;
         фифошка = new ArrayDeque<>();
+        debugGetSession = false;
+        debugPutSession = false;
+        isWriteLocked = false;
     }
 
     public void setWriteLocked(boolean writeLocked) {

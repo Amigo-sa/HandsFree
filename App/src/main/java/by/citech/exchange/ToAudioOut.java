@@ -2,6 +2,7 @@ package by.citech.exchange;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Build;
 import android.util.Log;
@@ -17,7 +18,6 @@ public class ToAudioOut
 
     //--------------------- settings
 
-    private boolean audioBuffIsShorts;
     private int audioStreamType;
     private int audioUsage;
     private int audioContentType;
@@ -29,16 +29,11 @@ public class ToAudioOut
     private int audioBuffSizeShorts;
 
     {
-        initiate();
-    }
-
-    private void initiate() {
         takeSettings();
         applySettings();
     }
 
     private void takeSettings() {
-        audioBuffIsShorts = Settings.audioBuffIsShorts;
         audioStreamType = Settings.audioStreamType;
         audioUsage = Settings.audioUsage;
         audioContentType = Settings.audioContentType;
@@ -46,9 +41,7 @@ public class ToAudioOut
         audioRate = Settings.audioRate;
         audioOutChannel = Settings.audioOutChannel;
         audioMode = Settings.audioMode;
-        audioBuffSizeBytes = Settings.audioSingleFrame
-                ? (Settings.audioCodecType.getDecodedShortsSize() * 2)
-                : Settings.audioBuffSizeBytes;
+        audioBuffSizeBytes = Settings.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
     }
 
@@ -60,7 +53,6 @@ public class ToAudioOut
     private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
     private boolean isRedirecting;
-    private boolean isChecked;
 
     public ToAudioOut(IReceiverReg iReceiverReg) {
         this.iReceiverReg = iReceiverReg;
@@ -100,7 +92,6 @@ public class ToAudioOut
     @Override
     public void redirectOff() {
         if (debug) Log.i(TAG, "redirectOff");
-        isChecked = false;
         isRedirecting = false;
         iReceiverReg.registerReceiver(null);
         if (audioTrack != null) {
@@ -128,20 +119,7 @@ public class ToAudioOut
     @Override
     public void onReceiveData(byte[] data) {
         if (debug) Log.i(TAG, "onReceiveData byte[]");
-        if (audioBuffIsShorts) {
-            Log.e(TAG, "onReceiveData byte[] while audioBuffIsShorts");
-            return;
-        }
         if (isRedirecting) {
-            if (!isChecked) {
-                if ((data.length != audioBuffSizeBytes)
-                        || (audioBuffSizeBytes != (audioBuffSizeShorts * 2))) {
-                    Log.e(TAG, "onReceiveData byte[] parameters disparity");
-                } else {
-                    isChecked = true;
-                    Log.w(TAG, "onReceiveData byte[] parameters conformity");
-                }
-            }
             audioTrack.write(data, 0, audioBuffSizeBytes);
         }
     }
@@ -149,20 +127,7 @@ public class ToAudioOut
     @Override
     public void onReceiveData(short[] data) {
         if (debug) Log.i(TAG, "onReceiveData short[]");
-        if (!audioBuffIsShorts) {
-            Log.e(TAG, "onReceiveData short[] while !audioBuffIsShorts");
-            return;
-        }
         if (isRedirecting) {
-            if (!isChecked) {
-                if ((data.length != audioBuffSizeShorts)
-                        || (audioBuffSizeShorts != (audioBuffSizeBytes / 2))) {
-                    Log.e(TAG, "onReceiveData short[] parameters disparity");
-                } else {
-                    isChecked = true;
-                    Log.w(TAG, "onReceiveData short[] parameters conformity");
-                }
-            }
             audioTrack.write(data, 0, audioBuffSizeShorts);
         }
     }

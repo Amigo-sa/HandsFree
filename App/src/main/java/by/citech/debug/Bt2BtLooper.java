@@ -48,7 +48,6 @@ public class Bt2BtLooper
 
     @Override
     public void activate() {
-        if (debug) Log.i(TAG, "activate");
         isRunning = false;
         isActive = true;
         new Thread(() -> {
@@ -66,7 +65,6 @@ public class Bt2BtLooper
     }
 
     private void looping() {
-        if (debug) Log.i(TAG, "looping");
         int btCount = 0;
         while (isRunning) {
             while (storageBtToNet.isEmpty()) {
@@ -79,9 +77,9 @@ public class Bt2BtLooper
             }
             dataAssembled[btCount] = storageBtToNet.getData();
             btCount++;
-            if (debug) Log.i(TAG, String.format("looping network output buffer contains %d arrays of %d bytes each", btCount, bt2btPacketSize));
+            if (debug) Log.i(TAG, String.format("run network output buffer contains %d arrays of %d bytes each", btCount, bt2btPacketSize));
             if (btCount == btFactor) {
-                if (debug) Log.i(TAG, "looping network output buffer contains enough data, sending");
+                if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 btCount = 0;
                 storageNetToBt.putData(dataAssembled);
             }
@@ -90,27 +88,20 @@ public class Bt2BtLooper
 
     @Override
     public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
         isActive = false;
         isRunning = false;
     }
 
     @Override
     public void startDebug() {
-        if (debug) Log.i(TAG, "startDebug");
-        storageBtToNet.setWriteLocked(false);
-        storageNetToBt.setWriteLocked(false);
+        storageBtToNet.clear();
+        storageNetToBt.clear();
         isRunning = true;
     }
 
     @Override
     public void stopDebug() {
-        if (debug) Log.i(TAG, "stopDebug");
         isRunning = false;
-        storageBtToNet.setWriteLocked(true);
-        storageNetToBt.setWriteLocked(true);
-        storageBtToNet.clear();
-        storageNetToBt.clear();
     }
 
 }

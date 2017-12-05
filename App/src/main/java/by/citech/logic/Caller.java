@@ -257,6 +257,7 @@ public class Caller {
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler());
 
+
         callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(bt2AudOutLooper)
@@ -375,6 +376,7 @@ public class Caller {
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt);
+
 
         callUi = CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
