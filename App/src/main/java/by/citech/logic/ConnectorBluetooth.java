@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import by.citech.bluetoothlegatt.BluetoothLeState;
 import by.citech.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.BluetoothLeService;
@@ -230,6 +231,7 @@ public class ConnectorBluetooth
     public final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
+            if (Settings.debug) Log.i(TAG, "onServiceConnected()");
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
             if (!mBluetoothLeService.initialize()) {
                 if (Settings.debug) Log.e(TAG, "Unable to initialize Bluetooth");
@@ -271,6 +273,43 @@ public class ConnectorBluetooth
             leBroadcastReceiver.unregisterReceiver();
         }
     }
+
+    //--------------------- work with fsm
+
+    private volatile BluetoothLeState BLEState;
+
+    public synchronized BluetoothLeState getBLEState() {
+        if (Settings.debug) Log.i(TAG, "getBLEState is " + BLEState.getName());
+        return BLEState;
+    }
+
+    public synchronized boolean setBLEState(BluetoothLeState fromBLEState, BluetoothLeState toBLEState) {
+        if (Settings.debug) Log.w(TAG, String.format("setState from %s to %s", fromBLEState.getName(), toBLEState.getName()));
+        if (BLEState == fromBLEState) {
+            if (fromBLEState.availableStates().contains(toBLEState)) {
+                BLEState = toBLEState;
+                if (BLEState == BLEState.IDLE) {
+                    BLEState = BLEState.IDLE;
+                }
+                return true;
+            } else {
+                if (Settings.debug) Log.e(TAG, String.format("setState: %s is not available from %s", toBLEState.getName(), fromBLEState.getName()));
+            }
+        } else {
+            if (Settings.debug) Log.e(TAG, String.format("setState: current is not %s", fromBLEState.getName()));
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
 
     //------------ устанавливаем хранилища для данных ---------------
 

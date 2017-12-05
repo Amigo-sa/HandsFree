@@ -58,5 +58,4 @@ public class LeConnector {
         leBroadcastReceiver.setBluetoothLeService(mBluetoothLeService);
         // ответ ждём в Callback(LeBroadcastReceiver)
     }
-
 }

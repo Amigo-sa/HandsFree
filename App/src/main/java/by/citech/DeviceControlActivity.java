@@ -378,12 +378,12 @@ public class DeviceControlActivity
             super.onBackPressed();
     }
 
-    //------------------------------ Разрешения местоположения --------------
+    //-------------------mjlj----------- Разрешения местоположения --------------
 
     private boolean checkPermission(String permission, int requestPermission){
         if (Settings.debug) Log.i(TAG, "checkPermission()");
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+            //if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
                 ActivityCompat.requestPermissions(this, new String[]{permission}, requestPermission);
             return false;
         }

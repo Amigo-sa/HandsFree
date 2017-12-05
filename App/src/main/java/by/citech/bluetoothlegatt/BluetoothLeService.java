@@ -170,7 +170,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
 
     @Override
     public void requestMtu() {
-        mBluetoothGatt.requestMtu(80);//TODO: изменить на параметр или переменную
+        mBluetoothGatt.requestMtu(Settings.btMtuSize);
     }
 
     public class LocalBinder extends Binder {
@@ -181,6 +181,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
 
     @Override
     public IBinder onBind(Intent intent) {
+        if (Settings.debug) Log.w(TAG, "onBind");
         return mBinder;
     }
 
@@ -323,7 +324,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
      * @param enabled If true, enable notification.  False otherwise.
      */
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+        if (mBluetoothAdapter == null || mBluetoothGatt == null || characteristic == null) {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
