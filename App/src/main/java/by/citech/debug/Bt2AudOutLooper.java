@@ -33,14 +33,13 @@ public class Bt2AudOutLooper
     }
 
     private void takeSettings() {
-        codecType = Settings.codecType;
+        codecType = Settings.audioCodecType;
     }
 
     //--------------------- non-settings
 
     private IReceiver iReceiver;
     private IReceiverCtrl iReceiverCtrl;
-    private boolean isRunning;
 
     public Bt2AudOutLooper() {
         iReceiverCtrl = new ToAudioOut(this);
@@ -48,30 +47,31 @@ public class Bt2AudOutLooper
 
     @Override
     public void activate() {
-        if (debug) Log.i(TAG, "run");
-        iReceiverCtrl.prepareRedirect();
-        iReceiverCtrl.redirectOn();
+        if (debug) Log.i(TAG, "activate");
     }
 
     @Override
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
-        isRunning = false;
-        iReceiverCtrl.redirectOff();
+        stopDebug();
     }
 
     @Override
     public void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        audioCodec.initiateEncoder();
-        audioCodec.initiateDecoder();
-        isRunning = true;
+        if (iReceiver == null) {
+            iReceiverCtrl.prepareRedirect();
+            iReceiverCtrl.redirectOn();
+            audioCodec.initiateEncoder();
+            audioCodec.initiateDecoder();
+        }
     }
 
     @Override
     public void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
-        isRunning = false;
+        iReceiver = null;
+        iReceiverCtrl.redirectOff();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class Bt2AudOutLooper
     @Override
     public void sendData(byte[] data) {
         if (debug) Log.i(TAG, "sendData byte[]");
-        if (isRunning && (iReceiver != null)) {
+        if (iReceiver != null) {
             iReceiver.onReceiveData(audioCodec.getDecodedData(data));
         }
     }

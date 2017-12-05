@@ -70,8 +70,11 @@
     <string name="hero_image">The Chosen One</string>
     <string name="hint_id">Contact\'s ID…</string>
 
-    <!-- Settings -->
+    <!-- Settings keys -->
     <string name="opMode">opMode</string>
     <string name="btLatencyMs">btLatencyMs</string>
+    <string name="audioCodecType">audioCodecType</string>
+    <string name="bt2NetFactor">bt2NetFactor</string>
+    <string name="btSinglePacket">btSingleBacket</string>
 
 </resources>

@@ -124,19 +124,20 @@ public class LeDataTransmitter implements CallbackWriteListener {
     @Override
     public void rcvBtPktIsDone(byte[] data) {
         if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone()");
-        if (storageFromBt != null)
-            switch (Settings.opMode) {
-                case Bt2AudOut:
-                    updateRxData(data);
-                    break;
-                case Bt2Bt:
-                case Normal:
+        switch (Settings.opMode) {
+            case Bt2AudOut:
+                updateRxData(data);
+                break;
+            case Bt2Bt:
+            case Normal:
+                if (storageFromBt != null) {
                     storageFromBt.putData(data);
-                    break;
-                case AudIn2Bt:
-                default:
-                    break;
-            }
+                }
+                break;
+            case AudIn2Bt:
+            default:
+                break;
+        }
     }
 
 

@@ -16,7 +16,6 @@ public class FromAudioIn
 
     //--------------------- settings
 
-
     private boolean audioBuffIsShorts;
     private int audioSource;
     private int audioRate;

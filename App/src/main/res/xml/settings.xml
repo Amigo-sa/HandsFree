@@ -11,23 +11,32 @@
         android:title="Mode" />
 
     <EditTextPreference
-        android:key="btLatencyMs"
+        android:key="@string/btLatencyMs"
         android:summary="Set minimal sleep interval (ms) on transmit BT2BT-packets"
         android:inputType="number"
         android:dialogTitle="Choose sleep interval"
         android:title="BT on transmit sleep interval" />
 
     <EditTextPreference
-        android:key="bt2NetFactor"
+        android:key="@string/bt2NetFactor"
         android:summary="Set amount of BT-packets in one NET-send"
         android:inputType="number"
         android:dialogTitle="Choose BT2NET factor"
         android:title="BT2NET factor" />
 
     <CheckBoxPreference
-        android:key="btSingleBacket"
+        android:key="@string/btSinglePacket"
         android:defaultValue="false"
         android:summary="Set if we try not to use bufferization on BT data"
-        android:title="No bufferization on BT"/>
+        android:title="No bufferization on BT" />
+
+    <ListPreference
+        android:key="@string/audioCodecType"
+        android:summary="Set audiocodec for decoding/encoding of audio data"
+        android:defaultValue="1"
+        android:entries="@array/audioCodecType"
+        android:entryValues="@array/audioCodecType"
+        android:dialogTitle="Choose audiocodec"
+        android:title="Audiocodec" />
 
 </PreferenceScreen>

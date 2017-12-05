@@ -62,5 +62,6 @@ public class Tags {
     public static final String EDITOR_HELPER       = "WSD_EDITOR_HELPER";
     public static final String BUTTON_HELPER       = "WSD_BUTTON_HELPER";
     public static final String ACTIVE_HELPER       = "WSD_ACTIVE_HELPER";
+    public static final String PRESETTER           = "WSD_PRESETTER";
 
 }

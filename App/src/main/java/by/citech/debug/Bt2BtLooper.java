@@ -77,7 +77,7 @@ public class Bt2BtLooper
             }
             dataAssembled[btCount] = storageBtToNet.getData();
             btCount++;
-            if (debug) Log.i(TAG, String.format("run network output buffer contains %d arrays of %d bytes each", btCount, Settings.bt2btPacketSize));
+            if (debug) Log.i(TAG, String.format("run network output buffer contains %d arrays of %d bytes each", btCount, bt2btPacketSize));
             if (btCount == btFactor) {
                 if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
                 btCount = 0;
@@ -94,6 +94,8 @@ public class Bt2BtLooper
 
     @Override
     public void startDebug() {
+        storageBtToNet.clear();
+        storageNetToBt.clear();
         isRunning = true;
     }
 

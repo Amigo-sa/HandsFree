@@ -39,7 +39,6 @@ public class CallUi
         opMode = Settings.opMode;
     }
 
-
     private void applySettings() {
     }
 
@@ -101,17 +100,21 @@ public class CallUi
          return Caller.getInstance().setState(fromCallerState, toCallerState);
     }
 
-
     public void destruct() {
         isInitiated = false;
-        iCallUiListeners.clear();
-        iCallUiListeners = null;
-        iCallUiExchangeListeners.clear();
-        iCallUiExchangeListeners = null;
-        iDebugListeners.clear();
-        iDebugListeners = null;
+        if (iCallUiListeners != null) {
+            iCallUiListeners.clear();
+            iCallUiListeners = null;
+        }
+        if (iCallUiExchangeListeners != null) {
+            iCallUiExchangeListeners.clear();
+            iCallUiExchangeListeners = null;
+        }
+        if (iDebugListeners != null) {
+            iDebugListeners.clear();
+            iDebugListeners = null;
+        }
     }
-
 
     //--------------------- main
 

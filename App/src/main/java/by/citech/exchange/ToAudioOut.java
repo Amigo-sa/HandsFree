@@ -2,7 +2,9 @@ package by.citech.exchange;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Build;
 import android.util.Log;
 
 import by.citech.param.Settings;
@@ -16,6 +18,7 @@ public class ToAudioOut
 
     //--------------------- settings
 
+    private int audioStreamType;
     private int audioUsage;
     private int audioContentType;
     private int audioEncoding;
@@ -31,6 +34,7 @@ public class ToAudioOut
     }
 
     private void takeSettings() {
+        audioStreamType = Settings.audioStreamType;
         audioUsage = Settings.audioUsage;
         audioContentType = Settings.audioContentType;
         audioEncoding = Settings.audioEncoding;
@@ -58,19 +62,30 @@ public class ToAudioOut
     public void prepareRedirect() {
         if (debug) Log.i(TAG, "prepareRedirect");
         redirectOff();
-        audioTrack = new AudioTrack.Builder()
-                .setAudioAttributes(new AudioAttributes.Builder()
-                        .setUsage(audioUsage)
-                        .setContentType(audioContentType)
-                        .build())
-                .setAudioFormat(new AudioFormat.Builder()
-                        .setEncoding(audioEncoding)
-                        .setSampleRate(audioRate)
-                        .setChannelMask(audioOutChannel)
-                        .build())
-                .setBufferSizeInBytes(audioBuffSizeBytes)
-                .setTransferMode(audioMode)
-                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            audioTrack = new AudioTrack.Builder()
+                    .setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(audioUsage)
+                            .setContentType(audioContentType)
+                            .build())
+                    .setAudioFormat(new AudioFormat.Builder()
+                            .setEncoding(audioEncoding)
+                            .setSampleRate(audioRate)
+                            .setChannelMask(audioOutChannel)
+                            .build())
+                    .setBufferSizeInBytes(audioBuffSizeBytes)
+                    .setTransferMode(audioMode)
+                    .build();
+        } else {
+            audioTrack = new AudioTrack(
+                    audioStreamType,
+                    audioRate,
+                    audioOutChannel,
+                    audioEncoding,
+                    audioBuffSizeBytes,
+                    audioMode
+            );
+        }
         if (debug) Log.i(TAG, "prepareRedirect done");
     }
 

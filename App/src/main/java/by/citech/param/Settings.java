@@ -2,6 +2,7 @@ package by.citech.param;
 
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
@@ -26,7 +27,7 @@ public class Settings {
 
     //---------------- BLUETOOTH
 
-    public static boolean btSinglePacket = true;  // если возможно, не используем буфферизацию
+    public static boolean btSinglePacket = false;  // если возможно, не используем буфферизацию
     public static int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете
     public static int bt2btPacketSize = 16;  // bytes in one BT message
     public static int btSignificantBytes = 10;  // кол-во значащих байтов данных в BT2BT-пакете
@@ -34,7 +35,7 @@ public class Settings {
     public static int bt2NetFactor = 90;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
     public static int audioIn2BtFactor = 1;  // кол-во буфферизированных пакетов BT2BT, принимаемое от аудиовхода
     public static int bt2AudioOutFactor = 1;  // кол-во буфферизированных пакетов BT2BT, отправляемое на аудиовыход
-    public static int btFactor = bt2AudioOutFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
+    public static int btFactor = bt2NetFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
     public static int btLatencyMs = 9;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
     public static int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
     public static int btAudioMsPerNetSendSize = btAudioMsPerPacket * bt2NetFactor;  // миллисекунд звука в одном BT2NET-пакете
@@ -45,9 +46,9 @@ public class Settings {
 
     public static boolean audioSinglePacket = false;
     public static boolean audioBuffIsShorts = true;
-    public static AudioCodecType codecType = AudioCodecType.Sit_2_1_java;
+    public static AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
     public static int audioRate = 8000;
-    public static int audioBuffSizeBytes = audioSinglePacket ? (codecType.getDecodedShortsSize() * 2) : 24000;
+    public static int audioBuffSizeBytes = audioSinglePacket ? (audioCodecType.getDecodedShortsSize() * 2) : 24000;
     public static int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 //  public static int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
 
@@ -65,6 +66,7 @@ public class Settings {
 //  public static int audioOutBuffersize = AudioRecord.getMinBufferSize(audioRate, AUDIO_CHANNEL, audioEncoding) * 12;
     public static int audioOutBuffersize = 10000;
     public static int audioMode = AudioTrack.MODE_STREAM;
+    public static int audioStreamType = AudioManager.STREAM_VOICE_CALL;
     public static int audioContentType = AudioAttributes.CONTENT_TYPE_SPEECH;
 //  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
 //  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;

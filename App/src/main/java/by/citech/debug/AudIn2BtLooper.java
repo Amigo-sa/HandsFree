@@ -36,14 +36,13 @@ public class AudIn2BtLooper
     }
 
     private void takeSettings() {
-        codecType = Settings.codecType;
+        codecType = Settings.audioCodecType;
     }
 
     //--------------------- non-settings
 
     private IReceiverCtrl iReceiverCtrl;
     private ITransmitterCtrl iTransmitterCtrl;
-    private boolean isRunning;
     private IReceiver iReceiver;
 
     public AudIn2BtLooper(StorageData<byte[][]> micToBtStorage) {
@@ -53,33 +52,34 @@ public class AudIn2BtLooper
 
     @Override
     public void activate() {
-        if (debug) Log.i(TAG, "run");
-        iReceiverCtrl.prepareRedirect();
-        iReceiverCtrl.redirectOn();
-        iTransmitterCtrl.prepareStream();
-        new Thread(() -> iTransmitterCtrl.streamOn()).start();
+        if (debug) Log.i(TAG, "activate");
     }
 
     @Override
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
-        isRunning = false;
-        iReceiverCtrl.redirectOff();
-        iTransmitterCtrl.streamOff();
+        stopDebug();
     }
 
     @Override
     public void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        audioCodec.initiateEncoder();
-        audioCodec.initiateDecoder();
-        isRunning = true;
+        if (iReceiver == null) {
+            audioCodec.initiateEncoder();
+            audioCodec.initiateDecoder();
+            iReceiverCtrl.prepareRedirect();
+            iReceiverCtrl.redirectOn();
+            iTransmitterCtrl.prepareStream();
+            new Thread(() -> iTransmitterCtrl.streamOn()).start();
+        }
     }
 
     @Override
     public void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
-        isRunning = false;
+        iReceiver = null;
+        iReceiverCtrl.redirectOff();
+        iTransmitterCtrl.streamOff();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class AudIn2BtLooper
     @Override
     public void sendData(short[] data) {
         if (debug) Log.i(TAG, "sendData short[]");
-        if (isRunning && (iReceiver != null)) {
+        if (iReceiver != null) {
             iReceiver.onReceiveData(audioCodec.getEncodedData(data));
         }
     }

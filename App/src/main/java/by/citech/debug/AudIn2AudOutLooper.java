@@ -44,7 +44,7 @@ public class AudIn2AudOutLooper
     }
 
     private void takeSettings() {
-        codecType = Settings.codecType;
+        codecType = Settings.audioCodecType;
         codecFactor = codecType.getDecodedShortsSize();
         audioBuffSizeBytes = Settings.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
@@ -65,30 +65,34 @@ public class AudIn2AudOutLooper
 
     @Override
     public void activate() {
-        if (debug) Log.i(TAG, "run");
-        audioCodec.initiateEncoder();
-        audioCodec.initiateDecoder();
-        iReceiverCtrl.prepareRedirect();
-        iTransmitterCtrl.prepareStream();
-        iReceiverCtrl.redirectOn();
-        new Thread(() -> iTransmitterCtrl.streamOn()).start();
+        if (debug) Log.i(TAG, "activate");
     }
 
     @Override
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
-        iTransmitterCtrl.streamOff();
-        iReceiverCtrl.redirectOff();
+        stopDebug();
     }
 
     @Override
     public void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
+        if (iReceiver == null) {
+            audioCodec.initiateEncoder();
+            audioCodec.initiateDecoder();
+            iReceiverCtrl.prepareRedirect();
+            iTransmitterCtrl.prepareStream();
+            iReceiverCtrl.redirectOn();
+            new Thread(() -> iTransmitterCtrl.streamOn()).start();
+        }
     }
 
     @Override
     public void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
+        iReceiver = null;
+        iTransmitterCtrl.streamOff();
+        iReceiverCtrl.redirectOff();
     }
 
     @Override

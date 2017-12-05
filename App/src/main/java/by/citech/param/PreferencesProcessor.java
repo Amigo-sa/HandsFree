@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import by.citech.R;
+import by.citech.codec.audio.AudioCodecType;
 
 public class PreferencesProcessor {
 
@@ -15,8 +16,6 @@ public class PreferencesProcessor {
     private Context context;
     private SharedPreferences prefs;
 
-    private OpMode opMode;
-
     public PreferencesProcessor(Context context) {
         this.context = context;
     }
@@ -24,12 +23,18 @@ public class PreferencesProcessor {
     public void processPreferences() {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         processOpMode();
+        processAudioCodecType();
+        processBtSinglePacket();
+        processBt2NetFactor();
+        processBtLatencyMs();
     }
 
     private void processOpMode() {
-        String currentOpMode = prefs.getString(context.getString(R.string.opMode), context.getResources().getStringArray(R.array.opMode)[0]);
+        OpMode opMode = null;
+        String chosenOpMode = prefs.getString(context.getString(R.string.opMode),
+                context.getResources().getStringArray(R.array.opMode)[0]);
         for (OpMode mode : OpMode.values()) {
-            if (currentOpMode.matches(mode.getSettingName())) {
+            if (chosenOpMode.matches(mode.getSettingName())) {
                 if (debug) Log.i(TAG, "found matching opMode: " + mode.getSettingName());
                 opMode = mode;
                 Presetter.setOpMode(opMode);
@@ -37,8 +42,43 @@ public class PreferencesProcessor {
             }
         }
         if (opMode == null) {
-            Log.e(TAG, "no matches for opMode, set to default");
-            Presetter.setOpModeDefault();
+            Presetter.setOpMode(null);
         }
     }
+
+    private void processAudioCodecType() {
+        AudioCodecType audioCodecType = null;
+        String chosenAudioCodecType = prefs.getString(context.getString(R.string.audioCodecType),
+                context.getResources().getStringArray(R.array.audioCodecType)[0]);
+        for (AudioCodecType type : AudioCodecType.values()) {
+            if (chosenAudioCodecType.matches(type.getSettingName())) {
+                if (debug) Log.i(TAG, "found matching audioCodecType: " + type.getSettingName());
+                audioCodecType = type;
+                Presetter.setAudioCodecType(audioCodecType);
+                break;
+            }
+        }
+        if (audioCodecType == null) {
+            Presetter.setAudioCodecType(null);
+        }
+    }
+
+    private void processBtLatencyMs() {
+        Presetter.setBtLatencyMs(Integer.parseInt(
+                prefs.getString(context.getString(R.string.btLatencyMs),
+                Integer.toString(Settings.btLatencyMs))));
+    }
+
+    private void processBt2NetFactor() {
+        Presetter.setBt2NetFactor(Integer.parseInt(
+                prefs.getString(context.getString(R.string.bt2NetFactor),
+                Integer.toString(Settings.bt2NetFactor))));
+    }
+
+    private void processBtSinglePacket() {
+        Presetter.setBtSinglePacket(
+                prefs.getBoolean(context.getString(R.string.btSinglePacket),
+                Settings.btSinglePacket));
+    }
+
 }
