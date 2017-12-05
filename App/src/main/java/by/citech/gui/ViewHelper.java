@@ -45,8 +45,8 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
 
     //--------------------- non-settings
 
-    private View ScanView;
-    private View MainView;
+    private View scanView;
+    private View mainView;
     private View viewContactEditor;
     private View viewChosenContact;
     private EditText editTextSearch;
@@ -62,14 +62,15 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     private Button btnRed;
     private Animation animCall;
     private boolean isCallAnim;
+    private boolean isInitiated;
 
     public ViewHelper(View scanView, View mainView, View viewContactEditor, View viewChosenContact,
                       EditText editTextSearch, TextView textViewChosenContactName, TextView textViewChosenContactIp,
                       EditText editTextContactName, EditText editTextContactIp, Button btnSaveContact,
                       Button btnDelContact, Button btnCancelContact, ButtonHelper buttonHelper, Button btnGreen,
                       Button btnRed, Animation animCall) {
-        ScanView = scanView;
-        MainView = mainView;
+        this.scanView = scanView;
+        this.mainView = mainView;
         this.viewContactEditor = viewContactEditor;
         this.viewChosenContact = viewChosenContact;
         this.editTextSearch = editTextSearch;
@@ -87,6 +88,9 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     }
 
     public void setDefaultView() {
+        if (!isInitiated) {
+            initiate();
+        }
         switch (opMode) {
             case Bt2AudOut:
             case AudIn2Bt:
@@ -113,6 +117,10 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
         prepare();
     }
 
+    public void stop() {
+        isInitiated = false;
+    }
+
     private void prepare() {
         animCall.setAnimationListener(new Animation.AnimationListener() {
             @Override public void onAnimationStart(Animation animation) {}
@@ -121,22 +129,22 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     }
 
     public boolean isMainViewHidden() {
-        return (MainView.getVisibility() != View.VISIBLE);
+        return (mainView.getVisibility() != View.VISIBLE);
     }
 
     public boolean isScanViewHidden() {
-        return (ScanView.getVisibility() != View.VISIBLE);
+        return (scanView.getVisibility() != View.VISIBLE);
     }
 
     public void showMainView() {
-        MainView.setVisibility(View.VISIBLE);
+        mainView.setVisibility(View.VISIBLE);
         viewContactEditor.setVisibility(View.GONE);
-        ScanView.setVisibility(View.GONE);
+        scanView.setVisibility(View.GONE);
     }
 
     public void showScaner() {
-        MainView.setVisibility(View.GONE);
-        ScanView.setVisibility(View.VISIBLE);
+        mainView.setVisibility(View.GONE);
+        scanView.setVisibility(View.VISIBLE);
     }
 
     //--------------------- chosen
@@ -167,12 +175,12 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     //--------------------- editor
 
     public void showEditor() {
-        MainView.setVisibility(View.GONE);
+        mainView.setVisibility(View.GONE);
         viewContactEditor.setVisibility(View.VISIBLE);
     }
 
     public void hideEditor() {
-        MainView.setVisibility(View.VISIBLE);
+        mainView.setVisibility(View.VISIBLE);
         viewContactEditor.setVisibility(View.GONE);
     }
 

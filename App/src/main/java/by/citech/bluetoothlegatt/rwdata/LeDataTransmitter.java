@@ -154,41 +154,43 @@ public class LeDataTransmitter implements CallbackWriteListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[][] arrayData = new byte[Settings.bt2NetFactor][Settings.bt2btPacketSize];
+                byte[][] arrayData;
                 int numBtPkt = 0;
                 isRunning = true;
-                int pktSize = (Settings.btSinglePacket) ? 1 : Settings.bt2NetFactor;
+                int pktSize = (Settings.btSinglePacket) ? 1 : Settings.btFactor;
                 while (isRunning) {
-
-                    if (!storageToBt.isEmpty() && numBtPkt == 0) {
-                        // принимаем двоной массив данных из сети
-                        arrayData = storageToBt.getData();
-                    } else {
-                        //разбираем двойной массив по BT пакетам
-                        if (numBtPkt < pktSize) {
-                            // запись данных производим с учётом Калбэка onWriteCharacteristic
-                            if (Callback) {
-                                writeByteArrayData(arrayData[numBtPkt]);
-                                //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
-                                Callback = false;
-                            }
-                            // выдерживаем коннект интервал
-                            try {
-                                Thread.sleep(Settings.btLatencyMs);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                            numBtPkt++;
-                            // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
-                            if (!Callback) {
-                                Callback = true;
-                                if (Settings.debug)
-                                    Log.e(TAG, "num lost write package is " + lostWritePkt++);
-                            }
-                        } else
-                            numBtPkt = 0;
+                    while (storageToBt.isEmpty()) {
+                        try {
+                            Thread.sleep(5);
+                            if (!isRunning) return;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
+                    arrayData = storageToBt.getData();
+                    while (numBtPkt != pktSize) {
+                        // запись данных производим с учётом Калбэка onWriteCharacteristic
+                        if (Callback) {
+                            if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
+                            writeByteArrayData(arrayData[numBtPkt]);
+                            //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
+                            Callback = false;
+                        }
+                        // выдерживаем коннект интервал
+                        try {
+                            Thread.sleep(Settings.btLatencyMs);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        numBtPkt++;
+                        // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
+                        if (!Callback) {
+                            Callback = true;
+                            if (Settings.debug)
+                                Log.e(TAG, "num lost write package is " + lostWritePkt++);
+                        }
+                    }
+                    numBtPkt = 0;
                 }
             }
         }).start();

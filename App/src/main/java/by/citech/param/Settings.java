@@ -5,10 +5,19 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import by.citech.codec.audio.AudioCodecType;
 
 public class Settings {
+
+    static {
+        Log.w("SETTINGS", "static initializer");
+    }
+
+    {
+        Log.w("SETTINGS", "non-static initializer");
+    }
 
     //---------------- COMMON
 
@@ -44,11 +53,11 @@ public class Settings {
 
     //---------------- AUDIO COMMON
 
-    public static boolean audioSinglePacket = false;
+    public static boolean audioSingleFrame = true;
     public static boolean audioBuffIsShorts = true;
     public static AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
     public static int audioRate = 8000;
-    public static int audioBuffSizeBytes = audioSinglePacket ? (audioCodecType.getDecodedShortsSize() * 2) : 24000;
+    public static int audioBuffSizeBytes = 16000;
     public static int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 //  public static int audioEncoding = AudioFormat.ENCODING_PCM_8BIT;
 

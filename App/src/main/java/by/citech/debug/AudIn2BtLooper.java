@@ -18,7 +18,7 @@ import by.citech.param.Tags;
 public class AudIn2BtLooper
         implements IDebugListener, IDebugCtrl, ITransmitter, IReceiverReg {
 
-    private static final String TAG = Tags.AUDINBT_LOOPER;
+    private static final String TAG = Tags.AUDIN2BT_LOOPER;
     private static final boolean debug = Settings.debug;
 
     //--------------------- settings
@@ -27,16 +27,20 @@ public class AudIn2BtLooper
     private AudioCodec audioCodec;
 
     {
+        initiate();
+    }
+
+    private void initiate() {
         takeSettings();
         applySettings();
     }
 
-    private void applySettings() {
-        audioCodec = new AudioCodec(codecType);
-    }
-
     private void takeSettings() {
         codecType = Settings.audioCodecType;
+    }
+
+    private void applySettings() {
+        audioCodec = new AudioCodec(codecType);
     }
 
     //--------------------- non-settings

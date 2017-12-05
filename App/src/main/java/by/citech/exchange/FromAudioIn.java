@@ -27,13 +27,12 @@ public class FromAudioIn
     private short[] shortsBuffer;
 
     {
-        takeSettings();
-        applySettings();
+        initiate();
     }
 
-    private void applySettings() {
-        bytesBuffer = new byte[audioBuffSizeBytes];
-        shortsBuffer = new short[audioBuffSizeShorts];
+    private void initiate() {
+        takeSettings();
+        applySettings();
     }
 
     private void takeSettings() {
@@ -42,8 +41,15 @@ public class FromAudioIn
         audioRate = Settings.audioRate;
         audioInChannel = Settings.audioInChannel;
         audioEncoding = Settings.audioEncoding;
-        audioBuffSizeBytes = Settings.audioBuffSizeBytes;
+        audioBuffSizeBytes = Settings.audioSingleFrame
+                ? (Settings.audioCodecType.getDecodedShortsSize() * 2)
+                : Settings.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
+    }
+
+    private void applySettings() {
+        bytesBuffer = new byte[audioBuffSizeBytes];
+        shortsBuffer = new short[audioBuffSizeShorts];
     }
 
     //--------------------- non-settings

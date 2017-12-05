@@ -22,11 +22,11 @@ public class PreferencesProcessor {
 
     public void processPreferences() {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        processOpMode();
         processAudioCodecType();
         processBtSinglePacket();
         processBt2NetFactor();
         processBtLatencyMs();
+        processOpMode();
     }
 
     private void processOpMode() {

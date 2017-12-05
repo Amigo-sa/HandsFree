@@ -294,6 +294,7 @@ public class DeviceControlActivity
         super.onPause();
         if (debug) Log.w(TAG, "onPause");
         connectorBluetooth.unregisterReceiver();
+        viewHelper.stop();
         caller.stop();
     }
 
