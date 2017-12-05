@@ -68,7 +68,7 @@ import by.citech.param.Tags;
  * <li>Supports ETags</li>
  * <li>Never caches anything</li>
  * <li>Doesn't limit bandwidth, request time or simultaneous connections</li>
- * <li>Default code serves files and shows all HTTP parameters and headers</li>
+ * <li>SettingsDefault code serves files and shows all HTTP parameters and headers</li>
  * <li>File server supports directory listing, index.html and index.htm</li>
  * <li>File server supports partial content (streaming)</li>
  * <li>File server supports ETags</li>

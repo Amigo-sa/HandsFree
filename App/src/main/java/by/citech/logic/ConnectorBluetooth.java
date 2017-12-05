@@ -30,7 +30,6 @@ public class ConnectorBluetooth
         implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener{
 
     private final static String TAG = "WSD_ConnectorBluetooth";
-    private final static OpMode opMode = Settings.opMode;
 
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
     private BluetoothLeService mBluetoothLeService;
@@ -369,7 +368,7 @@ public class ConnectorBluetooth
         if (Settings.debug) Log.i(TAG, "startDebug");
         CallerState currentState = getCallerState();
         if (Settings.debug) Log.i(TAG, currentState.getName());
-        switch (opMode) {
+        switch (Settings.opMode) {
             case AudIn2Bt:
                 if (!isDebugRunning) {
                     isDebugRunning = true;
@@ -399,7 +398,7 @@ public class ConnectorBluetooth
     @Override
     public void stopDebug() {
         if (Settings.debug) Log.i(TAG, "stopDebug");
-        switch (opMode) {
+        switch (Settings.opMode) {
             case Record:
                 disableTransmitData();
                 break;

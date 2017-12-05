@@ -30,7 +30,7 @@ public class AudIn2AudOutLooper
     private int audioBuffSizeBytes;
     private int audioBuffSizeShorts;
     private int buff2CodecFactor;
-    private boolean audioSinglePacket;
+    private boolean audioSingleFrame;
     private short[] dataBuff;
 
     {
@@ -49,7 +49,7 @@ public class AudIn2AudOutLooper
         audioBuffSizeBytes = Settings.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
         buff2CodecFactor = audioBuffSizeShorts / codecFactor;
-        audioSinglePacket = Settings.audioSinglePacket;
+        audioSingleFrame = Settings.audioSingleFrame;
     }
 
     //--------------------- non-settings
@@ -119,7 +119,7 @@ public class AudIn2AudOutLooper
     public void sendData(short[] data) {
         if (debug) Log.i(TAG, "sendData short[]");
         if (iReceiver != null) {
-            if (audioSinglePacket) {
+            if (audioSingleFrame) {
 //              iReceiver.onReceiveData(data);
                 iReceiver.onReceiveData(audioCodec.getDecodedData(audioCodec.getEncodedData(data)));
             } else {

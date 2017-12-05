@@ -4,8 +4,6 @@ import android.util.Log;
 
 import java.util.Arrays;
 
-import by.citech.codec.audio.AudioCodec;
-import by.citech.codec.audio.AudioCodecType;
 import by.citech.data.StorageData;
 import by.citech.debug.TrafficAnalyzer;
 import by.citech.debug.ITrafficUpdate;
@@ -22,11 +20,11 @@ public class ToBluetooth
 
     //--------------------- settings
 
-    private int toBtFactor;
+    private int btFactor;
     private int btToBtSendSize;
     private int btSignificantBytes;
-    private int toBtSendSize;
-    private boolean singlePacket;
+    private int btSendSize;
+    private boolean btSinglePacket;
     private byte[][] dataAssembled;
 
     {
@@ -35,15 +33,15 @@ public class ToBluetooth
     }
 
     private void takeSettings() {
-        toBtFactor = Settings.btFactor;
+        btFactor = Settings.btFactor;
         btToBtSendSize = Settings.bt2btPacketSize;
         btSignificantBytes = Settings.btSignificantBytes;
-        toBtSendSize = Settings.btSendSize;
-        singlePacket = Settings.btSinglePacket;
+        btSendSize = Settings.btSendSize;
+        btSinglePacket = Settings.btSinglePacket;
     }
 
     private void applySettings() {
-        dataAssembled = new byte[toBtFactor][btToBtSendSize];
+        dataAssembled = new byte[btFactor][btToBtSendSize];
     }
 
     //--------------------- non-settings
@@ -91,12 +89,12 @@ public class ToBluetooth
     public void onReceiveData(byte[] data) {
         if (debug) Log.i(TAG, "onReceiveData");
         if (isRedirecting) {
-            if (singlePacket) {
+            if (btSinglePacket) {
                 dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
             } else {
-                if (data.length != toBtSendSize) return;
+                if (data.length != btSendSize) return;
                 if (debug) Log.i(TAG, "onReceiveData received correct amount of bytes");
-                for (int i = 0; i < toBtFactor; i++) {
+                for (int i = 0; i < btFactor; i++) {
                   dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
                 }
             }
