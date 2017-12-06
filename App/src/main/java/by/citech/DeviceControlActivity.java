@@ -107,7 +107,7 @@ public class DeviceControlActivity
     private Button btnChangeDevice;
 
     // TODO: отображение траффика для дебага
-    TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
+    private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
     private ActionBar actionBar;
 
@@ -135,13 +135,13 @@ public class DeviceControlActivity
     private EditText editTextSearch, editTextContactName, editTextContactIp;
     private ContactsRecyclerAdapter contactsAdapter;
     private Contactor contactor;
-    ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
-    ContactEditorHelper contactEditorHelper;
-    ActiveContactHelper activeContactHelper;
-    ChosenContactHelper chosenContactHelper;
+    private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
+    private ContactEditorHelper contactEditorHelper;
+    private ActiveContactHelper activeContactHelper;
+    private ChosenContactHelper chosenContactHelper;
 
-    ViewHelper viewHelper;
-    ButtonHelper buttonHelper;
+    private ViewHelper viewHelper;
+    private ButtonHelper buttonHelper;
 
     // для включения разрешения местоположения
     private LocationManager locationManager;
@@ -485,7 +485,7 @@ public class DeviceControlActivity
             if (title != null) {
                 s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 s.setSpan(new AbsoluteSizeSpan(56), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
-                s.setSpan(new RelativeSizeSpan(0.5f), 7, title.length(), 0);
+                s.setSpan(new RelativeSizeSpan(0.7f), 7, title.length(), 0);
             }
             actionBar.setTitle(s);
         }
@@ -778,7 +778,7 @@ public class DeviceControlActivity
 
             public void onTopToBottomSwipe() {
                 Log.i(logTag, "onTopToBottomSwipe!");
-                    swipeScanStart();
+                swipeScanStart();
             }
 
             public void onBottomToTopSwipe() {

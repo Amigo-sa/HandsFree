@@ -32,7 +32,7 @@ public class PreferencesProcessor {
     private void processOpMode() {
         OpMode opMode = null;
         String chosenOpMode = prefs.getString(context.getString(R.string.opMode),
-                context.getResources().getStringArray(R.array.opMode)[0]);
+                SettingsDefault.Common.opMode.getSettingName());
         for (OpMode mode : OpMode.values()) {
             if (chosenOpMode.matches(mode.getSettingName())) {
                 if (debug) Log.i(TAG, "found matching opMode: " + mode.getSettingName());
@@ -49,7 +49,7 @@ public class PreferencesProcessor {
     private void processAudioCodecType() {
         AudioCodecType audioCodecType = null;
         String chosenAudioCodecType = prefs.getString(context.getString(R.string.audioCodecType),
-                context.getResources().getStringArray(R.array.audioCodecType)[0]);
+                SettingsDefault.AudioCommon.audioCodecType.getSettingName());
         for (AudioCodecType type : AudioCodecType.values()) {
             if (chosenAudioCodecType.matches(type.getSettingName())) {
                 if (debug) Log.i(TAG, "found matching audioCodecType: " + type.getSettingName());
@@ -66,19 +66,19 @@ public class PreferencesProcessor {
     private void processBtLatencyMs() {
         Presetter.setBtLatencyMs(Integer.parseInt(
                 prefs.getString(context.getString(R.string.btLatencyMs),
-                Integer.toString(Settings.btLatencyMs))));
+                Integer.toString(SettingsDefault.Bluetooth.btLatencyMs))));
     }
 
     private void processBt2NetFactor() {
         Presetter.setBt2NetFactor(Integer.parseInt(
                 prefs.getString(context.getString(R.string.bt2NetFactor),
-                Integer.toString(Settings.bt2NetFactor))));
+                Integer.toString(SettingsDefault.Bluetooth.bt2NetFactor))));
     }
 
     private void processBtSinglePacket() {
         Presetter.setBtSinglePacket(
                 prefs.getBoolean(context.getString(R.string.btSinglePacket),
-                Settings.btSinglePacket));
+                SettingsDefault.Bluetooth.btSinglePacket));
     }
 
 }

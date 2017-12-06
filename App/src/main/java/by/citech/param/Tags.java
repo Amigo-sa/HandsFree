@@ -2,6 +2,7 @@ package by.citech.param;
 
 public class Tags {
 
+    public static final String ACT_SETTINGS        = "WSD_ACT_SETTINGS";
     public static final String ACT_CLT             = "WSD_ACT_CLT";
     public static final String ACT_DPL             = "WSD_ACT_DPL";
     public static final String ACT_SRV             = "WSD_ACT_SRV";

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+<!--
     <string-array name="opMode">
         <item>Normal</item>
         <item>Bt2AudOut</item>
@@ -11,9 +12,10 @@
 
     <string-array name="audioCodecType">
         <item>Sit_2_1_java</item>
-        <!--<item>Sit_2_1_native</item>-->
-        <!--<item>Sit_3_0_java</item>-->
-        <!--<item>Sit_3_0_native</item>-->
+        <item>Sit_2_1_native</item>
+        <item>Sit_3_0_java</item>
+        <item>Sit_3_0_native</item>
    </string-array>
+   -->
 
 </resources>

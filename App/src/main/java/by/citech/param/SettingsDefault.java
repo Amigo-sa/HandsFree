@@ -10,6 +10,14 @@ import by.citech.codec.audio.AudioCodecType;
 
 public class SettingsDefault {
 
+        public static class Key {
+            public static final String keyOpMode = "opMode";
+            public static final String keyBtLatencyMs = "btLatencyMs";
+            public static final String keyBtSinglePacket = "btSinglePacket";
+            public static final String keyBt2NetFactor = "bt2NetFactor";
+            public static final String keyAudioCodecType = "audioCodecType";
+        }
+
         public static class Common {
             public static final DataSource dataSource = DataSource.BLUETOOTH;
             public static final OpMode opMode = OpMode.Normal;
