@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import by.citech.R;
 import by.citech.contact.Contact;
 import by.citech.debug.IDebugListener;
 import by.citech.logic.Caller;
@@ -45,6 +46,8 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
 
     //--------------------- non-settings
 
+    private IGetViewById iGetViewById;
+
     private View scanView;
     private View mainView;
     private View viewContactEditor;
@@ -57,34 +60,37 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     private Button btnSaveContact;
     private Button btnDelContact;
     private Button btnCancelContact;
-    private ButtonHelper buttonHelper;
     private Button btnGreen;
     private Button btnRed;
+    private Button btnChangeDevice;
+    private ButtonHelper buttonHelper;
     private Animation animCall;
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    public ViewHelper(View scanView, View mainView, View viewContactEditor, View viewChosenContact,
-                      EditText editTextSearch, TextView textViewChosenContactName, TextView textViewChosenContactIp,
-                      EditText editTextContactName, EditText editTextContactIp, Button btnSaveContact,
-                      Button btnDelContact, Button btnCancelContact, ButtonHelper buttonHelper, Button btnGreen,
-                      Button btnRed, Animation animCall) {
-        this.scanView = scanView;
-        this.mainView = mainView;
-        this.viewContactEditor = viewContactEditor;
-        this.viewChosenContact = viewChosenContact;
-        this.editTextSearch = editTextSearch;
-        this.textViewChosenContactName = textViewChosenContactName;
-        this.textViewChosenContactIp = textViewChosenContactIp;
-        this.editTextContactName = editTextContactName;
-        this.editTextContactIp = editTextContactIp;
-        this.btnSaveContact = btnSaveContact;
-        this.btnDelContact = btnDelContact;
-        this.btnCancelContact = btnCancelContact;
+    public ViewHelper(IGetViewById iGetViewById, ButtonHelper buttonHelper, Animation animCall) {
+        this.iGetViewById = iGetViewById;
         this.buttonHelper = buttonHelper;
-        this.btnGreen = btnGreen;
-        this.btnRed = btnRed;
         this.animCall = animCall;
+        takeViews();
+    }
+
+    private void takeViews() {
+        this.scanView = iGetViewById.findViewById(R.id.scanView);
+        this.mainView = iGetViewById.findViewById(R.id.mainView);
+        this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
+        this.viewChosenContact = iGetViewById.findViewById(R.id.viewContactChosen);
+        this.editTextSearch = iGetViewById.findViewById(R.id.editTextSearch);
+        this.textViewChosenContactName = iGetViewById.findViewById(R.id.textViewChosenContactName);
+        this.textViewChosenContactIp = iGetViewById.findViewById(R.id.textViewChosenContactIp);
+        this.editTextContactName = iGetViewById.findViewById(R.id.editTextContactName);
+        this.editTextContactIp = iGetViewById.findViewById(R.id.editTextContactIp);
+        this.btnSaveContact = iGetViewById.findViewById(R.id.btnSaveContact);
+        this.btnDelContact = iGetViewById.findViewById(R.id.btnDelContact);
+        this.btnCancelContact = iGetViewById.findViewById(R.id.btnCancelContact);
+        this.btnGreen = iGetViewById.findViewById(R.id.btnGreen);
+        this.btnRed = iGetViewById.findViewById(R.id.btnRed);
+        this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
     }
 
     public void setDefaultView() {
@@ -93,15 +99,24 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
         }
         switch (opMode) {
             case Bt2AudOut:
+                enableBtnCall(btnGreen, "RECEIVING");
+                ButtonHelper.disableGray(btnRed, "STOP");
             case AudIn2Bt:
+                enableBtnCall(btnGreen, "TRANSMITTING");
+                ButtonHelper.disableGray(btnRed, "STOP");
             case AudIn2AudOut:
                 enableBtnCall(btnGreen, "PLAY");
                 ButtonHelper.disableGray(btnRed, "STOP");
+                btnChangeDevice.setVisibility(View.GONE);
                 break;
             case Bt2Bt:
+                enableBtnCall(btnGreen, "LBACK ON");
+                ButtonHelper.disableGray(btnRed, "LBACK OFF");
+                break;
             case Net2Net:
                 enableBtnCall(btnGreen, "LBACK ON");
                 ButtonHelper.disableGray(btnRed, "LBACK OFF");
+                btnChangeDevice.setVisibility(View.GONE);
                 break;
             case Record:
                 enableBtnCall(btnGreen, "RECORD");

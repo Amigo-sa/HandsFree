@@ -38,6 +38,7 @@ public class Presetter {
                 case Normal:
                     Settings.opMode = OpMode.Normal;
                     Settings.btSinglePacket = false;
+                    Settings.btFactor = Settings.bt2NetFactor;
                     break;
                 default:
                     Log.e(TAG, "no matches for opMode, set to default");
