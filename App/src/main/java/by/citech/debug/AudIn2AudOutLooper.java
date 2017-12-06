@@ -34,12 +34,13 @@ public class AudIn2AudOutLooper
     private short[] dataBuff;
 
     {
-        initiate();
-    }
-
-    private void initiate() {
         takeSettings();
         applySettings();
+    }
+
+    private void applySettings() {
+        dataBuff = new short[audioBuffSizeShorts];
+        audioCodec = new AudioCodec(codecType);
     }
 
     private void takeSettings() {
@@ -49,11 +50,6 @@ public class AudIn2AudOutLooper
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
         buff2CodecFactor = audioBuffSizeShorts / codecFactor;
         audioSingleFrame = Settings.audioSingleFrame;
-    }
-
-    private void applySettings() {
-        dataBuff = new short[audioBuffSizeShorts];
-        audioCodec = new AudioCodec(codecType);
     }
 
     //--------------------- non-settings

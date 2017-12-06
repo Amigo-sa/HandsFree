@@ -111,7 +111,7 @@ public class ConnectorNet
         this.iConnCtrl = iConnCtrl;
     }
 
-    //--------------------- main_menu
+    //--------------------- main
 
     public void build() {
         new ServerOn(this, handler).execute(iNetInfoListener.getLocPort());

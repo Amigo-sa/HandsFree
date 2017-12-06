@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/baseView"
+    android:id="@+id/MainFrame"
     android:layout_margin="1dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/mainView"
+        android:id="@+id/MainView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="3dp"
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content" />
 
             <Button
-                android:id="@+id/btnChangeDevice"
+                android:id="@+id/btnChangeHandsFree"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -126,7 +126,7 @@
     <include layout="@layout/view_contact_editor" />
 
     <LinearLayout
-        android:id="@+id/scanView"
+        android:id="@+id/ScanList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"

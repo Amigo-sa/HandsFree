@@ -8,15 +8,13 @@
         android:checkable="false"
         android:orderInCategory="1"
         android:title="@string/menu_settings"
-        app:showAsAction="never" />
-
+        app:showAsAction="ifRoom" />
     <!--<item-->
         <!--android:id="@+id/menu_refresh"-->
         <!--android:checkable="false"-->
         <!--android:icon="@drawable/check256x256"-->
         <!--android:orderInCategory="1"-->
         <!--android:showAsAction="ifRoom" />-->
-
     <!--<item-->
         <!--android:id="@+id/menu_connect"-->
         <!--android:icon="@drawable/crossblack"-->

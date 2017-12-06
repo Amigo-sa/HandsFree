@@ -40,7 +40,7 @@ import java.util.List;
 import by.citech.network.server.connection.protocols.http.ClientHandler;
 
 /**
- * SettingsDefault threading strategy for NanoHTTPD.
+ * Default threading strategy for NanoHTTPD.
  * <p/>
  * <p>
  * By default, the server spawns a new Thread for every incoming request. These

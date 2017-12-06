@@ -57,7 +57,7 @@ public class TrafficAnalyzer
         this.iTrafficReporter = iTrafficReporter;
     }
 
-    //--------------------- main_menu
+    //--------------------- main
 
     @Override
     public void run() {

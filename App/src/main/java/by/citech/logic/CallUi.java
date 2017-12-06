@@ -116,7 +116,7 @@ public class CallUi
         }
     }
 
-    //--------------------- main_menu
+    //--------------------- main
 
     @Override
     public void onClickBtnGreen() {
