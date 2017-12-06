@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 
 /**
- * The runnable that will be used for the main listening thread.
+ * The runnable that will be used for the main_menu listening thread.
  */
 public class ServerRunnable implements Runnable {
 

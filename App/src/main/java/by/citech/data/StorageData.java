@@ -28,7 +28,7 @@ public class StorageData<T> {
         if (!debugGetSession && debug) {
             boolean isEmpty = фифошка.isEmpty();
             if (!isEmpty) {
-                Log.w(TAG, "isEmpty not empty");
+                Log.w(TAG, "isEmpty not empty first after clear");
             }
             return isEmpty;
         } else {
@@ -38,7 +38,7 @@ public class StorageData<T> {
 
     public T getData() {
         if (!debugGetSession && debug) {
-            Log.w(TAG, "getData");
+            Log.w(TAG, "getData first after clear");
             debugGetSession = true;
         }
         if (debug) {
@@ -55,7 +55,7 @@ public class StorageData<T> {
     public void putData(T dataIn) {
         if (isWriteLocked) return;
         if (!debugPutSession && debug) {
-            Log.w(TAG, "putData");
+            Log.w(TAG, "putData first after clear");
             debugPutSession = true;
         }
         фифошка.offer(dataIn);

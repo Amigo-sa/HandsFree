@@ -52,7 +52,7 @@ public class Contactor
         return memCtrl.getElements();
     }
 
-    //--------------------- main
+    //--------------------- main_menu
 
     public void start(Context context, IContactsListener iContactsListener) {
         if (debug) Log.i(TAG, "start");
@@ -61,11 +61,11 @@ public class Contactor
             return;
         }
         this.iContactsListener = iContactsListener;
-//        new Thread(() -> {
+        new Thread(() -> {
             dbCtrl = new ContactsDbCtrl(context);
 //          dbCtrl.test();
             getAllContacts();
-//        }).start();
+        }).start();
     }
 
     private void getAllContacts() {

@@ -22,7 +22,7 @@ public class ConnectorRecordAudio
         this.storage = storage;
     }
 
-    //--------------------- main
+    //--------------------- main_menu
 
     public void start() {
         if (debug) Log.i(TAG, "prepareStream");

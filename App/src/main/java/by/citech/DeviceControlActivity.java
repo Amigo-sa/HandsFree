@@ -14,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -24,21 +25,24 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,14 +66,13 @@ import by.citech.element.IElementUpd;
 import by.citech.gui.ActiveContactHelper;
 import by.citech.gui.ChosenContactHelper;
 import by.citech.gui.ContactEditorHelper;
+import by.citech.gui.IGetViewById;
 import by.citech.gui.ViewHelper;
 import by.citech.logic.Caller;
 import by.citech.logic.ConnectorBluetooth;
 import by.citech.logic.IBluetoothListener;
-import by.citech.debug.IDebugListener;
 import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
-import by.citech.logic.CallerState;
 import by.citech.param.Colors;
 import by.citech.param.OpMode;
 import by.citech.param.PreferencesProcessor;
@@ -78,11 +81,12 @@ import by.citech.param.Tags;
 import by.citech.gui.ButtonHelper;
 import by.citech.util.Keyboard;
 
+import static android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE;
 import static by.citech.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, IContactsListener, LocationListener {
+        implements INetInfoListener, IBluetoothListener, IContactsListener, LocationListener, IGetViewById {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -100,20 +104,18 @@ public class DeviceControlActivity
     private static final int DARKKHAKI = Colors.DARKKHAKI;
 
     // основные элементы управления
-    private Animation animCall;
-    private Button btnGreen, btnRed, btnChangeDevice;
+    private Button btnChangeDevice;
 
     // TODO: отображение траффика для дебага
     TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
-    // условие повторения анимации
-    private boolean isCallAnim;
+    private ActionBar actionBar;
 
     // список найденных устройств
     private ListView myListDevices;
     private LinearLayout mainView;
     private LinearLayout scanView;
-    private FrameLayout frameView;
+    private FrameLayout baseView;
 
     private Intent gattServiceIntent;
     private AlertDialog alertDialog;
@@ -126,20 +128,18 @@ public class DeviceControlActivity
 
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
-    private View viewContactEditor, viewChosenContact;
     private IElementAdd<Contact> iContactAdd;
     private IElementDel<Contact> iContactDel;
     private IElementUpd<Contact> iContactUpd;
     private RecyclerView viewRecyclerContacts;
     private EditText editTextSearch, editTextContactName, editTextContactIp;
-    private TextView textViewChosenContactName, textViewChosenContactIp;
     private ContactsRecyclerAdapter contactsAdapter;
     private Contactor contactor;
-    private Button btnDelContact, btnSaveContact, btnCancelContact;
     ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
     ContactEditorHelper contactEditorHelper;
     ActiveContactHelper activeContactHelper;
     ChosenContactHelper chosenContactHelper;
+
     ViewHelper viewHelper;
     ButtonHelper buttonHelper;
 
@@ -171,37 +171,24 @@ public class DeviceControlActivity
             finish();
         }
 
-        mainView = findViewById(R.id.MainView);
-        scanView = findViewById(R.id.ScanList);
-        frameView = findViewById(R.id.MainFrame);
-        viewContactEditor = findViewById(R.id.viewContactEditor);
-        viewChosenContact = findViewById(R.id.viewContactChosen);
+        baseView = findViewById(R.id.baseView);
+        mainView = findViewById(R.id.mainView);
+        scanView = findViewById(R.id.scanView);
         viewRecyclerContacts = findViewById(R.id.viewRecycler);
-        btnDelContact = findViewById(R.id.btnDelContact);
-        btnSaveContact = findViewById(R.id.btnSaveContact);
-        btnCancelContact = findViewById(R.id.btnCancelContact);
-        textViewChosenContactName = findViewById(R.id.textViewChosenContactName);
-        textViewChosenContactIp = findViewById(R.id.textViewChosenContactIp);
         editTextSearch = findViewById(R.id.editTextSearch);
         editTextContactName = findViewById(R.id.editTextContactName);
         editTextContactIp = findViewById(R.id.editTextContactIp);
-        btnGreen = findViewById(R.id.btnGreen);
-        btnRed = findViewById(R.id.btnRed);
-        animCall = AnimationUtils.loadAnimation(this, R.anim.anim_call);
 
         findViewById(R.id.btnClearContact).setOnClickListener((v) -> clickBtnClearContact());
         findViewById(R.id.btnAddContact).setOnClickListener((v) -> clickBtnAddContact());
-        btnDelContact.setOnClickListener((v) -> clickBtnDelContact());
-        btnSaveContact.setOnClickListener((v) -> clickBtnSaveContact());
-        btnCancelContact.setOnClickListener((v) -> clickBtnCancelContact());
-        btnGreen.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
-        btnRed.setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
+        findViewById(R.id.btnDelContact).setOnClickListener((v) -> clickBtnDelContact());
+        findViewById(R.id.btnSaveContact).setOnClickListener((v) -> clickBtnSaveContact());
+        findViewById(R.id.btnCancelContact).setOnClickListener((v) -> clickBtnCancelContact());
+        findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
+        findViewById(R.id.btnRed).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
 
         buttonHelper = ButtonHelper.getInstance();
-        viewHelper = new ViewHelper(scanView, mainView, viewContactEditor, viewChosenContact, editTextSearch,
-                textViewChosenContactName, textViewChosenContactIp, editTextContactName,
-                editTextContactIp, btnSaveContact, btnDelContact, btnCancelContact, buttonHelper, btnGreen,
-                btnRed, animCall);
+        viewHelper = new ViewHelper(this, buttonHelper, AnimationUtils.loadAnimation(this, R.anim.anim_call));
         chosenContactHelper = new ChosenContactHelper(viewHelper);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
         viewHelper.setDefaultView();
@@ -227,8 +214,8 @@ public class DeviceControlActivity
         }
 
         // Включаем Bluetooth
-        if (!connectorBluetooth.getBTAdapter().isEnabled()){
-            Log.e(TAG,"Bluetooth is Disable");
+        if (!connectorBluetooth.getBTAdapter().isEnabled()) {
+            Log.e(TAG,"Bluetooth is disable");
             connectorBluetooth.getBTAdapter().enable();
             Toast.makeText(getApplicationContext(), "Bluetooth now enabling", Toast.LENGTH_LONG).show();
         } else {
@@ -242,16 +229,11 @@ public class DeviceControlActivity
         setupContactEditor();
         contactor.start(DeviceControlActivity.this, DeviceControlActivity.this);
 
-        btnChangeDevice = findViewById(R.id.btnChangeHandsFree);
+        btnChangeDevice = findViewById(R.id.btnChangeDevice);
         btnChangeDevice.setText(R.string.connect_device);
         btnChangeDevice.setBackgroundColor(DARKCYAN);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setTitle(String.format(Locale.US, "SecTel %s:%d",
-                getIpAddr(Settings.ipv4),
-                Settings.serverLocalPortNumber));
+        setupActionBar();
 
 //      getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -325,21 +307,21 @@ public class DeviceControlActivity
 
     private void onCreateConnectMenu(Menu menu){
         if (debug) Log.i(TAG, "onCreateConnectMenu()");
-        getMenuInflater().inflate(R.menu.gatt_services, menu);
-        getSupportActionBar().setCustomView(null);
+        getMenuInflater().inflate(R.menu.scan_menu, menu);
+        actionBar.setCustomView(null);
     }
 
     private void onCreateScanMenu(Menu menu){
         if (Settings.debug) Log.i(TAG, "onCreateScanMenu()");
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         if (!connectorBluetooth.ismScanning()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
             menu.findItem(R.id.menu_scan).setVisible(true);
-            getSupportActionBar().setCustomView(null);
+            actionBar.setCustomView(null);
         } else {
             menu.findItem(R.id.menu_stop).setVisible(true);
             menu.findItem(R.id.menu_scan).setVisible(false);
-            getSupportActionBar().setCustomView(R.layout.actionbar);
+            actionBar.setCustomView(R.layout.actionbar);
         }
     }
 
@@ -353,8 +335,7 @@ public class DeviceControlActivity
                 connectorBluetooth.stopScanBTDevice();
                 break;
             case R.id.menu_settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, SettingsActivity.class));
                 if (debug) Log.i(TAG, "menu settings");
                 break;
         }
@@ -366,20 +347,20 @@ public class DeviceControlActivity
         if (debug) Log.i(TAG, "onBackPressed");
         Keyboard.hideSoftKeyboard(this);
         if (viewHelper.isMainViewHidden()) {
-            if (debug) Log.i(TAG, "onBackPressed get main visible");
+            if (debug) Log.i(TAG, "onBackPressed get main_menu visible");
             viewHelper.showMainView();
+            actionBar.setCustomView(null);
             if (contactEditorHelper.getState() != EditorState.Inactive)
                 contactEditorHelper.goToState(EditorState.Inactive);
-            getSupportActionBar().setCustomView(null);
-            if (connectorBluetooth != null) {
+            if (connectorBluetooth != null)
                 connectorBluetooth.stopScanBTDevice();
-            }
             invalidateOptionsMenu();
-        } else
+        } else {
             super.onBackPressed();
+        }
     }
 
-    //-------------------mjlj----------- Разрешения местоположения --------------
+    //-------------------------- permissons
 
     private boolean checkPermission(String permission, int requestPermission){
         if (Settings.debug) Log.i(TAG, "checkPermission()");
@@ -411,19 +392,17 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_LOCATION: {
+            case REQUEST_LOCATION:
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     enPermission(Manifest.permission.ACCESS_FINE_LOCATION);
-                return;
-            }
-            case REQUEST_MICROPHONE: {
+                break;
+            case REQUEST_MICROPHONE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     enPermission(Manifest.permission.RECORD_AUDIO);
-                return;
-            }
+                break;
         }
     }
 
@@ -491,7 +470,28 @@ public class DeviceControlActivity
         };
     }
 
-    //--------------------- Actions
+    private void setupActionBar() {
+        actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayShowCustomEnabled(true);
+            String title = String.format(Locale.US, "%s %s:%d %s",
+                    getTitle().toString(),
+                    getIpAddr(Settings.ipv4),
+                    Settings.serverLocalPortNumber,
+                    opMode.getSettingName()
+            );
+            SpannableString s = new SpannableString(title);
+            if (title != null) {
+                s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                s.setSpan(new AbsoluteSizeSpan(56), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
+                s.setSpan(new RelativeSizeSpan(0.5f), 7, title.length(), 0);
+            }
+            actionBar.setTitle(s);
+        }
+    }
+
+    //--------------------- actions
 
     void clickBtnCancelContact() {
         if (debug) Log.i(TAG, "clickBtnCancelContact");
@@ -530,13 +530,13 @@ public class DeviceControlActivity
         activeContactHelper.goToState(ActiveContactState.FromChosen);
     }
 
-    public void clickBtnChangeDevice(View view){
+    public void clickBtnChangeDevice(View view) {
         setVisibleList();
         myListDevices = findViewById(R.id.ListDevices);
         connectorBluetooth.initListBTDevice();
         myListDevices.setAdapter(connectorBluetooth.getmLeDeviceListAdapter());
         myListDevices.setOnTouchListener(new LinearLayoutTouchListener());
-        frameView.setOnTouchListener(new LinearLayoutTouchListener());
+        baseView.setOnTouchListener(new LinearLayoutTouchListener());
         Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
 // останавливаем сканирование и запускаем новое Activity
@@ -559,7 +559,7 @@ public class DeviceControlActivity
         connectorBluetooth.startScanBTDevices();
     }
 
-    //------------------------Dialogs-----------------------------------------
+    //--------------------- dialogs
 
     private void onCreateDialog(int id, BluetoothDevice device) {
         AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
@@ -607,7 +607,6 @@ public class DeviceControlActivity
         alertDialog.show();
     }
 
-    //Окно когда устройство успешно подключилось
     private void onCreateDialogIsConnected(BluetoothDevice device) {
         if (alertDialog != null)
             alertDialog.dismiss();
@@ -630,7 +629,7 @@ public class DeviceControlActivity
             }
         }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
     }
-    // Окно когда устройство не может быть подсоединено или произошло разъединение
+
     private void onCreateDialogIsDisconnected(BluetoothDevice device) {
         if (alertDialog != null)
             alertDialog.dismiss();
@@ -769,7 +768,8 @@ public class DeviceControlActivity
     public class LinearLayoutTouchListener implements View.OnTouchListener {
 
             static final String logTag = "ActivitySwipeDetector";
-            static final int MIN_DISTANCE = 100;// TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
+            // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
+            static final int MIN_DISTANCE = 100;
             private float downX, downY, upX, upY;
 
             public LinearLayoutTouchListener() {}
@@ -832,7 +832,6 @@ public class DeviceControlActivity
                         Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
                         // return false; // We don't consume the event
                     }
-
                     return false; // no swipe horizontally and no swipe vertically
                 }// case MotionEvent.ACTION_UP:
             }
@@ -887,7 +886,7 @@ public class DeviceControlActivity
     @Override
     public void doCallbackOnContactsChange(final Contact... contacts) {
         if (debug) Log.i(TAG, "doCallbackOnContactsChange");
-//        runOnUiThread(() -> {
+        runOnUiThread(() -> {
             Contact contact = contacts[0];
             ContactState state = contact.getState();
             Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
@@ -933,7 +932,7 @@ public class DeviceControlActivity
                         break;
                 }
             }
-//        });
+        });
     }
 
 }

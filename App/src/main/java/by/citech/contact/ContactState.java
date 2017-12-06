@@ -3,7 +3,7 @@ package by.citech.contact;
 public enum ContactState {
 
     Null {
-        public String getMessage() {return "Default state";}
+        public String getMessage() {return "SettingsDefault state";}
         public String getName() {return "Null";}
     },
 

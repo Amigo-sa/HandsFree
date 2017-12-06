@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import by.citech.network.server.connection.protocols.http.NanoHTTPD;
 
 /**
- * Default strategy for creating and cleaning up temporary files.
+ * SettingsDefault strategy for creating and cleaning up temporary files.
  * <p/>
  * <p>
  * This class stores its files in the standard location (that is, wherever

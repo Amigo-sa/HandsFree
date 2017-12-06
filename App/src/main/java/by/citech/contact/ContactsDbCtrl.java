@@ -58,7 +58,7 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
         //TODO: описание действий при переходе с одной версии БД на другую
     }
 
-    //--------------------- main
+    //--------------------- main_menu
 
     private static ContentValues buildContent(Contact contact) {
         if (debug) Log.d(TAG, "buildContent");

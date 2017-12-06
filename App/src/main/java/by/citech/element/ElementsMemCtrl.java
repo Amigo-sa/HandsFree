@@ -26,7 +26,7 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
         return elements;
     }
 
-    //--------------------- main
+    //--------------------- main_menu
 
     public void sort() {
         if (debug) Log.i(TAG, "sort");

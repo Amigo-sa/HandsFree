@@ -12,13 +12,13 @@
 
     <item
         android:id="@+id/menu_scan"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         android:title="@string/menu_scan"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_stop"
-        android:orderInCategory="101"
+        android:orderInCategory="3"
         android:title="@string/menu_stop"
         app:showAsAction="never" />
 
