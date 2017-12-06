@@ -61,11 +61,11 @@ public class Contactor
             return;
         }
         this.iContactsListener = iContactsListener;
-//        new Thread(() -> {
+        new Thread(() -> {
             dbCtrl = new ContactsDbCtrl(context);
 //          dbCtrl.test();
             getAllContacts();
-//        }).start();
+        }).start();
     }
 
     private void getAllContacts() {
