@@ -20,8 +20,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.preference.PreferenceManagerFix;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -80,7 +78,6 @@ import by.citech.param.OpMode;
 import by.citech.param.PreferencesProcessor;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
-import by.citech.gui.ButtonHelper;
 import by.citech.util.Keyboard;
 
 import static android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE;
@@ -143,7 +140,6 @@ public class DeviceControlActivity
     private ChosenContactHelper chosenContactHelper;
 
     private ViewHelper viewHelper;
-    private ButtonHelper buttonHelper;
 
     // для включения разрешения местоположения
     private LocationManager locationManager;
@@ -190,8 +186,7 @@ public class DeviceControlActivity
         findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
         findViewById(R.id.btnRed).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
 
-        buttonHelper = ButtonHelper.getInstance();
-        viewHelper = new ViewHelper(this, buttonHelper, AnimationUtils.loadAnimation(this, R.anim.anim_call));
+        viewHelper = new ViewHelper(this, AnimationUtils.loadAnimation(this, R.anim.anim_call));
         chosenContactHelper = new ChosenContactHelper(viewHelper);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
         viewHelper.setDefaultView();
@@ -887,8 +882,8 @@ public class DeviceControlActivity
     //--------------------- IContactsListener
 
     @Override
-    public void doCallbackOnContactsChange(final Contact... contacts) {
-        if (debug) Log.i(TAG, "doCallbackOnContactsChange");
+    public void onContactsChange(final Contact... contacts) {
+        if (debug) Log.i(TAG, "onContactsChange");
         runOnUiThread(() -> {
             Contact contact = contacts[0];
             ContactState state = contact.getState();
@@ -898,7 +893,7 @@ public class DeviceControlActivity
             } else {
                 int position = contactsAdapter.getItemPosition(contact);
                 if (debug) Log.w(TAG, String.format(Locale.US,
-                        "doCallbackOnContactsChange: state is %s, pos is %d, contact is %s",
+                        "onContactsChange: state is %s, pos is %d, contact is %s",
                         state.getMessage(), position, contact.toString()));
                 switch (state) {
                     case SuccessAdd:
@@ -911,8 +906,8 @@ public class DeviceControlActivity
                         if (contactEditorHelper.isUpdPending(contact))
                             contactEditorHelper.onContactEditSucc(position);
                         break;
-                    case FailInvalidContact:
-                    case FailNotUniqueContact:
+                    case FailInvalid:
+                    case FailNotUnique:
                         if (contactEditorHelper.isUpdPending(contact))
                             contactEditorHelper.onContactEditFail();
                         if (contactEditorHelper.isAddPending(contact))
@@ -928,10 +923,10 @@ public class DeviceControlActivity
                         if (contactEditorHelper.isAddPending(contact))
                             contactEditorHelper.onContactAddFail();
                     case Null:
-                        Log.e(TAG, "doCallbackOnContactsChange state Null");
+                        Log.e(TAG, "onContactsChange state Null");
                         break;
                     default:
-                        Log.e(TAG, "doCallbackOnContactsChange state default");
+                        Log.e(TAG, "onContactsChange state default");
                         break;
                 }
             }

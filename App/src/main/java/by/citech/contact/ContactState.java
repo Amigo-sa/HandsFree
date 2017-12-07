@@ -22,19 +22,34 @@ public enum ContactState {
         public String getName() {return "SuccessUpdate";}
     },
 
-    FailInvalidContact {
-        public String getMessage() {return "Invalid contact fields";}
-        public String getName() {return "FailInvalidContact";}
+    FailDelete {
+        public String getMessage() {return "Failed to delete contact";}
+        public String getName() {return "FailDelete";}
     },
 
-    FailNotUniqueContact {
+    FailInvalid {
+        public String getMessage() {return "Invalid contact fields";}
+        public String getName() {return "FailInvalid";}
+    },
+
+    FailNotUnique {
         public String getMessage() {return "Contact already exists";}
-        public String getName() {return "FailNotUniqueContact";}
+        public String getName() {return "FailNotUnique";}
     },
 
     FailToAdd {
         public String getMessage() {return "Fail to add contact to database";}
         public String getName() {return "FailToAdd";}
+    },
+
+    FailCopyNull {
+        public String getMessage() {return "Fail to copy null contact";}
+        public String getName() {return "FailCopyNull";}
+    },
+
+    FailUpdate {
+        public String getMessage() {return "Fail to update contact";}
+        public String getName() {return "FailUpdate";}
     };
 
     public abstract String getMessage();

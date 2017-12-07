@@ -35,13 +35,20 @@ public class Presetter {
                     Settings.audioBuffSizeBytes = 24000;
                     Settings.audioBuffIsShorts = true;
                     break;
-                case Normal:
-                    Settings.opMode = OpMode.Normal;
+                case Record:
+                    Settings.opMode = OpMode.Record;
                     Settings.btSinglePacket = false;
                     Settings.btFactor = Settings.bt2NetFactor;
                     break;
+                case Net2Net:
+                    setToDefault();
+                    Log.e(TAG, "setOpMode opMode is Net2Net (not implemented), set to default");
+                    break;
+                case Normal:
+                    setToDefault();
+                    break;
                 default:
-                    Settings.opMode = SettingsDefault.Common.opMode;
+                    setToDefault();
                     Log.e(TAG, "setOpMode no matches for opMode, set to default");
                     break;
             }
@@ -50,6 +57,12 @@ public class Presetter {
             Log.e(TAG, "setOpMode illegal value, set to default");
         }
         if (debug) Log.w(TAG, "setOpMode opMode set to " + Settings.opMode.getSettingName());
+    }
+
+    private static void setToDefault() {
+        Settings.opMode = SettingsDefault.Common.opMode;
+        Settings.btSinglePacket = SettingsDefault.Bluetooth.btSinglePacket;
+        Settings.btFactor = SettingsDefault.Bluetooth.btFactor;
     }
 
     public static void setAudioCodecType(AudioCodecType audioCodecType) {

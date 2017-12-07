@@ -12,11 +12,11 @@ import by.citech.codec.audio.AudioCodecType;
 public class Settings {
 
     static {
-        Log.w("SETTINGS", "static initializer");
+        Log.w("WSD_SETTINGS", "static initializer");
     }
 
     {
-        Log.w("SETTINGS", "non-static initializer");
+        Log.w("WSD_SETTINGS", "non-static initializer");
     }
 
     //---------------- COMMON

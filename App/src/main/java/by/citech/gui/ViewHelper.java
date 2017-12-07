@@ -33,8 +33,10 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     }
 
     private void initiate() {
+        if (Settings.debug) Log.w(TAG,"INITIATIATE");
         takeSettings();
         applySettings();
+        isInitiated = true;
     }
 
     private void takeSettings() {
@@ -45,8 +47,6 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     }
 
     //--------------------- non-settings
-
-    private IGetViewById iGetViewById;
 
     private View scanView;
     private View mainView;
@@ -68,14 +68,16 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    public ViewHelper(IGetViewById iGetViewById, ButtonHelper buttonHelper, Animation animCall) {
-        this.iGetViewById = iGetViewById;
-        this.buttonHelper = buttonHelper;
+    public ViewHelper(IGetViewById iGetViewById, Animation animCall) {
+        if (!isInitiated) {
+            initiate();
+        }
+        buttonHelper = ButtonHelper.getInstance();
         this.animCall = animCall;
-        takeViews();
+        takeViews(iGetViewById);
     }
 
-    private void takeViews() {
+    private void takeViews(IGetViewById iGetViewById) {
         this.scanView = iGetViewById.findViewById(R.id.scanView);
         this.mainView = iGetViewById.findViewById(R.id.mainView);
         this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
@@ -94,41 +96,45 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     }
 
     public void setDefaultView() {
-        if (!isInitiated) {
-            initiate();
-        }
+        if (Settings.debug) Log.w(TAG,"setDefaultView opMode is " + opMode.getSettingName());
         switch (opMode) {
             case Bt2AudOut:
                 enableBtnCall(btnGreen, "RECEIVING");
                 ButtonHelper.disableGray(btnRed, "STOP");
+                btnChangeDevice.setVisibility(View.VISIBLE);
+                break;
             case AudIn2Bt:
                 enableBtnCall(btnGreen, "TRANSMITTING");
                 ButtonHelper.disableGray(btnRed, "STOP");
+                btnChangeDevice.setVisibility(View.VISIBLE);
+                break;
             case AudIn2AudOut:
                 enableBtnCall(btnGreen, "PLAY");
                 ButtonHelper.disableGray(btnRed, "STOP");
-                btnChangeDevice.setVisibility(View.GONE);
+                btnChangeDevice.setVisibility(View.INVISIBLE);
                 break;
             case Bt2Bt:
                 enableBtnCall(btnGreen, "LBACK ON");
                 ButtonHelper.disableGray(btnRed, "LBACK OFF");
+                btnChangeDevice.setVisibility(View.VISIBLE);
                 break;
             case Net2Net:
                 enableBtnCall(btnGreen, "LBACK ON");
                 ButtonHelper.disableGray(btnRed, "LBACK OFF");
-                btnChangeDevice.setVisibility(View.GONE);
+                btnChangeDevice.setVisibility(View.INVISIBLE);
                 break;
             case Record:
                 enableBtnCall(btnGreen, "RECORD");
                 ButtonHelper.disableGray(btnRed, "PLAY");
+                btnChangeDevice.setVisibility(View.VISIBLE);
                 break;
             case Normal:
             default:
                 ButtonHelper.disableGray(btnGreen, "IDLE");
                 ButtonHelper.disableGray(btnRed, "IDLE");
+                btnChangeDevice.setVisibility(View.VISIBLE);
                 break;
         }
-
         prepare();
     }
 

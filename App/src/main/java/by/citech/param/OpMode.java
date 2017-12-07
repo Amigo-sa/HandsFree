@@ -1,6 +1,6 @@
 package by.citech.param;
 
-public enum OpMode implements ISettings<OpMode> {
+public enum OpMode implements IEnumSetting<OpMode> {
 
     Normal {
         @Override public String getSettingName() {return "Normal";}
@@ -31,16 +31,13 @@ public enum OpMode implements ISettings<OpMode> {
         @Override public String getSettingNumber() {return "7";}
     };
 
-    OpMode() {
-    }
-
     @Override
     public String getDefaultSettingName() {
         return getDefaultSetting().getSettingName();
     };
 
     @Override
-    public String getSettingTypeName() {
+    public String getSettingKey() {
         return SettingsDefault.Key.opMode;
     }
 

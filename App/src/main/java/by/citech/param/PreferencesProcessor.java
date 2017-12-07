@@ -24,15 +24,27 @@ public class PreferencesProcessor {
     public void processPreferences() {
         PreferenceManagerFix.setDefaultValues(context, R.xml.settings, false);
         prefs = PreferenceManagerFix.getDefaultSharedPreferences(context);
-        Presetter.setAudioCodecType(processEnum(AudioCodecType.class, SettingsDefault.AudioCommon.audioCodecType));
+        processAudioCodecType();
         processBtSinglePacket();
         processBt2NetFactor();
         processBtLatencyMs();
-        Presetter.setOpMode(processEnum(OpMode.class, SettingsDefault.Common.opMode));
+        processOpMode();
     }
 
-    private <T extends Enum<T> & ISettings> T processEnum(Class<T> clazz, T defaultT) {
-        String read = prefs.getString(defaultT.getSettingTypeName(), defaultT.getDefaultSettingName());
+    private void processAudioCodecType() {
+        Presetter.setAudioCodecType(processEnum(
+                AudioCodecType.class,
+                SettingsDefault.AudioCommon.audioCodecType));
+    }
+
+    private void processOpMode() {
+        Presetter.setOpMode(processEnum(
+                OpMode.class,
+                SettingsDefault.Common.opMode));
+    }
+
+    private <T extends Enum<T> & IEnumSetting> T processEnum(Class<T> clazz, T defaultT) {
+        String read = prefs.getString(defaultT.getSettingKey(), defaultT.getDefaultSettingName());
         if (read == null || read.isEmpty()) {
             Log.e(TAG, "processEnum read illegal value" + read);
         } else {
@@ -49,19 +61,19 @@ public class PreferencesProcessor {
 
     private void processBtLatencyMs() {
         Presetter.setBtLatencyMs(Integer.parseInt(
-                prefs.getString(context.getString(R.string.btLatencyMs),
+                prefs.getString(SettingsDefault.Key.btLatencyMs,
                 Integer.toString(SettingsDefault.Bluetooth.btLatencyMs))));
     }
 
     private void processBt2NetFactor() {
         Presetter.setBt2NetFactor(Integer.parseInt(
-                prefs.getString(context.getString(R.string.bt2NetFactor),
+                prefs.getString(SettingsDefault.Key.bt2NetFactor,
                 Integer.toString(SettingsDefault.Bluetooth.bt2NetFactor))));
     }
 
     private void processBtSinglePacket() {
         Presetter.setBtSinglePacket(
-                prefs.getBoolean(context.getString(R.string.btSinglePacket),
+                prefs.getBoolean(SettingsDefault.Key.btSinglePacket,
                 SettingsDefault.Bluetooth.btSinglePacket));
     }
 

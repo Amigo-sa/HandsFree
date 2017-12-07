@@ -1,9 +1,9 @@
 package by.citech.param;
 
-public interface ISettings<T extends Enum<T> & ISettings> {
+public interface IEnumSetting<T extends Enum<T> & IEnumSetting> {
     String getSettingName();
     String getSettingNumber();
     String getDefaultSettingName();
-    String getSettingTypeName();
+    String getSettingKey();
     T getDefaultSetting();
 }

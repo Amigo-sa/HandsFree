@@ -1,9 +1,9 @@
 package by.citech.codec.audio;
 
-import by.citech.param.ISettings;
+import by.citech.param.IEnumSetting;
 import by.citech.param.SettingsDefault;
 
-public enum AudioCodecType implements ISettings<AudioCodecType> {
+public enum AudioCodecType implements IEnumSetting<AudioCodecType> {
 
     Sit_2_1_java {
         @Override public int getDecodedShortsSize() {return 80;}
@@ -39,7 +39,7 @@ public enum AudioCodecType implements ISettings<AudioCodecType> {
     };
 
     @Override
-    public String getSettingTypeName() {
+    public String getSettingKey() {
         return SettingsDefault.Key.audioCodecType;
     };
 

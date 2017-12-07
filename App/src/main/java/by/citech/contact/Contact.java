@@ -10,7 +10,7 @@ import by.citech.util.Name;
 
 
 public class Contact
-        implements Comparable<Contact>, IIdentifier, ICopy<Contact>, IContactState {
+        implements Comparable<Contact>, IIdentifier, ICopy<Contact>, IContactState, Cloneable {
 
     private static final String TAG = Tags.CONTACT;
     private static final boolean debug = Settings.debug;
@@ -27,6 +27,9 @@ public class Contact
     private ContactState state;
 
     //--------------------- common
+
+    private Contact() {
+    }
 
     public Contact(String name, String ip) {
         id = -1;
@@ -48,11 +51,11 @@ public class Contact
         if (debug) Log.i(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
     }
 
-    public static boolean checkForValidity(Contact contact) {
-        if (debug) Log.i(TAG, "checkForValidity");
+    public static boolean checkForValid(Contact contact) {
+        if (debug) Log.i(TAG, "checkForValid");
         boolean isIpValid = InetAddress.checkForValidityIpAddress(contact.getIp());
         boolean isNameValid = Name.checkForValidityContactName(contact.getName());
-        if (debug) Log.i(TAG, String.format("checkForValidity ip is %s, name is %s",
+        if (debug) Log.i(TAG, String.format("checkForValid ip is %s, name is %s",
                 isIpValid ? VALID : INVALID,
                 isNameValid ? VALID : INVALID));
         return isIpValid && isNameValid;
@@ -91,6 +94,17 @@ public class Contact
     //--------------------- base
 
     @Override
+    protected Contact clone() throws CloneNotSupportedException {
+        Contact clone = (Contact) super.clone();
+        clone.name = this.name;
+        clone.ip = this.ip;
+        clone.id = this.id;
+        clone.state = ContactState.valueOf(this.state.name());
+        if (debug) Log.w(TAG, "original is " + this.toString() + "\nclone is " + clone.toString());
+        return clone;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -109,8 +123,8 @@ public class Contact
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
         sb.append(", ip='").append(ip).append('\'');
+        sb.append(", state=").append(state);
         sb.append('}');
         return sb.toString();
     }
-
 }

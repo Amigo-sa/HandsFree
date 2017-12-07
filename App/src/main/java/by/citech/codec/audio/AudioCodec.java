@@ -14,9 +14,6 @@ public class AudioCodec implements ICodec {
 
     public AudioCodec(AudioCodecType audioCodecType) {
         switch (audioCodecType) {
-            case Sit_3_0_java:
-                Log.i(TAG, "AudioCodec audioCodecType default Sit_3_0_java");
-                codec = new SitAudioCodec_3_0_java();
             case Sit_2_1_java:
             default:
                 Log.i(TAG, "AudioCodec audioCodecType default Sit_2_1_java");

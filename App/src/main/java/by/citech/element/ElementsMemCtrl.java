@@ -35,30 +35,37 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
         if (debug) {Log.d(TAG, "elements is (after sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
     }
 
-    public void add(T entry) {
+    public boolean add(T entry) {
         if (debug) Log.i(TAG, "add");
-        elements.add(entry);
-        sort();
-    }
-
-    public void delete(T entry) {
-        if (debug) Log.i(TAG, "delete");
-        if (elements.contains(entry)) {
-            if (debug) Log.i(TAG, "delete found element");
-            elements.remove(entry);
+        if (elements.add(entry)) {
+            if (debug) Log.i(TAG, "add success");
+            sort();
+            return true;
         } else {
-            if (debug) Log.e(TAG, "delete no such element");
+            Log.e(TAG, "add fail");
+            return false;
         }
-        if (debug) {Log.d(TAG, "elements is: "); for (T t : elements) {Log.d(TAG, t.toString());}}
     }
 
-    public void update(T entryToUpd, T entryToCopy) {
+    public boolean delete(T entry) {
+        if (debug) Log.i(TAG, "delete");
+        if (elements.remove(entry)) {
+            if (debug) Log.i(TAG, "delete success");
+            return true;
+        } else {
+            Log.e(TAG, "delete fail");
+            return false;
+        }
+    }
+
+    public boolean update(T entryToUpd, T entryToCopy) {
         if (debug) Log.i(TAG, "update");
         if (elements.contains(entryToUpd)) {
             if (debug) Log.i(TAG, "update found element");
             entryToUpd.doCopy(entryToCopy);
         } else {
-            if (debug) Log.e(TAG, "update no such element");
+            Log.e(TAG, "update no such element");
+            return false;
         }
         if (entryToCopy.compareTo(entryToUpd) == 0) {
             if (debug) Log.i(TAG, "update need to sort");
@@ -66,17 +73,18 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
         } else {
             if (debug) Log.i(TAG, "update no need to sort");
         }
+        return true;
     }
 
-    public boolean checkForUniqueness(T entry) {
-        if (debug) Log.i(TAG, "checkForUniqueness");
+    public boolean checkForUniq(T entry) {
+        if (debug) Log.i(TAG, "checkForUniq");
         for (T t : elements) {
             if (t.equals(entry)) {
-                if (debug) Log.w(TAG, "checkForUniqueness not unique");
+                if (debug) Log.w(TAG, "checkForUniq not unique");
                 return false;
             }
         }
-        if (debug) Log.i(TAG, "checkForUniqueness unique");
+        if (debug) Log.i(TAG, "checkForUniq unique");
         return true;
     }
 
