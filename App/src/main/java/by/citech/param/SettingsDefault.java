@@ -11,11 +11,11 @@ import by.citech.codec.audio.AudioCodecType;
 public class SettingsDefault {
 
         public static class Key {
-            public static final String keyOpMode = "opMode";
-            public static final String keyBtLatencyMs = "btLatencyMs";
-            public static final String keyBtSinglePacket = "btSinglePacket";
-            public static final String keyBt2NetFactor = "bt2NetFactor";
-            public static final String keyAudioCodecType = "audioCodecType";
+            public static final String opMode = "opMode";
+            public static final String btLatencyMs = "btLatencyMs";
+            public static final String btSinglePacket = "btSinglePacket";
+            public static final String bt2NetFactor = "bt2NetFactor";
+            public static final String audioCodecType = "audioCodecType";
         }
 
         public static class Common {

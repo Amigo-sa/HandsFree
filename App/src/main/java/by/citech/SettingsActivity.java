@@ -3,14 +3,13 @@ package by.citech;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.takisoft.fix.support.v7.preference.EditTextPreference;
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers;
 
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
-import android.support.v7.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.AbsoluteSizeSpan;
@@ -39,7 +38,6 @@ public class SettingsActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -216,21 +214,13 @@ public class SettingsActivity
                 return;
             }
             switch (s) {
-                case SettingsDefault.Key.keyOpMode:
+                case SettingsDefault.Key.opMode:
+                case SettingsDefault.Key.audioCodecType:
                     refreshListPref(s);
-//                  prepareOpModePref();
                     break;
-                case SettingsDefault.Key.keyAudioCodecType:
-                    refreshListPref(s);
-//                  prepareAudioCodecType();
-                    break;
-                case SettingsDefault.Key.keyBt2NetFactor:
+                case SettingsDefault.Key.bt2NetFactor:
+                case SettingsDefault.Key.btLatencyMs:
                     refreshEditTextPref(s);
-//                  prepareBt2NetFactorPref();
-                    break;
-                case SettingsDefault.Key.keyBtLatencyMs:
-                    refreshEditTextPref(s);
-//                  prepareBtLatencyMsPref();
                     break;
             }
         }

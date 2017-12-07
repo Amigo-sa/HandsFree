@@ -49,7 +49,7 @@ public class ConnectorNet
     private IConnCtrl iConnCtrl;
     private Handler handler;
     private INetInfoListener iNetInfoListener;
-    private ArrayList<ICallNetListener> iCallNetworkListeners;
+    private ArrayList<ICallNetListener> iCallNetListeners;
     private ArrayList<ICallNetExchangeListener> iCallNetExchangeListeners;
     private StorageData<byte[]> storageBtToNet;
     private StorageData<byte[][]> storageNetToBt;
@@ -59,7 +59,7 @@ public class ConnectorNet
     private static volatile ConnectorNet instance = null;
 
     private ConnectorNet() {
-        iCallNetworkListeners = new ArrayList<>();
+        iCallNetListeners = new ArrayList<>();
         iCallNetExchangeListeners = new ArrayList<>();
     }
 
@@ -92,7 +92,7 @@ public class ConnectorNet
     }
 
     public ConnectorNet addiCallNetworkListener(ICallNetListener iCallNetworkListener) {
-        iCallNetworkListeners.add(iCallNetworkListener);
+        iCallNetListeners.add(iCallNetworkListener);
         iCallNetExchangeListeners.add(iCallNetworkListener);
         return this;
     }
@@ -158,7 +158,7 @@ public class ConnectorNet
         if (!isValidIp()) {
             if (debug) Log.w(TAG, "callOutcomingStarted isValidIp()");
             if (setState(CallerState.OutcomingStarted, CallerState.Idle))
-                for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingInvalid();
+                for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingInvalid();
             return;
         }
         connect();
@@ -187,7 +187,7 @@ public class ConnectorNet
             case Idle:
                 if (debug) Log.i(TAG, "srvOnOpen Idle");
                 if (setState(CallerState.Idle, CallerState.IncomingDetected))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingDetected();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callIncomingDetected();
                 break;
             default:
                 if (debug) Log.e(TAG, "srvOnOpen " + getStateName());
@@ -202,7 +202,7 @@ public class ConnectorNet
             case IncomingDetected:
                 if (debug) Log.i(TAG, "srvOnFailure IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Error))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingFailed();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callIncomingFailed();
                 break;
             case Call:
                 if (debug) Log.i(TAG, "srvOnFailure Call");
@@ -221,7 +221,7 @@ public class ConnectorNet
             case IncomingDetected:
                 if (debug) Log.i(TAG, "srvOnClose IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Idle))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callIncomingCanceled();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callIncomingCanceled();
                 break;
             case Call:
                 if (debug) Log.i(TAG, "srvOnClose Call");
@@ -241,7 +241,7 @@ public class ConnectorNet
             case OutcomingStarted:
                 if (debug) Log.i(TAG, "cltOnOpen Call");
                 if (setState(CallerState.OutcomingStarted, CallerState.OutcomingConnected))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingConnected();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingConnected();
                 break;
             default:
                 if (debug) Log.e(TAG, "cltOnOpen " + getStateName());
@@ -256,12 +256,12 @@ public class ConnectorNet
             case OutcomingConnected:
                 if (debug) Log.i(TAG, "cltOnFailure OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingRejected();
                 break;
             case OutcomingStarted:
                 if (debug) Log.i(TAG, "cltOnFailure OutcomingStarted");
                 if (setState(CallerState.OutcomingStarted, CallerState.Error))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingFailed();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingFailed();
                 break;
             case Call:
                 if (debug) Log.i(TAG, "cltOnFailure Call");
@@ -287,7 +287,7 @@ public class ConnectorNet
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
                     if (debug) Log.i(TAG, "cltOnMessageText REJECT");
                     if (setState(CallerState.OutcomingConnected, CallerState.Idle))
-                        for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
+                        for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingRejected();
                     disconnect(iClientCtrl);
                 }
         }
@@ -300,7 +300,7 @@ public class ConnectorNet
             case OutcomingConnected:
                 if (debug) Log.i(TAG, "cltOnClose OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
-                    for (ICallNetListener listener : iCallNetworkListeners) listener.callOutcomingRejected();
+                    for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingRejected();
                 break;
             case Call:
                 if (debug) Log.i(TAG, "cltOnClose Call");
@@ -414,13 +414,22 @@ public class ConnectorNet
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
         if (debug) Log.i(TAG, "serverStarted");
-        if (iServerCtrl == null) {
-            if (setState(CallerState.Null, CallerState.GeneralFailure))
-                for (ICallNetListener listener : iCallNetworkListeners) listener.connectorFailure();
-        } else {
-            if (setState(CallerState.Null, CallerState.Idle))
-                for (ICallNetListener listener : iCallNetworkListeners) listener.connectorReady();
-            this.iServerCtrl = iServerCtrl;
+        switch (getState()) {
+            case Null:
+                if (iServerCtrl == null) {
+                    if (setState(CallerState.Null, CallerState.GeneralFailure))
+                        for (ICallNetListener listener : iCallNetListeners)
+                            listener.connectorFailure();
+                } else {
+                    if (setState(CallerState.Null, CallerState.Idle))
+                        for (ICallNetListener listener : iCallNetListeners)
+                            listener.connectorReady();
+                    this.iServerCtrl = iServerCtrl;
+                }
+                break;
+            default:
+                Log.e(TAG, "serverStarted on state default");
+                break;
         }
     }
 

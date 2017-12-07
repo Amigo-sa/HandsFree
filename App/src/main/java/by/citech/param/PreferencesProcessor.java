@@ -2,7 +2,8 @@ package by.citech.param;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
+import android.support.v7.preference.PreferenceManagerFix;
 import android.util.Log;
 
 import by.citech.R;
@@ -21,46 +22,29 @@ public class PreferencesProcessor {
     }
 
     public void processPreferences() {
-        prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        processAudioCodecType();
+        PreferenceManagerFix.setDefaultValues(context, R.xml.settings, false);
+        prefs = PreferenceManagerFix.getDefaultSharedPreferences(context);
+        Presetter.setAudioCodecType(processEnum(AudioCodecType.class, SettingsDefault.AudioCommon.audioCodecType));
         processBtSinglePacket();
         processBt2NetFactor();
         processBtLatencyMs();
-        processOpMode();
+        Presetter.setOpMode(processEnum(OpMode.class, SettingsDefault.Common.opMode));
     }
 
-    private void processOpMode() {
-        OpMode opMode = null;
-        String chosenOpMode = prefs.getString(context.getString(R.string.opMode),
-                SettingsDefault.Common.opMode.getSettingName());
-        for (OpMode mode : OpMode.values()) {
-            if (chosenOpMode.matches(mode.getSettingName())) {
-                if (debug) Log.i(TAG, "found matching opMode: " + mode.getSettingName());
-                opMode = mode;
-                Presetter.setOpMode(opMode);
-                break;
+    private <T extends Enum<T> & ISettings> T processEnum(Class<T> clazz, T defaultT) {
+        String read = prefs.getString(defaultT.getSettingTypeName(), defaultT.getDefaultSettingName());
+        if (read == null || read.isEmpty()) {
+            Log.e(TAG, "processEnum read illegal value" + read);
+        } else {
+            if (debug) Log.i(TAG, "processEnum read is " + read);
+            for (T t : clazz.getEnumConstants()) {
+                if (read.matches(t.getSettingNumber())) {
+                    if (debug) Log.i(TAG, "processEnum found matching setting: " + t.getSettingName());
+                    return t;
+                }
             }
         }
-        if (opMode == null) {
-            Presetter.setOpMode(null);
-        }
-    }
-
-    private void processAudioCodecType() {
-        AudioCodecType audioCodecType = null;
-        String chosenAudioCodecType = prefs.getString(context.getString(R.string.audioCodecType),
-                SettingsDefault.AudioCommon.audioCodecType.getSettingName());
-        for (AudioCodecType type : AudioCodecType.values()) {
-            if (chosenAudioCodecType.matches(type.getSettingName())) {
-                if (debug) Log.i(TAG, "found matching audioCodecType: " + type.getSettingName());
-                audioCodecType = type;
-                Presetter.setAudioCodecType(audioCodecType);
-                break;
-            }
-        }
-        if (audioCodecType == null) {
-            Presetter.setAudioCodecType(null);
-        }
+        return defaultT;
     }
 
     private void processBtLatencyMs() {

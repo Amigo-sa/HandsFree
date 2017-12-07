@@ -20,6 +20,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
+import android.support.v7.preference.PreferenceManagerFix;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -153,6 +155,7 @@ public class DeviceControlActivity
         if (debug) Log.w(TAG, "onCreate");
         new PreferencesProcessor(this).processPreferences();
         opMode = Settings.opMode;
+        if (debug) Log.i(TAG, "onCreate opMode is " + opMode.getSettingName());
     }
 
     @Override

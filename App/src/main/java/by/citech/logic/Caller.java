@@ -376,18 +376,18 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt);
 
-        callUi = CallUi.getInstance()
-                .addiCallUiListener(iCallUiListener)
-                .addiCallUiExchangeListener(ConnectorBluetooth.getInstance())
-                .addiCallUiListener(ConnectorNet.getInstance());
-
         connectorNet = ConnectorNet.getInstance()
                 .setStorageBtToNet(storageBtToNet)
                 .setStorageNetToBt(storageNetToBt)
                 .addiCallNetworkListener(iCallNetworkListener)
-                .addiCallNetworkExchangeListener(ConnectorBluetooth.getInstance())
+                .addiCallNetworkExchangeListener(connectorBluetooth)
                 .setiNetInfoListener(iNetInfoListener)
                 .setHandler(handlerExtended);
+
+        callUi = CallUi.getInstance()
+                .addiCallUiListener(iCallUiListener)
+                .addiCallUiExchangeListener(connectorBluetooth)
+                .addiCallUiListener(connectorNet);
 
         connectorBluetooth.build();
         connectorNet.build();

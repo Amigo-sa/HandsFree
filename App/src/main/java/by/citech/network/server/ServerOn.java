@@ -30,7 +30,7 @@ public class ServerOn
     protected Void doInBackground(String... port) {
         if (debug) Log.i(TAG, "doInBackground");
         int portNum = Integer.parseInt(port[0]);
-        if (debug) Log.i(TAG, String.format("%d", portNum));
+        if (debug) Log.i(TAG, "doInBackground portnum is " + portNum);
         ServerCtrlNanoWebSocket serverCtrlNanoWebSocket = new ServerCtrlNanoWebSocket(portNum, handler);
 
         if (!serverCtrlNanoWebSocket.isAliveServer()) {
@@ -40,6 +40,8 @@ public class ServerOn
                 e.printStackTrace();
             }
         }
+
+        if (iServerCtrl == null) return null;
 
         while (!iServerCtrl.isAliveServer()) {
             try {

@@ -41,18 +41,21 @@ public class Presetter {
                     Settings.btFactor = Settings.bt2NetFactor;
                     break;
                 default:
-                    Log.e(TAG, "no matches for opMode, set to default");
+                    Settings.opMode = SettingsDefault.Common.opMode;
+                    Log.e(TAG, "setOpMode no matches for opMode, set to default");
                     break;
             }
         } else {
-            Log.e(TAG, "opMode is null, set to default");
+            Settings.opMode = SettingsDefault.Common.opMode;
+            Log.e(TAG, "setOpMode illegal value, set to default");
         }
-        if (debug) Log.w(TAG, "opMode set to " + Settings.opMode.getSettingName());
+        if (debug) Log.w(TAG, "setOpMode opMode set to " + Settings.opMode.getSettingName());
     }
 
     public static void setAudioCodecType(AudioCodecType audioCodecType) {
         if (audioCodecType == null) {
-            Log.e(TAG, "illegal value audioCodecType, set to default");
+            Settings.audioCodecType = SettingsDefault.AudioCommon.audioCodecType;
+            Log.e(TAG, "setAudioCodecType illegal value, set to default");
         } else {
             Settings.audioCodecType = audioCodecType;
         }
@@ -61,25 +64,27 @@ public class Presetter {
 
     public static void setBt2NetFactor(int bt2NetFactor) {
         if (bt2NetFactor < 0) {
-            Log.e(TAG, "illegal value bt2NetFactor, set to default");
+            Settings.bt2NetFactor = SettingsDefault.Bluetooth.bt2NetFactor;
+            Log.e(TAG, "setBt2NetFactor illegal value, set to default");
         } else {
             Settings.bt2NetFactor = bt2NetFactor;
         }
-        if (debug) Log.w(TAG, "bt2NetFactor set to " + Settings.bt2NetFactor);
+        if (debug) Log.w(TAG, "setBt2NetFactor set to " + Settings.bt2NetFactor);
     }
 
     public static void setBtLatencyMs(int btLatencyMs) {
         if (btLatencyMs < 0) {
-            Log.e(TAG, "illegal value btLatencyMs, set to default");
+            Settings.btLatencyMs = SettingsDefault.Bluetooth.btLatencyMs;
+            Log.e(TAG, "setBtLatencyMs illegal value, set to default");
         } else {
             Settings.btLatencyMs = btLatencyMs;
         }
-        if (debug) Log.w(TAG, "btLatencyMs set to " + Settings.btLatencyMs);
+        if (debug) Log.w(TAG, "setBtLatencyMs set to " + Settings.btLatencyMs);
     }
 
     public static void setBtSinglePacket(boolean btSinglePacket) {
         Settings.btSinglePacket = btSinglePacket;
-        if (debug) Log.w(TAG, "btSinglePacket set to " + Settings.btSinglePacket);
+        if (debug) Log.w(TAG, "setBtSinglePacket set to " + Settings.btSinglePacket);
     }
 
 }
