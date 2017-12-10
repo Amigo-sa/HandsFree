@@ -7,12 +7,13 @@ import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiExchangeListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
+import by.citech.param.ISettings;
 import by.citech.param.OpMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class CallUi
-        implements IUiBtnGreenRedListener {
+        implements IUiBtnGreenRedListener, IBase, ISettings {
 
     private static final String TAG = Tags.CALL_UI;
     private static final boolean debug = Settings.debug;
@@ -26,20 +27,18 @@ public class CallUi
         initiate();
     }
 
-    private void initiate() {
+    @Override
+    public void initiate() {
         takeSettings();
-        applySettings();
         iCallUiListeners = new ArrayList<>();
         iCallUiExchangeListeners = new ArrayList<>();
         iDebugListeners = new ArrayList<>();
         isInitiated = true;
     }
 
-    private void takeSettings() {
+    @Override
+    public void takeSettings() {
         opMode = Settings.opMode;
-    }
-
-    private void applySettings() {
     }
 
     //--------------------- non-settings
@@ -100,8 +99,13 @@ public class CallUi
          return Caller.getInstance().setState(fromCallerState, toCallerState);
     }
 
-    public void destruct() {
-        isInitiated = false;
+    @Override
+    public void baseStart() {
+        initiate();
+    }
+
+    @Override
+    public void baseStop() {
         if (iCallUiListeners != null) {
             iCallUiListeners.clear();
             iCallUiListeners = null;
@@ -114,12 +118,18 @@ public class CallUi
             iDebugListeners.clear();
             iDebugListeners = null;
         }
+        isInitiated = false;
+        opMode = null;
     }
 
     //--------------------- main
 
     @Override
     public void onClickBtnGreen() {
+        if (!isInitiated) {
+            Log.e(TAG, "onClickBtnGreen not initiated");
+            return;
+        }
         if (debug) Log.w(TAG, "onClickBtnGreen opMode is " + opMode.getSettingName());
         switch (opMode) {
             case AudIn2Bt:
@@ -181,6 +191,10 @@ public class CallUi
     @Override
     public void onClickBtnRed() {
         if (debug) Log.i(TAG, "onClickBtnRed");
+        if (!isInitiated) {
+            Log.e(TAG, "onClickBtnRed not initiated");
+            return;
+        }
         switch (opMode) {
             case AudIn2Bt:
             case Bt2AudOut:

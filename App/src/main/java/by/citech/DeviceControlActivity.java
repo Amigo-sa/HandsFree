@@ -37,7 +37,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -46,7 +45,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -60,9 +62,9 @@ import by.citech.contact.ContactsRecyclerAdapter;
 import by.citech.contact.EditorState;
 import by.citech.contact.IContactsListener;
 import by.citech.dialog.DialogProcessor;
-import by.citech.element.IElementAdd;
-import by.citech.element.IElementDel;
-import by.citech.element.IElementUpd;
+import by.citech.dialog.DialogState;
+import by.citech.dialog.DialogType;
+import by.citech.exchange.IMsgToUi;
 import by.citech.gui.ActiveContactHelper;
 import by.citech.gui.ChosenContactHelper;
 import by.citech.gui.ContactEditorHelper;
@@ -70,6 +72,7 @@ import by.citech.gui.IGetViewById;
 import by.citech.gui.ViewHelper;
 import by.citech.logic.Caller;
 import by.citech.logic.ConnectorBluetooth;
+import by.citech.logic.IBase;
 import by.citech.logic.IBluetoothListener;
 import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
@@ -78,6 +81,7 @@ import by.citech.param.OpMode;
 import by.citech.param.PreferencesProcessor;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
+import by.citech.threading.CraftedThreadPool;
 import by.citech.util.Keyboard;
 
 import static android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE;
@@ -85,7 +89,7 @@ import static by.citech.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, IContactsListener, LocationListener, IGetViewById {
+        implements INetInfoListener, IBluetoothListener, LocationListener, IGetViewById, IMsgToUi {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -127,9 +131,6 @@ public class DeviceControlActivity
 
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
-    private IElementAdd<Contact> iContactAdd;
-    private IElementDel<Contact> iContactDel;
-    private IElementUpd<Contact> iContactUpd;
     private RecyclerView viewRecyclerContacts;
     private EditText editTextSearch, editTextContactName, editTextContactIp;
     private ContactsRecyclerAdapter contactsAdapter;
@@ -140,16 +141,18 @@ public class DeviceControlActivity
     private ChosenContactHelper chosenContactHelper;
 
     private ViewHelper viewHelper;
+    private CraftedThreadPool threadPool;
 
     // для включения разрешения местоположения
     private LocationManager locationManager;
     private String provider;
+    private List<IBase> iBaseList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (debug) Log.w(TAG, "onCreate");
-        new PreferencesProcessor(this).processPreferences();
+        PreferencesProcessor.process(this);
         opMode = Settings.opMode;
         if (debug) Log.i(TAG, "onCreate opMode is " + opMode.getSettingName());
     }
@@ -158,6 +161,7 @@ public class DeviceControlActivity
     public void onStart() {
         super.onStart();
         if (debug) Log.w(TAG, "onStart");
+        iBaseList = new ArrayList<>();
         // Для проверки разрешения местоположения
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
@@ -186,7 +190,14 @@ public class DeviceControlActivity
         findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
         findViewById(R.id.btnRed).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
 
-        viewHelper = new ViewHelper(this, AnimationUtils.loadAnimation(this, R.anim.anim_call));
+        try {
+            viewHelper = new ViewHelper(this, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        iBaseList.add(viewHelper);
+
         chosenContactHelper = new ChosenContactHelper(viewHelper);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
         viewHelper.setDefaultView();
@@ -197,6 +208,8 @@ public class DeviceControlActivity
                 .setiCallNetListener(viewHelper)
                 .setiNetInfoListener(this)
                 .setiBluetoothListener(this);
+
+        iBaseList.add(caller);
 
         connectorBluetooth = caller.getConnectorBluetooth();
         iUiBtnGreenRedListener = caller.getiUiBtnGreenRedListener();
@@ -221,11 +234,11 @@ public class DeviceControlActivity
         }
 
         dialogProcessor = new DialogProcessor(this);
+        threadPool = new CraftedThreadPool(Settings.threadNumber);
 
         setupContactor();
         setupViewRecyclerContacts();
         setupContactEditor();
-        contactor.start(DeviceControlActivity.this, DeviceControlActivity.this);
 
         btnChangeDevice = findViewById(R.id.btnChangeDevice);
         btnChangeDevice.setText(R.string.connect_device);
@@ -242,6 +255,8 @@ public class DeviceControlActivity
         // привязываем сервис
         bindService(gattServiceIntent, caller.getServiceConnection(), BIND_AUTO_CREATE);
 
+        contactor.build(this, contactEditorHelper, this);
+        threadPool.addRunnable(() -> contactor.getAllContacts());
         caller.build();
     }
 
@@ -274,16 +289,23 @@ public class DeviceControlActivity
         super.onPause();
         if (debug) Log.w(TAG, "onPause");
         connectorBluetooth.unregisterReceiver();
-        viewHelper.stop();
-        caller.stop();
+        unbindService(connectorBluetooth.mServiceConnection);
+        connectorBluetooth.closeLeService();
+        if (iBaseList != null) {
+            for (IBase iBase : iBaseList) {
+                if (iBase != null) {
+                    iBase.baseStop();
+                }
+            }
+            iBaseList.clear();
+            iBaseList = null;
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
-        unbindService(connectorBluetooth.mServiceConnection);
-        connectorBluetooth.closeLeService();
     }
 
     @Override
@@ -415,15 +437,13 @@ public class DeviceControlActivity
             @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
         });
         contactor = Contactor.getInstance();
-        iContactUpd = contactor;
-        iContactDel = contactor;
-        iContactAdd = contactor;
+        iBaseList.add(contactor);
     }
 
     private void setupContactEditor() {
         if (debug) Log.i(TAG, "setupContactEditor");
         contactEditorHelper = new ContactEditorHelper(viewHelper, swipeCrutch, activeContactHelper,
-                dialogProcessor, iContactDel, iContactAdd, iContactUpd, contactsAdapter);
+                this, threadPool, contactor, contactsAdapter);
         TextWatcher textWatcher = new TextWatcher() {
             @Override public void afterTextChanged(Editable arg0) {}
             @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
@@ -879,58 +899,28 @@ public class DeviceControlActivity
         invalidateOptionsMenu();
     }
 
-    //--------------------- IContactsListener
+    //--------------------- IMsgToUi
 
     @Override
-    public void onContactsChange(final Contact... contacts) {
-        if (debug) Log.i(TAG, "onContactsChange");
-        runOnUiThread(() -> {
-            Contact contact = contacts[0];
-            ContactState state = contact.getState();
-            Toast.makeText(DeviceControlActivity.this, state.getMessage(), Toast.LENGTH_SHORT).show();
-            if (contacts.length > 1) {
-                contactsAdapter.notifyDataSetChanged();
-            } else {
-                int position = contactsAdapter.getItemPosition(contact);
-                if (debug) Log.w(TAG, String.format(Locale.US,
-                        "onContactsChange: state is %s, pos is %d, contact is %s",
-                        state.getMessage(), position, contact.toString()));
-                switch (state) {
-                    case SuccessAdd:
-                        contactsAdapter.notifyItemInserted(position);
-                        if (contactEditorHelper.isAddPending(contact))
-                            contactEditorHelper.onContactAddSucc(position);
-                        break;
-                    case SuccessUpdate:
-                        contactsAdapter.notifyItemChanged(position);
-                        if (contactEditorHelper.isUpdPending(contact))
-                            contactEditorHelper.onContactEditSucc(position);
-                        break;
-                    case FailInvalid:
-                    case FailNotUnique:
-                        if (contactEditorHelper.isUpdPending(contact))
-                            contactEditorHelper.onContactEditFail();
-                        if (contactEditorHelper.isAddPending(contact))
-                            contactEditorHelper.onContactAddFail();
-                        break;
-                    case SuccessDelete:
-                        if (contactEditorHelper.isDelPending(contact))
-                            contactEditorHelper.onContactDelSuccess();
-                        else
-                            contactsAdapter.notifyDataSetChanged();
-                        break;
-                    case FailToAdd:
-                        if (contactEditorHelper.isAddPending(contact))
-                            contactEditorHelper.onContactAddFail();
-                    case Null:
-                        Log.e(TAG, "onContactsChange state Null");
-                        break;
-                    default:
-                        Log.e(TAG, "onContactsChange state default");
-                        break;
-                }
-            }
-        });
+    public void sendToUiToast(boolean isFromUiThread, String msg) {
+        if (debug) Log.i(TAG, "sendToUiToast");
+        sendToUiRunnable(isFromUiThread, () -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void sendToUiDialog(boolean isFromUiThread, DialogType dialog, Map<DialogState, Runnable> whatToDo) {
+        if (debug) Log.i(TAG, "sendToUiDialog");
+        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(dialog, whatToDo));
+    }
+
+    @Override
+    public void sendToUiRunnable(boolean isFromUiThread, Runnable runnable) {
+        if (debug) Log.i(TAG, "runRunnable");
+        if (isFromUiThread) {
+            runnable.run();
+        } else {
+            runOnUiThread(runnable);
+        }
     }
 
 }

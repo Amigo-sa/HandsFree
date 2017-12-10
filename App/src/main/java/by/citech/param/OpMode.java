@@ -46,4 +46,9 @@ public enum OpMode implements IEnumSetting<OpMode> {
         return SettingsDefault.Common.opMode;
     }
 
+    @Override
+    public OpMode[] getValues() {
+        return values();
+    }
+
 }

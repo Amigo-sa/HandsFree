@@ -20,7 +20,7 @@
     <string name="label_device_address">Device\'s address: </string>
     <string name="label_device_name">Device\' name: </string>
     <string name="label_state">State:</string>
-    <string name="label_abonent">Call destination:</string>
+    <string name="label_abonent">Call msgType:</string>
     <string name="no_data">No data</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
@@ -61,14 +61,7 @@
     <string name="CIT">CIT</string>
 
     <!-- Contacts -->
-    <string name="act_main_name">Searching</string>
-    <string name="action_settings">Settings</string>
-    <string name="contact_name">ZINCHUKVA</string>
     <string name="hint_search">Search…</string>
-    <string name="hero_name">Captain America</string>
-    <string name="hero_universe">DC UNIVERSE</string>
-    <string name="hero_image">The Chosen One</string>
-    <string name="hint_id">Contact\'s ID…</string>
 
     <!-- Settings keys -->
     <string name="opMode">opMode</string>

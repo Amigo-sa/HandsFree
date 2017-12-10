@@ -13,11 +13,12 @@ import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
 import by.citech.exchange.ITransmitterCtrl;
 import by.citech.exchange.ToAudioOut;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class AudIn2AudOutLooper
-        implements IDebugListener, IReceiverReg, ITransmitter, IDebugCtrl {
+        implements IDebugListener, IReceiverReg, ITransmitter, IBase {
 
     private static final String TAG = Tags.AUDIN2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -68,14 +69,14 @@ public class AudIn2AudOutLooper
     }
 
     @Override
-    public void activate() {
-        if (debug) Log.i(TAG, "activate");
-    }
-
-    @Override
-    public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
         stopDebug();
+        iTransmitterCtrl = null;
+        iReceiverCtrl = null;
+        codecType = null;
+        audioCodec = null;
+        dataBuff = null;
     }
 
     @Override
@@ -103,11 +104,6 @@ public class AudIn2AudOutLooper
     public void registerReceiver(IReceiver iReceiver) {
         if (debug) Log.i(TAG, "registerReceiver");
         this.iReceiver = iReceiver;
-    }
-
-    @Override
-    public void sendMessage(String message) {
-        Log.e(TAG, "sendMessage");
     }
 
     @Override

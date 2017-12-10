@@ -3,11 +3,12 @@ package by.citech.debug;
 import android.util.Log;
 
 import by.citech.data.StorageData;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class Bt2BtLooper
-        implements IDebugListener, IDebugCtrl {
+        implements IDebugListener, IBase {
 
     private static final String TAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -47,8 +48,8 @@ public class Bt2BtLooper
     }
 
     @Override
-    public void activate() {
-        if (debug) Log.i(TAG, "activate");
+    public void baseStart() {
+        if (debug) Log.i(TAG, "baseStart");
         isRunning = false;
         isActive = true;
         new Thread(() -> {
@@ -62,6 +63,9 @@ public class Bt2BtLooper
                 }
                 looping();
             }
+            dataAssembled = null;
+            storageBtToNet = null;
+            storageNetToBt = null;
         }).start();
     }
 
@@ -89,10 +93,10 @@ public class Bt2BtLooper
     }
 
     @Override
-    public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        stopDebug();
         isActive = false;
-        isRunning = false;
     }
 
     @Override

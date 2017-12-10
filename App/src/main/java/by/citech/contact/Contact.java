@@ -1,5 +1,6 @@
 package by.citech.contact;
 
+import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -127,4 +128,12 @@ public class Contact
         sb.append('}');
         return sb.toString();
     }
+
+    public static abstract class Contract implements BaseColumns {
+        public static final String TABLE_NAME = "contacts";
+        public static final String COLUMN_NAME_ID = "id";
+        public static final String COLUMN_NAME_NAME = "name";
+        public static final String COLUMN_NAME_IP = "ip";
+    }
+
 }

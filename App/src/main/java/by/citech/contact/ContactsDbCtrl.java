@@ -13,7 +13,8 @@ import java.util.List;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class ContactsDbCtrl extends SQLiteOpenHelper {
+public class ContactsDbCtrl
+        extends SQLiteOpenHelper {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.CONTACTS_DB_CTRL;
@@ -23,19 +24,15 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
 
     private static final String CREATE_DB_CONTACTS = String.format(
                     "CREATE TABLE IF NOT EXISTS %1$s (" +
-                    "%2$s INTEGER PRIMARY KEY NOT NULL" +
-                    "," +
-                    "%3$s TEXT NOT NULL" +
-                    "," +
+                    "%2$s INTEGER PRIMARY KEY NOT NULL," +
+                    "%3$s TEXT NOT NULL," +
                     "%4$s TEXT NOT NULL UNIQUE" +
                     ");",
-            ContactsContract.Contacts.TABLE_NAME,
-            ContactsContract.Contacts.COLUMN_NAME_ID,
-            ContactsContract.Contacts.COLUMN_NAME_NAME,
-            ContactsContract.Contacts.COLUMN_NAME_IP
+            Contact.Contract.TABLE_NAME,
+            Contact.Contract.COLUMN_NAME_ID,
+            Contact.Contract.COLUMN_NAME_NAME,
+            Contact.Contract.COLUMN_NAME_IP
             );
-
-    private SQLiteDatabase db;
 
     //--------------------- base
 
@@ -63,8 +60,8 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
     private static ContentValues buildContent(Contact contact) {
         if (debug) Log.d(TAG, "buildContent");
         ContentValues contentValues = new ContentValues();
-        contentValues.put(ContactsContract.Contacts.COLUMN_NAME_NAME, contact.getName());
-        contentValues.put(ContactsContract.Contacts.COLUMN_NAME_IP, contact.getIp());
+        contentValues.put(Contact.Contract.COLUMN_NAME_NAME, contact.getName());
+        contentValues.put(Contact.Contract.COLUMN_NAME_IP, contact.getIp());
         return contentValues;
     }
 
@@ -74,12 +71,12 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
             Log.e(TAG, "downloadAllContacts contacts is null");
             return false;
         }
-        db = getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         if (db == null) {
             Log.e(TAG, "downloadAllContacts db is null");
             return false;
         }
-        Cursor cursor = db.query(ContactsContract.Contacts.TABLE_NAME, null, null, null ,null, null, null);
+        Cursor cursor = db.query(Contact.Contract.TABLE_NAME, null, null, null ,null, null, null);
         if (cursor == null) {
             Log.e(TAG, "downloadAllContacts cursor is null");
             return false;
@@ -90,9 +87,9 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
             int i = 0;
             do {
                 contacts.add(new Contact(
-                        cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts.COLUMN_NAME_ID)),
-                        cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.COLUMN_NAME_NAME)),
-                        cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.COLUMN_NAME_IP))));
+                        cursor.getLong(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_ID)),
+                        cursor.getString(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_NAME)),
+                        cursor.getString(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_IP))));
                 if (debug) Log.i(TAG, "downloadAllContacts added contact to list: " + ++i);
             } while (cursor.moveToNext());
             if (debug) Log.i(TAG, "downloadAllContacts added all contacts to list");
@@ -111,8 +108,8 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
             return -1;
         }
         final long[] id = new long[1];
-        db = getWritableDatabase();
-        if (proc(() -> id[0] = db.insert(ContactsContract.Contacts.TABLE_NAME, null, buildContent(contact)))) {
+        SQLiteDatabase db = getWritableDatabase();
+        if (proc(db, () -> id[0] = db.insert(Contact.Contract.TABLE_NAME, null, buildContent(contact)))) {
             if (debug) Log.d(TAG, "add id: " + id[0]);
             return id[0];
         } else {
@@ -127,8 +124,8 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
             return false;
         }
         final int[] delCount = new int[1];
-        db = getWritableDatabase();
-        proc(() -> delCount[0] = db.delete(ContactsContract.Contacts.TABLE_NAME, "id = " + contact.getId(), null));
+        SQLiteDatabase db = getWritableDatabase();
+        proc(db, () -> delCount[0] = db.delete(Contact.Contract.TABLE_NAME, "id = " + contact.getId(), null));
         if (delCount[0] == 1) {
             if (debug) Log.i(TAG, "delete deleted 1");
             return true;
@@ -148,7 +145,8 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
             return false;
         }
         final int[] updCount = new int[1];
-        proc(() -> updCount[0] = db.update(ContactsContract.Contacts.TABLE_NAME, buildContent(contactToCopy), "id = " + contactToUpd.getId(), null));
+        SQLiteDatabase db = getWritableDatabase();
+        proc(db, () -> updCount[0] = db.update(Contact.Contract.TABLE_NAME, buildContent(contactToCopy), "id = " + contactToUpd.getId(), null));
         if (updCount[0] == 1) {
             if (debug) Log.i(TAG, "update updated 1");
             return true;
@@ -161,7 +159,7 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
         }
     }
 
-    private boolean proc(Runnable runnable) {
+    private static boolean proc(SQLiteDatabase db, Runnable runnable) {
         if (db == null || runnable == null) {
             Log.e(TAG, "proc illegal parameters");
             return false;
@@ -181,59 +179,59 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
 
     void test() {
         Log.w(TAG, "TEST DB");
-        testPrintDb();
+        printDb();
         testGetSizeDb();
-        if (!testIsEmptyDb()) {
-            testClearDb();
+        if (!isEmptyDb()) {
+            clearDb();
         }
-        testFillDb();
+        fillDb();
         Log.w(TAG, "TEST DB DONE");
     }
 
     private void testGetSizeDb() {
         Log.i(TAG, "testGetSizeDb");
-        db = getWritableDatabase();
-        long size = DatabaseUtils.queryNumEntries(db, ContactsContract.Contacts.TABLE_NAME);
+        SQLiteDatabase db = getReadableDatabase();
+        long size = DatabaseUtils.queryNumEntries(db, Contact.Contract.TABLE_NAME);
         db.close();
         Log.i(TAG, "testGetSizeDb db size is " + size);
     }
 
-    private void testPrintDb() {
-        Log.i(TAG, "testPrintDb");
-        db = getReadableDatabase();
-        Cursor cursor = db.query(ContactsContract.Contacts.TABLE_NAME, null, null, null ,null, null, null);
+    private void printDb() {
+        Log.i(TAG, "printDb");
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(Contact.Contract.TABLE_NAME, null, null, null ,null, null, null);
         if (cursor.moveToFirst()) {
             do {
                 Log.i(TAG, String.format("ID is %d, Name is %s, IP is %s",
-                        cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts.COLUMN_NAME_ID)),
-                        cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.COLUMN_NAME_NAME)),
-                        cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.COLUMN_NAME_IP))));
+                        cursor.getLong(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_ID)),
+                        cursor.getString(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_NAME)),
+                        cursor.getString(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_IP))));
             } while (cursor.moveToNext());
         } else {
-            Log.i(TAG, "testPrintDb db have no contacts");
+            Log.i(TAG, "printDb db have no contacts");
         }
         cursor.close();
         db.close();
     }
 
-    private boolean testIsEmptyDb() {
-        Log.i(TAG, "testIsEmptyDb");
-        db = getReadableDatabase();
-        boolean isClear = (DatabaseUtils.queryNumEntries(db, ContactsContract.Contacts.TABLE_NAME) == 0);
+    private boolean isEmptyDb() {
+        Log.i(TAG, "isEmptyDb");
+        SQLiteDatabase db = getReadableDatabase();
+        boolean isClear = (DatabaseUtils.queryNumEntries(db, Contact.Contract.TABLE_NAME) == 0);
         db.close();
-        Log.i(TAG, "testIsEmptyDb db is " + (isClear ? "" : "not ") + "empty");
+        Log.i(TAG, "isEmptyDb db is " + (isClear ? "" : "not ") + "empty");
         return isClear;
     }
 
-    private void testClearDb() {
-        Log.i(TAG, "testClearDb");
-        db = getWritableDatabase();
-        db.delete(ContactsContract.Contacts.TABLE_NAME, null, null);
+    private void clearDb() {
+        Log.i(TAG, "clearDb");
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(Contact.Contract.TABLE_NAME, null, null);
         db.close();
     }
 
-    private void testFillDb() {
-        Log.i(TAG, "testFillDb");
+    private void fillDb() {
+        Log.i(TAG, "fillDb");
         add(new Contact("Петька", "192.168.0.1"));
         add(new Contact("Саня", "192.12.0.1"));
         add(new Contact("Федя", "192.238.0.1"));
@@ -252,4 +250,5 @@ public class ContactsDbCtrl extends SQLiteOpenHelper {
         add(new Contact("Silvia Saint", "255.255.2.3"));
         add(new Contact("Иозя", "123.255.255.255"));
     }
+
 }

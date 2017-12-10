@@ -1,6 +1,7 @@
 package by.citech.contact;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -8,22 +9,24 @@ import java.util.Collections;
 import java.util.List;
 
 import by.citech.element.ElementsMemCtrl;
-import by.citech.element.IElementAdd;
-import by.citech.element.IElementDel;
-import by.citech.element.IElementUpd;
+import by.citech.element.IElement;
+import by.citech.exchange.IMsgToUi;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class Contactor
-        implements IElementDel<Contact>, IElementAdd<Contact>, IElementUpd<Contact> {
+        implements IElement<Contact>, IBase {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.CONTACTOR;
 
     private ContactsDbCtrl dbCtrl;
-    private IContactsListener iContactsListener;
+    private IContactsListener listener;
     private ElementsMemCtrl<Contact> memCtrl;
     private List<Contact> contacts;
+    private IMsgToUi iMsgToUi;
+    private boolean isInitiated;
 
     //--------------------- singleton
 
@@ -49,142 +52,178 @@ public class Contactor
 
     public List<Contact> getContacts() {
         if (debug) Log.i(TAG, "getContacts");
-        return memCtrl.getElements();
+        return memCtrl.getList();
     }
 
     //--------------------- main
 
-    public void start(Context context, IContactsListener iContactsListener) {
-        if (debug) Log.i(TAG, "start");
-        if (context == null || iContactsListener == null) {
-            if (debug) Log.e(TAG, "start at least one of key parameters are null");
+    public void build(@NonNull Context context,
+                      @NonNull IContactsListener listener,
+                      @NonNull IMsgToUi iMsgToUi) {
+        if (debug) Log.i(TAG, "build");
+        if (context == null || listener == null || iMsgToUi == null) {
+            Log.e(TAG, "start illegal parameters");
             return;
         }
-        this.iContactsListener = iContactsListener;
-        new Thread(() -> {
-            dbCtrl = new ContactsDbCtrl(context);
-            dbCtrl.test();
-            getAllContacts();
-        }).start();
+        if (isInitiated) {
+            Log.e(TAG, "start already started");
+            return;
+        } else {
+            isInitiated = true;
+        }
+        this.listener = listener;
+        dbCtrl = new ContactsDbCtrl(context);
     }
 
-    private void getAllContacts() {
+    public void getAllContacts() {
         if (debug) Log.i(TAG, "getAllContacts");
+        if (!isInitiated) return;
+        dbCtrl.test(); //TODO: remove, test
         if (!dbCtrl.downloadAllContacts(contacts)) {
             Log.e(TAG, "getAllContacts downloadAllContacts fail");
             return;
-        }
-        if (contacts.isEmpty()) {
+        } else if (contacts.isEmpty()) {
             if (debug) Log.i(TAG, "getAllContacts contacts is empty");
             return;
         }
         memCtrl.sort();
-        for (Contact contact : contacts)
-            contact.setState(ContactState.SuccessAdd);
-        iContactsListener.onContactsChange(contacts.toArray(new Contact[contacts.size()]));
+        for (Contact contact : contacts) {
+            if (contact != null) {
+                contact.setState(ContactState.SuccessAdd);
+            } else {
+                Log.e(TAG, "getAllContacts one of contacts is null, deleting");
+                contacts.remove(null);
+            }
+        }
+        reportContact(contacts.toArray(new Contact[contacts.size()]));
     }
 
     private boolean check(Contact toUpdate, Contact toCopy) {
         if (debug) Log.i(TAG, "check if copy");
-        if (toUpdate == null) {
-        } else if (toCopy == null) {
-            toUpdate.setState(ContactState.FailCopyNull);
-        } else if (!Contact.checkForValid(toCopy)) {
-            toUpdate.setState(ContactState.FailInvalid);
-        } else if (toUpdate.equals(toCopy)) {
-            return true;
-        } else if (!memCtrl.checkForUniq(toCopy)) {
-            toUpdate.setState(ContactState.FailNotUnique);
+        if (toUpdate != null) {
+            if (toCopy == null) {
+                toUpdate.setState(ContactState.FailUpdate);
+            } else if (!Contact.checkForValid(toCopy)) {
+                toUpdate.setState(ContactState.FailInvalid);
+            } else if (toUpdate.equals(toCopy)) {
+                return true;
+            } else if (!memCtrl.checkForUniq(toCopy)) {
+                toUpdate.setState(ContactState.FailNotUnique);
+            }
         }
-        iContactsListener.onContactsChange(toUpdate);
+        reportContact(toUpdate);
         return false;
      }
 
     private boolean check(Contact contact) {
         if (debug) Log.i(TAG, "check");
-        if (contact == null) {
-        } else if (!Contact.checkForValid(contact)) {
-            contact.setState(ContactState.FailInvalid);
-        } else if (!memCtrl.checkForUniq(contact)) {
-            contact.setState(ContactState.FailNotUnique);
-        } else {
-            return true;
+        if (contact != null) {
+            if (!Contact.checkForValid(contact)) {
+                contact.setState(ContactState.FailInvalid);
+            } else if (!memCtrl.checkForUniq(contact)) {
+                contact.setState(ContactState.FailNotUnique);
+            } else {
+                return true;
+            }
         }
-        iContactsListener.onContactsChange(contact);
+        reportContact(contact);
         return false;
+    }
+
+    private void reportContact(Contact... toReport) {
+        if (debug) Log.i(TAG, "reportContact");
+        iMsgToUi.sendToUiRunnable(false, () -> listener.onContactsChange(toReport));
     }
 
     //--------------------- interfaces
 
     @Override
-    public void addElement(Contact contactToAdd) {
+    public void addElement(Contact toAdd) {
         if (debug) Log.i(TAG, "addElement");
-        if (check(contactToAdd)) {
-            long contactId = dbCtrl.add(contactToAdd);
+        if (check(toAdd) && isInitiated) {
+            long contactId = dbCtrl.add(toAdd);
             if (contactId == -1) {
-                contactToAdd.setState(ContactState.FailToAdd);
+                toAdd.setState(ContactState.FailToAdd);
                 Log.e(TAG, "addElement to db fail");
             } else {
-                contactToAdd.setId(contactId);
-                if (!memCtrl.add(contactToAdd)) {
-                    contactToAdd.setState(ContactState.FailToAdd);
+                toAdd.setId(contactId);
+                if (!memCtrl.add(toAdd)) {
+                    toAdd.setState(ContactState.FailToAdd);
                     Log.e(TAG, "addElement to memory fail");
                 } else {
-                    contactToAdd.setState(ContactState.SuccessAdd);
+                    toAdd.setState(ContactState.SuccessAdd);
                 }
             }
-            iContactsListener.onContactsChange(contactToAdd);
+            reportContact(toAdd);
         }
     }
 
     @Override
-    public void deleteElement(Contact contact) {
+    public void deleteElement(Contact toDelete) {
         if (debug) Log.i(TAG, "deleteElement");
-        boolean isMemOpSuccess;
-        boolean isDbOpSuccess;
-        if (contact != null) {
-            if (!dbCtrl.delete(contact)) {
-                contact.setState(ContactState.FailDelete);
-                Log.e(TAG, "deleteElement from db fail");
-            } else if (!memCtrl.delete(contact)) {
-                contact.setState(ContactState.FailDelete);
-                Log.e(TAG, "deleteElement from memory fail");
+        if ((toDelete != null) && isInitiated) {
+            if (!dbCtrl.delete(toDelete)) {
+                toDelete.setState(ContactState.FailDelete);
+                Log.e(TAG, "deleteElement db fail");
+            } else if (!memCtrl.delete(toDelete)) {
+                toDelete.setState(ContactState.FailDelete);
+                Log.e(TAG, "deleteElement memory fail");
             } else {
-                contact.setState(ContactState.SuccessDelete);
+                toDelete.setState(ContactState.SuccessDelete);
             }
         }
-        iContactsListener.onContactsChange(contact);
+        reportContact(toDelete);
     }
 
     @Override
     public void updateElement(Contact toUpdate, Contact toCopy) {
         if (debug) Log.i(TAG, "updateElement");
+
+        //TODO: to remove, test area start
         Contact backup = null;
-        boolean isMemOpSuccess;
-        boolean isDbOpSuccess;
-        try {
-            backup = toUpdate.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        if (toUpdate != null) {
+            try {
+                backup = toUpdate.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
         }
         if (backup == null) {
             Log.e(TAG, "updateElement backup is null");
         }
-        if (check(toUpdate, toCopy)) {
+        //TODO: to remove, test area end
+
+        if (check(toUpdate, toCopy) && isInitiated) {
             if (!dbCtrl.update(toUpdate, toCopy)) {
                 toUpdate.setState(ContactState.FailUpdate);
+                Log.e(TAG, "updateElement db fail");
             } else if (!memCtrl.update(toUpdate, toCopy)) {
+                toUpdate.setState(ContactState.FailUpdate);
                 Log.e(TAG, "updateElement memory fail");
-                if (backup != null) {
-                    if (!dbCtrl.update(toUpdate, backup)) {
-                        Log.e(TAG, "updateElement backup fail");
-                    }
-                    Log.e(TAG, "updateElement backup success");
-                }
             } else {
                 toUpdate.setState(ContactState.SuccessUpdate);
             }
-            iContactsListener.onContactsChange(toUpdate);
+            reportContact(toUpdate);
+        }
+    }
+
+    @Override
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        if (!isInitiated) {
+            Log.e(TAG, "baseStop already stopped");
+        } else {
+            if (dbCtrl != null) {
+                dbCtrl = null;
+            }
+            if (contacts != null) {
+                contacts.clear();
+                contacts = null;
+            }
+            listener = null;
+            memCtrl = null;
+            isInitiated = false;
+            iMsgToUi = null;
         }
     }
 

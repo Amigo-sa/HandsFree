@@ -3,23 +3,28 @@ package by.citech.logic;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import by.citech.data.StorageData;
 import by.citech.debug.Bt2AudOutLooper;
 import by.citech.debug.Bt2BtLooper;
 import by.citech.debug.Bt2BtRecorder;
 import by.citech.debug.AudIn2AudOutLooper;
 import by.citech.debug.AudIn2BtLooper;
-import by.citech.debug.IDebugCtrl;
 import by.citech.debug.IDebugListener;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
 import by.citech.network.INetListener;
+import by.citech.param.ISettings;
 import by.citech.param.OpMode;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
-public class Caller {
+public class Caller
+        implements IBase, ISettings {
 
     private final String TAG = Tags.CALLER;
     private final boolean debug = Settings.debug;
@@ -33,17 +38,17 @@ public class Caller {
         initiate();
     }
 
-    private void initiate() {
-        isInitiated = true;
+    @Override
+    public void initiate() {
+        callerState = CallerState.Null;
+        iBaseList = new ArrayList<>();
         takeSettings();
-        applySettings();
+        isInitiated = true;
     }
 
-    private void takeSettings() {
+    @Override
+    public void takeSettings() {
         opMode = Settings.opMode;
-    }
-
-    private void applySettings() {
     }
 
     //--------------------- non-settings
@@ -54,17 +59,13 @@ public class Caller {
     private INetInfoListener iNetInfoListener;
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
-    private IDebugCtrl iDebugCtrl;
-    private ConnectorBluetooth connectorBluetooth;
-    private ConnectorNet connectorNet;
-    private CallUi callUi;
+    private List<IBase> iBaseList;
 
     //--------------------- singleton
 
     private static volatile Caller instance = null;
 
     private Caller() {
-        callerState = CallerState.Null;
     }
 
     public static Caller getInstance() {
@@ -74,6 +75,8 @@ public class Caller {
                     instance = new Caller();
                 }
             }
+        } else if (!instance.isInitiated) {
+            instance.initiate();
         }
         return instance;
     }
@@ -116,8 +119,8 @@ public class Caller {
         return this;
     }
 
-    public Caller setiDebugListener(IDebugListener iDebugListener) {
-        this.iDebugListener = iDebugListener;
+    public Caller setiDebugListener(IDebugListener listener) {
+        this.iDebugListener = listener;
         return this;
     }
 
@@ -155,14 +158,10 @@ public class Caller {
         if (!isInitiated) {
             initiate();
         }
-        if (iCallUiListener == null
-                || iCallNetworkListener == null
-                || iNetInfoListener == null
-                || iBluetoothListener == null) {
+        if (iCallUiListener == null) {
             if (debug) Log.e(TAG, "build illegal parameters");
             return;
         }
-
         switch (opMode) {
             case Bt2Bt:
                 buildDebugBt2Bt();
@@ -189,25 +188,27 @@ public class Caller {
         }
     }
 
-    public void stop() {
-        if (debug) Log.i(TAG, "stop");
+    @Override
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        //TODO: implement IBase.baseStop() in ConnectorBluetooth
+        if (iBaseList != null) {
+            for (IBase iBase : iBaseList) {
+                if (iBase != null) {
+                    iBase.baseStop();
+                }
+            }
+            iBaseList.clear();
+            iBaseList = null;
+        }
+        iCallUiListener = null;
+        iCallNetworkListener = null;
+        iNetInfoListener = null;
+        iBluetoothListener = null;
+        iDebugListener = null;
+        opMode = null;
+        callerState = null;
         isInitiated = false;
-        callerState = CallerState.Null;
-        if (iDebugCtrl != null) {
-            iDebugCtrl.deactivate();
-            iDebugCtrl = null;
-        }
-        if (connectorBluetooth != null) {
-            connectorBluetooth = null;
-        }
-        if (callUi != null) {
-            callUi.destruct();
-            callUi = null;
-        }
-        if (connectorNet != null) {
-            connectorNet.stop();
-            connectorNet = null;
-        }
     }
 
     //--------------------- data from microphone redirects to bluetooth
@@ -222,49 +223,53 @@ public class Caller {
         StorageData<byte[][]> audIn2BtStorage = new StorageData<>(Tags.AUDIN2BT_STORE);
 
         AudIn2BtLooper audIn2BtLooper = new AudIn2BtLooper(audIn2BtStorage);
-        iDebugCtrl = audIn2BtLooper;
 
-        connectorBluetooth = ConnectorBluetooth.getInstance()
+        iBaseList.add(audIn2BtLooper);
+
+        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setStorageToBt(audIn2BtStorage)
                 .setmHandler(new Handler());
 
-
-        callUi = CallUi.getInstance()
+        CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(audIn2BtLooper)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
+        iBaseList.add(callUi);
+
         connectorBluetooth.build();
-        iDebugCtrl.activate();
     }
 
     //--------------------- data from bluetooth redirects to dynamic
 
     private void buildBt2AudOut() {
         if (debug) Log.i(TAG, "buildBt2AudOut");
-        if (iDebugListener == null) {
+        if (iDebugListener == null
+                || iBluetoothListener == null) {
             if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
             return;
         }
 
         Bt2AudOutLooper bt2AudOutLooper = new Bt2AudOutLooper();
-        iDebugCtrl = bt2AudOutLooper;
 
-        connectorBluetooth = ConnectorBluetooth.getInstance()
+        iBaseList.add(bt2AudOutLooper);
+
+        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler());
 
-        callUi = CallUi.getInstance()
+        CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(bt2AudOutLooper)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener);
 
+        iBaseList.add(callUi);
+
         connectorBluetooth.build();
-        iDebugCtrl.activate();
     }
 
     //--------------------- data from microphone redirects to dynamic
@@ -277,79 +282,84 @@ public class Caller {
         }
 
         AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper();
-        iDebugCtrl = audIn2AudOutLooper;
 
-        callUi = CallUi.getInstance()
+        iBaseList.add(audIn2AudOutLooper);
+
+        CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(audIn2AudOutLooper)
                 .addiCallUiListener(iCallUiListener);
 
-        iDebugCtrl.activate();
+        iBaseList.add(callUi);
     }
 
     //--------------------- data from bluetooth loops back to bluetooth
 
     private void buildDebugBt2Bt() {
         if (debug) Log.i(TAG, "buildDebugBt2Bt");
-        if (iDebugListener == null) {
+        if (iDebugListener == null
+                || iBluetoothListener == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
 
-        StorageData<byte[]> storageBt2Net = new StorageData<>(Tags.BLE2NET_STORE);
-        StorageData<byte[][]> storageNet2Bt = new StorageData<>(Tags.NET2BLE_STORE);
+        StorageData<byte[]> storageFromBt = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageToBt = new StorageData<>(Tags.TO_BT_STORE);
 
-        Bt2BtLooper bt2BtLooper = new Bt2BtLooper(storageBt2Net, storageNet2Bt);
-        iDebugCtrl = bt2BtLooper;
+        Bt2BtLooper bt2BtLooper = new Bt2BtLooper(storageFromBt, storageToBt);
+        iBaseList.add(bt2BtLooper);
 
-        connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
-                .setStorageFromBt(storageBt2Net)
-                .setStorageToBt(storageNet2Bt);
+                .setStorageFromBt(storageFromBt)
+                .setStorageToBt(storageToBt);
 
-        callUi = CallUi.getInstance()
+        CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
+        iBaseList.add(callUi);
+
         connectorBluetooth.build();
-        iDebugCtrl.activate();
     }
 
     //--------------------- data from bluetooth recorded and looped back to bluetooth
 
     private void buildDebugRecord() {
         if (debug) Log.i(TAG, "buildDebugRecord");
-        if (iDebugListener == null) {
+        if (iDebugListener == null
+                || iBluetoothListener == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
 
-        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
-        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
 
         Bt2BtRecorder bt2BtRecorder = new Bt2BtRecorder(storageBtToNet, storageNetToBt);
-        iDebugCtrl = bt2BtRecorder;
+        iBaseList.add(bt2BtRecorder);
 
-        connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt);
 
-
-        callUi = CallUi.getInstance()
+        CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
+        iBaseList.add(callUi);
+
         connectorBluetooth.build();
-        iDebugCtrl.activate();
+        bt2BtRecorder.baseStart();
     }
 
     //--------------------- data from network looped back to network
@@ -357,7 +367,7 @@ public class Caller {
     private void buildDebugNet2Net() {
         if (debug) Log.i(TAG, "buildDebugNet2Net");
         if (iDebugListener == null) {
-            if (debug) Log.e(TAG, "buildDebugNet2Net illegal parameters");
+            Log.e(TAG, "buildDebugNet2Net illegal parameters");
             return;
         }
     }
@@ -366,17 +376,22 @@ public class Caller {
 
     private void buildNormal() {
         if (debug) Log.i(TAG, "buildNormal");
-        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.BLE2NET_STORE);
-        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.NET2BLE_STORE);
+        if (iCallNetworkListener == null
+                || iNetInfoListener == null
+                || iBluetoothListener == null) {
+            Log.e(TAG, "buildNormal illegal parameters");
+        }
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
         HandlerExtended handlerExtended = new HandlerExtended(getiNetworkListener());
 
-        connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt);
 
-        connectorNet = ConnectorNet.getInstance()
+        ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageBtToNet(storageBtToNet)
                 .setStorageNetToBt(storageNetToBt)
                 .addiCallNetworkListener(iCallNetworkListener)
@@ -384,13 +399,17 @@ public class Caller {
                 .setiNetInfoListener(iNetInfoListener)
                 .setHandler(handlerExtended);
 
-        callUi = CallUi.getInstance()
+        iBaseList.add(connectorNet);
+
+        CallUi callUi = CallUi.getInstance()
                 .addiCallUiListener(iCallUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth)
                 .addiCallUiListener(connectorNet);
 
+        iBaseList.add(callUi);
+
         connectorBluetooth.build();
-        connectorNet.build();
+        connectorNet.baseStart();
     }
 
 }

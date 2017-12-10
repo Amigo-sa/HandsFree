@@ -42,11 +42,6 @@ public enum ContactState {
         public String getName() {return "FailToAdd";}
     },
 
-    FailCopyNull {
-        public String getMessage() {return "Fail to copy null contact";}
-        public String getName() {return "FailCopyNull";}
-    },
-
     FailUpdate {
         public String getMessage() {return "Fail to update contact";}
         public String getName() {return "FailUpdate";}

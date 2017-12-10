@@ -21,8 +21,8 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
         this.elements = elements;
     }
 
-    public List<T> getElements() {
-        if (debug) Log.i(TAG, "getElements");
+    public List<T> getList() {
+        if (debug) Log.i(TAG, "getList");
         return elements;
     }
 
@@ -30,9 +30,9 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
 
     public void sort() {
         if (debug) Log.i(TAG, "sort");
-        if (debug) {Log.d(TAG, "elements is (before sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
+        if (debug) {Log.d(TAG, "sort before: "); for (T t : elements) {Log.d(TAG, t.toString());}}
         Collections.sort(elements);
-        if (debug) {Log.d(TAG, "elements is (after sort): "); for (T t : elements) {Log.d(TAG, t.toString());}}
+        if (debug) {Log.d(TAG, "sort after: "); for (T t : elements) {Log.d(TAG, t.toString());}}
     }
 
     public boolean add(T entry) {

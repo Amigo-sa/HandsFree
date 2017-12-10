@@ -28,7 +28,8 @@ public class ContactsRecyclerAdapter
     public ContactsRecyclerAdapter(List<Contact> contacts) {
         this.contacts = contacts;
         contactsCleanCopy = this.contacts;
-        setHasStableIds(true);
+//      setHasStableIds(true); //TODO: check if it has connection with Inconsistency FATAL EXCEPTION
+        setHasStableIds(false);
     }
 
     public static class ViewHolder

@@ -47,8 +47,8 @@ public class Tags {
     public static final String AUDIN_STORE         = "WSD_AUDIN_STORE";
     public static final String AUDOUT_SOURCE       = "WSD_AUDOUT_SOURCE";
     public static final String AUDIN2BT_STORE      = "WSD_MIC2BT_STORE";
-    public static final String NET2BLE_STORE       = "WSD_NET2BLE_STORE";
-    public static final String BLE2NET_STORE       = "WSD_BLE2NET_STORE";
+    public static final String TO_BT_STORE         = "WSD_2BT_STORE";
+    public static final String FROM_BT_STORE       = "WSD_4BT_STORE";
 
     public static final String AUDCODEC            = "WSD_AUDIOCODEC";
     public static final String CONTACT             = "WSD_CONTACT";
@@ -65,4 +65,9 @@ public class Tags {
     public static final String ACTIVE_HELPER       = "WSD_ACTIVE_HELPER";
     public static final String PRESETTER           = "WSD_PRESETTER";
 
+    public static final String I_BASE              = "WSD_I_BASE";
+    public static final String I_TRANSMITTER       = "WSD_I_TRANSMITTER";
+    public static final String I_SETTINGS          = "WSD_I_SETTINGS";
+    public static final String I_RECEIVER          = "WSD_I_RECEIVER";
+    public static final String I_MSG2UI            = "WSD_I_MSG2UI";
 }

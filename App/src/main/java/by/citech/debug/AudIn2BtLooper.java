@@ -12,11 +12,12 @@ import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
 import by.citech.exchange.ITransmitterCtrl;
 import by.citech.exchange.ToBluetooth;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class AudIn2BtLooper
-        implements IDebugListener, IDebugCtrl, ITransmitter, IReceiverReg {
+        implements IDebugListener, IBase, ITransmitter, IReceiverReg {
 
     private static final String TAG = Tags.AUDIN2BT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -55,14 +56,11 @@ public class AudIn2BtLooper
     }
 
     @Override
-    public void activate() {
-        if (debug) Log.i(TAG, "activate");
-    }
-
-    @Override
-    public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
         stopDebug();
+        iReceiverCtrl = null;
+        iTransmitterCtrl = null;
     }
 
     @Override
@@ -84,16 +82,6 @@ public class AudIn2BtLooper
         iReceiver = null;
         iReceiverCtrl.redirectOff();
         iTransmitterCtrl.streamOff();
-    }
-
-    @Override
-    public void sendMessage(String message) {
-        Log.e(TAG, "sendMessage");
-    }
-
-    @Override
-    public void sendData(byte[] data) {
-        Log.e(TAG, "sendData byte[]");
     }
 
     @Override

@@ -1,58 +1,72 @@
 package by.citech.gui;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import by.citech.DeviceControlActivity;
 import by.citech.contact.ActiveContactState;
 import by.citech.contact.Contact;
+import by.citech.contact.ContactState;
 import by.citech.contact.ContactsRecyclerAdapter;
 import by.citech.contact.EditorState;
+import by.citech.contact.IContactsListener;
 import by.citech.dialog.DialogProcessor;
 import by.citech.dialog.DialogState;
 import by.citech.dialog.DialogType;
+import by.citech.element.IElement;
 import by.citech.element.IElementAdd;
 import by.citech.element.IElementDel;
 import by.citech.element.IElementUpd;
+import by.citech.exchange.IMsgToUi;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
+import by.citech.threading.CraftedThreadPool;
 
-public class ContactEditorHelper {
+public class ContactEditorHelper
+        implements IBase, IContactsListener {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.EDITOR_HELPER;
 
     private Contact contactToEdit, contactToAdd;
     private int contactToEditPosition, contactToDeletePosition;
-    private boolean isEditPending, isAddPending, isDeletePending, isEdited, isAdded, isDeleted, isSwipedIn;
+    private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
     private EditorState editorState;
 
     private ViewHelper viewHelper;
     private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
     private ActiveContactHelper activeContactHelper;
-    private DialogProcessor dialogProcessor;
-    private IElementDel<Contact> iContactDel;
-    private IElementAdd<Contact> iContactAdd;
-    private IElementUpd<Contact> iContactUpd;
+    private IElement<Contact> iContact;
     private ContactsRecyclerAdapter contactsAdapter;
+    private IMsgToUi iMsgToUi;
+    private CraftedThreadPool threadPool;
 
-    public ContactEditorHelper(ViewHelper viewHelper, ContactsRecyclerAdapter.SwipeCrutch swipeCrutch,
-                               ActiveContactHelper activeContactHelper, DialogProcessor dialogProcessor,
-                               IElementDel<Contact> iContactDel, IElementAdd<Contact> iContactAdd,
-                               IElementUpd<Contact> iContactUpd, ContactsRecyclerAdapter contactsAdapter) {
+    public ContactEditorHelper(@NonNull ViewHelper viewHelper,
+                               @NonNull ContactsRecyclerAdapter.SwipeCrutch swipeCrutch,
+                               @NonNull ActiveContactHelper activeContactHelper,
+                               @NonNull IMsgToUi iMsgToUi,
+                               @NonNull CraftedThreadPool threadPool,
+                               @NonNull IElement<Contact> iContact,
+                               @NonNull ContactsRecyclerAdapter contactsAdapter) {
         this.viewHelper = viewHelper;
         this.swipeCrutch = swipeCrutch;
         this.activeContactHelper = activeContactHelper;
-        this.dialogProcessor = dialogProcessor;
-        this.iContactDel = iContactDel;
-        this.iContactAdd = iContactAdd;
-        this.iContactUpd = iContactUpd;
+        this.iMsgToUi = iMsgToUi;
+        this.threadPool = threadPool;
+        this.iContact = iContact;
         this.contactsAdapter = contactsAdapter;
         contactToEditPosition = -1;
         contactToDeletePosition = -1;
         editorState = EditorState.Inactive;
     }
+
+    //--------------------- getters and setters
 
     public void setSwipedIn() {
         isSwipedIn = true;
@@ -61,6 +75,8 @@ public class ContactEditorHelper {
     public EditorState getState() {
         return editorState;
     }
+
+    //--------------------- status
 
     public boolean isUpdPending(Contact contact) {
         return ((contactToEdit == contact) && isEditPending);
@@ -74,6 +90,8 @@ public class ContactEditorHelper {
         return ((contactToEdit == contact) && isDeletePending);
     }
 
+    //--------------------- enter point
+
     public void startEditorEditContact(Contact contact, int position) {
         if (debug) Log.i(TAG, "startEditorEditContact");
         goToState(EditorState.Edit, contact, position);
@@ -83,6 +101,8 @@ public class ContactEditorHelper {
         if (debug) Log.i(TAG, "startEditorAddContact");
         goToState(EditorState.Add);
     }
+
+    //--------------------- states
 
     public void goToState(EditorState toState) {
         if (toState != EditorState.Edit)
@@ -121,7 +141,6 @@ public class ContactEditorHelper {
                 isAddPending = false;
                 isEditPending = false;
                 isDeleted = false;
-                isAdded = false;
                 isEdited = false;
                 activeContactHelper.goToState(ActiveContactState.Default);
                 return;
@@ -132,6 +151,8 @@ public class ContactEditorHelper {
         viewHelper.showEditor();
         activeContactHelper.goToState(ActiveContactState.FromEditor);
     }
+
+    //--------------------- commands
 
     public void cancelContact() {
         if (debug) Log.i(TAG, "cancelContact");
@@ -157,9 +178,9 @@ public class ContactEditorHelper {
         freezeState();
         contactToDeletePosition = contactToEditPosition;
         Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Proceed, () -> iContactDel.deleteElement(contactToEdit));
+        map.put(DialogState.Proceed, () -> threadPool.addRunnable(() -> iContact.addElement(contactToAdd)));
         map.put(DialogState.Cancel, this::releaseState);
-        dialogProcessor.runDialog(DialogType.Delete, map);
+        iMsgToUi.sendToUiDialog(true, DialogType.Delete, map);
     }
 
     public void saveContact() {
@@ -169,12 +190,12 @@ public class ContactEditorHelper {
                 freezeState();
                 isAddPending = true;
                 contactToAdd = activeContactHelper.getContact();
-                iContactAdd.addElement(contactToAdd);
+                threadPool.addRunnable(() -> iContact.addElement(contactToAdd));
                 break;
             case Edit:
                 freezeState();
                 isEditPending = true;
-                iContactUpd.updateElement(contactToEdit, activeContactHelper.getContact());
+                threadPool.addRunnable(() -> iContact.updateElement(contactToEdit, activeContactHelper.getContact()));
                 break;
             case Inactive:
                 Log.e(TAG, "saveContact editorState Inactive");
@@ -185,8 +206,10 @@ public class ContactEditorHelper {
         }
     }
 
-    public void onContactDelSuccess() {
-        if (debug) Log.i(TAG, "onContactDelSuccess");
+    //--------------------- on command results
+
+    private void onContactDelSucc() {
+        if (debug) Log.i(TAG, "onContactDelSucc");
         isDeletePending = false;
         isDeleted = true;
         contactsAdapter.notifyItemRemoved(contactToDeletePosition);
@@ -195,16 +218,15 @@ public class ContactEditorHelper {
         goToState(EditorState.Add);
     }
 
-    public void onContactAddSucc(int position) {
+    private void onContactAddSucc(int position) {
         if (debug) Log.i(TAG, "onContactAddSucc");
         isAddPending = false;
-        isAdded = true;
         contactToEditPosition = position;
         goToState(EditorState.Edit, contactToAdd, position);
         contactToAdd = null;
     }
 
-    public void onContactEditSucc(int position) {
+    private void onContactEditSucc(int position) {
         if (debug) Log.i(TAG, "onContactEditSucc");
         isEditPending = false;
         isEdited = true;
@@ -212,18 +234,27 @@ public class ContactEditorHelper {
         goToState(EditorState.Edit, contactToEdit, position);
     }
 
-    public void onContactAddFail() {
+    private void onContactDelFail() {
+        if (debug) Log.i(TAG, "onContactDelFail");
+        isDeletePending = false;
+        isDeleted = false;
+        releaseState();
+    }
+
+    private void onContactAddFail() {
         if (debug) Log.i(TAG, "onContactAddFail");
         isAddPending = false;
         contactToAdd = null;
         releaseState();
     }
 
-    public void onContactEditFail() {
+    private void onContactEditFail() {
         if (debug) Log.i(TAG, "onContactEditFail");
         isEditPending = false;
         releaseState();
     }
+
+    //--------------------- additional
 
     public void contactFieldChanged() {
         viewHelper.setEditorFieldChanged();
@@ -237,6 +268,69 @@ public class ContactEditorHelper {
     private void releaseState() {
         if (debug) Log.i(TAG, "releaseState");
         viewHelper.setEditorButtonsRelease();
+    }
+
+    //--------------------- IContactsListener
+
+    @Override
+    public void onContactsChange(final Contact... contacts) {
+        if (debug) Log.i(TAG, "onContactsChange");
+        if (contacts == null || contacts[0] == null) {
+            Log.e(TAG, "onContactsChange returned contact is null");
+            goToState(EditorState.Inactive);
+            return;
+        }
+        Contact contact = contacts[0];
+        ContactState state = contact.getState();
+        iMsgToUi.sendToUiToast(true, state.getMessage());
+        if (contacts.length > 1) {
+            contactsAdapter.notifyDataSetChanged();
+        } else {
+            int position = contactsAdapter.getItemPosition(contact);
+            if (debug) Log.w(TAG, String.format(Locale.US,
+                    "onContactsChange: state is %s, pos is %d, contact is %s",
+                    state.getMessage(), position, contact.toString()));
+            switch (state) {
+                case FailDelete:
+                    if (isDelPending(contact))
+                        onContactDelFail();
+                    break;
+                case SuccessAdd:
+                    contactsAdapter.notifyItemInserted(position);
+                    if (isAddPending(contact))
+                        onContactAddSucc(position);
+                    break;
+                case SuccessUpdate:
+                    contactsAdapter.notifyItemChanged(position);
+                    if (isUpdPending(contact))
+                        onContactEditSucc(position);
+                    break;
+                case FailUpdate:
+                case FailInvalid:
+                case FailNotUnique:
+                    if (isUpdPending(contact)) {
+                        onContactEditFail();
+                    } else if (isAddPending(contact)) {
+                        onContactAddFail();
+                    }
+                    break;
+                case SuccessDelete:
+                    if (isDelPending(contact))
+                        onContactDelSucc();
+                    else
+                        contactsAdapter.notifyDataSetChanged();
+                    break;
+                case FailToAdd:
+                    if (isAddPending(contact))
+                        onContactAddFail();
+                case Null:
+                    Log.e(TAG, "onContactsChange state Null");
+                    break;
+                default:
+                    Log.e(TAG, "onContactsChange state default");
+                    break;
+            }
+        }
     }
 
 }

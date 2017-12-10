@@ -48,6 +48,12 @@ public enum AudioCodecType implements IEnumSetting<AudioCodecType> {
         return SettingsDefault.AudioCommon.audioCodecType;
     }
 
+    @Override
+    public AudioCodecType[] getValues() {
+        return values();
+    }
+
+
     public abstract int getEncodedBytesSize();
     public abstract int getDecodedShortsSize();
 

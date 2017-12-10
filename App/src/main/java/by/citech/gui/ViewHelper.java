@@ -1,8 +1,11 @@
 package by.citech.gui;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,14 +15,17 @@ import by.citech.contact.Contact;
 import by.citech.debug.IDebugListener;
 import by.citech.logic.Caller;
 import by.citech.logic.CallerState;
+import by.citech.logic.IBase;
 import by.citech.logic.ICallNetListener;
 import by.citech.param.Colors;
 import by.citech.param.OpMode;
 import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 import by.citech.util.Contacts;
 
-public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugListener {
+public class ViewHelper
+        implements ICallUiListener, ICallNetListener, IDebugListener, IBase {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.VIEW_HELPER;
@@ -48,6 +54,7 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
 
     //--------------------- non-settings
 
+    private IGetViewById iGetViewById;
     private View scanView;
     private View mainView;
     private View viewContactEditor;
@@ -68,16 +75,18 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    public ViewHelper(IGetViewById iGetViewById, Animation animCall) {
-        if (!isInitiated) {
-            initiate();
+    public ViewHelper(@NonNull IGetViewById iGetViewById,
+                      @NonNull Context context) throws Exception {
+        if (iGetViewById == null || context == null) {
+            throw new Exception(StatusMessages.ERR_PARAMETERS);
         }
+        this.iGetViewById = iGetViewById;
         buttonHelper = ButtonHelper.getInstance();
-        this.animCall = animCall;
-        takeViews(iGetViewById);
+        animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
+        takeViews();
     }
 
-    private void takeViews(IGetViewById iGetViewById) {
+    private void takeViews() {
         this.scanView = iGetViewById.findViewById(R.id.scanView);
         this.mainView = iGetViewById.findViewById(R.id.mainView);
         this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
@@ -96,7 +105,11 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
     }
 
     public void setDefaultView() {
-        if (Settings.debug) Log.w(TAG,"setDefaultView opMode is " + opMode.getSettingName());
+        if (Settings.debug) Log.i(TAG,"setDefaultView");
+        if (!isInitiated) {
+            initiate();
+            if (Settings.debug) Log.w(TAG,"setDefaultView opMode is " + opMode.getSettingName());
+        }
         switch (opMode) {
             case Bt2AudOut:
                 enableBtnCall(btnGreen, "RECEIVING");
@@ -138,7 +151,28 @@ public class ViewHelper implements ICallUiListener, ICallNetListener, IDebugList
         prepare();
     }
 
-    public void stop() {
+    @Override
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        scanView = null;
+        mainView = null;
+        viewContactEditor = null;
+        viewChosenContact = null;
+        editTextSearch = null;
+        textViewChosenContactName = null;
+        textViewChosenContactIp = null;
+        editTextContactName = null;
+        editTextContactIp = null;
+        btnSaveContact = null;
+        btnDelContact = null;
+        btnCancelContact = null;
+        btnGreen = null;
+        btnRed = null;
+        btnChangeDevice = null;
+        buttonHelper = null;
+        animCall = null;
+        iGetViewById = null;
+        isCallAnim = false;
         isInitiated = false;
     }
 

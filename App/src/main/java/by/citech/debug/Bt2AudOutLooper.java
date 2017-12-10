@@ -9,11 +9,12 @@ import by.citech.exchange.IReceiverCtrl;
 import by.citech.exchange.IReceiverReg;
 import by.citech.exchange.ITransmitter;
 import by.citech.exchange.ToAudioOut;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class Bt2AudOutLooper
-        implements IDebugListener, IDebugCtrl, ITransmitter, IReceiverReg {
+        implements IDebugListener, IBase, ITransmitter, IReceiverReg {
 
     private static final String TAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -46,14 +47,12 @@ public class Bt2AudOutLooper
     }
 
     @Override
-    public void activate() {
-        if (debug) Log.i(TAG, "activate");
-    }
-
-    @Override
-    public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
         stopDebug();
+        codecType = null;
+        audioCodec = null;
+        iReceiverCtrl = null;
     }
 
     @Override
@@ -81,21 +80,11 @@ public class Bt2AudOutLooper
     }
 
     @Override
-    public void sendMessage(String message) {
-        Log.e(TAG, "sendMessage");
-    }
-
-    @Override
     public void sendData(byte[] data) {
         if (debug) Log.i(TAG, "sendData byte[]");
         if (iReceiver != null) {
             iReceiver.onReceiveData(audioCodec.getDecodedData(data));
         }
-    }
-
-    @Override
-    public void sendData(short[] data) {
-        Log.e(TAG, "sendData short[]");
     }
 
 }

@@ -4,11 +4,12 @@ import android.util.Log;
 import by.citech.data.StorageData;
 import by.citech.logic.Caller;
 import by.citech.logic.CallerState;
+import by.citech.logic.IBase;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
 public class Bt2BtRecorder
-        implements IDebugListener, IDebugCtrl {
+        implements IDebugListener, IBase {
 
     private final String TAG = Tags.BT2BT_RECORDER;
     private final boolean debug = Settings.debug;
@@ -40,20 +41,20 @@ public class Bt2BtRecorder
     //--------------------- non-settings
 
     private int dataSavedCount;
-    private StorageData<byte[]> storageBtToNet;
-    private StorageData<byte[][]> storageNetToBt;
+    private StorageData<byte[]> storageFromBt;
+    private StorageData<byte[][]> storageToBt;
     private boolean isPlaying;
     private boolean isRecording;
     private boolean isActive;
 
-    public Bt2BtRecorder(StorageData<byte[]> storageBtToNet, StorageData<byte[][]> storageNetToBt) {
-        this.storageBtToNet = storageBtToNet;
-        this.storageNetToBt = storageNetToBt;
+    public Bt2BtRecorder(StorageData<byte[]> storageFromBt, StorageData<byte[][]> storageToBt) {
+        this.storageFromBt = storageFromBt;
+        this.storageToBt = storageToBt;
     }
 
     @Override
-    public void activate() {
-        if (debug) Log.i(TAG, "run");
+    public void baseStart() {
+        if (debug) Log.i(TAG, "baseStart");
         isActive = true;
         new Thread(() -> {
             while (isActive) {
@@ -69,9 +70,13 @@ public class Bt2BtRecorder
                 }
                 if (isRecording) {
                     record();
-                    storageBtToNet.setWriteLocked(true);
+                    storageFromBt.setWriteLocked(true);
                 }
             }
+            storageFromBt = null;
+            storageToBt = null;
+            dataAssembled = null;
+            dataSaved = null;
         }).start();
     }
 
@@ -79,7 +84,7 @@ public class Bt2BtRecorder
         if (debug) Log.i(TAG, "record");
         int dataAssembledCount = 0;
         while (isRecording) {
-            while (storageBtToNet.isEmpty()) {
+            while (storageFromBt.isEmpty()) {
                 try {
                     Thread.sleep(5);
                     if (!isRecording) return;
@@ -87,7 +92,7 @@ public class Bt2BtRecorder
                     e.printStackTrace();
                 }
             }
-            dataAssembled[dataAssembledCount] = storageBtToNet.getData();
+            dataAssembled[dataAssembledCount] = storageFromBt.getData();
             dataAssembledCount++;
             if (dataAssembledCount == btFactor) {
                 if (debug) Log.i(TAG, "run recorder output buffer contains enough data, saving");
@@ -100,17 +105,16 @@ public class Bt2BtRecorder
     }
 
     @Override
-    public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        stopDebug();
         isActive = false;
-        isPlaying = false;
-        isRecording = false;
     }
 
     private void play() {
         if (debug) Log.i(TAG, "play");
         for (int i = 0; i < dataSavedCount; i++) {
-            storageNetToBt.putData(dataSaved[i]);
+            storageToBt.putData(dataSaved[i]);
         }
         isPlaying = false;
     }
@@ -135,11 +139,7 @@ public class Bt2BtRecorder
         if (debug) Log.i(TAG, "stopDebug");
         isPlaying = false;
         isRecording = false;
-        storageNetToBt.clear();
-    }
-
-    private String getCallerStateName() {
-        return Caller.getInstance().getCallerState().getName();
+        storageToBt.clear();
     }
 
     private CallerState getCallerState() {

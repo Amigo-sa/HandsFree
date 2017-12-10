@@ -1,6 +1,11 @@
 package by.citech.param;
 
 public final class StatusMessages {
+
+    public static final String ERR_NOT_OVERRIDED = " usage of not overrided default method";
+    public static final String WRN_NOT_OVERRIDED = " usage of not overrided default method";
+    public static final String ERR_PARAMETERS    = " illegal parameters";
+
     public static final String WEBSOCKET_OPENED = "WEBSOCKET_OPENED";
     public static final String WEBSOCKET_FAILURE = "WEBSOCKET_FAILURE";
     public static final String WEBSOCKET_TIMEOUT = "WEBSOCKET_TIMEOUT";

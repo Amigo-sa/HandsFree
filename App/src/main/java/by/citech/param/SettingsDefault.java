@@ -19,6 +19,7 @@ public class SettingsDefault {
         }
 
         public static class Common {
+            public static final int threadNumber = 2;
             public static final DataSource dataSource = DataSource.BLUETOOTH;
             public static final OpMode opMode = OpMode.Normal;
             public static final boolean showTraffic = true;

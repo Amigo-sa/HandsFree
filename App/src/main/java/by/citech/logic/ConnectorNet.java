@@ -37,7 +37,7 @@ import static by.citech.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg,
-        IMessage, IServerOff, IDisc, INetListener, ICallUiListener {
+        IMessage, IServerOff, IDisc, INetListener, ICallUiListener, IBase {
 
     private static final String TAG = Tags.NET_CONNECTOR;
     private static final boolean debug = Settings.debug;
@@ -113,11 +113,13 @@ public class ConnectorNet
 
     //--------------------- main
 
-    public void build() {
+    @Override
+    public void baseStart() {
         new ServerOn(this, handler).execute(iNetInfoListener.getLocPort());
     }
 
-    public void stop() {
+    @Override
+    public void baseStop() {
         new ThreadNetStop().start();
     }
 

@@ -11,6 +11,7 @@ import by.citech.codec.audio.AudioCodecType;
 
 public class Settings {
 
+
     static {
         Log.w("WSD_SETTINGS", "static initializer");
     }
@@ -21,6 +22,7 @@ public class Settings {
 
     //---------------- COMMON
 
+    public static int threadNumber = 2;
     public static DataSource dataSource = DataSource.BLUETOOTH;
 //  public static DataSource dataSource = DataSource.MICROPHONE;
     public static OpMode opMode = OpMode.Normal;
