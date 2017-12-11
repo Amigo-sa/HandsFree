@@ -19,15 +19,9 @@ public class LeConnector {
     private BluetoothDevice mBTDevice;
     private LeScanner leScanner;
     private BluetoothLeService mBluetoothLeService;
-    private LeBroadcastReceiver leBroadcastReceiver;
-    private IBluetoothListener mIBluetoothListener;
 
-    public LeConnector(LeScanner leScanner,
-                       LeBroadcastReceiver leBroadcastReceiver,
-                       IBluetoothListener mIBluetoothListener) {
+    public LeConnector(LeScanner leScanner) {
         this.leScanner = leScanner;
-        this.leBroadcastReceiver = leBroadcastReceiver;
-        this.mIBluetoothListener = mIBluetoothListener;
     }
 
     public void setBTDevice(BluetoothDevice mBTDevice) {
@@ -55,7 +49,5 @@ public class LeConnector {
         // если сервис привязан производим соединение
         if (mBluetoothLeService != null)
             mBluetoothLeService.connect(mDeviceAddress);
-        leBroadcastReceiver.setBluetoothLeService(mBluetoothLeService);
-        // ответ ждём в Callback(LeBroadcastReceiver)
     }
 }

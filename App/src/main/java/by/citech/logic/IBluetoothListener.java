@@ -13,10 +13,8 @@ public interface IBluetoothListener {
     LeDeviceListAdapter addLeDeviceListAdapter();
     void finishConnection();
     void disconnectToast();
-    void disconnectDialogInfo(BluetoothDevice bluetoothDevice);
-    void connectDialogInfo(BluetoothDevice bluetoothDevice);
-    void registerIReceiver(BroadcastReceiver broadcastReceiver, IntentFilter intentFilter);
-    void unregisterIReceiver(BroadcastReceiver broadcastReceiver);
+    void withoutDeviceView();
+    void withDeviceView();
     String getUnknownServiceString();
     String unknownCharaString();
 }

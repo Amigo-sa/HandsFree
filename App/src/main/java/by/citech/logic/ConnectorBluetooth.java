@@ -1,21 +1,56 @@
 package by.citech.logic;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import by.citech.IService;
+import by.citech.bluetoothlegatt.ConnectAction;
+import by.citech.bluetoothlegatt.IReceive;
 import by.citech.bluetoothlegatt.BluetoothLeState;
+import by.citech.bluetoothlegatt.IVisible;
 import by.citech.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.BluetoothLeService;
 import by.citech.bluetoothlegatt.LeBroadcastReceiver;
 import by.citech.bluetoothlegatt.LeConnector;
 import by.citech.bluetoothlegatt.LeScanner;
+import by.citech.bluetoothlegatt.commands.adapter.AddConnectDeviceToAdapterCommand;
+import by.citech.bluetoothlegatt.commands.adapter.AddToListCommand;
+import by.citech.bluetoothlegatt.commands.BLEController;
+import by.citech.bluetoothlegatt.commands.characteristics.CharacteristicsDisplayOnCommand;
+import by.citech.bluetoothlegatt.commands.receiver.RegisterReceiverCommand;
+import by.citech.bluetoothlegatt.commands.receiver.UnregisterReceiverCommand;
+import by.citech.bluetoothlegatt.commands.service.BindServiceCommand;
+import by.citech.bluetoothlegatt.commands.button.ButtonChangeViewOffCommand;
+import by.citech.bluetoothlegatt.commands.button.ButtonChangeViewOnCommand;
+import by.citech.bluetoothlegatt.commands.adapter.ClearConnectDeviceFromAdapterCommand;
+import by.citech.bluetoothlegatt.commands.adapter.ClearListCommand;
+import by.citech.bluetoothlegatt.commands.service.CloseServiceCommand;
+import by.citech.bluetoothlegatt.commands.Command;
+import by.citech.bluetoothlegatt.commands.dialods.ConnInfoDialogCommand;
+import by.citech.bluetoothlegatt.commands.connect.ConnectCommand;
+import by.citech.bluetoothlegatt.commands.dialods.ConnectDialogCommand;
+import by.citech.bluetoothlegatt.commands.dataexchange.DataExchangeOffCommand;
+import by.citech.bluetoothlegatt.commands.dataexchange.DataExchangeOnCommand;
+import by.citech.bluetoothlegatt.commands.dialods.DisconnInfoDialogCommand;
+import by.citech.bluetoothlegatt.commands.connect.DisconnectCommand;
+import by.citech.bluetoothlegatt.commands.dialods.DisconnectDialogCommand;
+import by.citech.bluetoothlegatt.commands.adapter.InitListCommand;
+import by.citech.bluetoothlegatt.commands.dataexchange.ReceiveDataOn;
+import by.citech.bluetoothlegatt.commands.dialods.ReconnectDialogCommand;
+import by.citech.bluetoothlegatt.commands.scanner.ScanOffCommand;
+import by.citech.bluetoothlegatt.commands.scanner.ScanOnCommand;
+import by.citech.bluetoothlegatt.commands.service.StartServiceCommand;
+import by.citech.bluetoothlegatt.commands.service.UnbindServiceCommand;
 import by.citech.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.bluetoothlegatt.StorageListener;
@@ -27,15 +62,17 @@ import by.citech.param.OpMode;
 import by.citech.param.Settings;
 
 public class ConnectorBluetooth
-        implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener{
+        implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener, ConnectAction{
 
     private final static String TAG = "WSD_ConnectorBluetooth";
 
+    private AlertDialog alertDialog;
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
     private BluetoothLeService mBluetoothLeService;
     private Handler mHandler;
     // BLE устройство, с которым будем соединяться
     private BluetoothDevice mBTDevice;
+    private BluetoothDevice mBTDeviceConn;
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
     private BluetoothAdapter mBluetoothAdapter;
     // сканер имеющихся по близости BLE устройств
@@ -60,12 +97,59 @@ public class ConnectorBluetooth
     //для дебага
     private boolean isDebugRunning;
 
+private volatile BluetoothLeState BLEState;
+
+    private IReceive iReceive;
+    private IService iService;
+    private IVisible iVisible;
+
+    private Intent serviceIntent = new Intent("by.citech.bluetoothlegatt.BluetoothLeService");
+
+    private BLEController bleController;
+
+    // команды
+    private Command scanOn;
+    private Command scanOff;
+
+    private Command addToList;
+    private Command clearList;
+    private Command initList;
+
+    private Command connectDevice;
+    private Command disconnectDevice;
+
+    private Command exchangeDataOn;
+    private Command exchangeDataOff;
+    private Command receiveDataOn;
+
+    private Command closeService;
+    private Command startService;
+
+    private Command bindService;
+    private Command unbindService;
+
+    private Command connDialogOn;
+    private Command discDialogOn;
+    private Command reconnDiaologOn;
+    private Command connDialogInfoOn;
+    private Command disconnDialogInfoOn;
+
+    private Command buttonViewColorChangeOn;
+    private Command buttonViewColorChangeOff;
+
+    private Command addConnDeviceToAdapter;
+    private Command clrConnDeviceFromAdapter;
+
+    private Command registerReceiver;
+    private Command unregisterReceiver;
+
+    private Command characteristicDisplayOn;
     //--------------------- singleton
 
     private static volatile ConnectorBluetooth instance = null;
 
     private ConnectorBluetooth() {
-
+        BLEState = BluetoothLeState.DISCONECTED;
     }
 
     public static ConnectorBluetooth getInstance() {
@@ -88,20 +172,45 @@ public class ConnectorBluetooth
                 mBluetoothAdapter,
                 mIBluetoothListener,
                 controlAdapter);
-        leBroadcastReceiver = new LeBroadcastReceiver(
-                controlAdapter,
-                leScanner,
-                characteristics,
-                mIBluetoothListener,
-                this);
-        leConnector = new LeConnector(
-                leScanner,
-                leBroadcastReceiver,
-                mIBluetoothListener);
-        leDataTransmitter = new LeDataTransmitter(
-                characteristics,
-                mIBluetoothListener);
+        leBroadcastReceiver = new LeBroadcastReceiver(this);
+        leConnector = new LeConnector(leScanner);
+        leDataTransmitter = new LeDataTransmitter(characteristics, mIBluetoothListener);
         leDataTransmitter.addIRxDataListener(iTransmitter);
+        // инициализация контроллера команд
+        bleController = new BLEController();
+
+
+        // инициализация комманд
+        scanOn = new ScanOnCommand(leScanner);
+        scanOff = new ScanOffCommand(leScanner);
+
+        addToList = new AddToListCommand(controlAdapter);
+        clearList = new ClearListCommand(controlAdapter);
+        initList = new InitListCommand(controlAdapter);
+
+        connectDevice = new ConnectCommand(leConnector);
+        disconnectDevice = new DisconnectCommand(leConnector);
+
+        exchangeDataOn = new DataExchangeOnCommand(leDataTransmitter);
+        exchangeDataOff = new DataExchangeOffCommand(leDataTransmitter);
+        receiveDataOn = new ReceiveDataOn(leDataTransmitter);
+
+        closeService = new CloseServiceCommand(mBluetoothLeService);
+        startService = new StartServiceCommand(iService, serviceIntent);
+
+        bindService = new BindServiceCommand(iService, mServiceConnection);
+        unbindService = new UnbindServiceCommand(mServiceConnection, iService);
+
+        registerReceiver = new RegisterReceiverCommand(iReceive, this);
+        unregisterReceiver = new UnregisterReceiverCommand(iReceive, this);
+
+        buttonViewColorChangeOn = new ButtonChangeViewOnCommand(mIBluetoothListener);
+        buttonViewColorChangeOff = new ButtonChangeViewOffCommand(mIBluetoothListener);
+
+        // привязываем сервис и регистрируем BroadcastReceiver
+        bleController.setCommand(bindService)
+                     .setCommand(registerReceiver)
+                     .execute();
     }
 
     //--------------------- getters and setters
@@ -121,10 +230,6 @@ public class ConnectorBluetooth
         return null;
     }
 
-    public boolean ismConnected() {
-        return leBroadcastReceiver.isConnected();
-    }
-
     public ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
        return this;
@@ -134,18 +239,13 @@ public class ConnectorBluetooth
         return leScanner.isScanning();
     }
 
-    public void setmBTDevice(BluetoothDevice mBTDevice) {
+    private void setmBTDevice(BluetoothDevice mBTDevice) {
         this.mBTDevice = mBTDevice;
-        leBroadcastReceiver.setBTDevice(mBTDevice);
         leConnector.setBTDevice(mBTDevice);
     }
 
-    public BluetoothDevice getmBTDevice() {
-        return mBTDevice;
-    }
-
-    public BluetoothDevice getmBTDeviceConn() {
-        return leBroadcastReceiver.getmBTDeviceConn();
+    public BroadcastReceiver getBroadcastReceiver(){
+        return  leBroadcastReceiver.getGattUpdateReceiver();
     }
 
     public LeDeviceListAdapter getmLeDeviceListAdapter() {
@@ -167,6 +267,20 @@ public class ConnectorBluetooth
         return this;
     }
 
+    public ConnectorBluetooth setiReceive(IReceive iReceive) {
+        this.iReceive = iReceive;
+        return this;
+    }
+
+    public ConnectorBluetooth setiService(IService iService) {
+        this.iService = iService;
+        return this;
+    }
+
+    public ConnectorBluetooth setiVisible(IVisible iVisible) {
+        this.iVisible = iVisible;
+        return this;
+    }
     //---------------------------------Bluetooth -----------------------------
     public boolean getBluetoothAdapter(BluetoothManager bluetoothManager) {
         if (Settings.debug) Log.i(TAG, "getBluetoothAdapter()");
@@ -181,53 +295,112 @@ public class ConnectorBluetooth
         return mBluetoothAdapter;
     }
 
-    //------------------ inittialization-------------------------
+    //------------------ inittialization List-------------------------
 
     public void initListBTDevice() {
-        controlAdapter.initializeListBluetoothDevice();
+        bleController.setCommand(initList).execute();
     }
 
-    //----------------------- Scanning---------------------------
+    //------------------ inittialization List-------------------------
+
+ public void clickItemList(int position,  AlertDialog.Builder adb){
+        final BluetoothDevice device = getmLeDeviceListAdapter().getDevice(position);
+        if (device == null) return;
+        setmBTDevice(device);
+        // инициализация комманд работающих с устройством
+        //----------- Команды вызова диалоговых окон --------------
+        discDialogOn = new DisconnectDialogCommand(adb, mBTDevice, alertDialog, this);
+        disconnDialogInfoOn = new DisconnInfoDialogCommand(adb, mBTDevice, iVisible);
+        reconnDiaologOn = new ReconnectDialogCommand(adb, mBTDevice, alertDialog, this);
+        connDialogInfoOn = new ConnInfoDialogCommand(adb, mBTDevice, iVisible);
+        connDialogOn = new ConnectDialogCommand(adb, mBTDevice, alertDialog, this);
+        //------------------ Команды работы с адаптером -----------
+        addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
+        clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter, mBTDevice);
+        //------------------- Отображение характеристик устройства -----------------------
+        characteristicDisplayOn = new CharacteristicsDisplayOnCommand(characteristics, mBluetoothLeService);
+
+
+        if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
+        if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + mBTDeviceConn);
+        if (mBTDevice.equals(mBTDeviceConn)) {
+            bleController.setCommand(discDialogOn).execute();
+        } else if (mBTDeviceConn != null) {
+            bleController.setCommand(reconnDiaologOn).execute();
+        } else {
+            bleController.setCommand(connDialogOn)
+                         .setCommand(connectDevice)
+                         .execute();
+        }
+    }
+
+    //--------------------------- Callbacks from BroadcastReceiver --------------------
+    @Override
+    public void actionConnected() {
+        setBLEState(getBLEState(), BluetoothLeState.CONNECTED);
+        if (Settings.debug) Log.i(TAG, "mBTDevice = " + mBTDevice);
+        mBTDeviceConn = mBTDevice;
+
+        bleController.setCommand(connDialogOn).undo();
+        bleController.setCommand(connDialogInfoOn)
+                     .setCommand(buttonViewColorChangeOn)
+                     .setCommand(addConnDeviceToAdapter)
+                     .execute();
+
+        setStorages();
+    }
+
+    @Override
+    public void actionDisconnected() {
+        setBLEState(getBLEState(), BluetoothLeState.DISCONECTED);
+        mBTDeviceConn = null;
+        // TODO: добавить условие когда идёт передача и устройсво жёстко дисконектнули
+        bleController.setCommand(connDialogOn).undo();
+        bleController.setCommand(disconnDialogInfoOn)
+                     .setCommand(buttonViewColorChangeOff)
+                     .setCommand(clrConnDeviceFromAdapter)
+                     .setCommand(clearList)
+                     .setCommand(scanOn)
+                     .execute();
+    }
+
+    @Override
+    public void actionServiceDiscovered() {
+        setBLEState(getBLEState(), BluetoothLeState.SERVICES_DISCOVERED);
+        bleController.setCommand(characteristicDisplayOn).execute();
+    }
+  //----------------------- Scanning ---------------------------
 
     public void startScanBTDevices(){
-        if (leScanner != null) {
-            leScanner.startScanBluetoothDevice();
-        }
+         bleController.setCommand(scanOn).execute();
     }
 
     public void stopScanBTDevice(){
-        if (leScanner != null) {
-            leScanner.stopScanBluetoothDevice();
-        }
+         bleController.setCommand(scanOff).execute();
     }
 
     public void scanWork() {
-        if (controlAdapter != null) {
-            controlAdapter.clearAllDevicesFromList();
-            controlAdapter.addConnectDeviceToList();
-        }
-        startScanBTDevices();
+        bleController.setCommand(clearList)
+                     .setCommand(addToList)
+                     .setCommand(scanOn)
+                     .execute();
     }
 
     //----------------- Connection/Disconnection ----------------
-
-    public void disconnectWork() {// for dialog
-        if (controlAdapter != null && leConnector != null) {
-            controlAdapter.clearAllDevicesFromList();
-            leConnector.disconnectBTDevice();
-        }
-        startScanBTDevices();
+    public void disconnect() {
+        if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
+            bleController.setCommand(exchangeDataOff)
+                         .setCommand(disconnectDevice)
+                         .execute();
+        else
+            bleController.setCommand(disconnectDevice)
+                         .execute();
+    }
+    public void connecting() {
+        bleController.setCommand(connectDevice).execute();
     }
 
-    public void disconnectBTDevice() {
-        leConnector.disconnectBTDevice();
-    }
-
-    public void onConnectBTDevice() {
-        leConnector.onConnectBTDevice();
-    }
-
-    public final ServiceConnection mServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             if (Settings.debug) Log.i(TAG, "onServiceConnected()");
@@ -240,7 +413,6 @@ public class ConnectorBluetooth
             if (mBluetoothLeService != null && leBroadcastReceiver != null && leConnector != null && leDataTransmitter != null) {
                 if (mBTDevice != null)
                     mBluetoothLeService.connect(mBTDevice.getAddress());
-                leBroadcastReceiver.setBluetoothLeService(mBluetoothLeService);
                 leConnector.setBluetoothLeService(mBluetoothLeService);
                 leDataTransmitter.setBluetoothLeService(mBluetoothLeService);
             }
@@ -253,42 +425,31 @@ public class ConnectorBluetooth
         }
     };
 
-    public void closeLeService(){
-        if (Settings.debug) Log.i(TAG, "closeLeService()");
-        if (leDataTransmitter != null)
-            leDataTransmitter.disableTransmitData();
+    public void stop(){
+        if (Settings.debug) Log.i(TAG, "stop()");
+
+        bleController.setCommand(exchangeDataOff)
+                     .setCommand(unregisterReceiver)
+                     .setCommand(unbindService)
+                     .setCommand(closeService)
+                     .execute();
+
     }
 
-    //----------------------- BroadcastReceiver ---------------------
+    //---------------------------- blecontroller states ------------------------------
 
-    public void updateBCRData(){
-        if (leBroadcastReceiver != null) {
-            leBroadcastReceiver.updateBroadcastReceiveData();
-        }
-    }
-
-    public void unregisterReceiver(){
-        if (leBroadcastReceiver != null) {
-            leBroadcastReceiver.unregisterReceiver();
-        }
-    }
-
-    //--------------------- work with fsm
-
-    private volatile BluetoothLeState BLEState;
-
-    public synchronized BluetoothLeState getBLEState() {
+    private synchronized BluetoothLeState getBLEState() {
         if (Settings.debug) Log.i(TAG, "getBLEState is " + BLEState.getName());
         return BLEState;
     }
 
-    public synchronized boolean setBLEState(BluetoothLeState fromBLEState, BluetoothLeState toBLEState) {
+    private synchronized boolean setBLEState(BluetoothLeState fromBLEState, BluetoothLeState toBLEState) {
         if (Settings.debug) Log.w(TAG, String.format("setState from %s to %s", fromBLEState.getName(), toBLEState.getName()));
         if (BLEState == fromBLEState) {
             if (fromBLEState.availableStates().contains(toBLEState)) {
                 BLEState = toBLEState;
-                if (BLEState == BLEState.IDLE) {
-                    BLEState = BLEState.IDLE;
+                if (BLEState == BluetoothLeState.DISCONECTED) {
+                    BLEState = BluetoothLeState.DISCONECTED;
                 }
                 return true;
             } else {
@@ -301,22 +462,11 @@ public class ConnectorBluetooth
     }
 
 
-
-
-
-
-
-
-
-
-
     //------------ устанавливаем хранилища для данных ---------------
 
     @Override
     public void setStorages(){
         if (Settings.debug) Log.i(TAG, "setStorages()");
-//        mBluetoothLeService.setStorageFromBt(storageFromBt);
-//        mBluetoothLeService.setStorageToBt(storageToBt);
         leDataTransmitter.setStorageFromBt((storageFromBt));
         leDataTransmitter.setStorageToBt(storageToBt);
         mBluetoothLeService.setCallbackWriteListener(leDataTransmitter);
@@ -324,16 +474,19 @@ public class ConnectorBluetooth
 
     //---------------------- dataexchange ---------------------------
 
-    public void enableTransmitData() {
-        leDataTransmitter.enableTransmitData();
+    private void enableTransmitData() {
+        bleController.setCommand(exchangeDataOn).execute();
+        setBLEState(BluetoothLeState.SERVICES_DISCOVERED, BluetoothLeState.TRANSMIT_DATA);
     }
 
-    public void onlyReceiveData() {
-        leDataTransmitter.onlyReceiveData();
+    private void onlyReceiveData() {
+        bleController.setCommand(receiveDataOn).execute();
+        setBLEState(BluetoothLeState.SERVICES_DISCOVERED, BluetoothLeState.TRANSMIT_DATA);
     }
 
-    public void disableTransmitData() {
-        leDataTransmitter.disableTransmitData();
+    private void disableTransmitData() {
+        bleController.setCommand(exchangeDataOff).execute();
+        setBLEState(BluetoothLeState.TRANSMIT_DATA, BluetoothLeState.SERVICES_DISCOVERED);
     }
 
     @Override
@@ -375,8 +528,7 @@ public class ConnectorBluetooth
                     enableTransmitData();
                 }
             case Bt2Bt:
-                if (!isDebugRunning) {
-                    isDebugRunning = true;
+                if (getBLEState() == BluetoothLeState.SERVICES_DISCOVERED) {
                     enableTransmitData();
                 }
             case Record:

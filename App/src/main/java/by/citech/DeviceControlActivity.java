@@ -4,10 +4,8 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -49,9 +47,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
+import by.citech.bluetoothlegatt.IReceive;
+import by.citech.bluetoothlegatt.IVisible;
 import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.BluetoothLeService;
 import by.citech.contact.ActiveContactState;
@@ -88,7 +86,8 @@ import static by.citech.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, LocationListener, IGetViewById, IMsgToUi, IBaseAdder {
+        implements INetInfoListener, IBluetoothListener, LocationListener, 
+                   IGetViewById, IMsgToUi, IBaseAdder, IReceive, IService, IVisible {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -96,10 +95,6 @@ public class DeviceControlActivity
 
     public static final int REQUEST_LOCATION = 99;
     public static final int REQUEST_MICROPHONE = 98;
-
-    private static final int DEVICE_CONNECT = 1;
-    private static final int THIS_CONNECTED_DEVICE = 4;
-    private static final int OTHER_CONNECTED_DEVICE = 5;
 
     // цвета
     private static final int DARKCYAN = Colors.DARKCYAN;
@@ -203,7 +198,10 @@ public class DeviceControlActivity
                 .setiDebugListener(viewHelper)
                 .setiCallNetListener(viewHelper)
                 .setiNetInfoListener(this)
-                .setiBluetoothListener(this);
+                .setiBluetoothListener(this)
+                .setiReceive(this)
+                .setiService(this)
+                .setiVisible(this);
 
         connectorBluetooth = Caller.getInstance().getConnectorBluetooth();
         iUiBtnGreenRedListener = Caller.getInstance().getiUiBtnGreenRedListener();
@@ -246,10 +244,6 @@ public class DeviceControlActivity
 
         // инициализируем сервис
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
-
-        // привязываем сервис
-        bindService(gattServiceIntent, Caller.getInstance().getServiceConnection(), BIND_AUTO_CREATE);
-
         contactor.baseStart(this);
         threadPool.addRunnable(() -> contactor.getAllContacts());
         Caller.getInstance().baseStart(this);
@@ -262,9 +256,6 @@ public class DeviceControlActivity
         super.onResume();
         if (Settings.debug) Log.w(TAG,"onResume");
         enPermissions();
-        if (connectorBluetooth != null) {
-            connectorBluetooth.updateBCRData();
-        }
     }
 
     @Override
@@ -283,9 +274,6 @@ public class DeviceControlActivity
     protected void onPause() {
         super.onPause();
         if (debug) Log.w(TAG, "onPause");
-        connectorBluetooth.unregisterReceiver();
-        unbindService(connectorBluetooth.mServiceConnection);
-        connectorBluetooth.closeLeService();
         if (iBaseList != null) {
             for (IBase iBase : iBaseList) {
                 if (iBase != null) {
@@ -389,8 +377,7 @@ public class DeviceControlActivity
 
     private void enPermission(String permission){
         if (Settings.debug) Log.i(TAG, "enPermission()");
-        // permission was granted, yay! Do the
-        // location-related task you need to do.
+        // permission was granted, yay! Do the location-related task you need to do.
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
             //Request location updates:
             if (provider != null)
@@ -560,118 +547,15 @@ public class DeviceControlActivity
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
 // останавливаем сканирование и запускаем новое Activity
         myListDevices.setOnItemClickListener((parent, view1, position, id) -> {
-            final BluetoothDevice device = connectorBluetooth.getmLeDeviceListAdapter().getDevice(position);
-            if (device == null) return;
-            connectorBluetooth.setmBTDevice(device);
-            //выкидываем соответствующее диалоговое окно о подключении устройства
-            if (debug) Log.i(TAG, "mBTDevice = " + device);
-            if (debug) Log.i(TAG, "mBTDeviceConn = " + connectorBluetooth.getmBTDeviceConn());
-            if (connectorBluetooth.getmBTDevice().equals(connectorBluetooth.getmBTDeviceConn())) {
-                onCreateDialog(THIS_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
-            } else if (connectorBluetooth.getmBTDeviceConn() != null) {
-                onCreateDialog(OTHER_CONNECTED_DEVICE, connectorBluetooth.getmBTDevice());
-            } else {
-                onCreateDialog(DEVICE_CONNECT, connectorBluetooth.getmBTDevice());
-            }
+            AlertDialog.Builder adb = new AlertDialog.Builder(this);
+            connectorBluetooth.clickItemList(position, adb);
+   
         });
         connectorBluetooth.stopScanBTDevice();
         connectorBluetooth.startScanBTDevices();
     }
 
-    //--------------------- dialogs
-
-    private void onCreateDialog(int id, BluetoothDevice device) {
-        AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
-
-        switch (id) {
-            case DEVICE_CONNECT: {
-                connectorBluetooth.onConnectBTDevice();
-                adb.setTitle(device.getName())
-                        .setMessage(R.string.connect_message)
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .setCancelable(true)
-                        .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
-                            connectorBluetooth.disconnectBTDevice();
-                            dialog.cancel();
-                        });
-                alertDialog = adb.create();
-                break;
-            }
-            case THIS_CONNECTED_DEVICE: {
-                adb.setTitle(device.getName());
-                adb.setMessage(R.string.click_connected_device_message);
-                adb.setIcon(android.R.drawable.ic_dialog_info);
-                adb.setPositiveButton(R.string.disconnect, (dialog, which) -> {
-                    connectorBluetooth.disconnectWork();
-                    dialog.dismiss();
-                });
-                adb.setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.dismiss());
-                alertDialog = adb.create();
-                break;
-            }
-            case OTHER_CONNECTED_DEVICE: {
-                adb.setTitle(device.getName());
-                adb.setMessage(R.string.click_other_device_message);
-                adb.setIcon(android.R.drawable.ic_dialog_info);
-                adb.setPositiveButton(R.string.connect, (dialog, which) -> {
-                    connectorBluetooth.disconnectBTDevice();
-                    connectorBluetooth.onConnectBTDevice();
-                    dialog.dismiss();
-                });
-                adb.setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.dismiss());
-                alertDialog = adb.create();
-                break;
-            }
-        }
-        alertDialog.show();
-    }
-
-    private void onCreateDialogIsConnected(BluetoothDevice device) {
-        if (alertDialog != null)
-            alertDialog.dismiss();
-        Log.i("WSD_DIALOG","onCreateDialogConnected");
-        AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
-        adb.setTitle(device.getName())
-                .setMessage(R.string.connected_message)
-                .setIcon(android.R.drawable.checkbox_on_background)
-                .setCancelable(true);
-
-        final AlertDialog alertDialog = adb.create();
-        alertDialog.show();
-
-        final Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            public void run() {
-                alertDialog.dismiss(); // when the task active then close the dialog
-                t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
-                setVisibleMain();
-            }
-        }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
-    }
-
-    private void onCreateDialogIsDisconnected(BluetoothDevice device) {
-        if (alertDialog != null)
-            alertDialog.dismiss();
-        if (debug) Log.i(TAG,"onCreateDialogConnected");
-        AlertDialog.Builder adb = new AlertDialog.Builder(DeviceControlActivity.this);
-        adb.setTitle(device.getName())
-                .setMessage(R.string.disconnected_message)
-                .setIcon(android.R.drawable.ic_lock_power_off)
-                .setCancelable(true);
-
-        final AlertDialog alertDialog = adb.create();
-        alertDialog.show();
-
-        final Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            public void run() {
-                alertDialog.dismiss(); // when the task active then close the dialog
-                t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
-                setVisibleList();
-            }
-        }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
-    }
-
+   
     //--------------------- INetInfoListener
 
     @Override
@@ -720,25 +604,13 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void disconnectDialogInfo(BluetoothDevice bluetoothDevice) {
+    public void withoutDeviceView() {
         changeMainGUI(DARKCYAN, R.string.connect_device);
-        onCreateDialogIsDisconnected(bluetoothDevice);
     }
 
     @Override
-    public void connectDialogInfo(BluetoothDevice bluetoothDevice) {
+    public void withDeviceView() {
         changeMainGUI(DARKKHAKI, R.string.change_device);
-        onCreateDialogIsConnected(bluetoothDevice);
-    }
-
-    @Override
-    public void registerIReceiver(BroadcastReceiver broadcastReceiver, IntentFilter intentFilter) {
-        registerReceiver(broadcastReceiver, intentFilter);
-    }
-
-    @Override
-    public void unregisterIReceiver(BroadcastReceiver broadcastReceiver) {
-        unregisterReceiver(broadcastReceiver);
     }
 
     @Override
@@ -784,6 +656,10 @@ public class DeviceControlActivity
         }
     }
 
+    @Override
+    public Intent getServiceIntent() {
+        return gattServiceIntent;
+    }
     public class LinearLayoutTouchListener implements View.OnTouchListener {
 
             static final String logTag = "ActivitySwipeDetector";
@@ -860,16 +736,11 @@ public class DeviceControlActivity
     }
 
     //--------------------- ViewHelper
-
-    private boolean getVisiblityMain(){
-        return visiblityMain;
-    }
-
     private void setVisiblityMain(boolean visiblityMain){
         this.visiblityMain = visiblityMain;
     }
 
-    private void setVisibleMain() {
+    public void setVisibleMain() {
         runOnUiThread(() -> {
             invalidateOptionsMenu();
             setVisiblityMain(true);
@@ -878,19 +749,11 @@ public class DeviceControlActivity
         });
     }
 
-    private void setVisibleList() {
+    public void setVisibleList() {
         runOnUiThread(() -> {
             invalidateOptionsMenu();
             setVisiblityMain(false);
             viewHelper.showScaner();
-        });
-    }
-
-    private void setVisibleContact() {
-        runOnUiThread(() -> {
-            invalidateOptionsMenu();
-            setVisiblityMain(false);
-            mainView.setVisibility(View.GONE);
         });
     }
 

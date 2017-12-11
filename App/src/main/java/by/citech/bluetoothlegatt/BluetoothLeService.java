@@ -149,12 +149,21 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
-            if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
+            //if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
             if(status==BluetoothGatt.GATT_SUCCESS)
                 mCallbackWriteListener.MtuChangedDone(mtu);
         }
 
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorWrite(gatt, descriptor, status);
+            if (Settings.debug) Log.i(TAG, String.format("onDescriptorWrite() success, write status = %d", status));
+            if(status==BluetoothGatt.GATT_SUCCESS)
+                mCallbackWriteListener.callbackDescriptorIsDone();
+        }
+
     };
+
     // строку загружаем в Intent и передаём в LeBroadcastReceiver-у
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
@@ -171,6 +180,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
     @Override
     public void requestMtu() {
         mBluetoothGatt.requestMtu(Settings.btMtuSize);
+        if (Settings.debug) Log.i(TAG, "requestMtu was sendet, await callback ...");
     }
 
     public class LocalBinder extends Binder {
@@ -325,21 +335,32 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
      */
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null || characteristic == null) {
-            if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
+            if (Settings.debug) Log.i(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-
+        if (Settings.debug) Log.i(TAG, "setCharacteristicNotification " + enabled);
         if (READ_BYTES.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
                     UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
 
             if (descriptor != null) {
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                if (enabled)
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                else
+                    descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+
+                if (Settings.debug) Log.i(TAG, "descriptorValue = " + descriptor.getValue());
+                if (Settings.debug) Log.i(TAG, "descriptorCharacteristic = " + descriptor.getCharacteristic());
+                if (Settings.debug) Log.i(TAG, "descriptorUUID = " + descriptor.getUuid());
+                if (Settings.debug) Log.i(TAG, "descriptorPermissions = " + descriptor.getPermissions());
+
                 mBluetoothGatt.writeDescriptor(descriptor);
+
+                if (Settings.debug) Log.i(TAG, "Notify descriptor was written, await callback ...");
             }
             else {
-                if (Settings.debug) Log.w(TAG, "characteristic is null");
+                if (Settings.debug) Log.e(TAG, "characteristic is null");
             }
         }
     }

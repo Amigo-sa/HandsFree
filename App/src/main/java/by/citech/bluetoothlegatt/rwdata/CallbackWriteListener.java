@@ -8,4 +8,5 @@ public interface CallbackWriteListener {
     void callbackIsDone();
     void rcvBtPktIsDone(byte[] data);
     void MtuChangedDone(int mtu);
+    void callbackDescriptorIsDone();
 }

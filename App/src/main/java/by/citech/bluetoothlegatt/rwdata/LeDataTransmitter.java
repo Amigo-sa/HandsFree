@@ -18,6 +18,7 @@ import by.citech.param.Settings;
 public class LeDataTransmitter implements CallbackWriteListener {
 
     private final static String TAG = "WSD_LeDataTransmitter";
+    private static final long WAIT_PERIOD = 50;
 
     private BluetoothLeService mBluetoothLeService;
     private Characteristics characteristics;
@@ -32,7 +33,7 @@ public class LeDataTransmitter implements CallbackWriteListener {
     private int lostWritePkt = 0;
     private ArrayList<ITransmitter> iRxDataListeners;
     private boolean isMtuChanged = false;
-
+    private boolean notifyDescriptorWritten = false;
 
     public LeDataTransmitter(Characteristics characteristics,
                              IBluetoothListener mIBluetoothListener) {
@@ -72,7 +73,7 @@ public class LeDataTransmitter implements CallbackWriteListener {
     //нотификацию с устройства
     public void onlyReceiveData() {
         if (Settings.debug) Log.i(TAG, "onlyReceiveData()");
-        if(characteristics.isEmpty()){
+        if(!characteristics.isEmpty()){
             notifyCharacteristicStart();
         } else{
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
@@ -82,18 +83,14 @@ public class LeDataTransmitter implements CallbackWriteListener {
 
     public void enableTransmitData() {
         if (Settings.debug) Log.i(TAG, "enableTransmitData()");
-        mBluetoothLeService.requestMtu();
-        if(characteristics.isEmpty()){
-            while (!isMtuChanged){
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            notifyCharacteristicStart();
-            characteristic_write = characteristics.getWriteCharacteristic();
-            writeThreadStart();
+
+        setMTU();
+        if(!characteristics.isEmpty()){
+            if (notifyCharacteristicStart()) {  
+                characteristic_write = characteristics.getWriteCharacteristic();
+                 writeThreadStart();
+             } else
+                   if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
         } else{
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
             mIBluetoothListener.disconnectToast();
@@ -104,21 +101,51 @@ public class LeDataTransmitter implements CallbackWriteListener {
     public void disableTransmitData() {
         if (Settings.debug) Log.i(TAG, "disableTransmitData()");
         writeThreadStop();
-        notifyCharacteristicStop();
+        if (!notifyCharacteristicStop())
+            if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
     }
 
     //---------------------- Methods for notify -------------------------
 
-    public void notifyCharacteristicStart() {
-        if (Settings.debug) Log.i(TAG, "notifyCharacteristicStart()");
-        mNotifyCharacteristic = characteristics.getNotifyCharacteristic();
-        if (mBluetoothLeService != null)
-        mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, true);
+    private boolean notifyCharacteristicStart() {
+        notifyDescriptorWritten = false;
+        return setCharacteristicNotification(true);
     }
 
-    public void notifyCharacteristicStop() {
-        if(mBluetoothLeService != null)
-            mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
+       private boolean notifyCharacteristicStop() {
+        notifyDescriptorWritten = false;
+        return setCharacteristicNotification(false);
+    }
+
+    private boolean setCharacteristicNotification(boolean enable){
+        //if (Settings.debug) Log.i(TAG, "setNotifyCharacteristic = " + enable);
+        mNotifyCharacteristic = characteristics.getNotifyCharacteristic();
+        if(mBluetoothLeService != null) {
+            mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, enable);
+            return callbackDescriptorWriteAwait();
+        }
+        return false;
+    }
+    private boolean callbackDescriptorWriteAwait() {
+        int time = 0;
+
+        while (!notifyDescriptorWritten) {
+            if (Settings.debug) Log.e(TAG, "DescriptorWriteAwait...");
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            time++;
+            if (time == WAIT_PERIOD)
+                return false;
+        }
+        return true;
+    }
+    @Override
+    public void callbackDescriptorIsDone() {
+        if (Settings.debug) Log.i(TAG, "callbackDescriptorIsDone");
+        notifyDescriptorWritten = true;
     }
 
     @Override
@@ -140,8 +167,34 @@ public class LeDataTransmitter implements CallbackWriteListener {
         }
     }
 
-
     //---------------------- Methods for write -------------------------
+
+    private void setMTU(){
+        if (!isMtuChanged) {
+            mBluetoothLeService.requestMtu();
+            if (!awaitMTUChange())
+                if (Settings.debug) Log.e(TAG, "callback from requestMtu was'nt get");
+        }
+    }
+
+    private boolean awaitMTUChange(){
+        int time = 0;
+
+        while (!isMtuChanged) {
+            if (Settings.debug) Log.e(TAG, "awaitMTUChange...");
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            time++;
+            if (time == WAIT_PERIOD)
+                return false;
+        }
+        return true;
+
+
+    }
 
     // Прослушка  калбэка onMtuChanged
     @Override

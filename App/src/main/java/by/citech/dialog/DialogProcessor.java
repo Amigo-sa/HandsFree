@@ -37,12 +37,47 @@ public class DialogProcessor {
             case Save:
                 dialogSave(map);
                 break;
+            case Connect:
+                dialogConnect(map);
+                break;
+            case Connecting:
+                dialogConnecting(map);
+                break;
+            case Disconnect:
+                dialogDisconnect(map);
+                break;
+            case Disconnecting:
+                dialogDisconnecting(map);
+                break;
+            case Reconnect:
+                dialogReconnect(map);
+                break;
             default:
                 break;
         }
     }
 
+    private void dialogReconnect(Map<DialogState, Runnable> map) {
+    }
+
+    private void dialogDisconnecting(Map<DialogState, Runnable> map) {
+
+    }
+
+    private void dialogDisconnect(Map<DialogState, Runnable> map) {
+
+    }
+
+    private void dialogConnecting(Map<DialogState, Runnable> map) {
+
+    }
+
+    private void dialogConnect(Map<DialogState, Runnable> map) {
+
+    }
+
     private void dialogSave(final Map<DialogState, Runnable> map) {
+
     }
 
     private void dialogDelete(final Map<DialogState, Runnable> map) {
@@ -88,5 +123,9 @@ public class DialogProcessor {
         dialog.setView(dialogView);
         dialog.show();
     }
+
+
+
+
 
 }

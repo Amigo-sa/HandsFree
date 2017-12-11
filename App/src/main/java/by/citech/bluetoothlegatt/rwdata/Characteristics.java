@@ -31,8 +31,8 @@ public class Characteristics {
 
     public boolean isEmpty(){
         if (mGattCharacteristics != null)
-            return true;
-        return false;
+            return false;
+        return true;
     }
 
     //Собираем все имеющиеся характеристики устройства в коллекции

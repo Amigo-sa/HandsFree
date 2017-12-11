@@ -1,15 +1,11 @@
 package by.citech.bluetoothlegatt;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import by.citech.bluetoothlegatt.adapters.ControlAdapter;
-import by.citech.bluetoothlegatt.rwdata.Characteristics;
-import by.citech.logic.IBluetoothListener;
 import by.citech.param.Settings;
 
 /**
@@ -20,44 +16,14 @@ public class LeBroadcastReceiver {
 
     private final static String TAG = "WSD_BroadcastReceiver";
 
-    private boolean mConnected = false;
-    private BluetoothDevice mBTDeviceConn, mBTDevice;
+    private ConnectAction connectAction;
 
-    private ControlAdapter controlAdapter;
-    private LeScanner leScanner;
-    private Characteristics characteristics;
-    private BluetoothLeService mBluetoothLeService;
-
-    private IBluetoothListener mIBluetoothListener;
-    private StorageListener storageListener;//this
-
-    public LeBroadcastReceiver(ControlAdapter controlAdapter,
-                               LeScanner leScanner,
-                               Characteristics characteristics,
-                               IBluetoothListener mIBluetoothListener,
-                               StorageListener storageListener) {
-
-        this.controlAdapter = controlAdapter;
-        this.leScanner = leScanner;
-        this.characteristics = characteristics;
-        this.mIBluetoothListener = mIBluetoothListener;
-        this.storageListener = storageListener;
+    public LeBroadcastReceiver(ConnectAction connectAction) {
+        this.connectAction = connectAction;
     }
 
-    public void setBTDevice(BluetoothDevice mBTDevice) {
-        this.mBTDevice = mBTDevice;
-    }
-
-    public void setBluetoothLeService(BluetoothLeService mBluetoothLeService) {
-        this.mBluetoothLeService = mBluetoothLeService;
-    }
-
-    public boolean isConnected() {
-        return mConnected;
-    }
-
-    public BluetoothDevice getmBTDeviceConn() {
-        return mBTDeviceConn;
+    public BroadcastReceiver getGattUpdateReceiver(){
+        return mGattUpdateReceiver;
     }
 
     // Handles various events fired by the Service.
@@ -73,28 +39,11 @@ public class LeBroadcastReceiver {
             if (Settings.debug) Log.i(TAG, "onReceive");
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                if (Settings.debug) Log.i(TAG, "ACTION_GATT_CONNECTED");
-                mConnected = true;
-                mBTDeviceConn = mBTDevice;
-                if (Settings.debug) Log.i(TAG, "mBTDevice = " + mBTDevice);
-                if (mBTDevice != null)
-                    mIBluetoothListener.connectDialogInfo(mBTDevice);
-                controlAdapter.setBTDevice(mBTDeviceConn);
-                controlAdapter.setConnected(mConnected);
-                storageListener.setStorages();
+                connectAction.actionConnected();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                mConnected = false;
-                mBTDeviceConn = null;
-                if (Settings.debug) Log.i(TAG, "ACTION_GATT_DISCONNECTED");
-                if (mBTDevice != null)
-                    mIBluetoothListener.disconnectDialogInfo(mBTDevice);
-                controlAdapter.setBTDevice(mBTDeviceConn);
-                controlAdapter.setConnected(mConnected);
-                controlAdapter.clearAllDevicesFromList();
+                connectAction.actionDisconnected();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                if (Settings.debug) Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
-                // Show all the supported services and characteristics on the user interface.
-                characteristics.displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                connectAction.actionServiceDiscovered();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
@@ -105,25 +54,8 @@ public class LeBroadcastReceiver {
         }
     };
 
-    // Обновление данных LeBroadcastReceiver
-    public void updateBroadcastReceiveData(){
-        if (Settings.debug) Log.i(TAG, "updateBroadcastReceiveData()");
-        mIBluetoothListener.registerIReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-        if (mBluetoothLeService != null) {
-            if (mBTDevice != null) {
-                final boolean result = mBluetoothLeService.connect(mBTDevice.getAddress());
-                if (Settings.debug) Log.i(TAG, "Connect request result = " + result);
-            }
-        }
-    }
-
-    public void unregisterReceiver(){
-        if (Settings.debug) Log.i(TAG, "unregisterReceiver()");
-        mIBluetoothListener.unregisterIReceiver(mGattUpdateReceiver);
-    }
-
     // определяем фильтр для нашего BroadcastReceivera, чтобы регистрировать конкретные события
-    private static IntentFilter makeGattUpdateIntentFilter() {
+    public static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);

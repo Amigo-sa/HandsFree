@@ -9,43 +9,22 @@ import java.util.HashSet;
 
 public enum BluetoothLeState {
 
-    IDLE{ // disconnect state
+    DISCONECTED{
         @Override
         public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(SCAN, CONNECTING));
-        }
-        @Override
-        public String getName() {
-            return "Idle";
-        }
-    },
-
-    SCAN{
-        @Override
-        public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(IDLE, CONNECTING));
-        }
-
-        @Override
-        public String getName() { return "Scanning";}
-    },
-
-    CONNECTING{
-        @Override
-        public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(IDLE, CONNECTED));
+            return new HashSet<> (Arrays.asList(CONNECTED));
         }
 
         @Override
         public String getName() {
-            return "Connecting";
+            return "Disconected";
         }
     },
 
     CONNECTED{
         @Override
         public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(IDLE, TRANSMIT_DATA));
+            return new HashSet<> (Arrays.asList(DISCONECTED, SERVICES_DISCOVERED));
         }
 
         @Override
@@ -54,10 +33,22 @@ public enum BluetoothLeState {
         }
     },
 
+    SERVICES_DISCOVERED{
+        @Override
+        public HashSet<BluetoothLeState> availableStates() {
+            return new HashSet<> (Arrays.asList(DISCONECTED, TRANSMIT_DATA));
+        }
+
+        @Override
+        public String getName() {
+            return "Service discovered";
+        }
+    },
+
     TRANSMIT_DATA{
         @Override
         public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(IDLE, CONNECTED));
+            return new HashSet<> (Arrays.asList(DISCONECTED, SERVICES_DISCOVERED, TRANSMIT_DATA));
         }
 
         @Override
@@ -68,5 +59,4 @@ public enum BluetoothLeState {
 
     public abstract HashSet<BluetoothLeState> availableStates();
     public abstract String getName();
-
 }

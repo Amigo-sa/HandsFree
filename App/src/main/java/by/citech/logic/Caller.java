@@ -6,7 +6,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import by.citech.IService;
+import by.citech.bluetoothlegatt.IReceive;
+import by.citech.bluetoothlegatt.IVisible;
 import by.citech.data.StorageData;
 import by.citech.debug.Bt2AudOutLooper;
 import by.citech.debug.Bt2BtLooper;
@@ -60,6 +62,9 @@ public class Caller
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
     private List<IBase> iBaseList;
+    private IReceive iReceive;
+    private IService iService;
+    private IVisible iVisible;
 
     //--------------------- singleton
 
@@ -95,10 +100,6 @@ public class Caller
         return ConnectorBluetooth.getInstance();
     }
 
-    public ServiceConnection getServiceConnection() {
-        return ConnectorBluetooth.getInstance().mServiceConnection;
-    }
-
     public Caller setiCallUiListener(ICallUiListener listener) {
         iCallUiListener = listener;
         return this;
@@ -121,6 +122,21 @@ public class Caller
 
     public Caller setiDebugListener(IDebugListener listener) {
         this.iDebugListener = listener;
+        return this;
+    }
+
+  public Caller setiReceive(IReceive iReceive) {
+        this.iReceive = iReceive;
+        return this;
+    }
+
+    public Caller setiService(IService iService) {
+        this.iService = iService;
+        return this;
+    }
+
+    public Caller setiVisible(IVisible iVisible) {
+        this.iVisible = iVisible;
         return this;
     }
 
@@ -229,7 +245,10 @@ public class Caller
         ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setStorageToBt(audIn2BtStorage)
-                .setmHandler(new Handler());
+                .setmHandler(new Handler())
+                .setiService(iService)
+                .setiReceive(iReceive)
+                .setiVisible(iVisible);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -257,7 +276,10 @@ public class Caller
         ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(bt2AudOutLooper)
-                .setmHandler(new Handler());
+                .setmHandler(new Handler())
+                .setiService(iService)
+                .setiReceive(iReceive)
+                .setiVisible(iVisible);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -309,7 +331,10 @@ public class Caller
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageFromBt)
-                .setStorageToBt(storageToBt);
+                .setStorageToBt(storageToBt)
+                .setiService(iService)
+                .setiReceive(iReceive)
+                .setiVisible(iVisible);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
@@ -342,7 +367,10 @@ public class Caller
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageBtToNet)
-                .setStorageToBt(storageNetToBt);
+                .setStorageToBt(storageNetToBt)
+                .setiService(iService)
+                .setiReceive(iReceive)
+                .setiVisible(iVisible);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
@@ -383,7 +411,10 @@ public class Caller
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
-                .setStorageToBt(storageNetToBt);
+                .setStorageToBt(storageNetToBt)
+                .setiService(iService)
+                .setiReceive(iReceive)
+                .setiVisible(iVisible);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageBtToNet(storageBtToNet)
