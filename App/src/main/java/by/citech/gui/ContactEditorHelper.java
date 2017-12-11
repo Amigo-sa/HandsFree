@@ -25,6 +25,7 @@ import by.citech.element.IElementUpd;
 import by.citech.exchange.IMsgToUi;
 import by.citech.logic.IBase;
 import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 import by.citech.threading.CraftedThreadPool;
 
@@ -53,7 +54,11 @@ public class ContactEditorHelper
                                @NonNull IMsgToUi iMsgToUi,
                                @NonNull CraftedThreadPool threadPool,
                                @NonNull IElement<Contact> iContact,
-                               @NonNull ContactsRecyclerAdapter contactsAdapter) {
+                               @NonNull ContactsRecyclerAdapter contactsAdapter) throws Exception {
+        if (viewHelper == null || swipeCrutch == null || activeContactHelper == null || iMsgToUi == null
+                || threadPool == null || iContact == null || contactsAdapter == null) {
+            throw new Exception(StatusMessages.ERR_PARAMETERS);
+        }
         this.viewHelper = viewHelper;
         this.swipeCrutch = swipeCrutch;
         this.activeContactHelper = activeContactHelper;

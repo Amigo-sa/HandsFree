@@ -16,6 +16,7 @@ import by.citech.debug.IDebugListener;
 import by.citech.logic.Caller;
 import by.citech.logic.CallerState;
 import by.citech.logic.IBase;
+import by.citech.logic.IBaseAdder;
 import by.citech.logic.ICallNetListener;
 import by.citech.param.Colors;
 import by.citech.param.OpMode;
@@ -39,7 +40,7 @@ public class ViewHelper
     }
 
     private void initiate() {
-        if (Settings.debug) Log.w(TAG,"INITIATIATE");
+        if (debug) Log.i(TAG,"initiate");
         takeSettings();
         applySettings();
         isInitiated = true;
@@ -83,10 +84,12 @@ public class ViewHelper
         this.iGetViewById = iGetViewById;
         buttonHelper = ButtonHelper.getInstance();
         animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
-        takeViews();
     }
 
-    private void takeViews() {
+    @Override
+    public void baseStart(IBaseAdder iBaseAdder) {
+        if (debug) Log.i(TAG, "baseStart");
+        iBaseAdder.addBase(this);
         this.scanView = iGetViewById.findViewById(R.id.scanView);
         this.mainView = iGetViewById.findViewById(R.id.mainView);
         this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
@@ -100,15 +103,42 @@ public class ViewHelper
         this.btnDelContact = iGetViewById.findViewById(R.id.btnDelContact);
         this.btnCancelContact = iGetViewById.findViewById(R.id.btnCancelContact);
         this.btnGreen = iGetViewById.findViewById(R.id.btnGreen);
+        Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
         this.btnRed = iGetViewById.findViewById(R.id.btnRed);
         this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
+        setDefaultView();
     }
 
-    public void setDefaultView() {
-        if (Settings.debug) Log.i(TAG,"setDefaultView");
+    @Override
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        scanView = null;
+        mainView = null;
+        viewContactEditor = null;
+        viewChosenContact = null;
+        editTextSearch = null;
+        textViewChosenContactName = null;
+        textViewChosenContactIp = null;
+        editTextContactName = null;
+        editTextContactIp = null;
+        btnSaveContact = null;
+        btnDelContact = null;
+        btnCancelContact = null;
+        btnGreen = null;
+        btnRed = null;
+        btnChangeDevice = null;
+        buttonHelper = null;
+        animCall = null;
+        iGetViewById = null;
+        isCallAnim = false;
+        isInitiated = false;
+    }
+
+    private void setDefaultView() {
+        if (debug) Log.i(TAG,"setDefaultView");
         if (!isInitiated) {
             initiate();
-            if (Settings.debug) Log.w(TAG,"setDefaultView opMode is " + opMode.getSettingName());
+            if (debug) Log.w(TAG,"setDefaultView opMode is " + opMode.getSettingName());
         }
         switch (opMode) {
             case Bt2AudOut:
@@ -149,31 +179,6 @@ public class ViewHelper
                 break;
         }
         prepare();
-    }
-
-    @Override
-    public void baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        scanView = null;
-        mainView = null;
-        viewContactEditor = null;
-        viewChosenContact = null;
-        editTextSearch = null;
-        textViewChosenContactName = null;
-        textViewChosenContactIp = null;
-        editTextContactName = null;
-        editTextContactIp = null;
-        btnSaveContact = null;
-        btnDelContact = null;
-        btnCancelContact = null;
-        btnGreen = null;
-        btnRed = null;
-        btnChangeDevice = null;
-        buttonHelper = null;
-        animCall = null;
-        iGetViewById = null;
-        isCallAnim = false;
-        isInitiated = false;
     }
 
     private void prepare() {
@@ -363,6 +368,7 @@ public class ViewHelper
     @Override
     public void connectorReady() {
         if (debug) Log.i(TAG, "connectorReady");
+        Log.e(TAG, "connectorReady btnGreen is " + btnGreen); //TODO: remove test
         enableBtnCall(btnGreen, "CALL");
         ButtonHelper.disableGray(btnRed, "IDLE");
     }
@@ -421,15 +427,15 @@ public class ViewHelper
         }
     }
 
-    public void enableBtnCall(Button button) {
+    private void enableBtnCall(Button button) {
         ButtonHelper.enable(button, getColorBtnCall(button));
     }
 
-    public void enableBtnCall(Button button, String label) {
+    private void enableBtnCall(Button button, String label) {
         ButtonHelper.enable(button, getColorBtnCall(button), label);
     }
 
-    public void startCallAnim() {
+    private void startCallAnim() {
         if (debug && !isCallAnim) Log.i(TAG, "startCallAnim");
         btnGreen.startAnimation(animCall);
         isCallAnim = true;

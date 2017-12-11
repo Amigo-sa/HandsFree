@@ -70,4 +70,5 @@ public class Tags {
     public static final String I_SETTINGS          = "WSD_I_SETTINGS";
     public static final String I_RECEIVER          = "WSD_I_RECEIVER";
     public static final String I_MSG2UI            = "WSD_I_MSG2UI";
+    public static final String THREADPOOL          = "WSD_THREADPOOL";
 }

@@ -20,7 +20,7 @@
     <string name="label_device_address">Device\'s address: </string>
     <string name="label_device_name">Device\' name: </string>
     <string name="label_state">State:</string>
-    <string name="label_abonent">Call msgType:</string>
+    <string name="label_abonent">Call destination:</string>
     <string name="no_data">No data</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>

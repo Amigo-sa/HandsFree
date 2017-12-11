@@ -94,7 +94,7 @@ public class ButtonHelper {
 
     public static void disableGray(Button button, String label) {
         button.setEnabled(false);
-        ButtonHelper.setColorLabel(button, label, Colors.GRAY);
+        setColorLabel(button, label, Colors.GRAY);
     }
 
     public static void disableGray(Button... buttons) {

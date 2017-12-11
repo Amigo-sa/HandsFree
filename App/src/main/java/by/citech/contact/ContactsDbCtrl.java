@@ -46,7 +46,6 @@ public class ContactsDbCtrl
         if (debug) Log.i(TAG, "onCreate");
         if (debug) Log.i(TAG, "onCreate SQL-request is: " + CREATE_DB_CONTACTS);
         db.execSQL(CREATE_DB_CONTACTS);
-        db.close();
     }
 
     @Override
@@ -63,6 +62,22 @@ public class ContactsDbCtrl
         contentValues.put(Contact.Contract.COLUMN_NAME_NAME, contact.getName());
         contentValues.put(Contact.Contract.COLUMN_NAME_IP, contact.getIp());
         return contentValues;
+    }
+
+    private static boolean proc(SQLiteDatabase db, Runnable runnable) {
+        if (db == null || runnable == null) {
+            Log.e(TAG, "proc illegal parameters");
+            return false;
+        }
+        db.beginTransaction();
+        try {
+            runnable.run();
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+        return true;
     }
 
     boolean downloadAllContacts(List<Contact> contacts) {
@@ -97,7 +112,7 @@ public class ContactsDbCtrl
             if (debug) Log.i(TAG, "downloadAllContacts db have no contacts");
         }
         cursor.close();
-        db.close();
+        this.close();
         return true;
     }
 
@@ -159,28 +174,12 @@ public class ContactsDbCtrl
         }
     }
 
-    private static boolean proc(SQLiteDatabase db, Runnable runnable) {
-        if (db == null || runnable == null) {
-            Log.e(TAG, "proc illegal parameters");
-            return false;
-        }
-        db.beginTransaction();
-        try {
-            runnable.run();
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-            db.close();
-        }
-        return true;
-    }
-
     //--------------------- test
 
     void test() {
         Log.w(TAG, "TEST DB");
         printDb();
-        testGetSizeDb();
+        getSizeDb();
         if (!isEmptyDb()) {
             clearDb();
         }
@@ -188,18 +187,16 @@ public class ContactsDbCtrl
         Log.w(TAG, "TEST DB DONE");
     }
 
-    private void testGetSizeDb() {
-        Log.i(TAG, "testGetSizeDb");
-        SQLiteDatabase db = getReadableDatabase();
-        long size = DatabaseUtils.queryNumEntries(db, Contact.Contract.TABLE_NAME);
-        db.close();
-        Log.i(TAG, "testGetSizeDb db size is " + size);
+    private void getSizeDb() {
+        Log.i(TAG, "getSizeDb");
+        long size = DatabaseUtils.queryNumEntries(getReadableDatabase(), Contact.Contract.TABLE_NAME);
+        this.close();
+        Log.i(TAG, "getSizeDb db size is " + size);
     }
 
     private void printDb() {
         Log.i(TAG, "printDb");
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(Contact.Contract.TABLE_NAME, null, null, null ,null, null, null);
+        Cursor cursor = getReadableDatabase().query(Contact.Contract.TABLE_NAME, null, null, null ,null, null, null);
         if (cursor.moveToFirst()) {
             do {
                 Log.i(TAG, String.format("ID is %d, Name is %s, IP is %s",
@@ -211,23 +208,21 @@ public class ContactsDbCtrl
             Log.i(TAG, "printDb db have no contacts");
         }
         cursor.close();
-        db.close();
+        this.close();
     }
 
     private boolean isEmptyDb() {
         Log.i(TAG, "isEmptyDb");
-        SQLiteDatabase db = getReadableDatabase();
-        boolean isClear = (DatabaseUtils.queryNumEntries(db, Contact.Contract.TABLE_NAME) == 0);
-        db.close();
+        boolean isClear = (DatabaseUtils.queryNumEntries(getReadableDatabase(), Contact.Contract.TABLE_NAME) == 0);
+        this.close();
         Log.i(TAG, "isEmptyDb db is " + (isClear ? "" : "not ") + "empty");
         return isClear;
     }
 
     private void clearDb() {
         Log.i(TAG, "clearDb");
-        SQLiteDatabase db = getWritableDatabase();
-        db.delete(Contact.Contract.TABLE_NAME, null, null);
-        db.close();
+        getWritableDatabase().delete(Contact.Contract.TABLE_NAME, null, null);
+        this.close();
     }
 
     private void fillDb() {

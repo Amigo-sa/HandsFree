@@ -114,7 +114,14 @@ public class ConnectorNet
     //--------------------- main
 
     @Override
-    public void baseStart() {
+    public void baseStart(IBaseAdder iBaseAdder) {
+        if (debug) Log.i(TAG, "baseStart");
+        if (iBaseAdder == null) {
+            Log.e(TAG, "baseStart iBaseAdder is null");
+            return;
+        } else {
+            iBaseAdder.addBase(this);
+        }
         new ServerOn(this, handler).execute(iNetInfoListener.getLocPort());
     }
 

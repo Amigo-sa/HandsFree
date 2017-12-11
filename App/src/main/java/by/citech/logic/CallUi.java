@@ -99,9 +99,20 @@ public class CallUi
          return Caller.getInstance().setState(fromCallerState, toCallerState);
     }
 
+    //--------------------- base
+
     @Override
-    public void baseStart() {
-        initiate();
+    public void baseStart(IBaseAdder iBaseAdder) {
+        if (debug) Log.i(TAG, "baseStart");
+        if (iBaseAdder == null) {
+            Log.e(TAG, "baseStart iBaseAdder is null");
+            return;
+        } else {
+            iBaseAdder.addBase(this);
+        }
+        if (!isInitiated) {
+            initiate();
+        }
     }
 
     @Override

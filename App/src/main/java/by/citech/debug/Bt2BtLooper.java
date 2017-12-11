@@ -4,6 +4,7 @@ import android.util.Log;
 
 import by.citech.data.StorageData;
 import by.citech.logic.IBase;
+import by.citech.logic.IBaseAdder;
 import by.citech.param.Settings;
 import by.citech.param.Tags;
 
@@ -48,8 +49,14 @@ public class Bt2BtLooper
     }
 
     @Override
-    public void baseStart() {
+    public void baseStart(IBaseAdder iBaseAdder) {
         if (debug) Log.i(TAG, "baseStart");
+        if (iBaseAdder == null) {
+            Log.e(TAG, "baseStart iBaseAdder is null");
+            return;
+        } else {
+            iBaseAdder.addBase(this);
+        }
         isRunning = false;
         isActive = true;
         new Thread(() -> {

@@ -12,29 +12,47 @@ import by.citech.element.ElementsMemCtrl;
 import by.citech.element.IElement;
 import by.citech.exchange.IMsgToUi;
 import by.citech.logic.IBase;
+import by.citech.logic.IBaseAdder;
+import by.citech.param.ISettings;
 import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
 public class Contactor
-        implements IElement<Contact>, IBase {
+        implements IElement<Contact>, IBase, ISettings {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.CONTACTOR;
+
+    //--------------------- settings
+
+    {
+        initiate();
+    }
+
+    @Override
+    public void initiate() {
+        contacts = Collections.synchronizedList(new ArrayList<>());
+        memCtrl = new ElementsMemCtrl<>(contacts);
+        isInitiated = true;
+    }
+
+    //--------------------- non-settings
 
     private ContactsDbCtrl dbCtrl;
     private IContactsListener listener;
     private ElementsMemCtrl<Contact> memCtrl;
     private List<Contact> contacts;
     private IMsgToUi iMsgToUi;
+    private Context context;
     private boolean isInitiated;
+    private boolean isReady;
 
     //--------------------- singleton
 
     private static volatile Contactor instance = null;
 
     private Contactor() {
-        contacts = Collections.synchronizedList(new ArrayList<>());
-        memCtrl = new ElementsMemCtrl<>(contacts);
     }
 
     public static Contactor getInstance() {
@@ -44,6 +62,8 @@ public class Contactor
                     instance = new Contactor();
                 }
             }
+        } else if (!instance.isInitiated) {
+            instance.initiate();
         }
         return instance;
     }
@@ -55,29 +75,68 @@ public class Contactor
         return memCtrl.getList();
     }
 
+    public Contactor setListener(IContactsListener listener) {
+        this.listener = listener;
+        return this;
+    }
+
+    public Contactor setiMsgToUi(IMsgToUi iMsgToUi) {
+        this.iMsgToUi = iMsgToUi;
+        return this;
+    }
+
+    public Contactor setContext(Context context) {
+        this.context = context;
+        return this;
+    }
+
     //--------------------- main
 
-    public void build(@NonNull Context context,
-                      @NonNull IContactsListener listener,
-                      @NonNull IMsgToUi iMsgToUi) {
-        if (debug) Log.i(TAG, "build");
-        if (context == null || listener == null || iMsgToUi == null) {
-            Log.e(TAG, "start illegal parameters");
-            return;
+    @Override
+    public void baseStart(IBaseAdder iBaseAdder) {
+        if (debug) Log.i(TAG, "baseStart");
+        if (!isInitiated) {
+            initiate();
         }
-        if (isInitiated) {
-            Log.e(TAG, "start already started");
+        if (iBaseAdder == null) {
+            Log.e(TAG, "baseStart iBaseAdder is null");
             return;
         } else {
-            isInitiated = true;
+            iBaseAdder.addBase(this);
         }
-        this.listener = listener;
+        if (context == null || listener == null || iMsgToUi == null) {
+            Log.e(TAG, "baseStart illegal parameters");
+            return;
+        }
         dbCtrl = new ContactsDbCtrl(context);
+        isReady = true;
+    }
+
+    @Override
+    public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        if (!isInitiated) {
+            Log.e(TAG, "baseStop already stopped");
+        } else {
+            dbCtrl = null;
+            if (contacts != null) {
+                contacts.clear();
+                contacts = null;
+            }
+            listener = null;
+            memCtrl = null;
+            isInitiated = false;
+            isReady = false;
+            iMsgToUi = null;
+        }
     }
 
     public void getAllContacts() {
         if (debug) Log.i(TAG, "getAllContacts");
-        if (!isInitiated) return;
+        if (!isReady) {
+            Log.e(TAG, "getAllContacts not ready");
+            return;
+        }
         dbCtrl.test(); //TODO: remove, test
         if (!dbCtrl.downloadAllContacts(contacts)) {
             Log.e(TAG, "getAllContacts downloadAllContacts fail");
@@ -132,7 +191,11 @@ public class Contactor
 
     private void reportContact(Contact... toReport) {
         if (debug) Log.i(TAG, "reportContact");
-        iMsgToUi.sendToUiRunnable(false, () -> listener.onContactsChange(toReport));
+        if (listener != null && iMsgToUi != null) {
+            iMsgToUi.sendToUiRunnable(false, () -> listener.onContactsChange(toReport));
+        } else {
+            Log.e(TAG, "reportContact" + StatusMessages.ERR_PARAMETERS);
+        }
     }
 
     //--------------------- interfaces
@@ -140,7 +203,11 @@ public class Contactor
     @Override
     public void addElement(Contact toAdd) {
         if (debug) Log.i(TAG, "addElement");
-        if (check(toAdd) && isInitiated) {
+        if (!isReady) {
+            Log.e(TAG, "addElement not ready");
+            return;
+        }
+        if (check(toAdd)) {
             long contactId = dbCtrl.add(toAdd);
             if (contactId == -1) {
                 toAdd.setState(ContactState.FailToAdd);
@@ -161,7 +228,11 @@ public class Contactor
     @Override
     public void deleteElement(Contact toDelete) {
         if (debug) Log.i(TAG, "deleteElement");
-        if ((toDelete != null) && isInitiated) {
+        if (!isReady) {
+            Log.e(TAG, "deleteElement not ready");
+            return;
+        }
+        if (toDelete != null) {
             if (!dbCtrl.delete(toDelete)) {
                 toDelete.setState(ContactState.FailDelete);
                 Log.e(TAG, "deleteElement db fail");
@@ -178,6 +249,10 @@ public class Contactor
     @Override
     public void updateElement(Contact toUpdate, Contact toCopy) {
         if (debug) Log.i(TAG, "updateElement");
+        if (!isReady) {
+            Log.e(TAG, "updateElement not ready");
+            return;
+        }
 
         //TODO: to remove, test area start
         Contact backup = null;
@@ -193,7 +268,7 @@ public class Contactor
         }
         //TODO: to remove, test area end
 
-        if (check(toUpdate, toCopy) && isInitiated) {
+        if (check(toUpdate, toCopy)) {
             if (!dbCtrl.update(toUpdate, toCopy)) {
                 toUpdate.setState(ContactState.FailUpdate);
                 Log.e(TAG, "updateElement db fail");
@@ -204,26 +279,6 @@ public class Contactor
                 toUpdate.setState(ContactState.SuccessUpdate);
             }
             reportContact(toUpdate);
-        }
-    }
-
-    @Override
-    public void baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        if (!isInitiated) {
-            Log.e(TAG, "baseStop already stopped");
-        } else {
-            if (dbCtrl != null) {
-                dbCtrl = null;
-            }
-            if (contacts != null) {
-                contacts.clear();
-                contacts = null;
-            }
-            listener = null;
-            memCtrl = null;
-            isInitiated = false;
-            iMsgToUi = null;
         }
     }
 

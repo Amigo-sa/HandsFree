@@ -56,11 +56,9 @@ import by.citech.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.bluetoothlegatt.BluetoothLeService;
 import by.citech.contact.ActiveContactState;
 import by.citech.contact.Contact;
-import by.citech.contact.ContactState;
 import by.citech.contact.Contactor;
 import by.citech.contact.ContactsRecyclerAdapter;
 import by.citech.contact.EditorState;
-import by.citech.contact.IContactsListener;
 import by.citech.dialog.DialogProcessor;
 import by.citech.dialog.DialogState;
 import by.citech.dialog.DialogType;
@@ -73,6 +71,7 @@ import by.citech.gui.ViewHelper;
 import by.citech.logic.Caller;
 import by.citech.logic.ConnectorBluetooth;
 import by.citech.logic.IBase;
+import by.citech.logic.IBaseAdder;
 import by.citech.logic.IBluetoothListener;
 import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
@@ -89,7 +88,7 @@ import static by.citech.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, LocationListener, IGetViewById, IMsgToUi {
+        implements INetInfoListener, IBluetoothListener, LocationListener, IGetViewById, IMsgToUi, IBaseAdder {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -126,7 +125,6 @@ public class DeviceControlActivity
 
     // основная логика
     private IUiBtnGreenRedListener iUiBtnGreenRedListener;
-    private Caller caller;
     private ConnectorBluetooth connectorBluetooth;
 
     // ддя списка контактов
@@ -192,27 +190,23 @@ public class DeviceControlActivity
 
         try {
             viewHelper = new ViewHelper(this, this);
+            viewHelper.baseStart(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        iBaseList.add(viewHelper);
-
         chosenContactHelper = new ChosenContactHelper(viewHelper);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
-        viewHelper.setDefaultView();
 
-        caller = Caller.getInstance()
+        Caller.getInstance()
                 .setiCallUiListener(viewHelper)
                 .setiDebugListener(viewHelper)
                 .setiCallNetListener(viewHelper)
                 .setiNetInfoListener(this)
                 .setiBluetoothListener(this);
 
-        iBaseList.add(caller);
-
-        connectorBluetooth = caller.getConnectorBluetooth();
-        iUiBtnGreenRedListener = caller.getiUiBtnGreenRedListener();
+        connectorBluetooth = Caller.getInstance().getConnectorBluetooth();
+        iUiBtnGreenRedListener = Caller.getInstance().getiUiBtnGreenRedListener();
 
         // Initializes a Bluetooth adapter. For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager. Checks if Bluetooth is supported on the device.
@@ -235,10 +229,11 @@ public class DeviceControlActivity
 
         dialogProcessor = new DialogProcessor(this);
         threadPool = new CraftedThreadPool(Settings.threadNumber);
+        threadPool.baseStart(this);
 
-        setupContactor();
         setupViewRecyclerContacts();
         setupContactEditor();
+        setupContactor();
 
         btnChangeDevice = findViewById(R.id.btnChangeDevice);
         btnChangeDevice.setText(R.string.connect_device);
@@ -253,11 +248,11 @@ public class DeviceControlActivity
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
 
         // привязываем сервис
-        bindService(gattServiceIntent, caller.getServiceConnection(), BIND_AUTO_CREATE);
+        bindService(gattServiceIntent, Caller.getInstance().getServiceConnection(), BIND_AUTO_CREATE);
 
-        contactor.build(this, contactEditorHelper, this);
+        contactor.baseStart(this);
         threadPool.addRunnable(() -> contactor.getAllContacts());
-        caller.build();
+        Caller.getInstance().baseStart(this);
     }
 
     //-------------------------- base
@@ -436,14 +431,20 @@ public class DeviceControlActivity
             @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
             @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
         });
-        contactor = Contactor.getInstance();
-        iBaseList.add(contactor);
+        contactor = Contactor.getInstance()
+                .setContext(this)
+                .setiMsgToUi(this)
+                .setListener(contactEditorHelper);
     }
 
     private void setupContactEditor() {
         if (debug) Log.i(TAG, "setupContactEditor");
-        contactEditorHelper = new ContactEditorHelper(viewHelper, swipeCrutch, activeContactHelper,
-                this, threadPool, contactor, contactsAdapter);
+        try {
+            contactEditorHelper = new ContactEditorHelper(viewHelper, swipeCrutch, activeContactHelper,
+                    this, threadPool, Contactor.getInstance(), contactsAdapter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         TextWatcher textWatcher = new TextWatcher() {
             @Override public void afterTextChanged(Editable arg0) {}
             @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
@@ -455,7 +456,7 @@ public class DeviceControlActivity
 
     private void setupViewRecyclerContacts() {
         if (debug) Log.i(TAG, "setupViewRecyclerContacts");
-        contactsAdapter = new ContactsRecyclerAdapter(contactor.getContacts());
+        contactsAdapter = new ContactsRecyclerAdapter(Contactor.getInstance().getContacts());
         contactsAdapter.setOnClickViewListener(this::clickContactItem);
         swipeCrutch = contactsAdapter.new SwipeCrutch();
         viewRecyclerContacts.setHasFixedSize(false);
@@ -899,6 +900,17 @@ public class DeviceControlActivity
         invalidateOptionsMenu();
     }
 
+    //--------------------- IBaseAdder
+
+    @Override
+    public void addBase(IBase iBase) {
+        if (iBaseList == null || iBase == null) {
+            Log.e(TAG, "addBase iBaseList or iBase is null");
+        } else {
+            iBaseList.add(iBase);
+        }
+    }
+
     //--------------------- IMsgToUi
 
     @Override
@@ -915,7 +927,7 @@ public class DeviceControlActivity
 
     @Override
     public void sendToUiRunnable(boolean isFromUiThread, Runnable runnable) {
-        if (debug) Log.i(TAG, "runRunnable");
+        if (debug) Log.i(TAG, "sendToUiRunnable");
         if (isFromUiThread) {
             runnable.run();
         } else {
