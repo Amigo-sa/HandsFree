@@ -4,8 +4,14 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import by.citech.R;
 import by.citech.bluetoothlegatt.commands.Command;
+import by.citech.dialog.DialogState;
+import by.citech.dialog.DialogType;
+import by.citech.exchange.IMsgToUi;
 import by.citech.logic.ConnectorBluetooth;
 import by.citech.param.Settings;
 
@@ -14,35 +20,29 @@ import by.citech.param.Settings;
  */
 
 public class ConnectDialogCommand implements Command {
-    private AlertDialog.Builder adb;
     private BluetoothDevice device;
     private ConnectorBluetooth connectorBluetooth;
-    private AlertDialog alertDialog;
+    private IMsgToUi iMsgToUi;
 
-    public ConnectDialogCommand(AlertDialog.Builder adb, BluetoothDevice device, AlertDialog alertDialog, ConnectorBluetooth connectorBluetooth) {
-        this.adb = adb;
+    public ConnectDialogCommand(BluetoothDevice device, ConnectorBluetooth connectorBluetooth, IMsgToUi iMsgToUi) {
         this.device = device;
-        this.alertDialog = alertDialog;
         this.connectorBluetooth = connectorBluetooth;
+        this.iMsgToUi = iMsgToUi;
     }
 
     @Override
     public void execute() {
-        adb.setTitle(device.getName())
-                .setMessage(R.string.connect_message)
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setCancelable(true)
-                .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
-                    connectorBluetooth.disconnect();
-                    dialog.cancel();
-                });
-        alertDialog = adb.create();
-        alertDialog.show();
+
+        Map<DialogState, Runnable> map = new HashMap<>();
+        map.put(DialogState.Cancel, () -> connectorBluetooth.disconnect());
+
+        iMsgToUi.sendToUiDialog(true, DialogType.Connect, map, device.getName());
+
     }
 
+
     public void undo() {
-        if (alertDialog != null)
-            alertDialog.dismiss();
+        iMsgToUi.recallFromUiDialog(DialogType.Connect);
     }
 
 }

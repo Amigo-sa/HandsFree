@@ -62,7 +62,7 @@ import by.citech.param.OpMode;
 import by.citech.param.Settings;
 
 public class ConnectorBluetooth
-        implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener, ConnectAction{
+        implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener, ConnectAction , IBase{
 
     private final static String TAG = "WSD_ConnectorBluetooth";
 
@@ -425,7 +425,19 @@ private volatile BluetoothLeState BLEState;
         }
     };
 
-    public void stop(){
+    @Override
+    public void baseStart(IBaseAdder iBaseAdder) {
+        if (iBaseAdder == null) {
+            if (Settings.debug) Log.e(TAG, "baseStart illegal parameters");
+            return;
+        } else {
+            iBaseAdder.addBase(this);
+        }
+        build();
+    }
+
+    @Override
+    public void baseStop(){
         if (Settings.debug) Log.i(TAG, "stop()");
 
         bleController.setCommand(exchangeDataOff)

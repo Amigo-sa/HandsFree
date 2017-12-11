@@ -25,7 +25,7 @@ public class DialogProcessor {
         state = DialogState.Idle;
     }
 
-    public void runDialog(DialogType type, Map<DialogState, Runnable> map) {
+    public void runDialog(DialogType type, Map<DialogState, Runnable> map, String... messages) {
         if (map == null || type == null) {
             if (debug) Log.i(TAG, "runDialog one of key parameters are null");
             return;
@@ -38,7 +38,7 @@ public class DialogProcessor {
                 dialogSave(map);
                 break;
             case Connect:
-                dialogConnect(map);
+                dialogConnect(map, messages[0]);
                 break;
             case Connecting:
                 dialogConnecting(map);
@@ -72,7 +72,38 @@ public class DialogProcessor {
 
     }
 
-    private void dialogConnect(Map<DialogState, Runnable> map) {
+    private void dialogConnect(Map<DialogState, Runnable> map, String deviceName) {
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setOnDismissListener((dialog) -> {
+                    if (debug) Log.i(TAG, "dialogConnect onDismiss");
+                    switch (state) {
+                        case Cancel:
+                            if (debug) Log.i(TAG, "dialogConnect cancel");
+                            map.get(DialogState.Cancel).run();
+                            break;
+                        case Idle:
+                            if (debug) Log.i(TAG, "dialogConnect just dismiss");
+                            //map.get(DialogState.Cancel).run();
+                            break;
+                        default:
+                            Log.e(TAG, "dialogConnect state default");
+                            break;
+
+                    }
+                    state = DialogState.Idle;
+                });
+
+        builder.setTitle(deviceName)
+                .setMessage(R.string.connect_message)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setCancelable(true)
+                .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
+                    dialog.cancel();
+                });
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
 
     }
 

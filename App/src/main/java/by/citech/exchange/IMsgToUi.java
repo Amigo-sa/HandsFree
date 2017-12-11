@@ -18,7 +18,7 @@ public interface IMsgToUi {
         Log.e(TAG, "sendToUiToast" + MSG);
     }
 
-    default void sendToUiDialog(boolean isFromUiThread, DialogType dialog,  Map<DialogState, Runnable> whatToDo) {
+    default void sendToUiDialog(boolean isFromUiThread, DialogType dialog,  Map<DialogState, Runnable> whatToDo, String... messages) {
         Log.e(TAG, "sendToUiDialog" + MSG);
     }
 
@@ -26,4 +26,7 @@ public interface IMsgToUi {
         Log.e(TAG, "sendToUiRunnable" + MSG);
     }
 
+    default void recallFromUiDialog(DialogType dialog){
+       Log.e(TAG, "recallFromUiDialog" + MSG);
+    }
 }
