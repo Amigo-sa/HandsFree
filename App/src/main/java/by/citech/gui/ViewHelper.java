@@ -19,6 +19,7 @@ import by.citech.logic.IBase;
 import by.citech.logic.IBaseAdder;
 import by.citech.logic.ICallNetListener;
 import by.citech.param.Colors;
+import by.citech.param.ISettings;
 import by.citech.param.OpMode;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
@@ -26,35 +27,45 @@ import by.citech.param.Tags;
 import by.citech.util.Contacts;
 
 public class ViewHelper
-        implements ICallUiListener, ICallNetListener, IDebugListener, IBase {
+        implements ICallUiListener, ICallNetListener, IDebugListener, IBase, ISettings {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.VIEW_HELPER;
+
+    //--------------------- debug
+
+    private static int objCount;
+
+    static {
+        if (debug) Log.i(TAG,"static initiate");
+        objCount = 0;
+    }
 
     //--------------------- settings
 
     private OpMode opMode;
 
     {
+        if (debug) Log.i(TAG,"non-static initiate");
+        objCount++;
         initiate();
     }
 
-    private void initiate() {
+    @Override
+    public void initiate() {
         if (debug) Log.i(TAG,"initiate");
         takeSettings();
-        applySettings();
         isInitiated = true;
     }
 
-    private void takeSettings() {
+    @Override
+    public void takeSettings() {
         opMode = Settings.opMode;
-    }
-
-    private void applySettings() {
     }
 
     //--------------------- non-settings
 
+    private IGetViewGetter iGetViewGetter;
     private IGetViewById iGetViewById;
     private View scanView;
     private View mainView;
@@ -76,12 +87,13 @@ public class ViewHelper
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    public ViewHelper(@NonNull IGetViewById iGetViewById,
+    public ViewHelper(@NonNull IGetViewGetter iGetViewGetter,
                       @NonNull Context context) throws Exception {
-        if (iGetViewById == null || context == null) {
+        if (debug) Log.i(TAG, "object count is " + objCount);
+        if (iGetViewGetter == null || context == null) {
             throw new Exception(StatusMessages.ERR_PARAMETERS);
         }
-        this.iGetViewById = iGetViewById;
+        this.iGetViewGetter = iGetViewGetter;
         buttonHelper = ButtonHelper.getInstance();
         animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
     }
@@ -89,7 +101,20 @@ public class ViewHelper
     @Override
     public void baseStart(IBaseAdder iBaseAdder) {
         if (debug) Log.i(TAG, "baseStart");
-        iBaseAdder.addBase(this);
+        if (iBaseAdder == null) {
+            Log.e(TAG, "baseStart iBaseAdder is null");
+            return;
+        } else {
+            iBaseAdder.addBase(this);
+        }
+        if (!isInitiated) {
+            initiate();
+        }
+
+        Log.e(TAG, "baseStart iGetViewById is " + iGetViewById); //TODO: remove test
+        iGetViewById = iGetViewGetter.getViewGetter();
+        Log.e(TAG, "baseStart iGetViewById is " + iGetViewById); //TODO: remove test
+
         this.scanView = iGetViewById.findViewById(R.id.scanView);
         this.mainView = iGetViewById.findViewById(R.id.mainView);
         this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
@@ -102,8 +127,11 @@ public class ViewHelper
         this.btnSaveContact = iGetViewById.findViewById(R.id.btnSaveContact);
         this.btnDelContact = iGetViewById.findViewById(R.id.btnDelContact);
         this.btnCancelContact = iGetViewById.findViewById(R.id.btnCancelContact);
+
+        Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
         this.btnGreen = iGetViewById.findViewById(R.id.btnGreen);
         Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
+
         this.btnRed = iGetViewById.findViewById(R.id.btnRed);
         this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
         setDefaultView();
@@ -368,7 +396,21 @@ public class ViewHelper
     @Override
     public void connectorReady() {
         if (debug) Log.i(TAG, "connectorReady");
-        Log.e(TAG, "connectorReady btnGreen is " + btnGreen); //TODO: remove test
+
+        //TODO: remove test area start
+        Log.e(TAG, "connectorReady btnGreen is " + btnGreen);
+        if (btnGreen == null) {
+            Log.e(TAG, "connectorReady iGetViewGetter is " + iGetViewGetter);
+            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
+            if (iGetViewById == null) {
+                iGetViewById = iGetViewGetter.getViewGetter();
+            }
+            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
+            btnGreen = iGetViewById.findViewById(R.id.btnGreen);
+            Log.e(TAG, "connectorReady btnGreen found and it is " + btnGreen);
+        }
+        //TODO: remove test area end
+
         enableBtnCall(btnGreen, "CALL");
         ButtonHelper.disableGray(btnRed, "IDLE");
     }

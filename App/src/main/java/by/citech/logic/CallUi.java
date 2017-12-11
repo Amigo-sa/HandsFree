@@ -117,6 +117,7 @@ public class CallUi
 
     @Override
     public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
         if (iCallUiListeners != null) {
             iCallUiListeners.clear();
             iCallUiListeners = null;
@@ -129,8 +130,8 @@ public class CallUi
             iDebugListeners.clear();
             iDebugListeners = null;
         }
-        isInitiated = false;
         opMode = null;
+        isInitiated = false;
     }
 
     //--------------------- main

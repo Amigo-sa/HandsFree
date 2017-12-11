@@ -1,6 +1,5 @@
 package by.citech.logic;
 
-import android.content.ServiceConnection;
 import android.os.Handler;
 import android.util.Log;
 
@@ -57,7 +56,7 @@ public class Caller
 
     private volatile CallerState callerState;
     private ICallUiListener iCallUiListener;
-    private ICallNetListener iCallNetworkListener;
+    private ICallNetListener iCallNetListener;
     private INetInfoListener iNetInfoListener;
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
@@ -106,7 +105,7 @@ public class Caller
     }
 
     public Caller setiCallNetListener(ICallNetListener listener) {
-        iCallNetworkListener = listener;
+        iCallNetListener = listener;
         return this;
     }
 
@@ -178,8 +177,9 @@ public class Caller
         if (iCallUiListener == null || iBaseAdder == null) {
             if (debug) Log.e(TAG, "baseStart illegal parameters");
             return;
+        } else {
+            iBaseAdder.addBase(this);
         }
-        iBaseAdder.addBase(this);
         switch (opMode) {
             case Bt2Bt:
                 buildDebugBt2Bt();
@@ -220,12 +220,15 @@ public class Caller
             iBaseList = null;
         }
         iCallUiListener = null;
-        iCallNetworkListener = null;
+        iCallNetListener = null;
         iNetInfoListener = null;
         iBluetoothListener = null;
         iDebugListener = null;
         opMode = null;
         callerState = null;
+        iReceive = null;
+        iService = null;
+        iVisible = null;
         isInitiated = false;
     }
 
@@ -233,7 +236,10 @@ public class Caller
 
     private void buildDebugAudIn2Bt() {
         if (debug) Log.i(TAG, "buildDebugAudIn2Bt");
-        if (iDebugListener == null) {
+        if (iDebugListener == null
+                || iService == null
+                || iReceive == null
+                || iVisible == null) {
             if (debug) Log.e(TAG, "buildDebugAudIn2Bt illegal parameters");
             return;
         }
@@ -266,7 +272,10 @@ public class Caller
     private void buildBt2AudOut() {
         if (debug) Log.i(TAG, "buildBt2AudOut");
         if (iDebugListener == null
-                || iBluetoothListener == null) {
+                || iBluetoothListener == null
+                || iService == null
+                || iReceive == null
+                || iVisible == null) {
             if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
             return;
         }
@@ -317,7 +326,10 @@ public class Caller
     private void buildDebugBt2Bt() {
         if (debug) Log.i(TAG, "buildDebugBt2Bt");
         if (iDebugListener == null
-                || iBluetoothListener == null) {
+                || iBluetoothListener == null
+                || iService == null
+                || iReceive == null
+                || iVisible == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -353,7 +365,10 @@ public class Caller
     private void buildDebugRecord() {
         if (debug) Log.i(TAG, "buildDebugRecord");
         if (iDebugListener == null
-                || iBluetoothListener == null) {
+                || iBluetoothListener == null
+                || iService == null
+                || iReceive == null
+                || iVisible == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -398,9 +413,12 @@ public class Caller
 
     private void buildNormal() {
         if (debug) Log.i(TAG, "buildNormal");
-        if (iCallNetworkListener == null
+        if (iCallNetListener == null
                 || iNetInfoListener == null
-                || iBluetoothListener == null) {
+                || iBluetoothListener == null
+                || iService == null
+                || iReceive == null
+                || iVisible == null) {
             Log.e(TAG, "buildNormal illegal parameters");
         }
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
@@ -419,7 +437,7 @@ public class Caller
         ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageBtToNet(storageBtToNet)
                 .setStorageNetToBt(storageNetToBt)
-                .addiCallNetworkListener(iCallNetworkListener)
+                .addiCallNetworkListener(iCallNetListener)
                 .addiCallNetworkExchangeListener(connectorBluetooth)
                 .setiNetInfoListener(iNetInfoListener)
                 .setHandler(handlerExtended);

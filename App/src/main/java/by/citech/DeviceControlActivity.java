@@ -65,6 +65,7 @@ import by.citech.gui.ActiveContactHelper;
 import by.citech.gui.ChosenContactHelper;
 import by.citech.gui.ContactEditorHelper;
 import by.citech.gui.IGetViewById;
+import by.citech.gui.IGetViewGetter;
 import by.citech.gui.ViewHelper;
 import by.citech.logic.Caller;
 import by.citech.logic.ConnectorBluetooth;
@@ -86,8 +87,8 @@ import static by.citech.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, LocationListener, 
-                   IGetViewById, IMsgToUi, IBaseAdder, IReceive, IService, IVisible {
+        implements INetInfoListener, IBluetoothListener, LocationListener, IGetViewById,
+        IMsgToUi, IBaseAdder, IReceive, IService, IVisible, IGetViewGetter {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -115,7 +116,6 @@ public class DeviceControlActivity
     private FrameLayout baseView;
 
     private Intent gattServiceIntent;
-    private AlertDialog alertDialog;
     private boolean visiblityMain = true;
 
     // основная логика
@@ -127,7 +127,6 @@ public class DeviceControlActivity
     private RecyclerView viewRecyclerContacts;
     private EditText editTextSearch, editTextContactName, editTextContactIp;
     private ContactsRecyclerAdapter contactsAdapter;
-    private Contactor contactor;
     private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
     private ContactEditorHelper contactEditorHelper;
     private ActiveContactHelper activeContactHelper;
@@ -244,8 +243,8 @@ public class DeviceControlActivity
 
         // инициализируем сервис
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        contactor.baseStart(this);
-        threadPool.addRunnable(() -> contactor.getAllContacts());
+        Contactor.getInstance().baseStart(this);
+        threadPool.addRunnable(() -> Contactor.getInstance().getAllContacts());
         Caller.getInstance().baseStart(this);
     }
 
@@ -274,6 +273,12 @@ public class DeviceControlActivity
     protected void onPause() {
         super.onPause();
         if (debug) Log.w(TAG, "onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (debug) Log.w(TAG, "onStop");
         if (iBaseList != null) {
             for (IBase iBase : iBaseList) {
                 if (iBase != null) {
@@ -283,12 +288,6 @@ public class DeviceControlActivity
             iBaseList.clear();
             iBaseList = null;
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (debug) Log.w(TAG, "onStop");
     }
 
     @Override
@@ -418,7 +417,7 @@ public class DeviceControlActivity
             @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
             @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
         });
-        contactor = Contactor.getInstance()
+        Contactor.getInstance()
                 .setContext(this)
                 .setiMsgToUi(this)
                 .setListener(contactEditorHelper);
@@ -549,7 +548,6 @@ public class DeviceControlActivity
         myListDevices.setOnItemClickListener((parent, view1, position, id) -> {
             AlertDialog.Builder adb = new AlertDialog.Builder(this);
             connectorBluetooth.clickItemList(position, adb);
-   
         });
         connectorBluetooth.stopScanBTDevice();
         connectorBluetooth.startScanBTDevices();
@@ -660,7 +658,9 @@ public class DeviceControlActivity
     public Intent getServiceIntent() {
         return gattServiceIntent;
     }
-    public class LinearLayoutTouchListener implements View.OnTouchListener {
+
+    public class LinearLayoutTouchListener
+            implements View.OnTouchListener {
 
             static final String logTag = "ActivitySwipeDetector";
             // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
@@ -736,6 +736,7 @@ public class DeviceControlActivity
     }
 
     //--------------------- ViewHelper
+
     private void setVisiblityMain(boolean visiblityMain){
         this.visiblityMain = visiblityMain;
     }
@@ -767,11 +768,20 @@ public class DeviceControlActivity
 
     @Override
     public void addBase(IBase iBase) {
+        if (debug) Log.i(TAG, "addBase");
         if (iBaseList == null || iBase == null) {
             Log.e(TAG, "addBase iBaseList or iBase is null");
         } else {
             iBaseList.add(iBase);
         }
+    }
+
+    //--------------------- IGetViewGetter
+
+    @Override
+    public IGetViewById getViewGetter() {
+        if (debug) Log.i(TAG, "getViewGetter");
+        return this;
     }
 
     //--------------------- IMsgToUi

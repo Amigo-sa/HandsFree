@@ -41,7 +41,9 @@ public class ServerOn
             }
         }
 
-        if (iServerCtrl == null) return null;
+        if (iServerCtrl == null) {
+            return null;
+        }
 
         while (!iServerCtrl.isAliveServer()) {
             try {
