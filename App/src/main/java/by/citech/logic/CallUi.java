@@ -138,6 +138,7 @@ public class CallUi
 
     @Override
     public void onClickBtnGreen() {
+        if (debug) Log.i(TAG, "onClickBtnGreen");
         if (!isInitiated) {
             Log.e(TAG, "onClickBtnGreen not initiated");
             return;

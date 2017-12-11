@@ -787,24 +787,30 @@ public class DeviceControlActivity
     //--------------------- IMsgToUi
 
     @Override
-    public void sendToUiToast(boolean isFromUiThread, String msg) {
+    public void sendToUiToast(boolean isFromUiThread, String message) {
         if (debug) Log.i(TAG, "sendToUiToast");
-        sendToUiRunnable(isFromUiThread, () -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
+        sendToUiRunnable(isFromUiThread, () -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
     }
 
     @Override
-    public void sendToUiDialog(boolean isFromUiThread, DialogType dialog, Map<DialogState, Runnable> whatToDo) {
+    public void sendToUiDialog(boolean isFromUiThread, DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
         if (debug) Log.i(TAG, "sendToUiDialog");
-        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(dialog, whatToDo));
+        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(toRun, toDoMap, messages));
     }
 
     @Override
-    public void sendToUiRunnable(boolean isFromUiThread, Runnable runnable) {
+    public void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny) {
+        if (debug) Log.i(TAG, "recallFromUiDialog");
+        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.denyDialog(toDeny));
+    }
+
+    @Override
+    public void sendToUiRunnable(boolean isFromUiThread, Runnable toDo) {
         if (debug) Log.i(TAG, "sendToUiRunnable");
         if (isFromUiThread) {
-            runnable.run();
+            toDo.run();
         } else {
-            runOnUiThread(runnable);
+            runOnUiThread(toDo);
         }
     }
 

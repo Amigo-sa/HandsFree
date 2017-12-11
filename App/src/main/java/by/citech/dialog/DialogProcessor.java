@@ -6,10 +6,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import java.util.ArrayDeque;
 import java.util.Map;
+import java.util.Queue;
 
 import by.citech.R;
 import by.citech.param.Settings;
+import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 
 public class DialogProcessor {
@@ -18,145 +21,209 @@ public class DialogProcessor {
     private static final String TAG = Tags.DIALOG_PROC;
 
     private AppCompatActivity activity;
-    private DialogState state;
+    private DialogState currentState;
+    private DialogType currentType;
+    private AlertDialog currentDialog;
+    private Queue<DelayedDialog> delayedDialogs;
 
     public DialogProcessor(AppCompatActivity activity) {
         this.activity = activity;
-        state = DialogState.Idle;
+        currentState = DialogState.Idle;
+        delayedDialogs = new ArrayDeque<>();
     }
 
-    public void runDialog(DialogType type, Map<DialogState, Runnable> map, String... messages) {
-        if (map == null || type == null) {
-            if (debug) Log.i(TAG, "runDialog one of key parameters are null");
+    //--------------------- main
+
+    public synchronized void runDialog(DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
+        if (toRun == null || toDoMap == null) {
+            Log.e(TAG, "runDialog" + StatusMessages.ERR_PARAMETERS);
             return;
         }
-        switch (type) {
+        if (currentType != null || currentDialog != null) {
+            Log.e(TAG, "runDialog another dialog still running");
+            addDelayedDialog(new DelayedDialog(toRun, toDoMap, messages));
+            return;
+        } else {
+            currentType = toRun;
+        }
+        switch (currentType) {
             case Delete:
-                dialogDelete(map);
+                dialogDelete(toDoMap);
                 break;
             case Save:
-                dialogSave(map);
+                dialogSave(toDoMap);
                 break;
             case Connect:
-                dialogConnect(map, messages[0]);
+                dialogConnect(toDoMap, messages[0]);
                 break;
             case Connecting:
-                dialogConnecting(map);
+                dialogConnecting(toDoMap);
                 break;
             case Disconnect:
-                dialogDisconnect(map);
+                dialogDisconnect(toDoMap);
                 break;
             case Disconnecting:
-                dialogDisconnecting(map);
+                dialogDisconnecting(toDoMap);
                 break;
             case Reconnect:
-                dialogReconnect(map);
+                dialogReconnect(toDoMap);
                 break;
             default:
                 break;
         }
     }
 
-    private void dialogReconnect(Map<DialogState, Runnable> map) {
+    public synchronized void denyDialog(DialogType toDeny) {
+        if (currentType == null || currentDialog == null) {
+            Log.e(TAG, "denyDialog there is no running currentDialog");
+            return;
+        }
+        if (toDeny == null) {
+            Log.e(TAG, "denyDialog" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
+        if (currentType == toDeny) {
+            if (debug) Log.i(TAG, "denyDialog found currentDialog to deny");
+            currentDialog.dismiss();
+        }
     }
 
-    private void dialogDisconnecting(Map<DialogState, Runnable> map) {
-
+    private void addDelayedDialog(DelayedDialog delayedDialog) {
+        if (debug) Log.i(TAG, "addDelayedDialog");
+        if (!delayedDialogs.offer(delayedDialog)) {
+            Log.e(TAG, "addDelayedDialog fail to add");
+        }
     }
 
-    private void dialogDisconnect(Map<DialogState, Runnable> map) {
-
+    private void runDelayedDialog() {
+        if (debug) Log.i(TAG, "runDelayedDialog");
+        if (!delayedDialogs.isEmpty()) {
+            if (debug) Log.i(TAG, "runDelayedDialog found delayed currentDialog");
+            DelayedDialog delayedDialog = delayedDialogs.poll();
+            runDialog(delayedDialog.toRun, delayedDialog.toDoMap, delayedDialog.messages);
+        } else {
+            if (debug) Log.i(TAG, "runDelayedDialog no delayed dialogs");
+        }
     }
 
-    private void dialogConnecting(Map<DialogState, Runnable> map) {
-
+    private void onDialogEnd() {
+        currentState = DialogState.Idle;
+        currentType = null;
+        currentDialog = null;
+        runDelayedDialog();
     }
 
-    private void dialogConnect(Map<DialogState, Runnable> map, String deviceName) {
+    //--------------------- delayedDialogs
+
+    private void dialogReconnect(Map<DialogState, Runnable> toDoMap) {
+        if (debug) Log.i(TAG, "dialogReconnect");
+    }
+
+    private void dialogDisconnecting(Map<DialogState, Runnable> toDoMap) {
+        if (debug) Log.i(TAG, "dialogDisconnecting");
+    }
+
+    private void dialogDisconnect(Map<DialogState, Runnable> toDoMap) {
+        if (debug) Log.i(TAG, "dialogDisconnect");
+    }
+
+    private void dialogConnecting(Map<DialogState, Runnable> toDoMap) {
+        if (debug) Log.i(TAG, "dialogConnecting");
+    }
+
+    private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
+        if (debug) Log.i(TAG, "dialogConnect");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnect onDismiss");
-                    switch (state) {
+                    switch (currentState) {
                         case Cancel:
                             if (debug) Log.i(TAG, "dialogConnect cancel");
-                            map.get(DialogState.Cancel).run();
+                            toDoMap.get(DialogState.Cancel).run();
                             break;
                         case Idle:
                             if (debug) Log.i(TAG, "dialogConnect just dismiss");
-                            //map.get(DialogState.Cancel).run();
+                            //toDoMap.get(DialogState.Cancel).run(); //TODO: что делать при клике мимо диалога
                             break;
                         default:
-                            Log.e(TAG, "dialogConnect state default");
+                            Log.e(TAG, "dialogConnect currentState default");
                             break;
-
                     }
-                    state = DialogState.Idle;
+                    onDialogEnd();
                 });
 
         builder.setTitle(deviceName)
                 .setMessage(R.string.connect_message)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setCancelable(true)
-                .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
-                    dialog.cancel();
-                });
+                .setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.cancel());
 
-        final AlertDialog dialog = builder.create();
-        dialog.show();
-
+        currentDialog = builder.create();
+        currentDialog.show();
     }
 
-    private void dialogSave(final Map<DialogState, Runnable> map) {
-
+    private void dialogSave(final Map<DialogState, Runnable> toDoMap) {
+        if (debug) Log.i(TAG, "dialogSave");
     }
 
-    private void dialogDelete(final Map<DialogState, Runnable> map) {
+    private void dialogDelete(final Map<DialogState, Runnable> toDoMap) {
         if (debug) Log.i(TAG, "dialogDelete");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "tryToDeleteContact onDismiss");
-                    switch (state) {
+                    switch (currentState) {
                         case Cancel:
                             if (debug) Log.i(TAG, "tryToDeleteContact cancel");
-                            map.get(DialogState.Cancel).run();
+                            toDoMap.get(DialogState.Cancel).run();
                             break;
                         case Proceed:
                             if (debug) Log.i(TAG, "tryToDeleteContact delete");
-                            map.get(DialogState.Proceed).run();
+                            toDoMap.get(DialogState.Proceed).run();
                             break;
                         case Idle:
                             if (debug) Log.i(TAG, "tryToDeleteContact just dismiss");
-                            map.get(DialogState.Cancel).run();
+                            toDoMap.get(DialogState.Cancel).run();
                             break;
                         default:
-                            Log.e(TAG, "dialogDelete state default");
+                            Log.e(TAG, "dialogDelete currentState default");
                             break;
-
                     }
-                    state = DialogState.Idle;
+                    onDialogEnd();
                 });
 
-        final AlertDialog dialog = builder.create();
+        currentDialog = builder.create();
         View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_proceed, null);
 
         dialogView.findViewById(R.id.btnProceed).setOnClickListener((v) -> {
-            state = DialogState.Proceed;
-            dialog.dismiss();
+            currentState = DialogState.Proceed;
+            currentDialog.dismiss();
         });
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener((v) -> {
-            state = DialogState.Cancel;
-            dialog.dismiss();
+            currentState = DialogState.Cancel;
+            currentDialog.dismiss();
         });
 
-        dialog.setView(dialogView);
-        dialog.show();
+        currentDialog.setView(dialogView);
+        currentDialog.show();
     }
 
+    //--------------------- support classes
 
+    private class DelayedDialog {
 
+        private DialogType toRun;
+        private Map<DialogState, Runnable> toDoMap;
+        private String[] messages;
 
+        private DelayedDialog(DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
+            this.toRun = toRun;
+            this.toDoMap = toDoMap;
+            this.messages = messages;
+        }
+
+    }
 
 }

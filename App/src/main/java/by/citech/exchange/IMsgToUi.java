@@ -14,19 +14,20 @@ public interface IMsgToUi {
     String TAG = Tags.I_MSG2UI;
     String MSG = StatusMessages.ERR_NOT_OVERRIDED;
 
-    default void sendToUiToast(boolean isFromUiThread, String msg) {
+    default void sendToUiToast(boolean isFromUiThread, String message) {
         Log.e(TAG, "sendToUiToast" + MSG);
     }
 
-    default void sendToUiDialog(boolean isFromUiThread, DialogType dialog,  Map<DialogState, Runnable> whatToDo, String... messages) {
+    default void sendToUiDialog(boolean isFromUiThread, DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
         Log.e(TAG, "sendToUiDialog" + MSG);
     }
 
-    default void sendToUiRunnable(boolean isFromUiThread, Runnable runnable) {
+    default void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny) {
+        Log.e(TAG, "recallFromUiDialog" + MSG);
+    }
+
+    default void sendToUiRunnable(boolean isFromUiThread, Runnable toDo) {
         Log.e(TAG, "sendToUiRunnable" + MSG);
     }
 
-    default void recallFromUiDialog(DialogType dialog){
-       Log.e(TAG, "recallFromUiDialog" + MSG);
-    }
 }

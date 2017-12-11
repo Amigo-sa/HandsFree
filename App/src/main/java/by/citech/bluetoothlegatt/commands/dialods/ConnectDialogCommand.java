@@ -32,17 +32,14 @@ public class ConnectDialogCommand implements Command {
 
     @Override
     public void execute() {
-
         Map<DialogState, Runnable> map = new HashMap<>();
         map.put(DialogState.Cancel, () -> connectorBluetooth.disconnect());
-
         iMsgToUi.sendToUiDialog(true, DialogType.Connect, map, device.getName());
-
     }
 
-
+    @Override
     public void undo() {
-        iMsgToUi.recallFromUiDialog(DialogType.Connect);
+        iMsgToUi.recallFromUiDialog(true, DialogType.Connect);
     }
 
 }

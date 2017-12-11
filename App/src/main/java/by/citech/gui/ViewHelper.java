@@ -255,7 +255,6 @@ public class ViewHelper
         Contacts.setContactInfo(textViewChosenContactName, textViewChosenContactIp);
     }
 
-
     public String getSearchText() {
         return editTextSearch.getText().toString();
     }
