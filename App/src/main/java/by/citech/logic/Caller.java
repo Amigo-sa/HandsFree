@@ -216,7 +216,6 @@ public class Caller
     @Override
     public void baseStop() {
         if (debug) Log.i(TAG, "baseStop");
-        //TODO: implement IBase.baseStop() in ConnectorBluetooth
         if (iBaseList != null) {
             for (IBase iBase : iBaseList) {
                 if (iBase != null) {
@@ -437,7 +436,9 @@ public class Caller
                 || iVisible == null
                 || iMsgToUi == null) {
             Log.e(TAG, "buildNormal illegal parameters");
+            return;
         }
+
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
         HandlerExtended handlerExtended = new HandlerExtended(getiNetworkListener());
@@ -472,6 +473,7 @@ public class Caller
 
     @Override
     public void addBase(IBase iBase) {
+        if (debug) Log.i(TAG, "addBase");
         if (iBaseList == null || iBase == null) {
             Log.e(TAG, "addBase iBaseList or iBase is null");
         } else {

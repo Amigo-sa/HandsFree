@@ -43,4 +43,5 @@ public class AudioCodec implements ICodec {
         if (debug) Log.i(TAG, "getEncodedData");
         return codec.getEncodedData(dataToEncode);
     }
+
 }

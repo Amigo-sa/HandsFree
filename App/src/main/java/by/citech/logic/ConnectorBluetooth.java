@@ -442,6 +442,7 @@ private volatile BluetoothLeState BLEState;
 
     @Override
     public void baseStart(IBaseAdder iBaseAdder) {
+        if (Settings.debug) Log.i(TAG, "baseStart");
         if (iBaseAdder == null) {
             if (Settings.debug) Log.e(TAG, "baseStart illegal parameters");
             return;
@@ -453,7 +454,7 @@ private volatile BluetoothLeState BLEState;
 
     @Override
     public void baseStop(){
-        if (Settings.debug) Log.i(TAG, "baseStop()");
+        if (Settings.debug) Log.i(TAG, "baseStop");
 
         bleController.setCommand(exchangeDataOff)
                      .setCommand(unregisterReceiver)
