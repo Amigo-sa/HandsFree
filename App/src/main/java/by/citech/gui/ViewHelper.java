@@ -1,6 +1,7 @@
 package by.citech.gui;
 
 import android.content.Context;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -117,25 +118,25 @@ public class ViewHelper
         iGetViewById = iGetViewGetter.getViewGetter();
         Log.e(TAG, "baseStart iGetViewById is " + iGetViewById); //TODO: remove test
 
-        this.scanView = iGetViewById.findViewById(R.id.scanView);
-        this.mainView = iGetViewById.findViewById(R.id.mainView);
-        this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
-        this.viewChosenContact = iGetViewById.findViewById(R.id.viewContactChosen);
-        this.editTextSearch = iGetViewById.findViewById(R.id.editTextSearch);
-        this.textViewChosenContactName = iGetViewById.findViewById(R.id.textViewChosenContactName);
-        this.textViewChosenContactIp = iGetViewById.findViewById(R.id.textViewChosenContactIp);
-        this.editTextContactName = iGetViewById.findViewById(R.id.editTextContactName);
-        this.editTextContactIp = iGetViewById.findViewById(R.id.editTextContactIp);
-        this.btnSaveContact = iGetViewById.findViewById(R.id.btnSaveContact);
-        this.btnDelContact = iGetViewById.findViewById(R.id.btnDelContact);
-        this.btnCancelContact = iGetViewById.findViewById(R.id.btnCancelContact);
+//        this.scanView = iGetViewById.findViewById(R.id.scanView);
+//        this.mainView = iGetViewById.findViewById(R.id.mainView);
+//        this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
+//        this.viewChosenContact = iGetViewById.findViewById(R.id.viewContactChosen);
+//        this.editTextSearch = iGetViewById.findViewById(R.id.editTextSearch);
+//        this.textViewChosenContactName = iGetViewById.findViewById(R.id.textViewChosenContactName);
+//        this.textViewChosenContactIp = iGetViewById.findViewById(R.id.textViewChosenContactIp);
+//        this.editTextContactName = iGetViewById.findViewById(R.id.editTextContactName);
+//        this.editTextContactIp = iGetViewById.findViewById(R.id.editTextContactIp);
+//        this.btnSaveContact = iGetViewById.findViewById(R.id.btnSaveContact);
+//        this.btnDelContact = iGetViewById.findViewById(R.id.btnDelContact);
+//        this.btnCancelContact = iGetViewById.findViewById(R.id.btnCancelContact);
 
         Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
-        this.btnGreen = iGetViewById.findViewById(R.id.btnGreen);
+//        this.btnGreen = iGetViewById.findViewById(R.id.btnGreen);
         Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
 
-        this.btnRed = iGetViewById.findViewById(R.id.btnRed);
-        this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
+//        this.btnRed = iGetViewById.findViewById(R.id.btnRed);
+//        this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
         setDefaultView();
 
         Log.e(TAG, "this object's number is " + objNumber); //TODO: remove test
@@ -159,6 +160,7 @@ public class ViewHelper
         btnGreen = null;
         btnRed = null;
         btnChangeDevice = null;
+
         buttonHelper = null;
         animCall = null;
         iGetViewById = null;
@@ -167,47 +169,47 @@ public class ViewHelper
     }
 
     private void setDefaultView() {
-        if (debug) Log.i(TAG,"setDefaultView");
+        if (debug) Log.i(TAG, "setDefaultView");
         if (!isInitiated) {
             initiate();
-            if (debug) Log.w(TAG,"setDefaultView opMode is " + opMode.getSettingName());
+            if (debug) Log.w(TAG, "setDefaultView opMode is " + opMode.getSettingName());
         }
         switch (opMode) {
             case Bt2AudOut:
-                enableBtnCall(btnGreen, "RECEIVING");
-                ButtonHelper.disableGray(btnRed, "STOP");
-                btnChangeDevice.setVisibility(View.VISIBLE);
+                enableBtnCall(getBtnGreen(), "RECEIVING");
+                ButtonHelper.disableGray(getBtnRed(), "STOP");
+                getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
             case AudIn2Bt:
-                enableBtnCall(btnGreen, "TRANSMITTING");
-                ButtonHelper.disableGray(btnRed, "STOP");
-                btnChangeDevice.setVisibility(View.VISIBLE);
+                enableBtnCall(getBtnGreen(), "TRANSMITTING");
+                ButtonHelper.disableGray(getBtnRed(), "STOP");
+                getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
             case AudIn2AudOut:
-                enableBtnCall(btnGreen, "PLAY");
-                ButtonHelper.disableGray(btnRed, "STOP");
-                btnChangeDevice.setVisibility(View.INVISIBLE);
+                enableBtnCall(getBtnGreen(), "PLAY");
+                ButtonHelper.disableGray(getBtnRed(), "STOP");
+                getBtnChangeDevice().setVisibility(View.INVISIBLE);
                 break;
             case Bt2Bt:
-                enableBtnCall(btnGreen, "LBACK ON");
-                ButtonHelper.disableGray(btnRed, "LBACK OFF");
-                btnChangeDevice.setVisibility(View.VISIBLE);
+                enableBtnCall(getBtnGreen(), "LBACK ON");
+                ButtonHelper.disableGray(getBtnRed(), "LBACK OFF");
+                getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
             case Net2Net:
-                enableBtnCall(btnGreen, "LBACK ON");
-                ButtonHelper.disableGray(btnRed, "LBACK OFF");
-                btnChangeDevice.setVisibility(View.INVISIBLE);
+                enableBtnCall(getBtnGreen(), "LBACK ON");
+                ButtonHelper.disableGray(getBtnRed(), "LBACK OFF");
+                getBtnChangeDevice().setVisibility(View.INVISIBLE);
                 break;
             case Record:
-                enableBtnCall(btnGreen, "RECORD");
-                ButtonHelper.disableGray(btnRed, "PLAY");
-                btnChangeDevice.setVisibility(View.VISIBLE);
+                enableBtnCall(getBtnGreen(), "RECORD");
+                ButtonHelper.disableGray(getBtnRed(), "PLAY");
+                getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
             case Normal:
             default:
-                ButtonHelper.disableGray(btnGreen, "IDLE");
-                ButtonHelper.disableGray(btnRed, "IDLE");
-                btnChangeDevice.setVisibility(View.VISIBLE);
+                ButtonHelper.disableGray(getBtnGreen(), "IDLE");
+                ButtonHelper.disableGray(getBtnRed(), "IDLE");
+                getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
         }
         prepare();
@@ -221,85 +223,85 @@ public class ViewHelper
     }
 
     public boolean isMainViewHidden() {
-        return (mainView.getVisibility() != View.VISIBLE);
+        return (getMainView().getVisibility() != View.VISIBLE);
     }
 
     public boolean isScanViewHidden() {
-        return (scanView.getVisibility() != View.VISIBLE);
+        return (getScanView().getVisibility() != View.VISIBLE);
     }
 
     public void showMainView() {
-        mainView.setVisibility(View.VISIBLE);
-        viewContactEditor.setVisibility(View.GONE);
-        scanView.setVisibility(View.GONE);
+        getMainView().setVisibility(View.VISIBLE);
+        getViewContactEditor().setVisibility(View.GONE);
+        getScanView().setVisibility(View.GONE);
     }
 
     public void showScaner() {
-        mainView.setVisibility(View.GONE);
-        scanView.setVisibility(View.VISIBLE);
+        getMainView().setVisibility(View.GONE);
+        getScanView().setVisibility(View.VISIBLE);
     }
 
     //--------------------- chosen
 
     public void showChosen() {
-        viewChosenContact.setVisibility(View.VISIBLE);
-        editTextSearch.setVisibility(View.GONE);
+        getViewChosenContact().setVisibility(View.VISIBLE);
+        getEditTextSearch().setVisibility(View.GONE);
     }
 
     public void hideChosen() {
-        viewChosenContact.setVisibility(View.GONE);
-        editTextSearch.setVisibility(View.VISIBLE);
+        getViewChosenContact().setVisibility(View.GONE);
+        getEditTextSearch().setVisibility(View.VISIBLE);
     }
 
     public void setChosenContactInfo(Contact chosenContact) {
-        Contacts.setContactInfo(chosenContact, textViewChosenContactName, textViewChosenContactIp);
+        Contacts.setContactInfo(chosenContact, getTextViewChosenContactName(), getTextViewChosenContactIp());
     }
 
     public void clearChosenContactInfo() {
-        Contacts.setContactInfo(textViewChosenContactName, textViewChosenContactIp);
+        Contacts.setContactInfo(getTextViewChosenContactName(), getTextViewChosenContactIp());
     }
 
     public String getSearchText() {
-        return editTextSearch.getText().toString();
+        return getEditTextSearch().getText().toString();
     }
 
     //--------------------- editor
 
     public void showEditor() {
-        mainView.setVisibility(View.GONE);
-        viewContactEditor.setVisibility(View.VISIBLE);
+        getMainView().setVisibility(View.GONE);
+        getViewContactEditor().setVisibility(View.VISIBLE);
     }
 
     public void hideEditor() {
-        mainView.setVisibility(View.VISIBLE);
-        viewContactEditor.setVisibility(View.GONE);
+        getMainView().setVisibility(View.VISIBLE);
+        getViewContactEditor().setVisibility(View.GONE);
     }
 
     public String getEditorContactNameText() {
-        return editTextContactName.getText().toString();
+        return getEditTextContactName().getText().toString();
     }
 
     public String getEditorContactIpText() {
-        return editTextContactIp.getText().toString();
+        return getEditTextContactIp().getText().toString();
     }
 
     public void setEditorAdd() {
-        btnDelContact.setVisibility(View.GONE);
-        btnSaveContact.setText("ADD");
-        Contacts.setContactInfo(editTextContactName, editTextContactIp);
-        ButtonHelper.disableGray(btnDelContact, btnSaveContact, btnCancelContact);
+        getBtnDelContact().setVisibility(View.GONE);
+        getBtnSaveContact().setText("ADD");
+        Contacts.setContactInfo(getEditTextContactName(), getEditTextContactIp());
+        ButtonHelper.disableGray(getBtnDelContact(), getBtnSaveContact(), getBtnCancelContact());
     }
 
     public void setEditorEdit(Contact contactToEdit) {
-        btnSaveContact.setText("SAVE");
-        Contacts.setContactInfo(contactToEdit, editTextContactName, editTextContactIp);
-        ButtonHelper.enableGreen(btnDelContact);
-        ButtonHelper.disableGray(btnSaveContact, btnCancelContact);
-        btnDelContact.setVisibility(View.VISIBLE);
+        getBtnSaveContact().setText("SAVE");
+        Contacts.setContactInfo(contactToEdit, getEditTextContactName(), getEditTextContactIp());
+        ButtonHelper.enableGreen(getBtnDelContact());
+        ButtonHelper.disableGray(getBtnSaveContact(), getBtnCancelContact());
+        getBtnDelContact().setVisibility(View.VISIBLE);
     }
 
     public void setEditorButtonsFreeze() {
-        buttonHelper.freezeState(Tags.EDITOR_HELPER, btnDelContact, btnSaveContact, btnCancelContact);
+        buttonHelper.freezeState(Tags.EDITOR_HELPER, getBtnDelContact(), getBtnSaveContact(), getBtnCancelContact());
     }
 
     public void setEditorButtonsRelease() {
@@ -307,7 +309,7 @@ public class ViewHelper
     }
 
     public void setEditorFieldChanged() {
-        ButtonHelper.enableGreen(btnSaveContact, btnCancelContact);
+        ButtonHelper.enableGreen(getBtnSaveContact(), getBtnCancelContact());
     }
 
     //--------------------- ICallNetListener
@@ -315,85 +317,85 @@ public class ViewHelper
     @Override
     public void callFailed() {
         if (debug) Log.i(TAG, "callFailed");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "FAIL");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "FAIL");
     }
 
     @Override
     public void callEndedExternally() {
         if (debug) Log.i(TAG, "callEndedExternally");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "ENDED");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "ENDED");
     }
 
     @Override
     public void callOutcomingConnected() {
         if (debug) Log.i(TAG, "callOutcomingConnected");
-        enableBtnCall(btnGreen, "CALLING...");
-        enableBtnCall(btnRed, "CANCEL");
+        enableBtnCall(getBtnGreen(), "CALLING...");
+        enableBtnCall(getBtnRed(), "CANCEL");
     }
 
     @Override
     public void callOutcomingAccepted() {
         if (debug) Log.i(TAG, "callOutcomingAccepted");
-        ButtonHelper.disableGray(btnGreen, "ON CALL");
-        enableBtnCall(btnRed, "END CALL");
+        ButtonHelper.disableGray(getBtnGreen(), "ON CALL");
+        enableBtnCall(getBtnRed(), "END CALL");
         stopCallAnim();
     }
 
     @Override
     public void callOutcomingRejected() {
         if (debug) Log.i(TAG, "callOutcomingRejected");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "BUSY");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "BUSY");
         stopCallAnim();
     }
 
     @Override
     public void callOutcomingFailed() {
         if (debug) Log.i(TAG, "callOutcomingFailed");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "OFFLINE");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "OFFLINE");
         stopCallAnim();
     }
 
     @Override
     public void callOutcomingInvalid() {
         if (debug) Log.i(TAG, "callOutcomingInvalid");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "INVALID");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "INVALID");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingDetected() {
         if (debug) Log.i(TAG, "callIncomingDetected");
-        enableBtnCall(btnGreen, "INCOMING...");
-        enableBtnCall(btnRed, "REJECT");
+        enableBtnCall(getBtnGreen(), "INCOMING...");
+        enableBtnCall(getBtnRed(), "REJECT");
         startCallAnim();
     }
 
     @Override
     public void callIncomingCanceled() {
         if (debug) Log.i(TAG, "callIncomingCanceled");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "CANCELED");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "CANCELED");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingFailed() {
         if (debug) Log.i(TAG, "callIncomingFailed");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "INCOME FAIL");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "INCOME FAIL");
         stopCallAnim();
     }
 
     @Override
     public void connectorFailure() {
         if (debug) Log.e(TAG, "connectorFailure");
-        ButtonHelper.disableGray(btnGreen, "ERROR");
-        ButtonHelper.disableGray(btnRed, "ERROR");
+        ButtonHelper.disableGray(getBtnGreen(), "ERROR");
+        ButtonHelper.disableGray(getBtnRed(), "ERROR");
     }
 
     @Override
@@ -401,7 +403,7 @@ public class ViewHelper
         if (debug) Log.i(TAG, "connectorReady");
 
         //TODO: remove test area start
-        Log.e(TAG, "connectorReady btnGreen is " + btnGreen);
+        Log.e(TAG, "connectorReady btnGreen is " + getBtnGreen());
         if (btnGreen == null) {
             Log.e(TAG, "connectorReady iGetViewGetter is " + iGetViewGetter);
             Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
@@ -410,12 +412,12 @@ public class ViewHelper
             }
             Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
             btnGreen = iGetViewById.findViewById(R.id.btnGreen);
-            Log.e(TAG, "connectorReady btnGreen found and it is " + btnGreen);
+            Log.e(TAG, "connectorReady btnGreen found and it is " + getBtnGreen());
         }
         //TODO: remove test area end
 
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "IDLE");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "IDLE");
     }
 
     //--------------------- ICallUiListener
@@ -423,48 +425,48 @@ public class ViewHelper
     @Override
     public void callOutcomingStarted() {
         if (debug) Log.i(TAG, "callOutcomingStarted");
-        ButtonHelper.disableGray(btnGreen, "CALLING...");
-        enableBtnCall(btnRed, "CANCEL");
+        ButtonHelper.disableGray(getBtnGreen(), "CALLING...");
+        enableBtnCall(getBtnRed(), "CANCEL");
         startCallAnim();
     }
 
     @Override
     public void callEndedInternally() {
         if (debug) Log.i(TAG, "callEndedInternally");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "ENDED");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "ENDED");
     }
 
     @Override
     public void callOutcomingCanceled() {
         if (debug) Log.i(TAG, "callOutcomingCanceled");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "CANCELED");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "CANCELED");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingRejected() {
         if (debug) Log.i(TAG, "callIncomingRejected");
-        enableBtnCall(btnGreen, "CALL");
-        ButtonHelper.disableGray(btnRed, "REJECTED");
+        enableBtnCall(getBtnGreen(), "CALL");
+        ButtonHelper.disableGray(getBtnRed(), "REJECTED");
         stopCallAnim();
     }
 
     @Override
     public void callIncomingAccepted() {
         if (debug) Log.i(TAG, "callIncomingAccepted");
-        ButtonHelper.disableGray(btnGreen, "ON CALL");
-        enableBtnCall(btnRed, "END CALL");
+        ButtonHelper.disableGray(getBtnGreen(), "ON CALL");
+        enableBtnCall(getBtnRed(), "END CALL");
         stopCallAnim();
     }
 
     //--------------------- call buttons
 
     private int getColorBtnCall(Button button) {
-        if (button == btnGreen) {
+        if (button == getBtnGreen()) {
             return Colors.GREEN;
-        } else if (button == btnRed) {
+        } else if (button == getBtnRed()) {
             return Colors.RED;
         } else {
             Log.e(TAG, "enableBtnCall color not defined");
@@ -482,13 +484,13 @@ public class ViewHelper
 
     private void startCallAnim() {
         if (debug && !isCallAnim) Log.i(TAG, "startCallAnim");
-        btnGreen.startAnimation(animCall);
+        getBtnGreen().startAnimation(animCall);
         isCallAnim = true;
     }
 
     private void stopCallAnim() {
         if (debug) Log.i(TAG, "stopCallAnim");
-        btnGreen.clearAnimation();
+        getBtnGreen().clearAnimation();
         isCallAnim = false;
     }
 
@@ -510,18 +512,18 @@ public class ViewHelper
             case AudIn2AudOut:
             case Bt2Bt:
             case Net2Net:
-                ButtonHelper.disableGray(btnGreen);
-                enableBtnCall(btnRed);
+                ButtonHelper.disableGray(getBtnGreen());
+                enableBtnCall(getBtnRed());
                 break;
             case Record:
                 switch (getCallerState()) {
                     case DebugPlay:
-                        ButtonHelper.disableGray(btnGreen, "PLAYING");
-                        enableBtnCall(btnRed, "STOP");
+                        ButtonHelper.disableGray(getBtnGreen(), "PLAYING");
+                        enableBtnCall(getBtnRed(), "STOP");
                         break;
                     case DebugRecord:
-                        ButtonHelper.disableGray(btnGreen, "RECORDING");
-                        enableBtnCall(btnRed, "STOP");
+                        ButtonHelper.disableGray(getBtnGreen(), "RECORDING");
+                        enableBtnCall(getBtnRed(), "STOP");
                         break;
                     default:
                         if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
@@ -542,17 +544,128 @@ public class ViewHelper
             case AudIn2AudOut:
             case Bt2Bt:
             case Net2Net:
-                ButtonHelper.enableGreen(btnGreen);
-                ButtonHelper.disableGray(btnRed);
+                ButtonHelper.enableGreen(getBtnGreen());
+                ButtonHelper.disableGray(getBtnRed());
                 break;
             case Record:
-                enableBtnCall(btnGreen, "PLAY");
-                ButtonHelper.disableGray(btnRed, "RECORDED");
+                enableBtnCall(getBtnGreen(), "PLAY");
+                ButtonHelper.disableGray(getBtnRed(), "RECORDED");
                 break;
             case Normal:
             default:
                 break;
         }
+    }
+
+    //--------------------- getters
+
+    private <T extends View> T getView(T t, @IdRes int id) {
+        if (t == null) {
+            Log.e(TAG, "getView requested view is null, get");
+            if (iGetViewById == null) {
+                Log.e(TAG, "getView iGetViewById is null, get");
+                if (iGetViewGetter == null) {
+                    Log.e(TAG, "getView iGetViewGetter is null, return");
+                    return null;
+                } else {
+                    iGetViewById = iGetViewGetter.getViewGetter();
+                    if (iGetViewById == null) {
+                        Log.e(TAG, "getView iGetViewById is still null, return");
+                        return null;
+                    } else {
+                        t = getViewById(iGetViewById, id);
+                    }
+                }
+            } else {
+                t = getViewById(iGetViewById, id);
+            }
+        }
+        return t;
+    }
+
+    private <T extends View> T getViewById(IGetViewById iGetViewById, @IdRes int id) {
+        if (iGetViewById != null) {
+            T t = iGetViewById.findViewById(id);
+            if (t == null) {
+                Log.e(TAG, "IGetViewById view is still null, return");
+            } else {
+                if (debug) Log.i(TAG, "IGetViewById view is " + t);
+            }
+            return t;
+        } else {
+            Log.e(TAG, "IGetViewById iGetViewById null, return");
+            return null;
+        }
+    }
+
+    public View getScanView() {
+        if (scanView == null) {
+            Log.e(TAG, "connectorReady iGetViewGetter is " + iGetViewGetter);
+            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
+            if (iGetViewById == null) {
+                iGetViewById = iGetViewGetter.getViewGetter();
+            }
+            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
+            scanView = iGetViewById.findViewById(R.id.scanView);
+            Log.e(TAG, "connectorReady btnGreen found and it is " + scanView);
+        }
+        return scanView;
+    }
+
+    public View getMainView() {
+        return mainView;
+    }
+
+    public Button getBtnGreen() {
+        return btnGreen;
+    }
+
+    public Button getBtnRed() {
+        return btnRed;
+    }
+
+    public Button getBtnChangeDevice() {
+        return btnChangeDevice;
+    }
+
+    public View getViewContactEditor() {
+        return viewContactEditor;
+    }
+
+    public View getViewChosenContact() {
+        return viewChosenContact;
+    }
+
+    public EditText getEditTextSearch() {
+        return editTextSearch;
+    }
+
+    public TextView getTextViewChosenContactName() {
+        return textViewChosenContactName;
+    }
+
+    public TextView getTextViewChosenContactIp() {
+        return textViewChosenContactIp;
+    }
+
+    public EditText getEditTextContactName() {
+        return editTextContactName;
+    }
+
+    public Button getBtnDelContact() {
+        return btnDelContact;
+    }
+
+    public Button getBtnSaveContact() {
+        return btnSaveContact;
+    }
+
+    public EditText getEditTextContactIp() {
+        return editTextContactIp;
+    }
+
+    public Button getBtnCancelContact() {
+        return btnCancelContact;
     }
 
 }
