@@ -65,6 +65,7 @@ public class ViewHelper
 
     //--------------------- non-settings
 
+    private final int objNumber;
     private IGetViewGetter iGetViewGetter;
     private IGetViewById iGetViewById;
     private View scanView;
@@ -93,6 +94,7 @@ public class ViewHelper
         if (iGetViewGetter == null || context == null) {
             throw new Exception(StatusMessages.ERR_PARAMETERS);
         }
+        objNumber = objCount;
         this.iGetViewGetter = iGetViewGetter;
         buttonHelper = ButtonHelper.getInstance();
         animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
@@ -135,6 +137,8 @@ public class ViewHelper
         this.btnRed = iGetViewById.findViewById(R.id.btnRed);
         this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
         setDefaultView();
+
+        if (debug) Log.i(TAG, "this object's number is " + objNumber); //TODO: remove test
     }
 
     @Override

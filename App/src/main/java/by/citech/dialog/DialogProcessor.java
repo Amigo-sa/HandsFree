@@ -24,24 +24,22 @@ public class DialogProcessor {
     private DialogState currentState;
     private DialogType currentType;
     private AlertDialog currentDialog;
-    private Queue<DelayedDialog> delayedDialogs;
 
     public DialogProcessor(AppCompatActivity activity) {
         this.activity = activity;
         currentState = DialogState.Idle;
-        delayedDialogs = new ArrayDeque<>();
     }
 
     //--------------------- main
 
     public synchronized void runDialog(DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
+        if (debug) Log.i(TAG, "runDialog");
         if (toRun == null || toDoMap == null) {
             Log.e(TAG, "runDialog" + StatusMessages.ERR_PARAMETERS);
             return;
         }
         if (currentType != null || currentDialog != null) {
             Log.e(TAG, "runDialog another dialog still running");
-            addDelayedDialog(new DelayedDialog(toRun, toDoMap, messages));
             return;
         } else {
             currentType = toRun;
@@ -73,9 +71,10 @@ public class DialogProcessor {
         }
     }
 
-    public synchronized void denyDialog(DialogType toDeny) {
+    public synchronized void denyDialog(DialogType toDeny, DialogState onDeny) {
+        if (debug) Log.i(TAG, "denyDialog");
         if (currentType == null || currentDialog == null) {
-            Log.e(TAG, "denyDialog there is no running currentDialog");
+            Log.e(TAG, "denyDialog there is no running dialog");
             return;
         }
         if (toDeny == null) {
@@ -84,33 +83,18 @@ public class DialogProcessor {
         }
         if (currentType == toDeny) {
             if (debug) Log.i(TAG, "denyDialog found currentDialog to deny");
+            if (onDeny != null) {
+                currentState = onDeny;
+            }
             currentDialog.dismiss();
         }
     }
 
-    private void addDelayedDialog(DelayedDialog delayedDialog) {
-        if (debug) Log.i(TAG, "addDelayedDialog");
-        if (!delayedDialogs.offer(delayedDialog)) {
-            Log.e(TAG, "addDelayedDialog fail to add");
-        }
-    }
-
-    private void runDelayedDialog() {
-        if (debug) Log.i(TAG, "runDelayedDialog");
-        if (!delayedDialogs.isEmpty()) {
-            if (debug) Log.i(TAG, "runDelayedDialog found delayed currentDialog");
-            DelayedDialog delayedDialog = delayedDialogs.poll();
-            runDialog(delayedDialog.toRun, delayedDialog.toDoMap, delayedDialog.messages);
-        } else {
-            if (debug) Log.i(TAG, "runDelayedDialog no delayed dialogs");
-        }
-    }
-
     private void onDialogEnd() {
+        if (debug) Log.i(TAG, "onDialogEnd");
         currentState = DialogState.Idle;
         currentType = null;
         currentDialog = null;
-        runDelayedDialog();
     }
 
     //--------------------- delayedDialogs
@@ -208,22 +192,6 @@ public class DialogProcessor {
 
         currentDialog.setView(dialogView);
         currentDialog.show();
-    }
-
-    //--------------------- support classes
-
-    private class DelayedDialog {
-
-        private DialogType toRun;
-        private Map<DialogState, Runnable> toDoMap;
-        private String[] messages;
-
-        private DelayedDialog(DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
-            this.toRun = toRun;
-            this.toDoMap = toDoMap;
-            this.messages = messages;
-        }
-
     }
 
 }

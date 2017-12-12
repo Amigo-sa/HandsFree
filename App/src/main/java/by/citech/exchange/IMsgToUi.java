@@ -22,7 +22,7 @@ public interface IMsgToUi {
         Log.e(TAG, "sendToUiDialog" + MSG);
     }
 
-    default void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny) {
+    default void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny, DialogState onDeny) {
         Log.e(TAG, "recallFromUiDialog" + MSG);
     }
 

@@ -166,6 +166,13 @@ public class DeviceControlActivity
             finish();
         }
 
+        try {
+            viewHelper = new ViewHelper(this, this);
+            viewHelper.baseStart(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         baseView = findViewById(R.id.baseView);
         mainView = findViewById(R.id.mainView);
         scanView = findViewById(R.id.scanView);
@@ -181,13 +188,6 @@ public class DeviceControlActivity
         findViewById(R.id.btnCancelContact).setOnClickListener((v) -> clickBtnCancelContact());
         findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
         findViewById(R.id.btnRed).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
-
-        try {
-            viewHelper = new ViewHelper(this, this);
-            viewHelper.baseStart(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         chosenContactHelper = new ChosenContactHelper(viewHelper);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
@@ -799,9 +799,9 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny) {
+    public void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny, DialogState onDeny) {
         if (debug) Log.i(TAG, "recallFromUiDialog");
-        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.denyDialog(toDeny));
+        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.denyDialog(toDeny, onDeny));
     }
 
     @Override
