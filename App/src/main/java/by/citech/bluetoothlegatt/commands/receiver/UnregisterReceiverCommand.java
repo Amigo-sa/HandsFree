@@ -19,7 +19,7 @@ public class UnregisterReceiverCommand implements Command {
 
     @Override
     public void execute() {
-
+        iReceive.unregisterReceiver(connectorBluetooth.getBroadcastReceiver());
     }
 
     @Override

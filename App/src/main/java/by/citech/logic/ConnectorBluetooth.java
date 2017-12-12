@@ -453,7 +453,7 @@ private volatile BluetoothLeState BLEState;
 
     @Override
     public void baseStop(){
-        if (Settings.debug) Log.i(TAG, "stop()");
+        if (Settings.debug) Log.i(TAG, "baseStop()");
 
         bleController.setCommand(exchangeDataOff)
                      .setCommand(unregisterReceiver)

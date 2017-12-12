@@ -466,7 +466,7 @@ public class Caller
                 .addiCallUiListener(connectorNet);
 
         callUi.baseStart(this);
-        connectorBluetooth.build();
+        connectorBluetooth.baseStart(this);
         connectorNet.baseStart(this);
     }
 
