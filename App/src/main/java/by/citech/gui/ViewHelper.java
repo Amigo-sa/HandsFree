@@ -138,7 +138,7 @@ public class ViewHelper
         this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
         setDefaultView();
 
-        if (debug) Log.i(TAG, "this object's number is " + objNumber); //TODO: remove test
+        Log.e(TAG, "this object's number is " + objNumber); //TODO: remove test
     }
 
     @Override

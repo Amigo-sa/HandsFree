@@ -236,6 +236,7 @@ public class Caller
         iReceive = null;
         iService = null;
         iVisible = null;
+        iMsgToUi = null;
         isInitiated = false;
     }
 
@@ -272,7 +273,7 @@ public class Caller
                 .addiCallUiListener(iCallUiListener);
 
         callUi.baseStart(this);
-        connectorBluetooth.build();
+        connectorBluetooth.baseStart(this);
         audIn2BtLooper.baseStart(this);
     }
 
@@ -308,7 +309,7 @@ public class Caller
                 .addiCallUiListener(iCallUiListener);
 
         callUi.baseStart(this);
-        connectorBluetooth.build();
+        connectorBluetooth.baseStart(this);
         bt2AudOutLooper.baseStart(this);
     }
 
@@ -369,7 +370,7 @@ public class Caller
                 .addiCallUiExchangeListener(connectorBluetooth);
 
         callUi.baseStart(this);
-        connectorBluetooth.build();
+        connectorBluetooth.baseStart(this);
         bt2BtLooper.baseStart(this);
     }
 
@@ -410,7 +411,7 @@ public class Caller
                 .addiCallUiExchangeListener(connectorBluetooth);
 
         callUi.baseStart(this);
-        connectorBluetooth.build();
+        connectorBluetooth.baseStart(this);
         bt2BtRecorder.baseStart(this);
     }
 

@@ -6,11 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import java.util.ArrayDeque;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import by.citech.R;
 import by.citech.param.Settings;
@@ -40,10 +36,7 @@ public class DialogProcessor {
             Log.e(TAG, "runDialog" + StatusMessages.ERR_PARAMETERS);
             return;
         }
-        if (currentDialog != null) {
-            Log.e(TAG, "runDialog another dialog still running");
-            currentDialog.dismiss();
-        }
+        denyDialog(null, null);
         currentType = toRun;
         switch (currentType) {
             case Delete:
@@ -75,27 +68,33 @@ public class DialogProcessor {
     public synchronized void denyDialog(DialogType toDeny, DialogState onDeny) {
         if (debug) Log.i(TAG, "denyDialog");
         if (currentDialog == null) {
-            Log.e(TAG, "denyDialog there is no running dialog");
+            if (debug) Log.i(TAG, "denyDialog currentDialog is null, return");
             return;
-        }
-        if (toDeny == null) {
-            Log.e(TAG, "denyDialog" + StatusMessages.ERR_PARAMETERS);
+        } else if (!currentDialog.isShowing()) {
+            if (debug) Log.i(TAG, "denyDialog there is no running dialog, return");
             return;
-        }
-        if (currentType == toDeny) {
-            if (debug) Log.i(TAG, "denyDialog found currentDialog to deny");
-            if (onDeny != null) {
-                currentState = onDeny;
+        } else if (toDeny != null) {
+            if (currentType == toDeny) {
+                if (debug) Log.i(TAG, "denyDialog found dialog to deny, deny");
+                if (onDeny != null) {
+                    currentState = onDeny;
+                }
+            } else if (currentType != null) {
+                if (debug) Log.i(TAG, "denyDialog not found dialog to deny, return");
+                return;
+            } else {
+                if (debug) Log.i(TAG, "denyDialog currentType is null, deny any dialog");
             }
-            currentDialog.dismiss();
+        } else {
+            if (debug) Log.i(TAG, "denyDialog deny any dialog");
         }
+        currentDialog.dismiss();
     }
 
     private void onDialogEnd() {
         if (debug) Log.i(TAG, "onDialogEnd");
         currentState = DialogState.Idle;
         currentType = null;
-        currentDialog = null;
     }
 
     //--------------------- delayedDialogs
@@ -113,7 +112,8 @@ public class DialogProcessor {
     }
 
     private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Log.i(TAG, "dialogConnecting");
+        if (debug) Log.i(TAG, "dialogConnect");
+
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnect just dismiss");
@@ -126,37 +126,27 @@ public class DialogProcessor {
                 .setIcon(android.R.drawable.checkbox_on_background)
                 .setCancelable(true);
 
-        currentDialog = builder.create();
-        currentDialog.show();
-
-//        final Timer t = new Timer();
-//        t.schedule(new TimerTask() {
-//            public void run() {
-//                if (currentDialog != null)
-//                    currentDialog.dismiss(); // when the task active then close the dialog
-//                t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
-//            }
-//        }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
-
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        currentDialog = dialog;
     }
 
     private void dialogConnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Log.i(TAG, "dialogConnect");
+        if (debug) Log.i(TAG, "dialogConnecting");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Log.i(TAG, "dialogConnect onDismiss");
+                    if (debug) Log.i(TAG, "dialogConnecting onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Log.i(TAG, "dialogConnect cancel");
+                            if (debug) Log.i(TAG, "dialogConnecting cancel");
                             toDoMap.get(DialogState.Cancel).run();
                             break;
                         case Idle:
-                            if (debug) Log.i(TAG, "dialogConnect just dismiss");
-                            //toDoMap.get(DialogState.Cancel).run(); //TODO: что делать при клике мимо диалога
+                            if (debug) Log.i(TAG, "dialogConnecting just dismiss");
                             break;
                         default:
-                            Log.e(TAG, "dialogConnect currentState default");
+                            Log.e(TAG, "dialogConnecting currentState default");
                             break;
                     }
                     onDialogEnd();
@@ -168,8 +158,9 @@ public class DialogProcessor {
                 .setCancelable(true)
                 .setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.cancel());
 
-        currentDialog = builder.create();
-        currentDialog.show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        currentDialog = dialog;
     }
 
     private void dialogSave(final Map<DialogState, Runnable> toDoMap) {
@@ -181,18 +172,18 @@ public class DialogProcessor {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Log.i(TAG, "tryToDeleteContact onDismiss");
+                    if (debug) Log.i(TAG, "dialogDelete onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Log.i(TAG, "tryToDeleteContact cancel");
+                            if (debug) Log.i(TAG, "dialogDelete cancel");
                             toDoMap.get(DialogState.Cancel).run();
                             break;
                         case Proceed:
-                            if (debug) Log.i(TAG, "tryToDeleteContact delete");
+                            if (debug) Log.i(TAG, "dialogDelete delete");
                             toDoMap.get(DialogState.Proceed).run();
                             break;
                         case Idle:
-                            if (debug) Log.i(TAG, "tryToDeleteContact just dismiss");
+                            if (debug) Log.i(TAG, "dialogDelete just dismiss");
                             toDoMap.get(DialogState.Cancel).run();
                             break;
                         default:
@@ -202,21 +193,23 @@ public class DialogProcessor {
                     onDialogEnd();
                 });
 
-        currentDialog = builder.create();
+        AlertDialog dialog = builder.create();
+        currentDialog = dialog;
+
         View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_proceed, null);
 
         dialogView.findViewById(R.id.btnProceed).setOnClickListener((v) -> {
             currentState = DialogState.Proceed;
-            currentDialog.dismiss();
+            dialog.dismiss();
         });
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener((v) -> {
             currentState = DialogState.Cancel;
-            currentDialog.dismiss();
+            dialog.dismiss();
         });
 
-        currentDialog.setView(dialogView);
-        currentDialog.show();
+        dialog.setView(dialogView);
+        dialog.show();
     }
 
 }
