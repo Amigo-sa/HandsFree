@@ -313,9 +313,9 @@ private volatile BluetoothLeState BLEState;
         setmBTDevice(device);
         // инициализация комманд работающих с устройством
         //----------- Команды вызова диалоговых окон --------------
-        discDialogOn = new DisconnectDialogCommand(adb, mBTDevice, alertDialog, this);
-        disconnDialogInfoOn = new DisconnInfoDialogCommand(adb, mBTDevice, iVisible);
-        reconnDiaologOn = new ReconnectDialogCommand(adb, mBTDevice, alertDialog, this);
+        discDialogOn = new DisconnectDialogCommand(mBTDevice, this, iMsgToUi);
+        disconnDialogInfoOn = new DisconnInfoDialogCommand(mBTDevice, iMsgToUi, iVisible);
+        reconnDiaologOn = new ReconnectDialogCommand(mBTDevice, this, iMsgToUi);
         connDialogInfoOn = new ConnInfoDialogCommand(mBTDevice, iMsgToUi, iVisible);
         connDialogOn = new ConnectDialogCommand(mBTDevice, this, iMsgToUi);
         //------------------ Команды работы с адаптером -----------
@@ -323,7 +323,6 @@ private volatile BluetoothLeState BLEState;
         clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter, mBTDevice);
         //------------------- Отображение характеристик устройства -----------------------
         characteristicDisplayOn = new CharacteristicsDisplayOnCommand(characteristics, mBluetoothLeService);
-
 
         if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
         if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + mBTDeviceConn);
@@ -359,17 +358,25 @@ private volatile BluetoothLeState BLEState;
 
     @Override
     public void actionDisconnected() {
-        setBLEState(getBLEState(), BluetoothLeState.DISCONECTED);
-        mBTDeviceConn = null;
-        // TODO: добавить условие когда идёт передача и устройсво жёстко дисконектнули
-        bleController.setCommand(connDialogOn).undo();
-        bleController.setCommand(disconnDialogInfoOn)
-                     .setCommand(buttonViewColorChangeOff)
-                     .setCommand(clrConnDeviceFromAdapter)
-                     .setCommand(clearList)
-                     .setCommand(scanOn)
-                     .execute();
 
+        if (BLEState != BluetoothLeState.DISCONECTED) {
+            mBTDeviceConn = null;
+
+            bleController.setCommand(connDialogOn).undo();
+
+            if (BLEState == BluetoothLeState.TRANSMIT_DATA)
+                bleController.setCommand(exchangeDataOff).execute();
+
+            bleController.setCommand(disconnDialogInfoOn).execute();
+            bleController.setCommand(disconnDialogInfoOn).undo();
+            bleController.setCommand(buttonViewColorChangeOff)
+                    .setCommand(clrConnDeviceFromAdapter)
+                    .setCommand(clearList)
+                    .setCommand(scanOn)
+                    .execute();
+
+            setBLEState(BLEState, BluetoothLeState.DISCONECTED);
+        }
     }
 
     @Override

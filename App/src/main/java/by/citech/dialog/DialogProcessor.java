@@ -32,7 +32,7 @@ public class DialogProcessor {
 
     public synchronized void runDialog(DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
         if (debug) Log.i(TAG, "runDialog");
-        if (toRun == null || toDoMap == null) {
+        if (toRun == null) {
             Log.e(TAG, "runDialog" + StatusMessages.ERR_PARAMETERS);
             return;
         }
@@ -52,13 +52,13 @@ public class DialogProcessor {
                 dialogConnecting(toDoMap, messages[0]);
                 break;
             case Disconnect:
-                dialogDisconnect(toDoMap);
+                dialogDisconnect(toDoMap, messages[0]);
                 break;
             case Disconnecting:
-                dialogDisconnecting(toDoMap);
+                dialogDisconnecting(toDoMap, messages[0]);
                 break;
             case Reconnect:
-                dialogReconnect(toDoMap);
+                dialogReconnect(toDoMap, messages[0]);
                 break;
             default:
                 break;
@@ -99,16 +99,104 @@ public class DialogProcessor {
 
     //--------------------- delayedDialogs
 
-    private void dialogReconnect(Map<DialogState, Runnable> toDoMap) {
+    private void dialogReconnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogReconnect");
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setOnDismissListener((dialog) -> {
+                    if (debug) Log.i(TAG, "dialogDelete onDismiss");
+                    switch (currentState) {
+                        case Cancel:
+                            if (debug) Log.i(TAG, "dialogDelete cancel");
+                            break;
+                        case Proceed:
+                            if (debug) Log.i(TAG, "dialogDelete delete");
+                            toDoMap.get(DialogState.Proceed).run();
+                            break;
+                        case Idle:
+                            if (debug) Log.i(TAG, "dialogDelete just dismiss");
+                            break;
+                        default:
+                            Log.e(TAG, "dialogDelete currentState default");
+                            break;
+                    }
+                    onDialogEnd();
+                });
+        builder.setTitle(deviceName)
+               .setMessage(R.string.click_other_device_message)
+               .setIcon(android.R.drawable.ic_dialog_info)
+               .setPositiveButton(R.string.connect, (dialog, which) -> {
+                   currentState = DialogState.Proceed;
+                   dialog.dismiss();
+               })
+               .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
+                   currentState = DialogState.Cancel;
+                   dialog.dismiss();
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        currentDialog = dialog;
     }
 
-    private void dialogDisconnecting(Map<DialogState, Runnable> toDoMap) {
+    private void dialogDisconnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogDisconnecting");
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setOnDismissListener((dialog) -> {
+                    if (debug) Log.i(TAG, "dialogDelete onDismiss");
+                    switch (currentState) {
+                        case Cancel:
+                            if (debug) Log.i(TAG, "dialogDelete cancel");
+                            break;
+                        case Proceed:
+                            if (debug) Log.i(TAG, "dialogDelete delete");
+                            toDoMap.get(DialogState.Proceed).run();
+                            break;
+                        case Idle:
+                            if (debug) Log.i(TAG, "dialogDelete just dismiss");
+                            break;
+                        default:
+                            Log.e(TAG, "dialogDelete currentState default");
+                            break;
+                    }
+                    onDialogEnd();
+                });
+
+        builder.setTitle(deviceName)
+                .setMessage(R.string.click_connected_device_message)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton(R.string.disconnect, (dialog, which) -> {
+                    currentState = DialogState.Proceed;
+                    dialog.dismiss();
+                })
+                .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
+                    currentState = DialogState.Cancel;
+                    dialog.dismiss();
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        currentDialog = dialog;
     }
 
-    private void dialogDisconnect(Map<DialogState, Runnable> toDoMap) {
+
+    private void dialogDisconnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogDisconnect");
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setOnDismissListener((dialog) -> {
+                    if (debug) Log.i(TAG, "dialogConnect just dismiss");
+                    toDoMap.get(DialogState.Idle).run();
+                    onDialogEnd();
+                });
+        builder.setTitle(deviceName)
+                .setMessage(R.string.disconnected_message)
+                .setIcon(android.R.drawable.ic_lock_power_off)
+                .setCancelable(true);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        currentDialog = dialog;
+
     }
 
     private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
@@ -156,7 +244,10 @@ public class DialogProcessor {
                 .setMessage(R.string.connect_message)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setCancelable(true)
-                .setNegativeButton(R.string.cancel, (dialog, identifier) -> dialog.cancel());
+                .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
+                    currentState = DialogState.Cancel;
+                    dialog.cancel();
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
