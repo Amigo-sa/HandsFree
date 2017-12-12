@@ -316,7 +316,7 @@ private volatile BluetoothLeState BLEState;
         discDialogOn = new DisconnectDialogCommand(adb, mBTDevice, alertDialog, this);
         disconnDialogInfoOn = new DisconnInfoDialogCommand(adb, mBTDevice, iVisible);
         reconnDiaologOn = new ReconnectDialogCommand(adb, mBTDevice, alertDialog, this);
-        connDialogInfoOn = new ConnInfoDialogCommand(adb, mBTDevice, iVisible);
+        connDialogInfoOn = new ConnInfoDialogCommand(mBTDevice, iMsgToUi, iVisible);
         connDialogOn = new ConnectDialogCommand(mBTDevice, this, iMsgToUi);
         //------------------ Команды работы с адаптером -----------
         addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
@@ -346,8 +346,11 @@ private volatile BluetoothLeState BLEState;
         mBTDeviceConn = mBTDevice;
 
         bleController.setCommand(connDialogOn).undo();
-        bleController.setCommand(connDialogInfoOn)
-                     .setCommand(buttonViewColorChangeOn)
+
+        bleController.setCommand(connDialogInfoOn).execute();
+        bleController.setCommand(connDialogInfoOn).undo();
+
+        bleController.setCommand(buttonViewColorChangeOn)
                      .setCommand(addConnDeviceToAdapter)
                      .execute();
 

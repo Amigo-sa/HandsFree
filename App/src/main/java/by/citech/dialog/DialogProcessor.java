@@ -9,6 +9,8 @@ import android.view.View;
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import by.citech.R;
 import by.citech.param.Settings;
@@ -38,12 +40,11 @@ public class DialogProcessor {
             Log.e(TAG, "runDialog" + StatusMessages.ERR_PARAMETERS);
             return;
         }
-        if (currentType != null || currentDialog != null) {
+        if (currentDialog != null) {
             Log.e(TAG, "runDialog another dialog still running");
-            return;
-        } else {
-            currentType = toRun;
+            currentDialog.dismiss();
         }
+        currentType = toRun;
         switch (currentType) {
             case Delete:
                 dialogDelete(toDoMap);
@@ -55,7 +56,7 @@ public class DialogProcessor {
                 dialogConnect(toDoMap, messages[0]);
                 break;
             case Connecting:
-                dialogConnecting(toDoMap);
+                dialogConnecting(toDoMap, messages[0]);
                 break;
             case Disconnect:
                 dialogDisconnect(toDoMap);
@@ -73,7 +74,7 @@ public class DialogProcessor {
 
     public synchronized void denyDialog(DialogType toDeny, DialogState onDeny) {
         if (debug) Log.i(TAG, "denyDialog");
-        if (currentType == null || currentDialog == null) {
+        if (currentDialog == null) {
             Log.e(TAG, "denyDialog there is no running dialog");
             return;
         }
@@ -111,11 +112,35 @@ public class DialogProcessor {
         if (debug) Log.i(TAG, "dialogDisconnect");
     }
 
-    private void dialogConnecting(Map<DialogState, Runnable> toDoMap) {
+    private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogConnecting");
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setOnDismissListener((dialog) -> {
+                    if (debug) Log.i(TAG, "dialogConnect just dismiss");
+                    toDoMap.get(DialogState.Idle).run();
+                    onDialogEnd();
+                });
+
+        builder.setTitle(deviceName)
+                .setMessage(R.string.connected_message)
+                .setIcon(android.R.drawable.checkbox_on_background)
+                .setCancelable(true);
+
+        currentDialog = builder.create();
+        currentDialog.show();
+
+//        final Timer t = new Timer();
+//        t.schedule(new TimerTask() {
+//            public void run() {
+//                if (currentDialog != null)
+//                    currentDialog.dismiss(); // when the task active then close the dialog
+//                t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
+//            }
+//        }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
+
     }
 
-    private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
+    private void dialogConnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogConnect");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
