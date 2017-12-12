@@ -15,6 +15,7 @@ import by.citech.debug.Bt2BtRecorder;
 import by.citech.debug.AudIn2AudOutLooper;
 import by.citech.debug.AudIn2BtLooper;
 import by.citech.debug.IDebugListener;
+import by.citech.exchange.IMsgToUi;
 import by.citech.gui.ICallUiListener;
 import by.citech.gui.IUiBtnGreenRedListener;
 import by.citech.network.INetInfoListener;
@@ -64,6 +65,7 @@ public class Caller
     private IReceive iReceive;
     private IService iService;
     private IVisible iVisible;
+    private IMsgToUi iMsgToUi;
 
     //--------------------- singleton
 
@@ -136,6 +138,11 @@ public class Caller
 
     public Caller setiVisible(IVisible iVisible) {
         this.iVisible = iVisible;
+        return this;
+    }
+
+    public Caller setiMsgToUi(IMsgToUi iMsgToUi) {
+        this.iMsgToUi = iMsgToUi;
         return this;
     }
 
@@ -239,7 +246,8 @@ public class Caller
         if (iDebugListener == null
                 || iService == null
                 || iReceive == null
-                || iVisible == null) {
+                || iVisible == null
+                || iMsgToUi == null) {
             if (debug) Log.e(TAG, "buildDebugAudIn2Bt illegal parameters");
             return;
         }
@@ -254,7 +262,8 @@ public class Caller
                 .setmHandler(new Handler())
                 .setiService(iService)
                 .setiReceive(iReceive)
-                .setiVisible(iVisible);
+                .setiVisible(iVisible)
+                .setiMsgToUi(iMsgToUi);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -275,7 +284,8 @@ public class Caller
                 || iBluetoothListener == null
                 || iService == null
                 || iReceive == null
-                || iVisible == null) {
+                || iVisible == null
+                || iMsgToUi == null) {
             if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
             return;
         }
@@ -288,7 +298,8 @@ public class Caller
                 .setmHandler(new Handler())
                 .setiService(iService)
                 .setiReceive(iReceive)
-                .setiVisible(iVisible);
+                .setiVisible(iVisible)
+                .setiMsgToUi(iMsgToUi);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
@@ -329,7 +340,8 @@ public class Caller
                 || iBluetoothListener == null
                 || iService == null
                 || iReceive == null
-                || iVisible == null) {
+                || iVisible == null
+                || iMsgToUi == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -346,7 +358,8 @@ public class Caller
                 .setStorageToBt(storageToBt)
                 .setiService(iService)
                 .setiReceive(iReceive)
-                .setiVisible(iVisible);
+                .setiVisible(iVisible)
+                .setiMsgToUi(iMsgToUi);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
@@ -368,7 +381,8 @@ public class Caller
                 || iBluetoothListener == null
                 || iService == null
                 || iReceive == null
-                || iVisible == null) {
+                || iVisible == null
+                || iMsgToUi == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -385,7 +399,8 @@ public class Caller
                 .setStorageToBt(storageNetToBt)
                 .setiService(iService)
                 .setiReceive(iReceive)
-                .setiVisible(iVisible);
+                .setiVisible(iVisible)
+                .setiMsgToUi(iMsgToUi);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
@@ -418,7 +433,8 @@ public class Caller
                 || iBluetoothListener == null
                 || iService == null
                 || iReceive == null
-                || iVisible == null) {
+                || iVisible == null
+                || iMsgToUi == null) {
             Log.e(TAG, "buildNormal illegal parameters");
         }
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
@@ -432,7 +448,8 @@ public class Caller
                 .setStorageToBt(storageNetToBt)
                 .setiService(iService)
                 .setiReceive(iReceive)
-                .setiVisible(iVisible);
+                .setiVisible(iVisible)
+                .setiMsgToUi(iMsgToUi);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageBtToNet(storageBtToNet)

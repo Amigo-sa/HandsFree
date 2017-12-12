@@ -200,7 +200,8 @@ public class DeviceControlActivity
                 .setiBluetoothListener(this)
                 .setiReceive(this)
                 .setiService(this)
-                .setiVisible(this);
+                .setiVisible(this)
+                .setiMsgToUi(this);
 
         connectorBluetooth = Caller.getInstance().getConnectorBluetooth();
         iUiBtnGreenRedListener = Caller.getInstance().getiUiBtnGreenRedListener();

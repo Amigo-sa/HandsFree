@@ -56,9 +56,9 @@ import by.citech.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.bluetoothlegatt.StorageListener;
 import by.citech.data.StorageData;
 import by.citech.debug.IDebugListener;
+import by.citech.exchange.IMsgToUi;
 import by.citech.exchange.ITransmitter;
 import by.citech.gui.ICallUiExchangeListener;
-import by.citech.param.OpMode;
 import by.citech.param.Settings;
 
 public class ConnectorBluetooth
@@ -102,6 +102,7 @@ private volatile BluetoothLeState BLEState;
     private IReceive iReceive;
     private IService iService;
     private IVisible iVisible;
+    private IMsgToUi iMsgToUi;
 
     private Intent serviceIntent = new Intent("by.citech.bluetoothlegatt.BluetoothLeService");
 
@@ -163,7 +164,7 @@ private volatile BluetoothLeState BLEState;
         return instance;
     }
 
-    public void build(){
+     void build(){
         if (Settings.debug) Log.i(TAG,"build()");
         characteristics = new Characteristics(mIBluetoothListener);
         controlAdapter = new ControlAdapter(mIBluetoothListener);
@@ -215,7 +216,7 @@ private volatile BluetoothLeState BLEState;
 
     //--------------------- getters and setters
 
-    public ConnectorBluetooth setmHandler(Handler mHandler) {
+     ConnectorBluetooth setmHandler(Handler mHandler) {
         this.mHandler = mHandler;
         return this;
     }
@@ -230,7 +231,7 @@ private volatile BluetoothLeState BLEState;
         return null;
     }
 
-    public ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
+     ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
        return this;
     }
@@ -252,43 +253,46 @@ private volatile BluetoothLeState BLEState;
         return controlAdapter.getLeDeviceListAdapter();
     }
 
-    public ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
+     ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
         return this;
     }
 
-    public ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt){
+     ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt){
         this.storageFromBt = storageFromBt;
         return this;
     }
 
-    public ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt){
+     ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt){
         this.storageToBt = storageToBt;
         return this;
     }
 
-    public ConnectorBluetooth setiReceive(IReceive iReceive) {
+     ConnectorBluetooth setiReceive(IReceive iReceive) {
         this.iReceive = iReceive;
         return this;
     }
 
-    public ConnectorBluetooth setiService(IService iService) {
+     ConnectorBluetooth setiService(IService iService) {
         this.iService = iService;
         return this;
     }
 
-    public ConnectorBluetooth setiVisible(IVisible iVisible) {
+     ConnectorBluetooth setiVisible(IVisible iVisible) {
         this.iVisible = iVisible;
         return this;
     }
+
+     ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
+        this.iMsgToUi = iMsgToUi;
+        return this;
+    }
+
     //---------------------------------Bluetooth -----------------------------
     public boolean getBluetoothAdapter(BluetoothManager bluetoothManager) {
         if (Settings.debug) Log.i(TAG, "getBluetoothAdapter()");
         mBluetoothAdapter = bluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null)
-            return false;
-        else
-            return true;
+        return !(mBluetoothAdapter == null);
     }
 
     public BluetoothAdapter getBTAdapter(){
@@ -313,7 +317,7 @@ private volatile BluetoothLeState BLEState;
         disconnDialogInfoOn = new DisconnInfoDialogCommand(adb, mBTDevice, iVisible);
         reconnDiaologOn = new ReconnectDialogCommand(adb, mBTDevice, alertDialog, this);
         connDialogInfoOn = new ConnInfoDialogCommand(adb, mBTDevice, iVisible);
-        connDialogOn = new ConnectDialogCommand(adb, mBTDevice, alertDialog, this);
+        connDialogOn = new ConnectDialogCommand(mBTDevice, this, iMsgToUi);
         //------------------ Команды работы с адаптером -----------
         addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
         clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter, mBTDevice);
@@ -362,6 +366,7 @@ private volatile BluetoothLeState BLEState;
                      .setCommand(clearList)
                      .setCommand(scanOn)
                      .execute();
+
     }
 
     @Override

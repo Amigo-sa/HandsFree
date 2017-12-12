@@ -39,7 +39,7 @@ public class ConnectDialogCommand implements Command {
 
     @Override
     public void undo() {
-        iMsgToUi.recallFromUiDialog(true, DialogType.Connect);
+        iMsgToUi.recallFromUiDialog(true, DialogType.Connect, DialogState.Idle);
     }
 
 }
