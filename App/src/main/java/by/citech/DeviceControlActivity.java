@@ -1,7 +1,6 @@
 package by.citech;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -14,8 +13,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -367,9 +364,8 @@ public class DeviceControlActivity
 
     private boolean checkPermission(String permission, int requestPermission){
         if (Settings.debug) Log.i(TAG, "checkPermission()");
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            //if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
-                ActivityCompat.requestPermissions(this, new String[]{permission}, requestPermission);
+        if (this.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                this.requestPermissions(new String[]{permission}, requestPermission);
             return false;
         }
         return true;
@@ -378,7 +374,7 @@ public class DeviceControlActivity
     private void enPermission(String permission){
         if (Settings.debug) Log.i(TAG, "enPermission()");
         // permission was granted, yay! Do the location-related task you need to do.
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+        if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             //Request location updates:
             if (provider != null)
                 locationManager.requestLocationUpdates(provider, 400, 1, this);
