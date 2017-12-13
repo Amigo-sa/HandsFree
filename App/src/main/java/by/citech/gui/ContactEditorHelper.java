@@ -183,7 +183,7 @@ public class ContactEditorHelper
         freezeState();
         contactToDeletePosition = contactToEditPosition;
         Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Proceed, () -> threadPool.addRunnable(() -> iContact.addElement(contactToAdd)));
+        map.put(DialogState.Proceed, () -> threadPool.addRunnable(() -> iContact.deleteElement(contactToEdit)));
         map.put(DialogState.Cancel, this::releaseState);
         iMsgToUi.sendToUiDialog(true, DialogType.Delete, map);
     }
