@@ -96,6 +96,7 @@ public class ViewHelper
             throw new Exception(StatusMessages.ERR_PARAMETERS);
         }
         objNumber = objCount;
+        if (debug) Log.w(TAG, "this object's number is " + objNumber);
         this.iGetGetter = iGetGetter;
         buttonHelper = ButtonHelper.getInstance();
         animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
@@ -114,7 +115,6 @@ public class ViewHelper
             initiate();
         }
         setDefaultView();
-        Log.e(TAG, "this object's number is " + objNumber); //TODO: remove test
     }
 
     @Override
@@ -138,6 +138,7 @@ public class ViewHelper
         buttonHelper = null;
         animCall = null;
         iGetter = null;
+        iGetGetter = null;
         isCallAnim = false;
         isInitiated = false;
     }
@@ -375,21 +376,6 @@ public class ViewHelper
     @Override
     public void connectorReady() {
         if (debug) Log.i(TAG, "connectorReady");
-
-        //TODO: remove test area start
-        Log.e(TAG, "connectorReady btnGreen is " + getBtnGreen());
-        if (btnGreen == null) {
-            Log.e(TAG, "connectorReady iGetGetter is " + iGetGetter);
-            Log.e(TAG, "connectorReady iGetter is " + iGetter);
-            if (iGetter == null) {
-                iGetter = iGetGetter.getViewGetter();
-            }
-            Log.e(TAG, "connectorReady iGetter is " + iGetter);
-            btnGreen = iGetter.findViewById(R.id.btnGreen);
-            Log.e(TAG, "connectorReady btnGreen found and it is " + getBtnGreen());
-        }
-        //TODO: remove test area end
-
         enableBtnCall(getBtnGreen(), "CALL");
         ButtonHelper.disableGray(getBtnRed(), "IDLE");
     }

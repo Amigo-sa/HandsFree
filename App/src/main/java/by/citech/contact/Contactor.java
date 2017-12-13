@@ -1,7 +1,6 @@
 package by.citech.contact;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -164,7 +163,7 @@ public class Contactor
                 toUpdate.setState(ContactState.FailUpdate);
             } else if (!Contact.checkForValid(toCopy)) {
                 toUpdate.setState(ContactState.FailInvalid);
-            } else if (toUpdate.equals(toCopy)) {
+            } else if (Contact.checkForEqual(toUpdate, toCopy)) {
                 return true;
             } else if (!memCtrl.checkForUniq(toCopy)) {
                 toUpdate.setState(ContactState.FailNotUnique);

@@ -37,19 +37,23 @@ public class Contact
         state = ContactState.Null;
         this.name = name;
         this.ip = ip;
-        if (debug) Log.i(TAG, toString() + " contactTrunkCount is: " + (++contactTrunkCount));
+        if (debug) Log.d(TAG, toString() + " contactTrunkCount is: " + (++contactTrunkCount));
     }
 
     public Contact(long id, String name, String ip) {
         this(name, ip);
         this.id = id;
-        if (debug) Log.i(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
+        if (debug) Log.d(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
     }
 
     public Contact(long id, Contact contact) {
         this(contact.getName(), contact.getIp());
         this.id = id;
-        if (debug) Log.i(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
+        if (debug) Log.d(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
+    }
+
+    public static boolean checkForEqual(Contact toCheck1, Contact toCheck2) {
+        return toCheck1.ip.equals(toCheck2.ip);
     }
 
     public static boolean checkForValid(Contact contact) {
@@ -64,10 +68,21 @@ public class Contact
 
     //--------------------- getters and setters
 
-    public String getName() {return name;}
-    public String getIp() {return ip;}
-    public void setId(long id) {this.id = id;}
-    public void setState(ContactState state) {this.state = state;}
+    public String getName() {
+        return name;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setState(ContactState state) {
+        this.state = state;
+    }
 
     //--------------------- interfaces
 
@@ -109,13 +124,22 @@ public class Contact
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Contact contact = (Contact) o;
-        return ip.equals(contact.ip);
+
+        if (id != contact.id) return false;
+        if (!name.equals(contact.name)) return false;
+        if (!ip.equals(contact.ip)) return false;
+        return state == contact.state;
     }
 
     @Override
     public int hashCode() {
-        return ip.hashCode();
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + name.hashCode();
+        result = 31 * result + ip.hashCode();
+        result = 31 * result + state.hashCode();
+        return result;
     }
 
     @Override
