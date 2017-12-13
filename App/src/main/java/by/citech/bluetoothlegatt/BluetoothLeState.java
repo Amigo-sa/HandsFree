@@ -36,7 +36,7 @@ public enum BluetoothLeState {
     SERVICES_DISCOVERED{
         @Override
         public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(DISCONECTED, TRANSMIT_DATA));
+            return new HashSet<> (Arrays.asList(DISCONECTED, CONNECTED, TRANSMIT_DATA));
         }
 
         @Override
