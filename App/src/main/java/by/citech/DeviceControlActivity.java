@@ -796,7 +796,11 @@ public class DeviceControlActivity
     @Override
     public void sendToUiDialog(boolean isFromUiThread, DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
         if (debug) Log.i(TAG, "sendToUiDialog");
-        sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(toRun, toDoMap, messages));
+        if (!isFinishing()) {
+            sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(toRun, toDoMap, messages));
+        } else {
+            Log.e(TAG, "sendToUiDialog isFinishing, not sending");
+        }
     }
 
     @Override

@@ -67,15 +67,15 @@ public class ViewHelper
     //--------------------- non-settings
 
     private final int objNumber;
-    private IGetViewGetter iGetViewGetter;
-    private IGetViewById iGetViewById;
+    private IGetViewGetter iGetGetter;
+    private IGetViewById iGetter;
     private View scanView;
     private View mainView;
     private View viewContactEditor;
-    private View viewChosenContact;
+    private View viewContactChosen;
     private EditText editTextSearch;
-    private TextView textViewChosenContactName;
-    private TextView textViewChosenContactIp;
+    private TextView textViewContactChosenName;
+    private TextView textViewContactChosenIp;
     private EditText editTextContactName;
     private EditText editTextContactIp;
     private Button btnSaveContact;
@@ -89,14 +89,14 @@ public class ViewHelper
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    public ViewHelper(@NonNull IGetViewGetter iGetViewGetter,
+    public ViewHelper(@NonNull IGetViewGetter iGetGetter,
                       @NonNull Context context) throws Exception {
         if (debug) Log.i(TAG, "object count is " + objCount);
-        if (iGetViewGetter == null || context == null) {
+        if (iGetGetter == null || context == null) {
             throw new Exception(StatusMessages.ERR_PARAMETERS);
         }
         objNumber = objCount;
-        this.iGetViewGetter = iGetViewGetter;
+        this.iGetGetter = iGetGetter;
         buttonHelper = ButtonHelper.getInstance();
         animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
     }
@@ -113,32 +113,7 @@ public class ViewHelper
         if (!isInitiated) {
             initiate();
         }
-
-        Log.e(TAG, "baseStart iGetViewById is " + iGetViewById); //TODO: remove test
-        iGetViewById = iGetViewGetter.getViewGetter();
-        Log.e(TAG, "baseStart iGetViewById is " + iGetViewById); //TODO: remove test
-
-//        this.scanView = iGetViewById.findViewById(R.id.scanView);
-//        this.mainView = iGetViewById.findViewById(R.id.mainView);
-//        this.viewContactEditor = iGetViewById.findViewById(R.id.viewContactEditor);
-//        this.viewChosenContact = iGetViewById.findViewById(R.id.viewContactChosen);
-//        this.editTextSearch = iGetViewById.findViewById(R.id.editTextSearch);
-//        this.textViewChosenContactName = iGetViewById.findViewById(R.id.textViewChosenContactName);
-//        this.textViewChosenContactIp = iGetViewById.findViewById(R.id.textViewChosenContactIp);
-//        this.editTextContactName = iGetViewById.findViewById(R.id.editTextContactName);
-//        this.editTextContactIp = iGetViewById.findViewById(R.id.editTextContactIp);
-//        this.btnSaveContact = iGetViewById.findViewById(R.id.btnSaveContact);
-//        this.btnDelContact = iGetViewById.findViewById(R.id.btnDelContact);
-//        this.btnCancelContact = iGetViewById.findViewById(R.id.btnCancelContact);
-
-        Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
-//        this.btnGreen = iGetViewById.findViewById(R.id.btnGreen);
-        Log.e(TAG, "baseStart btnGreen is " + btnGreen); //TODO: remove test
-
-//        this.btnRed = iGetViewById.findViewById(R.id.btnRed);
-//        this.btnChangeDevice = iGetViewById.findViewById(R.id.btnChangeDevice);
         setDefaultView();
-
         Log.e(TAG, "this object's number is " + objNumber); //TODO: remove test
     }
 
@@ -148,10 +123,10 @@ public class ViewHelper
         scanView = null;
         mainView = null;
         viewContactEditor = null;
-        viewChosenContact = null;
+        viewContactChosen = null;
         editTextSearch = null;
-        textViewChosenContactName = null;
-        textViewChosenContactIp = null;
+        textViewContactChosenName = null;
+        textViewContactChosenIp = null;
         editTextContactName = null;
         editTextContactIp = null;
         btnSaveContact = null;
@@ -160,10 +135,9 @@ public class ViewHelper
         btnGreen = null;
         btnRed = null;
         btnChangeDevice = null;
-
         buttonHelper = null;
         animCall = null;
-        iGetViewById = null;
+        iGetter = null;
         isCallAnim = false;
         isInitiated = false;
     }
@@ -244,21 +218,21 @@ public class ViewHelper
     //--------------------- chosen
 
     public void showChosen() {
-        getViewChosenContact().setVisibility(View.VISIBLE);
+        getViewContactChosen().setVisibility(View.VISIBLE);
         getEditTextSearch().setVisibility(View.GONE);
     }
 
     public void hideChosen() {
-        getViewChosenContact().setVisibility(View.GONE);
+        getViewContactChosen().setVisibility(View.GONE);
         getEditTextSearch().setVisibility(View.VISIBLE);
     }
 
     public void setChosenContactInfo(Contact chosenContact) {
-        Contacts.setContactInfo(chosenContact, getTextViewChosenContactName(), getTextViewChosenContactIp());
+        Contacts.setContactInfo(chosenContact, getTextViewContactChosenName(), getTextViewContactChosenIp());
     }
 
     public void clearChosenContactInfo() {
-        Contacts.setContactInfo(getTextViewChosenContactName(), getTextViewChosenContactIp());
+        Contacts.setContactInfo(getTextViewContactChosenName(), getTextViewContactChosenIp());
     }
 
     public String getSearchText() {
@@ -405,13 +379,13 @@ public class ViewHelper
         //TODO: remove test area start
         Log.e(TAG, "connectorReady btnGreen is " + getBtnGreen());
         if (btnGreen == null) {
-            Log.e(TAG, "connectorReady iGetViewGetter is " + iGetViewGetter);
-            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
-            if (iGetViewById == null) {
-                iGetViewById = iGetViewGetter.getViewGetter();
+            Log.e(TAG, "connectorReady iGetGetter is " + iGetGetter);
+            Log.e(TAG, "connectorReady iGetter is " + iGetter);
+            if (iGetter == null) {
+                iGetter = iGetGetter.getViewGetter();
             }
-            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
-            btnGreen = iGetViewById.findViewById(R.id.btnGreen);
+            Log.e(TAG, "connectorReady iGetter is " + iGetter);
+            btnGreen = iGetter.findViewById(R.id.btnGreen);
             Log.e(TAG, "connectorReady btnGreen found and it is " + getBtnGreen());
         }
         //TODO: remove test area end
@@ -557,115 +531,121 @@ public class ViewHelper
         }
     }
 
-    //--------------------- getters
+    //--------------------- view getters help
 
     private <T extends View> T getView(T t, @IdRes int id) {
         if (t == null) {
-            Log.e(TAG, "getView requested view is null, get");
-            if (iGetViewById == null) {
-                Log.e(TAG, "getView iGetViewById is null, get");
-                if (iGetViewGetter == null) {
-                    Log.e(TAG, "getView iGetViewGetter is null, return");
-                    return null;
-                } else {
-                    iGetViewById = iGetViewGetter.getViewGetter();
-                    if (iGetViewById == null) {
-                        Log.e(TAG, "getView iGetViewById is still null, return");
-                        return null;
-                    } else {
-                        t = getViewById(iGetViewById, id);
-                    }
-                }
-            } else {
-                t = getViewById(iGetViewById, id);
-            }
+            Log.e(TAG, "getView view is null, get");
+            t = getViewFromGetter(getGetter(iGetGetter), id);
         }
         return t;
     }
 
-    private <T extends View> T getViewById(IGetViewById iGetViewById, @IdRes int id) {
-        if (iGetViewById != null) {
-            T t = iGetViewById.findViewById(id);
-            if (t == null) {
-                Log.e(TAG, "IGetViewById view is still null, return");
+    private IGetViewById getGetter(IGetViewGetter iGetGetter) {
+        if (iGetter == null) {
+            Log.e(TAG, "getGetter iGetter is null, get");
+            if (iGetGetter == null) {
+                Log.e(TAG, "getGetter iGetGetter is null, return");
             } else {
-                if (debug) Log.i(TAG, "IGetViewById view is " + t);
+                iGetter = iGetGetter.getViewGetter();
+                if (iGetter == null) {
+                    Log.e(TAG, "getGetter iGetter is still null, return");
+                }
             }
-            return t;
-        } else {
-            Log.e(TAG, "IGetViewById iGetViewById null, return");
-            return null;
         }
+        return iGetter;
     }
 
-    public View getScanView() {
-        if (scanView == null) {
-            Log.e(TAG, "connectorReady iGetViewGetter is " + iGetViewGetter);
-            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
-            if (iGetViewById == null) {
-                iGetViewById = iGetViewGetter.getViewGetter();
+    private <T extends View> T getViewFromGetter(IGetViewById iGetter, @IdRes int id) {
+        T t = null;
+        if (iGetter != null) {
+            t = iGetter.findViewById(id);
+            if (t == null) {
+                Log.e(TAG, "getViewFromGetter view is still null, return");
+            } else {
+                if (debug) Log.i(TAG, "getViewFromGetter view is " + t);
             }
-            Log.e(TAG, "connectorReady iGetViewById is " + iGetViewById);
-            scanView = iGetViewById.findViewById(R.id.scanView);
-            Log.e(TAG, "connectorReady btnGreen found and it is " + scanView);
+        } else {
+            Log.e(TAG, "getViewFromGetter iGetter is null, return");
         }
+        return t;
+    }
+
+    //--------------------- view getters
+
+    private View getScanView() {
+        if (scanView == null) scanView = getView(scanView, R.id.scanView);
         return scanView;
     }
 
-    public View getMainView() {
+    private View getMainView() {
+        if (mainView == null) mainView = getView(mainView, R.id.mainView);
         return mainView;
     }
 
-    public Button getBtnGreen() {
-        return btnGreen;
-    }
-
-    public Button getBtnRed() {
-        return btnRed;
-    }
-
-    public Button getBtnChangeDevice() {
-        return btnChangeDevice;
-    }
-
-    public View getViewContactEditor() {
+    private View getViewContactEditor() {
+        if (viewContactEditor == null) viewContactEditor = getView(viewContactEditor, R.id.viewContactEditor);
         return viewContactEditor;
     }
 
-    public View getViewChosenContact() {
-        return viewChosenContact;
+    private View getViewContactChosen() {
+        if (viewContactChosen == null) viewContactChosen = getView(viewContactChosen, R.id.viewContactChosen);
+        return viewContactChosen;
     }
 
-    public EditText getEditTextSearch() {
+    private EditText getEditTextSearch() {
+        if (editTextSearch == null) editTextSearch = getView(editTextSearch, R.id.editTextSearch);
         return editTextSearch;
     }
 
-    public TextView getTextViewChosenContactName() {
-        return textViewChosenContactName;
+    private TextView getTextViewContactChosenName() {
+        if (textViewContactChosenName == null) textViewContactChosenName = getView(textViewContactChosenName, R.id.textViewContactChosenName);
+        return textViewContactChosenName;
     }
 
-    public TextView getTextViewChosenContactIp() {
-        return textViewChosenContactIp;
+    private TextView getTextViewContactChosenIp() {
+        if (textViewContactChosenIp == null) textViewContactChosenIp = getView(textViewContactChosenIp, R.id.textViewContactChosenIp);
+        return textViewContactChosenIp;
     }
 
-    public EditText getEditTextContactName() {
+    private EditText getEditTextContactName() {
+        if (editTextContactName == null) editTextContactName = getView(editTextContactName, R.id.editTextContactName);
         return editTextContactName;
     }
 
-    public Button getBtnDelContact() {
-        return btnDelContact;
-    }
-
-    public Button getBtnSaveContact() {
-        return btnSaveContact;
-    }
-
-    public EditText getEditTextContactIp() {
+    private EditText getEditTextContactIp() {
+        if (editTextContactIp == null) editTextContactIp = getView(editTextContactIp, R.id.editTextContactIp);
         return editTextContactIp;
     }
 
-    public Button getBtnCancelContact() {
+    private Button getBtnSaveContact() {
+        if (btnSaveContact == null) btnSaveContact = getView(btnSaveContact, R.id.btnSaveContact);
+        return btnSaveContact;
+    }
+
+    private Button getBtnDelContact() {
+        if (btnDelContact == null) btnDelContact = getView(btnDelContact, R.id.btnDelContact);
+        return btnDelContact;
+    }
+
+    private Button getBtnCancelContact() {
+        if (btnCancelContact == null) btnCancelContact = getView(btnCancelContact, R.id.btnCancelContact);
         return btnCancelContact;
+    }
+
+    private Button getBtnGreen() {
+        if (btnGreen == null) btnGreen = getView(btnGreen, R.id.btnGreen);
+        return btnGreen;
+    }
+
+    private Button getBtnRed() {
+        if (btnRed == null) btnRed = getView(btnRed, R.id.btnRed);
+        return btnRed;
+    }
+
+    private Button getBtnChangeDevice() {
+        if (btnChangeDevice == null) btnChangeDevice = getView(btnChangeDevice, R.id.btnChangeDevice);
+        return btnChangeDevice;
     }
 
 }

@@ -34,7 +34,7 @@
                 android:layout_height="8dp" />
 
             <TextView
-                android:id="@+id/textViewChosenContactName"
+                android:id="@+id/textViewContactChosenName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/spaceChosenContactName"
@@ -46,10 +46,10 @@
                 android:textSize="16sp" />
 
             <TextView
-                android:id="@+id/textViewChosenContactIp"
+                android:id="@+id/textViewContactChosenIp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/textViewChosenContactName"
+                android:layout_below="@id/textViewContactChosenName"
                 android:layout_gravity="start"
                 android:layout_marginBottom="4dp"
                 android:layout_marginStart="8dp"
@@ -58,7 +58,7 @@
                 android:textSize="14sp" />
 
             <Space
-                android:layout_below="@id/textViewChosenContactIp"
+                android:layout_below="@id/textViewContactChosenIp"
                 android:layout_width="match_parent"
                 android:layout_height="8dp" />
 
