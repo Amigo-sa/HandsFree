@@ -547,8 +547,7 @@ public class DeviceControlActivity
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
 // останавливаем сканирование и запускаем новое Activity
         myListDevices.setOnItemClickListener((parent, view1, position, id) -> {
-            AlertDialog.Builder adb = new AlertDialog.Builder(this);
-            connectorBluetooth.clickItemList(position, adb);
+            connectorBluetooth.clickItemList(position );
         });
         connectorBluetooth.stopScanBTDevice();
         connectorBluetooth.startScanBTDevices();

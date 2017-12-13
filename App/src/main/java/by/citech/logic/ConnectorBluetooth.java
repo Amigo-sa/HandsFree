@@ -307,7 +307,7 @@ private volatile BluetoothLeState BLEState;
 
     //------------------ inittialization List-------------------------
 
- public void clickItemList(int position,  AlertDialog.Builder adb){
+ public void clickItemList(int position){
         final BluetoothDevice device = getmLeDeviceListAdapter().getDevice(position);
         if (device == null) return;
         setmBTDevice(device);
