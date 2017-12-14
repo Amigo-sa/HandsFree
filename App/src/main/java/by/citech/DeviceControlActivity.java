@@ -107,6 +107,7 @@ public class DeviceControlActivity
     private ListView listDevices;
     private LinearLayout mainView;
     private LinearLayout scanView;
+    private LeDeviceListAdapter deviceListAdapter;
 
     private Intent gattServiceIntent;
 
@@ -231,7 +232,7 @@ public class DeviceControlActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (Settings.debug) Log.w(TAG,"onResume");
+        if (debug) Log.w(TAG,"onResume");
         enPermissions();
     }
 
@@ -292,7 +293,7 @@ public class DeviceControlActivity
     }
 
     private void onCreateScanMenu(Menu menu){
-        if (Settings.debug) Log.i(TAG, "onCreateScanMenu()");
+        if (debug) Log.i(TAG, "onCreateScanMenu()");
         getMenuInflater().inflate(R.menu.main_menu, menu);
         if (!ConnectorBluetooth.getInstance().ismScanning()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
@@ -343,7 +344,7 @@ public class DeviceControlActivity
     //-------------------------- permissons
 
     private void enPermissions(){
-        if (Settings.debug) Log.i(TAG, "enPermissions");
+        if (debug) Log.i(TAG, "enPermissions");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, REQUEST_LOCATION))
@@ -353,7 +354,7 @@ public class DeviceControlActivity
     }
 
     private boolean checkPermission(String permission, int requestPermission){
-        if (Settings.debug) Log.i(TAG, "checkPermission()");
+        if (debug) Log.i(TAG, "checkPermission()");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 this.requestPermissions(new String[]{permission}, requestPermission);
@@ -369,7 +370,7 @@ public class DeviceControlActivity
     }
 
     private void enPermission(String permission){
-        if (Settings.debug) Log.i(TAG, "enPermission");
+        if (debug) Log.i(TAG, "enPermission");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
                 if (provider != null)
@@ -539,7 +540,7 @@ public class DeviceControlActivity
         setVisibleList();
         ConnectorBluetooth.getInstance().initListBTDevice();
         setupViewListDevices();
-        Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
+        if (debug) Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
         // останавливаем сканирование и запускаем новое Activity
         ConnectorBluetooth.getInstance().startScanBTDevices();
@@ -576,7 +577,11 @@ public class DeviceControlActivity
 
     @Override
     public LeDeviceListAdapter addLeDeviceListAdapter() {
-        return new LeDeviceListAdapter(this.getLayoutInflater());
+        if (deviceListAdapter == null) {
+            if (debug) Log.w(TAG, "addLeDeviceListAdapter deviceListAdapter is null, initiate");
+            deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
+        }
+        return deviceListAdapter;
     }
 
     @Override
@@ -608,27 +613,27 @@ public class DeviceControlActivity
 
     @Override
     public String unknownCharaString() {
-        return  getResources().getString(R.string.unknown_characteristic);
+        return getResources().getString(R.string.unknown_characteristic);
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if (Settings.debug) Log.i(TAG, "onLocationChanged");
+        if (debug) Log.i(TAG, "onLocationChanged");
     }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
-        if (Settings.debug) Log.i(TAG, "onStatusChanged");
+        if (debug) Log.i(TAG, "onStatusChanged");
     }
 
     @Override
     public void onProviderEnabled(String s) {
-        if (Settings.debug) Log.i(TAG, "onProviderEnabled");
+        if (debug) Log.i(TAG, "onProviderEnabled");
     }
 
     @Override
     public void onProviderDisabled(String s) {
-        if (Settings.debug) Log.i(TAG, "onProviderDisabled");
+        if (debug) Log.i(TAG, "onProviderDisabled");
     }
 
     private void swipeScanStart(){
