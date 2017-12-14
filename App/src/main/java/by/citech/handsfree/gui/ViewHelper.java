@@ -70,7 +70,6 @@ public class ViewHelper
     //--------------------- non-settings
 
     private final int objNumber;
-    private List<Runnable> list;
     private IGetViewGetter iGetGetter;
     private IGetView iGetter;
     private View scanView;
@@ -92,37 +91,15 @@ public class ViewHelper
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    //--------------------- singleton
-
-    private static volatile ViewHelper instance = null;
-
-    private ViewHelper() {
+    public ViewHelper() {
         objNumber = objCount;
         if (debug) Log.w(TAG, "this object's number is " + objNumber);
-    }
-
-    public static ViewHelper getInstance() {
-        if (instance == null) {
-            synchronized (ViewHelper.class) {
-                if (instance == null) {
-                    instance = new ViewHelper();
-                }
-            }
-        } else if (!instance.isInitiated) {
-            instance.initiate();
-        }
-        return instance;
     }
 
     //--------------------- getters and setters
 
     public ViewHelper setiGetGetter(IGetViewGetter iGetGetter) {
         this.iGetGetter = iGetGetter;
-        return this;
-    }
-
-    public ViewHelper setContext(Context context) {
-        animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
         return this;
     }
 
@@ -219,7 +196,7 @@ public class ViewHelper
     }
 
     private void prepare() {
-        animCall.setAnimationListener(new Animation.AnimationListener() {
+        getAnimCall().setAnimationListener(new Animation.AnimationListener() {
             @Override public void onAnimationStart(Animation animation) {}
             @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {startCallAnim();}}
             @Override public void onAnimationRepeat(Animation animation) {}});
@@ -482,7 +459,7 @@ public class ViewHelper
 
     private void startCallAnim() {
         if (debug && !isCallAnim) Log.i(TAG, "startCallAnim");
-        getBtnGreen().startAnimation(animCall);
+        getBtnGreen().startAnimation(getAnimCall());
         isCallAnim = true;
     }
 
@@ -555,15 +532,7 @@ public class ViewHelper
         }
     }
 
-    //--------------------- view getters help
-
-    private <T extends View> T getView(T t, @IdRes int id) {
-        if (t == null) {
-            if (debug) Log.w(TAG, "getView view is null, get");
-            t = getViewFromGetter(getGetter(iGetGetter), id);
-        }
-        return t;
-    }
+    //--------------------- getters help
 
     private IGetView getGetter(IGetViewGetter iGetGetter) {
         if (iGetter == null) {
@@ -578,6 +547,37 @@ public class ViewHelper
             }
         }
         return iGetter;
+    }
+
+    private Animation getAnim(Animation a, int id) {
+        if (a == null) {
+            if (debug) Log.w(TAG, "getAnim anim is null, get");
+            a = getAnimFromGetter(getGetter(iGetGetter), id);
+        }
+        return a;
+    }
+
+    private Animation getAnimFromGetter(IGetView iGetter, int id) {
+        Animation a = null;
+        if (iGetter != null) {
+            a = iGetter.getAnimation(id);
+            if (a == null) {
+                if (debug) Log.w(TAG, "getAnimFromGetter anim is still null, return");
+            } else {
+                if (debug) Log.i(TAG, "getAnimFromGetter anim is " + a);
+            }
+        } else {
+            Log.e(TAG, "getAnimFromGetter iGetter is null, return");
+        }
+        return a;
+    }
+
+    private <T extends View> T getView(T t, @IdRes int id) {
+        if (t == null) {
+            if (debug) Log.w(TAG, "getView view is null, get");
+            t = getViewFromGetter(getGetter(iGetGetter), id);
+        }
+        return t;
     }
 
     private <T extends View> T getViewFromGetter(IGetView iGetter, @IdRes int id) {
@@ -614,7 +614,12 @@ public class ViewHelper
         getScanView();
     }
 
-    //--------------------- view getters
+    //--------------------- getters
+
+    private Animation getAnimCall() {
+        if (animCall == null) animCall = getAnim(animCall, R.anim.anim_call);
+        return animCall;
+    }
 
     private View getScanView() {
         if (scanView == null) scanView = getView(scanView, R.id.scanView);

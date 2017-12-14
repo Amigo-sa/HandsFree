@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.graphics.drawable.AnimationUtilsCompat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,7 +24,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-//import android.text.TextWatcher;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
@@ -33,6 +33,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -92,19 +94,17 @@ public class DeviceControlActivity
     public static final int REQUEST_LOCATION = 99;
     public static final int REQUEST_MICROPHONE = 98;
 
-    // цвета
-    private static final int DARKCYAN = Colors.DARKCYAN;
-    private static final int DARKKHAKI = Colors.DARKKHAKI;
-
     // TODO: отображение траффика для дебага
     private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
+    private ViewHelper viewHelper;
     private ActionBar actionBar;
 
     // список найденных устройств
     private ListView listDevices;
     private LinearLayout mainView;
     private LinearLayout scanView;
+    private LeDeviceListAdapter deviceListAdapter;
 
     private Intent gattServiceIntent;
 
@@ -136,13 +136,10 @@ public class DeviceControlActivity
         PreferencesProcessor.process(this);
         opMode = Settings.opMode;
         if (debug) Log.w(TAG, "onCreate opMode is " + opMode.getSettingName());
-
         iBaseList = new ArrayList<>();
 
-        ViewHelper.getInstance()
-                .setContext(this)
-                .setiGetGetter(this)
-                .baseStart(this);
+        viewHelper = new ViewHelper();
+        viewHelper.setiGetGetter(this).baseStart(this);
 
         mainView = findViewById(R.id.mainView);
         scanView = findViewById(R.id.scanView);
@@ -190,13 +187,13 @@ public class DeviceControlActivity
             Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
         }
 
-        chosenContactHelper = new ChosenContactHelper(ViewHelper.getInstance());
-        activeContactHelper = new ActiveContactHelper(chosenContactHelper, ViewHelper.getInstance());
+        chosenContactHelper = new ChosenContactHelper(viewHelper);
+        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
 
         Caller.getInstance()
-                .setiCallUiListener(ViewHelper.getInstance())
-                .setiDebugListener(ViewHelper.getInstance())
-                .setiCallNetListener(ViewHelper.getInstance())
+                .setiCallUiListener(viewHelper)
+                .setiDebugListener(viewHelper)
+                .setiCallNetListener(viewHelper)
                 .setiNetInfoListener(this)
                 .setiBluetoothListener(this)
                 .setiReceive(this)
@@ -229,7 +226,7 @@ public class DeviceControlActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (Settings.debug) Log.w(TAG,"onResume");
+        if (debug) Log.w(TAG,"onResume");
         enPermissions();
     }
 
@@ -276,7 +273,7 @@ public class DeviceControlActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!ViewHelper.getInstance().isMainViewHidden())
+        if (!viewHelper.isMainViewHidden())
             onCreateConnectMenu(menu);
         else
             onCreateScanMenu(menu);
@@ -290,7 +287,7 @@ public class DeviceControlActivity
     }
 
     private void onCreateScanMenu(Menu menu){
-        if (Settings.debug) Log.i(TAG, "onCreateScanMenu()");
+        if (debug) Log.i(TAG, "onCreateScanMenu()");
         getMenuInflater().inflate(R.menu.main_menu, menu);
         if (!ConnectorBluetooth.getInstance().ismScanning()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
@@ -324,9 +321,9 @@ public class DeviceControlActivity
     public void onBackPressed() {
         if (debug) Log.i(TAG, "onBackPressed");
         Keyboard.hideSoftKeyboard(this);
-        if (ViewHelper.getInstance().isMainViewHidden()) {
+        if (viewHelper.isMainViewHidden()) {
             if (debug) Log.i(TAG, "onBackPressed get main_menu visible");
-            ViewHelper.getInstance().showMainView();
+            viewHelper.showMainView();
             actionBar.setCustomView(null);
             if (ContactEditorHelper.getInstance().getState() != EditorState.Inactive)
                 ContactEditorHelper.getInstance().goToState(EditorState.Inactive);
@@ -341,7 +338,7 @@ public class DeviceControlActivity
     //-------------------------- permissons
 
     private void enPermissions(){
-        if (Settings.debug) Log.i(TAG, "enPermissions");
+        if (debug) Log.i(TAG, "enPermissions");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, REQUEST_LOCATION))
@@ -351,7 +348,7 @@ public class DeviceControlActivity
     }
 
     private boolean checkPermission(String permission, int requestPermission){
-        if (Settings.debug) Log.i(TAG, "checkPermission()");
+        if (debug) Log.i(TAG, "checkPermission()");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 this.requestPermissions(new String[]{permission}, requestPermission);
@@ -367,7 +364,7 @@ public class DeviceControlActivity
     }
 
     private void enPermission(String permission){
-        if (Settings.debug) Log.i(TAG, "enPermission");
+        if (debug) Log.i(TAG, "enPermission");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
                 if (provider != null)
@@ -415,7 +412,7 @@ public class DeviceControlActivity
     private void setupContactEditor() {
         if (debug) Log.i(TAG, "setupContactEditor");
         ContactEditorHelper.getInstance()
-                .setViewHelper(ViewHelper.getInstance())
+                .setViewHelper(viewHelper)
                 .setSwipeCrutch(swipeCrutch)
                 .setActiveContactHelper(activeContactHelper)
                 .setiMsgToUi(this)
@@ -537,7 +534,7 @@ public class DeviceControlActivity
         setVisibleList();
         ConnectorBluetooth.getInstance().initListBTDevice();
         setupViewListDevices();
-        Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
+        if (debug) Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
         // останавливаем сканирование и запускаем новое Activity
         ConnectorBluetooth.getInstance().startScanBTDevices();
@@ -574,7 +571,11 @@ public class DeviceControlActivity
 
     @Override
     public LeDeviceListAdapter addLeDeviceListAdapter() {
-        return new LeDeviceListAdapter(this.getLayoutInflater());
+        if (deviceListAdapter == null) {
+            if (debug) Log.w(TAG, "addLeDeviceListAdapter deviceListAdapter is null, initiate");
+            deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
+        }
+        return deviceListAdapter;
     }
 
     @Override
@@ -589,13 +590,13 @@ public class DeviceControlActivity
 
     @Override
     public void withoutDeviceView() {
-        ViewHelper.getInstance().setMainNoDevice();
+        viewHelper.setMainNoDevice();
         invalidateOptionsMenu();
     }
 
     @Override
     public void withDeviceView() {
-        ViewHelper.getInstance().setMainDeviceConnected();
+        viewHelper.setMainDeviceConnected();
         invalidateOptionsMenu();
    }
 
@@ -606,38 +607,38 @@ public class DeviceControlActivity
 
     @Override
     public String unknownCharaString() {
-        return  getResources().getString(R.string.unknown_characteristic);
+        return getResources().getString(R.string.unknown_characteristic);
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if (Settings.debug) Log.i(TAG, "onLocationChanged");
+        if (debug) Log.i(TAG, "onLocationChanged");
     }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
-        if (Settings.debug) Log.i(TAG, "onStatusChanged");
+        if (debug) Log.i(TAG, "onStatusChanged");
     }
 
     @Override
     public void onProviderEnabled(String s) {
-        if (Settings.debug) Log.i(TAG, "onProviderEnabled");
+        if (debug) Log.i(TAG, "onProviderEnabled");
     }
 
     @Override
     public void onProviderDisabled(String s) {
-        if (Settings.debug) Log.i(TAG, "onProviderDisabled");
+        if (debug) Log.i(TAG, "onProviderDisabled");
     }
 
     private void swipeScanStart(){
-        if (!ViewHelper.getInstance().isScanViewHidden()) {
+        if (!viewHelper.isScanViewHidden()) {
             ConnectorBluetooth.getInstance().stopScanBTDevice();
             ConnectorBluetooth.getInstance().scanWork();
         }
     }
 
     private void swipeScanStop(){
-        if (!ViewHelper.getInstance().isScanViewHidden()) {
+        if (!viewHelper.isScanViewHidden()) {
             ConnectorBluetooth.getInstance().stopScanBTDevice();
         }
     }
@@ -655,16 +656,16 @@ public class DeviceControlActivity
             static final int MIN_DISTANCE = 100;
             private float downX, downY, upX, upY;
 
-            LinearLayoutTouchListener() {}
-            void onRightToLeftSwipe() {Log.i(logTag, "RightToLeftSwipe!");}
-            void onLeftToRightSwipe() {Log.i(logTag, "LeftToRightSwipe!");}
+            public LinearLayoutTouchListener() {}
+            public void onRightToLeftSwipe() {Log.i(logTag, "RightToLeftSwipe!");}
+            public void onLeftToRightSwipe() {Log.i(logTag, "LeftToRightSwipe!");}
 
-            void onTopToBottomSwipe() {
+            public void onTopToBottomSwipe() {
                 Log.i(logTag, "onTopToBottomSwipe!");
                 swipeScanStart();
             }
 
-            void onBottomToTopSwipe() {
+            public void onBottomToTopSwipe() {
                 Log.i(logTag, "onBottomToTopSwipe!");
                 swipeScanStop();
             }
@@ -681,7 +682,6 @@ public class DeviceControlActivity
                     upX = motionEvent.getX();
                     upY = motionEvent.getY();
                     float deltaX = downX - upX;
-
                     float deltaY = downY - upY;
                     // swipe horizontal?
                     if (Math.abs(deltaX) > MIN_DISTANCE) {
@@ -733,7 +733,7 @@ public class DeviceControlActivity
     public void setVisibleList() {
         runOnUiThread(() -> {
             invalidateOptionsMenu();
-            ViewHelper.getInstance().showScaner();
+            viewHelper.showScaner();
         });
     }
 
@@ -760,7 +760,15 @@ public class DeviceControlActivity
     @Nullable
     @Override
     public <T extends View> T getView(int id) {
+        if (debug) Log.i(TAG, "getView");
         return findViewById(id);
+    }
+
+    @Nullable
+    @Override
+    public Animation getAnimation(int id) {
+        if (debug) Log.i(TAG, "getAnimation");
+        return AnimationUtils.loadAnimation(this, id);
     }
 
     //--------------------- IMsgToUi

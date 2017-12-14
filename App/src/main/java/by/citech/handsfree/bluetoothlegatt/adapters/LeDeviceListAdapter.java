@@ -18,6 +18,7 @@ import by.citech.handsfree.param.Settings;
 // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
 // останавливаем сканирование и запускаем новое Activity
 public class LeDeviceListAdapter extends BaseAdapter {
+
     private final static String TAG = "WSD_LeListAdapter";
     // View, которые будут содержаться в списке
     private ArrayList<BluetoothDevice> mLeDevices;
@@ -26,8 +27,8 @@ public class LeDeviceListAdapter extends BaseAdapter {
 
     public LeDeviceListAdapter(LayoutInflater mInflator) {
         super();
-        mLeDevices = new ArrayList<BluetoothDevice>();
-        mLeRssi = new ArrayList<String>();
+        mLeDevices = new ArrayList<>();
+        mLeRssi = new ArrayList<>();
         this.mInflator = mInflator;
     }
 
@@ -36,18 +37,17 @@ public class LeDeviceListAdapter extends BaseAdapter {
         ImageView deviceHeadSet;
         TextView  deviceName;
         TextView  deviceAddress;
-/*        TextView  bluetoothClass;
-        TextView  deviceRssi;*/
+//      TextView  bluetoothClass;
+//      TextView  deviceRssi;
         ImageView checkIcon;
     }
 
     public void addDevice(BluetoothDevice device, int rssi) {
         if (!mLeDevices.contains(device)) {
+            if (Settings.debug) Log.i(TAG, "addDevice device added: " + device.getAddress());
             mLeDevices.add(device);
             mLeRssi.add(String.valueOf(rssi));
             notifyDataSetChanged();
-        } else {
-            Log.e(TAG, "addDevice device already added");
         }
     }
 
@@ -63,10 +63,12 @@ public class LeDeviceListAdapter extends BaseAdapter {
         mLeDevices.clear();
         mLeRssi.clear();
     }
+
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
     }
+
     @Override
     public int getCount() {
         return mLeDevices.size();
@@ -89,40 +91,39 @@ public class LeDeviceListAdapter extends BaseAdapter {
         if (view == null) {
             view = mInflator.inflate(R.layout.lineitem_device, null);
             viewHolder = new LeDeviceListAdapter.ViewHolder();
-            viewHolder.deviceIcon = (ImageView) view.findViewById(R.id.icon);
+            viewHolder.deviceIcon = view.findViewById(R.id.icon);
             viewHolder.deviceIcon.setVisibility(View.VISIBLE);
-            viewHolder.deviceHeadSet = (ImageView) view.findViewById(R.id.iconhead);
+            viewHolder.deviceHeadSet = view.findViewById(R.id.iconhead);
             viewHolder.deviceHeadSet.setVisibility(View.GONE);
-            viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
-            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-/*            viewHolder.bluetoothClass = (TextView) view.findViewById(R.id.bluetooth_class);
-            viewHolder.deviceRssi = (TextView) view.findViewById(R.id.device_rssi);*/
-            viewHolder.checkIcon = (ImageView) view.findViewById(R.id.iconcheck);
+            viewHolder.deviceName = view.findViewById(R.id.device_name);
+            viewHolder.deviceAddress = view.findViewById(R.id.device_address);
+//          viewHolder.bluetoothClass = view.findViewById(R.id.bluetooth_class);
+//          viewHolder.deviceRssi = view.findViewById(R.id.device_rssi);
+            viewHolder.checkIcon = view.findViewById(R.id.iconcheck);
             view.setTag(viewHolder);
-        } else {
+        } else
             viewHolder = (LeDeviceListAdapter.ViewHolder) view.getTag();
-        }
 
         BluetoothDevice device = mLeDevices.get(i);
         final String deviceName = device.getName();
+
         if (deviceName != null && deviceName.length() > 0) {
             viewHolder.deviceName.setText(deviceName);
             if (deviceName.length() > 13)
-                if(deviceName.substring(0,13).equals("CIT HandsFree")) {
+                if (deviceName.substring(0,13).equals("CIT HandsFree")) {
                     viewHolder.deviceIcon.setVisibility(View.GONE);
                     viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     viewHolder.deviceIcon.setVisibility(View.VISIBLE);
                     viewHolder.deviceHeadSet.setVisibility(View.GONE);
                 }
-        }
-        else{
+        } else {
             viewHolder.deviceName.setText(R.string.unknown_device);
             viewHolder.deviceIcon.setVisibility(View.VISIBLE);
             viewHolder.deviceHeadSet.setVisibility(View.GONE);
         }
 
-        if(mLeRssi.get(i).equals("200")) {
+        if (mLeRssi.get(i).equals("200")) {
             if (Settings.debug) Log.i(TAG, "Set Icon to List");
             viewHolder.checkIcon.setVisibility(View.VISIBLE);
         }
@@ -130,9 +131,8 @@ public class LeDeviceListAdapter extends BaseAdapter {
             viewHolder.checkIcon.setVisibility(View.GONE);
 
         viewHolder.deviceAddress.setText(device.getAddress());
-/*        viewHolder.bluetoothClass.setText("Device Class: " + device.getBluetoothClass().toString());
-        viewHolder.deviceRssi.setText("RSSI: " + mLeRssi.get(i) + " dbm");
-*/
+//      viewHolder.bluetoothClass.setText("Device Class: " + device.getBluetoothClass().toString());
+//      viewHolder.deviceRssi.setText("RSSI: " + mLeRssi.get(i) + " dbm");
 
         return view;
     }
