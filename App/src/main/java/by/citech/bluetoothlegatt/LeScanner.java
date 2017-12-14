@@ -27,15 +27,15 @@ public class LeScanner {
     private boolean mScanning;
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
     private IBluetoothListener mIBluetoothListener;
-    private ControlAdapter controlAdapter;
+    private IScanneble iScanneble;
     private BluetoothAdapter bluetoothAdapter;
 
     public LeScanner(Handler mHandler,
                      IBluetoothListener mIBluetoothListener,
-                     ControlAdapter controlAdapter) {
+                     IScanneble iScanneble) {
         this.mHandler = mHandler;
         this.mIBluetoothListener = mIBluetoothListener;
-        this.controlAdapter = controlAdapter;
+        this.iScanneble = iScanneble;
     }
 
     //--------------------- getters and setters
@@ -111,10 +111,7 @@ public class LeScanner {
                 @Override
                 public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
                     //if (Settings.debug) Log.i(TAG, "onLeScan()");
-                    final LeDeviceListAdapter leDeviceListAdapter = controlAdapter.getLeDeviceListAdapter();
-                    if (leDeviceListAdapter != null && mIBluetoothListener != null)
-                        mIBluetoothListener.addDeviceToList(leDeviceListAdapter, device, rssi);
-
+                    iScanneble.scanCallback(device, rssi);
                 }
             };
 

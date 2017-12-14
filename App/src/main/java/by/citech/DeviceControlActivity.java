@@ -575,12 +575,6 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void addDeviceToList(final LeDeviceListAdapter leDeviceListAdapter, final BluetoothDevice device, final int rssi) {
-        if (debug) Log.w(TAG, "addDeviceToList: " + device.getAddress());
-        runOnUiThread(() -> leDeviceListAdapter.addDevice(device, rssi));
-    }
-
-    @Override
     public LeDeviceListAdapter addLeDeviceListAdapter() {
         return new LeDeviceListAdapter(this.getLayoutInflater());
     }

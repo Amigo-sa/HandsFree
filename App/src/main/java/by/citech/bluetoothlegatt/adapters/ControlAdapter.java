@@ -3,6 +3,7 @@ package by.citech.bluetoothlegatt.adapters;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
+import by.citech.bluetoothlegatt.IScanneble;
 import by.citech.logic.IBluetoothListener;
 import by.citech.param.Settings;
 
@@ -10,7 +11,7 @@ import by.citech.param.Settings;
  * Created by tretyak on 21.11.2017.
  */
 
-public class ControlAdapter {
+public class ControlAdapter implements IScanneble {
 
     private final static String TAG = "WSD_ControlAdapter";
 
@@ -66,5 +67,11 @@ public class ControlAdapter {
             mLeDeviceListAdapter.clear();
             mLeDeviceListAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void scanCallback(BluetoothDevice device, int rssi) {
+        if (mLeDeviceListAdapter != null)
+            mLeDeviceListAdapter.addDevice(device, rssi);
     }
 }
