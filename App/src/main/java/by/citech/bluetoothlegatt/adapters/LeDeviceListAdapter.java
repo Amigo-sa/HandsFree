@@ -42,9 +42,12 @@ public class LeDeviceListAdapter extends BaseAdapter {
     }
 
     public void addDevice(BluetoothDevice device, int rssi) {
-        if(!mLeDevices.contains(device)) {
+        if (!mLeDevices.contains(device)) {
             mLeDevices.add(device);
             mLeRssi.add(String.valueOf(rssi));
+            notifyDataSetChanged();
+        } else {
+            Log.e(TAG, "addDevice device already added");
         }
     }
 

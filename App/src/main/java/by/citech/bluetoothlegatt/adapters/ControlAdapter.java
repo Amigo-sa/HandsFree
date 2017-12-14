@@ -40,8 +40,10 @@ public class ControlAdapter {
         if (mLeDeviceListAdapter == null) {
             mLeDeviceListAdapter = mIBluetoothListener.addLeDeviceListAdapter();
             //if (Settings.debug) Log.i(TAG, "mLeDeviceListAdapter() = " + mLeDeviceListAdapter);
-        } else
+        } else {
+            Log.e(TAG, "initializeListBluetoothDevice adapter is null");
             clearAllDevicesFromList();
+        }
         if (Connected)
             addConnectDeviceToList();
     }

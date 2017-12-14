@@ -4,7 +4,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-public interface IGetViewById {
+public interface IGetView {
     @Nullable
-    <T extends View> T findViewById(@IdRes int id);
+    <T extends View> T getView(@IdRes int id);
 }

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -23,17 +24,39 @@ import by.citech.element.IElementAdd;
 import by.citech.element.IElementDel;
 import by.citech.element.IElementUpd;
 import by.citech.exchange.IMsgToUi;
+import by.citech.logic.Caller;
+import by.citech.logic.CallerState;
 import by.citech.logic.IBase;
+import by.citech.param.ISettings;
+import by.citech.param.OpMode;
 import by.citech.param.Settings;
 import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 import by.citech.threading.CraftedThreadPool;
 
 public class ContactEditorHelper
-        implements IBase, IContactsListener {
+        implements IBase, IContactsListener, ISettings {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.EDITOR_HELPER;
+
+    //--------------------- settings
+
+    private boolean isInitiated;
+
+    {
+        initiate();
+    }
+
+    @Override
+    public void initiate() {
+        contactToEditPosition = -1;
+        contactToDeletePosition = -1;
+        editorState = EditorState.Inactive;
+        isInitiated = true;
+    }
+
+    //--------------------- non-settings
 
     private Contact contactToEdit, contactToAdd;
     private int contactToEditPosition, contactToDeletePosition;
@@ -48,30 +71,63 @@ public class ContactEditorHelper
     private IMsgToUi iMsgToUi;
     private CraftedThreadPool threadPool;
 
-    public ContactEditorHelper(@NonNull ViewHelper viewHelper,
-                               @NonNull ContactsRecyclerAdapter.SwipeCrutch swipeCrutch,
-                               @NonNull ActiveContactHelper activeContactHelper,
-                               @NonNull IMsgToUi iMsgToUi,
-                               @NonNull CraftedThreadPool threadPool,
-                               @NonNull IElement<Contact> iContact,
-                               @NonNull ContactsRecyclerAdapter contactsAdapter) throws Exception {
-        if (viewHelper == null || swipeCrutch == null || activeContactHelper == null || iMsgToUi == null
-                || threadPool == null || iContact == null || contactsAdapter == null) {
-            throw new Exception(StatusMessages.ERR_PARAMETERS);
+    //--------------------- singleton
+
+    private static volatile ContactEditorHelper instance = null;
+
+    private ContactEditorHelper() {
+    }
+
+    public static ContactEditorHelper getInstance() {
+        if (instance == null) {
+            synchronized (ContactEditorHelper.class) {
+                if (instance == null) {
+                    instance = new ContactEditorHelper();
+                }
+            }
+        } else if (!instance.isInitiated) {
+            instance.initiate();
         }
-        this.viewHelper = viewHelper;
-        this.swipeCrutch = swipeCrutch;
-        this.activeContactHelper = activeContactHelper;
-        this.iMsgToUi = iMsgToUi;
-        this.threadPool = threadPool;
-        this.iContact = iContact;
-        this.contactsAdapter = contactsAdapter;
-        contactToEditPosition = -1;
-        contactToDeletePosition = -1;
-        editorState = EditorState.Inactive;
+        return instance;
     }
 
     //--------------------- getters and setters
+
+    public ContactEditorHelper setViewHelper(ViewHelper viewHelper) {
+        this.viewHelper = viewHelper;
+        return this;
+    }
+
+    public ContactEditorHelper setSwipeCrutch(ContactsRecyclerAdapter.SwipeCrutch swipeCrutch) {
+        this.swipeCrutch = swipeCrutch;
+        return this;
+    }
+
+    public ContactEditorHelper setActiveContactHelper(ActiveContactHelper activeContactHelper) {
+        this.activeContactHelper = activeContactHelper;
+        return this;
+    }
+
+    public ContactEditorHelper setiMsgToUi(IMsgToUi iMsgToUi) {
+        this.iMsgToUi = iMsgToUi;
+        return this;
+    }
+
+    public ContactEditorHelper setThreadPool(CraftedThreadPool threadPool) {
+        this.threadPool = threadPool;
+        return this;
+    }
+
+    public ContactEditorHelper setiContact(IElement<Contact> iContact) {
+        this.iContact = iContact;
+        return this;
+    }
+
+    public ContactEditorHelper setContactsAdapter(ContactsRecyclerAdapter contactsAdapter) {
+        this.contactsAdapter = contactsAdapter;
+        return this;
+    }
+
 
     public void setSwipedIn() {
         isSwipedIn = true;

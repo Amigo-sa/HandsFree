@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.List;
+
 import by.citech.R;
 import by.citech.contact.Contact;
 import by.citech.debug.IDebugListener;
@@ -23,7 +25,6 @@ import by.citech.param.Colors;
 import by.citech.param.ISettings;
 import by.citech.param.OpMode;
 import by.citech.param.Settings;
-import by.citech.param.StatusMessages;
 import by.citech.param.Tags;
 import by.citech.util.Contacts;
 
@@ -32,6 +33,9 @@ public class ViewHelper
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.VIEW_HELPER;
+
+    private static final int DARKCYAN = Colors.DARKCYAN;
+    private static final int DARKKHAKI = Colors.DARKKHAKI;
 
     //--------------------- debug
 
@@ -67,8 +71,9 @@ public class ViewHelper
     //--------------------- non-settings
 
     private final int objNumber;
+    private List<Runnable> list;
     private IGetViewGetter iGetGetter;
-    private IGetViewById iGetter;
+    private IGetView iGetter;
     private View scanView;
     private View mainView;
     private View viewContactEditor;
@@ -84,23 +89,45 @@ public class ViewHelper
     private Button btnGreen;
     private Button btnRed;
     private Button btnChangeDevice;
-    private ButtonHelper buttonHelper;
     private Animation animCall;
     private boolean isCallAnim;
     private boolean isInitiated;
 
-    public ViewHelper(@NonNull IGetViewGetter iGetGetter,
-                      @NonNull Context context) throws Exception {
-        if (debug) Log.i(TAG, "object count is " + objCount);
-        if (iGetGetter == null || context == null) {
-            throw new Exception(StatusMessages.ERR_PARAMETERS);
-        }
+    //--------------------- singleton
+
+    private static volatile ViewHelper instance = null;
+
+    private ViewHelper() {
         objNumber = objCount;
         if (debug) Log.w(TAG, "this object's number is " + objNumber);
-        this.iGetGetter = iGetGetter;
-        buttonHelper = ButtonHelper.getInstance();
-        animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
     }
+
+    public static ViewHelper getInstance() {
+        if (instance == null) {
+            synchronized (ViewHelper.class) {
+                if (instance == null) {
+                    instance = new ViewHelper();
+                }
+            }
+        } else if (!instance.isInitiated) {
+            instance.initiate();
+        }
+        return instance;
+    }
+
+    //--------------------- getters and setters
+
+    public ViewHelper setiGetGetter(IGetViewGetter iGetGetter) {
+        this.iGetGetter = iGetGetter;
+        return this;
+    }
+
+    public ViewHelper setContext(Context context) {
+        animCall = AnimationUtils.loadAnimation(context, R.anim.anim_call);
+        return this;
+    }
+
+    //--------------------- base
 
     @Override
     public void baseStart(IBaseAdder iBaseAdder) {
@@ -114,6 +141,7 @@ public class ViewHelper
         if (!isInitiated) {
             initiate();
         }
+//      takeViews();
         setDefaultView();
     }
 
@@ -135,7 +163,6 @@ public class ViewHelper
         btnGreen = null;
         btnRed = null;
         btnChangeDevice = null;
-        buttonHelper = null;
         animCall = null;
         iGetter = null;
         iGetGetter = null;
@@ -149,6 +176,8 @@ public class ViewHelper
             initiate();
             if (debug) Log.w(TAG, "setDefaultView opMode is " + opMode.getSettingName());
         }
+        getBtnChangeDevice().setText(R.string.connect_device);
+        getBtnChangeDevice().setBackgroundColor(DARKCYAN);
         switch (opMode) {
             case Bt2AudOut:
                 enableBtnCall(getBtnGreen(), "RECEIVING");
@@ -216,6 +245,16 @@ public class ViewHelper
         getScanView().setVisibility(View.VISIBLE);
     }
 
+    //--------------------- device connected/disconnected
+
+    public void setMainNoDevice() {
+        ButtonHelper.setColorLaber(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
+    }
+
+    public void setMainDeviceConnected() {
+        ButtonHelper.setColorLaber(getBtnChangeDevice(), R.string.change_device, DARKKHAKI);
+    }
+
     //--------------------- chosen
 
     public void showChosen() {
@@ -276,11 +315,11 @@ public class ViewHelper
     }
 
     public void setEditorButtonsFreeze() {
-        buttonHelper.freezeState(Tags.EDITOR_HELPER, getBtnDelContact(), getBtnSaveContact(), getBtnCancelContact());
+        ButtonHelper.getInstance().freezeState(Tags.EDITOR_HELPER, getBtnDelContact(), getBtnSaveContact(), getBtnCancelContact());
     }
 
     public void setEditorButtonsRelease() {
-        buttonHelper.releaseState(Tags.EDITOR_HELPER);
+        ButtonHelper.getInstance().releaseState(Tags.EDITOR_HELPER);
     }
 
     public void setEditorFieldChanged() {
@@ -521,15 +560,15 @@ public class ViewHelper
 
     private <T extends View> T getView(T t, @IdRes int id) {
         if (t == null) {
-            Log.e(TAG, "getView view is null, get");
+            if (debug) Log.w(TAG, "getView view is null, get");
             t = getViewFromGetter(getGetter(iGetGetter), id);
         }
         return t;
     }
 
-    private IGetViewById getGetter(IGetViewGetter iGetGetter) {
+    private IGetView getGetter(IGetViewGetter iGetGetter) {
         if (iGetter == null) {
-            Log.e(TAG, "getGetter iGetter is null, get");
+            if (debug) Log.w(TAG, "getGetter iGetter is null, get");
             if (iGetGetter == null) {
                 Log.e(TAG, "getGetter iGetGetter is null, return");
             } else {
@@ -542,12 +581,12 @@ public class ViewHelper
         return iGetter;
     }
 
-    private <T extends View> T getViewFromGetter(IGetViewById iGetter, @IdRes int id) {
+    private <T extends View> T getViewFromGetter(IGetView iGetter, @IdRes int id) {
         T t = null;
         if (iGetter != null) {
-            t = iGetter.findViewById(id);
+            t = iGetter.getView(id);
             if (t == null) {
-                Log.e(TAG, "getViewFromGetter view is still null, return");
+                if (debug) Log.w(TAG, "getViewFromGetter view is still null, return");
             } else {
                 if (debug) Log.i(TAG, "getViewFromGetter view is " + t);
             }
@@ -555,6 +594,25 @@ public class ViewHelper
             Log.e(TAG, "getViewFromGetter iGetter is null, return");
         }
         return t;
+    }
+
+    private void takeViews() {
+        if (debug) Log.w(TAG, "takeViews");
+        getBtnChangeDevice();
+        getBtnCancelContact();
+        getBtnSaveContact();
+        getBtnDelContact();
+        getBtnGreen();
+        getBtnRed();
+        getTextViewContactChosenIp();
+        getTextViewContactChosenName();
+        getViewContactChosen();
+        getViewContactEditor();
+        getEditTextContactIp();
+        getEditTextContactName();
+        getEditTextSearch();
+        getMainView();
+        getScanView();
     }
 
     //--------------------- view getters

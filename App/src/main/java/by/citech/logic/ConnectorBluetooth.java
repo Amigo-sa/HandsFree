@@ -73,8 +73,6 @@ public class ConnectorBluetooth
     // BLE устройство, с которым будем соединяться
     private BluetoothDevice mBTDevice;
     private BluetoothDevice mBTDeviceConn;
-    // Класс BluetoothAdapter для связи софта с реальным железом BLE
-    private BluetoothAdapter mBluetoothAdapter;
     // сканер имеющихся по близости BLE устройств
     private LeScanner leScanner;
     // хранилища данных
@@ -170,7 +168,6 @@ private volatile BluetoothLeState BLEState;
         controlAdapter = new ControlAdapter(mIBluetoothListener);
         leScanner = new LeScanner(
                 mHandler,
-                mBluetoothAdapter,
                 mIBluetoothListener,
                 controlAdapter);
         leBroadcastReceiver = new LeBroadcastReceiver(this);
@@ -286,17 +283,6 @@ private volatile BluetoothLeState BLEState;
      ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
         return this;
-    }
-
-    //---------------------------------Bluetooth -----------------------------
-    public boolean getBluetoothAdapter(BluetoothManager bluetoothManager) {
-        if (Settings.debug) Log.i(TAG, "getBluetoothAdapter()");
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        return !(mBluetoothAdapter == null);
-    }
-
-    public BluetoothAdapter getBTAdapter(){
-        return mBluetoothAdapter;
     }
 
     //------------------ inittialization List-------------------------

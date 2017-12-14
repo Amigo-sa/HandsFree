@@ -26,29 +26,37 @@ public class LeScanner {
     private Handler mHandler;
     private boolean mScanning;
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
-    private BluetoothAdapter mBluetoothAdapter;
     private IBluetoothListener mIBluetoothListener;
     private ControlAdapter controlAdapter;
+    private BluetoothAdapter bluetoothAdapter;
 
     public LeScanner(Handler mHandler,
-                     BluetoothAdapter mBluetoothAdapter,
                      IBluetoothListener mIBluetoothListener,
                      ControlAdapter controlAdapter) {
         this.mHandler = mHandler;
-        this.mBluetoothAdapter = mBluetoothAdapter;
         this.mIBluetoothListener = mIBluetoothListener;
         this.controlAdapter = controlAdapter;
+    }
+
+    //--------------------- getters and setters
+
+    private BluetoothAdapter getBluetoothAdapter() {
+        if (bluetoothAdapter == null) {
+            if (Settings.debug) Log.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
+            bluetoothAdapter = mIBluetoothListener.getBluetoothManager().getAdapter();
+        }
+        return bluetoothAdapter;
     }
 
     public boolean isScanning() {
         return mScanning;
     }
 
-    public void startScanBluetoothDevice(){
+    public void startScanBluetoothDevice() {
         scanLeDevice(true);
     }
 
-    public void stopScanBluetoothDevice(){
+    public void stopScanBluetoothDevice() {
         scanLeDevice(false);
     }
 
@@ -60,18 +68,18 @@ public class LeScanner {
             mHandler.postDelayed(() -> {
                 if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
                 mScanning = false;
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                getBluetoothAdapter().stopLeScan(mLeScanCallback);
                 mIBluetoothListener.changeOptionMenu();
 
             }, SCAN_PERIOD);
 
             mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            getBluetoothAdapter().startLeScan(mLeScanCallback);
             //mBluetoothAdapter.getBluetoothLeScanner().startScan(mScanCallback); TODO: заменить deprecated  сканирование
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            getBluetoothAdapter().stopLeScan(mLeScanCallback);
         }
         mIBluetoothListener.changeOptionMenu();
     }
@@ -97,11 +105,9 @@ public class LeScanner {
 //        }
 //    };
 
-
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
-
                 @Override
                 public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
                     //if (Settings.debug) Log.i(TAG, "onLeScan()");
@@ -111,4 +117,5 @@ public class LeScanner {
 
                 }
             };
+
 }

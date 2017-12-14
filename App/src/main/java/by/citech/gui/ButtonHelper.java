@@ -72,6 +72,15 @@ public class ButtonHelper {
         button.setBackgroundColor(color);
     }
 
+    public static void setColorLaber(Button button, int resId, int color) {
+        if (button == null) {
+            Log.e(TAG, "setColorLabel" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
+        button.setText(resId);
+        button.setBackgroundColor(color);
+    }
+
     public static void setColorLabel(Button button, String label, int color) {
         if (button == null) {
             Log.e(TAG, "setColorLabel" + StatusMessages.ERR_PARAMETERS);
