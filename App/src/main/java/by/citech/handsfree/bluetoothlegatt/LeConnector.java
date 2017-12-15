@@ -43,8 +43,6 @@ public class LeConnector {
         if (Settings.debug) Log.i(TAG,"onConnectBTDevice()");
         // получаем данные от присоединяемого устройсва
         mDeviceAddress = mBTDevice.getAddress();
-        // останавливаем сканирование
-        leScanner.stopScanBluetoothDevice();
         // если сервис привязан производим соединение
         if (mBluetoothLeService != null)
             mBluetoothLeService.connect(mDeviceAddress);

@@ -124,7 +124,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
         }
 
         if (mLeRssi.get(i).equals("200")) {
-            if (Settings.debug) Log.i(TAG, "Set Icon to List");
+            //if (Settings.debug) Log.i(TAG, "Set Icon to List");
             viewHolder.checkIcon.setVisibility(View.VISIBLE);
         }
         else

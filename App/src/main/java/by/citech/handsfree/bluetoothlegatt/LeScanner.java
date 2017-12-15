@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.util.Log;
 
+import by.citech.handsfree.gui.IbtToUiListener;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.param.Settings;
 
@@ -12,7 +13,7 @@ import by.citech.handsfree.param.Settings;
  * Created by tretyak on 21.11.2017.
  */
 
-public class LeScanner {
+public class LeScanner implements IbtToUiListener {
 
     private final static String TAG = "WSD_LeScanner";
     private static final long SCAN_PERIOD = 10000;
@@ -20,15 +21,15 @@ public class LeScanner {
     private boolean mScanning;
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
     private IBluetoothListener mIBluetoothListener;
-    private IScanneble iScanneble;
+    private IScannListener iScannListener;
     private BluetoothAdapter bluetoothAdapter;
 
     public LeScanner(Handler mHandler,
                      IBluetoothListener mIBluetoothListener,
-                     IScanneble iScanneble) {
+                     IScannListener iScannListener) {
         this.mHandler = mHandler;
         this.mIBluetoothListener = mIBluetoothListener;
-        this.iScanneble = iScanneble;
+        this.iScannListener = iScannListener;
     }
 
     //--------------------- getters and setters
@@ -104,8 +105,12 @@ public class LeScanner {
                 @Override
                 public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
                     //if (Settings.debug) Log.i(TAG, "onLeScan()");
-                    iScanneble.scanCallback(device, rssi);
+                    iScannListener.scanCallback(device, rssi);
                 }
             };
 
+    @Override
+    public boolean menuChangeCondition() {
+        return mScanning;
+    }
 }

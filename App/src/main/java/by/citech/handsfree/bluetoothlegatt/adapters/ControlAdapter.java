@@ -3,7 +3,7 @@ package by.citech.handsfree.bluetoothlegatt.adapters;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import by.citech.handsfree.bluetoothlegatt.IScanneble;
+import by.citech.handsfree.bluetoothlegatt.IScannListener;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.param.Settings;
 
@@ -11,14 +11,32 @@ import by.citech.handsfree.param.Settings;
  * Created by tretyak on 21.11.2017.
  */
 
-public class ControlAdapter implements IScanneble {
+public class ControlAdapter implements IScannListener {
 
-    private final static String TAG = "WSD_ControlAdapter";
+//    private final static String TAG = "WSD_ControlAdapter";
+    private final String TAG;
 
     private LeDeviceListAdapter mLeDeviceListAdapter;
-    private boolean Connected = false;
-    private BluetoothDevice mBTDevice;
+    private boolean Connected;
+    private volatile BluetoothDevice mBTDevice;
     private IBluetoothListener mIBluetoothListener;
+
+    //--------------------- TEST
+
+    private static int objCount;
+    private final int objNumber;
+
+    static {
+        objCount = 0;
+    }
+
+    {
+        objCount++;
+        objNumber = objCount;
+        TAG = "WSD_ControlAdapter " + objNumber;
+    }
+
+    //--------------------- TEST
 
     public ControlAdapter(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
@@ -34,6 +52,15 @@ public class ControlAdapter implements IScanneble {
 
     public void setBTDevice(BluetoothDevice mBTDevice) {
         this.mBTDevice = mBTDevice;
+        if (Settings.debug) Log.w(TAG, "set mBTDevice 1 to " + this.mBTDevice );
+        if (mBTDevice == null) {
+            if (Settings.debug) Log.w(TAG, "set mBTDevice 2 to " + mBTDevice );
+            this.mBTDevice = null;
+            if (this.mBTDevice != null) {
+                this.mBTDevice = null;
+                if (Settings.debug) Log.w(TAG, "set mBTDevice 3 is " + this.mBTDevice );
+            }
+        }
     }
 
     public void initializeListBluetoothDevice() {
@@ -45,8 +72,9 @@ public class ControlAdapter implements IScanneble {
             Log.e(TAG, "initializeListBluetoothDevice adapter is null");
             clearAllDevicesFromList();
         }
-        if (Connected)
+        if (Connected) {
             addConnectDeviceToList();
+        }
     }
 
     public void addConnectDeviceToList(){

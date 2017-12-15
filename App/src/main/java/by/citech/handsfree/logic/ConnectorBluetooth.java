@@ -57,6 +57,8 @@ import by.citech.handsfree.debug.IDebugListener;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.gui.ICallUiExchangeListener;
+import by.citech.handsfree.gui.IbtToUiListener;
+import by.citech.handsfree.gui.UiBtListener;
 import by.citech.handsfree.param.Settings;
 
 public class ConnectorBluetooth
@@ -248,6 +250,14 @@ private volatile BluetoothLeState BLEState;
         return controlAdapter.getLeDeviceListAdapter();
     }
 
+    public UiBtListener getUiBtListener() {
+        return BleUi.getInstance();
+    }
+
+    public IbtToUiListener getIbtToUiListener(){
+        return leScanner;
+    }
+
      ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
         return this;
@@ -308,6 +318,7 @@ private volatile BluetoothLeState BLEState;
         //------------------- Отображение характеристик устройства -----------------------
         characteristicDisplayOn = new CharacteristicsDisplayOnCommand(characteristics, mBluetoothLeService);
 
+        bleController.setCommand(scanOff).execute();
         if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
         if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + mBTDeviceConn);
         if (mBTDevice.equals(mBTDeviceConn)) {
@@ -342,7 +353,7 @@ private volatile BluetoothLeState BLEState;
 
     @Override
     public void actionDisconnected() {
-
+        if (Settings.debug) Log.i(TAG, "actionDisconnected()");
         if (BLEState != BluetoothLeState.DISCONECTED) {
             mBTDeviceConn = null;
 
@@ -353,14 +364,13 @@ private volatile BluetoothLeState BLEState;
 
             bleController.setCommand(disconnDialogInfoOn).execute();
             bleController.setCommand(disconnDialogInfoOn).undo();
-            bleController.setCommand(buttonViewColorChangeOff)
-                    .setCommand(clrConnDeviceFromAdapter)
+            bleController.setCommand(clrConnDeviceFromAdapter)
+                    .setCommand(buttonViewColorChangeOff)
                     .setCommand(clearList)
                     .setCommand(scanOn)
                     .execute();
-
-            setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
+        setBLEState(BLEState, BluetoothLeState.DISCONECTED);
     }
 
     @Override
@@ -410,8 +420,10 @@ private volatile BluetoothLeState BLEState;
             }
             // Automatically connects to the device upon successful start-up initialization.
             if (mBluetoothLeService != null && leBroadcastReceiver != null && leConnector != null && leDataTransmitter != null) {
-                if (mBTDevice != null)
+                if (mBTDevice != null) {
                     mBluetoothLeService.connect(mBTDevice.getAddress());
+                    addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
+                }
                 leConnector.setBluetoothLeService(mBluetoothLeService);
                 leDataTransmitter.setBluetoothLeService(mBluetoothLeService);
             }
@@ -446,6 +458,12 @@ private volatile BluetoothLeState BLEState;
                      .setCommand(closeService)
                      .execute();
 
+        bleController = null;
+        characteristics = null;
+        controlAdapter = null;
+        leScanner = null;
+        leConnector = null;
+        leDataTransmitter = null;
     }
 
     //---------------------------- blecontroller states ------------------------------
