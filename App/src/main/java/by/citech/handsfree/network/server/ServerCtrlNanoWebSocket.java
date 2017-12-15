@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.network.server.connection.protocols.http.IHTTPSession;
 import by.citech.handsfree.network.server.connection.websockets.CloseCode;
 import by.citech.handsfree.network.server.connection.websockets.NanoWSD;

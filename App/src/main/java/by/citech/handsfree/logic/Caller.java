@@ -16,17 +16,17 @@ import by.citech.handsfree.debug.AudIn2AudOutLooper;
 import by.citech.handsfree.debug.AudIn2BtLooper;
 import by.citech.handsfree.debug.IDebugListener;
 import by.citech.handsfree.exchange.IMsgToUi;
-import by.citech.handsfree.gui.ICallUiListener;
-import by.citech.handsfree.gui.IUiBtnGreenRedListener;
-import by.citech.handsfree.network.INetInfoListener;
+import by.citech.handsfree.gui.ICallToUiListener;
+import by.citech.handsfree.gui.IUiToCallListener;
+import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.network.INetListener;
-import by.citech.handsfree.param.ISettings;
-import by.citech.handsfree.param.OpMode;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.ISettingsCtrl;
+import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Caller
-        implements IBase, ISettings, IBaseAdder {
+        implements IBase, ISettingsCtrl, IBaseAdder {
 
     private final String TAG = Tags.CALLER;
     private final boolean debug = Settings.debug;
@@ -37,11 +37,11 @@ public class Caller
     private OpMode opMode;
 
     {
-        initiate();
+        initSettings();
     }
 
     @Override
-    public void initiate() {
+    public void initSettings() {
         callerState = CallerState.Null;
         iBaseList = new ArrayList<>();
         takeSettings();
@@ -56,9 +56,9 @@ public class Caller
     //--------------------- non-settings
 
     private volatile CallerState callerState;
-    private ICallUiListener iCallUiListener;
+    private ICallToUiListener iCallToUiListener;
     private ICallNetListener iCallNetListener;
-    private INetInfoListener iNetInfoListener;
+    private INetInfoGetter iNetInfoGetter;
     private IBluetoothListener iBluetoothListener;
     private IDebugListener iDebugListener;
     private List<IBase> iBaseList;
@@ -82,14 +82,14 @@ public class Caller
                 }
             }
         } else if (!instance.isInitiated) {
-            instance.initiate();
+            instance.initSettings();
         }
         return instance;
     }
 
     //--------------------- getters and setters
 
-    public IUiBtnGreenRedListener getiUiBtnGreenRedListener() {
+    public IUiToCallListener getiUiBtnGreenRedListener() {
         return CallUi.getInstance();
     }
 
@@ -97,8 +97,8 @@ public class Caller
         return ConnectorNet.getInstance();
     }
 
-    public Caller setiCallUiListener(ICallUiListener listener) {
-        iCallUiListener = listener;
+    public Caller setiCallToUiListener(ICallToUiListener listener) {
+        iCallToUiListener = listener;
         return this;
     }
 
@@ -107,8 +107,8 @@ public class Caller
         return this;
     }
 
-    public Caller setiNetInfoListener(INetInfoListener listener) {
-        iNetInfoListener = listener;
+    public Caller setiNetInfoGetter(INetInfoGetter listener) {
+        iNetInfoGetter = listener;
         return this;
     }
 
@@ -175,9 +175,9 @@ public class Caller
     public void baseStart(IBaseAdder iBaseAdder) {
         if (debug) Log.i(TAG, "baseStart");
         if (!isInitiated) {
-            initiate();
+            initSettings();
         }
-        if (iCallUiListener == null || iBaseAdder == null) {
+        if (iCallToUiListener == null || iBaseAdder == null) {
             if (debug) Log.e(TAG, "baseStart illegal parameters");
             return;
         } else {
@@ -221,9 +221,9 @@ public class Caller
             iBaseList.clear();
             iBaseList = null;
         }
-        iCallUiListener = null;
+        iCallToUiListener = null;
         iCallNetListener = null;
-        iNetInfoListener = null;
+        iNetInfoGetter = null;
         iBluetoothListener = null;
         iDebugListener = null;
         opMode = null;
@@ -265,7 +265,7 @@ public class Caller
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(audIn2BtLooper)
                 .addiDebugListener(connectorBluetooth)
-                .addiCallUiListener(iCallUiListener);
+                .addiCallUiListener(iCallToUiListener);
 
         callUi.baseStart(this);
         connectorBluetooth.baseStart(this);
@@ -301,7 +301,7 @@ public class Caller
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(bt2AudOutLooper)
                 .addiDebugListener(connectorBluetooth)
-                .addiCallUiListener(iCallUiListener);
+                .addiCallUiListener(iCallToUiListener);
 
         callUi.baseStart(this);
         connectorBluetooth.baseStart(this);
@@ -322,7 +322,7 @@ public class Caller
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(audIn2AudOutLooper)
-                .addiCallUiListener(iCallUiListener);
+                .addiCallUiListener(iCallToUiListener);
 
         callUi.baseStart(this);
         audIn2AudOutLooper.baseStart(this);
@@ -361,7 +361,7 @@ public class Caller
                 .addiDebugListener(bt2BtLooper)
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(connectorBluetooth)
-                .addiCallUiListener(iCallUiListener)
+                .addiCallUiListener(iCallToUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
         callUi.baseStart(this);
@@ -402,7 +402,7 @@ public class Caller
                 .addiDebugListener(bt2BtRecorder)
                 .addiDebugListener(iDebugListener)
                 .addiDebugListener(connectorBluetooth)
-                .addiCallUiListener(iCallUiListener)
+                .addiCallUiListener(iCallToUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
         callUi.baseStart(this);
@@ -425,7 +425,7 @@ public class Caller
     private void buildNormal() {
         if (debug) Log.i(TAG, "buildNormal");
         if (iCallNetListener == null
-                || iNetInfoListener == null
+                || iNetInfoGetter == null
                 || iBluetoothListener == null
                 || iService == null
                 || iReceive == null
@@ -454,11 +454,11 @@ public class Caller
                 .setStorageFromNet(storageNetToBt)
                 .addiCallNetworkListener(iCallNetListener)
                 .addiCallNetworkExchangeListener(connectorBluetooth)
-                .setiNetInfoListener(iNetInfoListener)
+                .setiNetInfoGetter(iNetInfoGetter)
                 .setHandler(handlerExtended);
 
         CallUi callUi = CallUi.getInstance()
-                .addiCallUiListener(iCallUiListener)
+                .addiCallUiListener(iCallToUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth)
                 .addiCallUiListener(connectorNet);
 

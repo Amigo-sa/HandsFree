@@ -5,7 +5,7 @@ import android.util.Log;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.logic.IBase;
 import by.citech.handsfree.logic.IBaseAdder;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2BtLooper

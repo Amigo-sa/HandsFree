@@ -12,13 +12,13 @@ import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.logic.IBase;
 import by.citech.handsfree.logic.IBaseAdder;
-import by.citech.handsfree.param.ISettings;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.ISettingsCtrl;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 
 public class Contactor
-        implements IElement<Contact>, IBase, ISettings {
+        implements IElement<Contact>, IBase, ISettingsCtrl {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.CONTACTOR;
@@ -26,11 +26,11 @@ public class Contactor
     //--------------------- settings
 
     {
-        initiate();
+        initSettings();
     }
 
     @Override
-    public void initiate() {
+    public void initSettings() {
         contacts = Collections.synchronizedList(new ArrayList<>());
         memCtrl = new ElementsMemCtrl<>(contacts);
         isInitiated = true;
@@ -62,7 +62,7 @@ public class Contactor
                 }
             }
         } else if (!instance.isInitiated) {
-            instance.initiate();
+            instance.initSettings();
         }
         return instance;
     }
@@ -95,7 +95,7 @@ public class Contactor
     public void baseStart(IBaseAdder iBaseAdder) {
         if (debug) Log.i(TAG, "baseStart");
         if (!isInitiated) {
-            initiate();
+            initSettings();
         }
         if (iBaseAdder == null) {
             Log.e(TAG, "baseStart iBaseAdder is null");

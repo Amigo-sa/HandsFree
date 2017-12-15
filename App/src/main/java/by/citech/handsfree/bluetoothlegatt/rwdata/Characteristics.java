@@ -10,7 +10,7 @@ import java.util.List;
 
 import by.citech.handsfree.data.SampleGattAttributes;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 16.11.2017.

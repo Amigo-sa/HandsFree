@@ -5,7 +5,7 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class ToNet

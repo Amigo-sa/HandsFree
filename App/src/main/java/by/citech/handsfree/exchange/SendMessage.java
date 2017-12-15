@@ -3,7 +3,7 @@ package by.citech.handsfree.exchange;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 

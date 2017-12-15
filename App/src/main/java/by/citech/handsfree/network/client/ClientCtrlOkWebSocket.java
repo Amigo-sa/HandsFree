@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -73,7 +73,7 @@ public class ClientCtrlOkWebSocket
         OkHttpClient client = new OkHttpClient.Builder()
                 .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
-                .retryOnConnectionFailure(Settings.reconnect)
+                .retryOnConnectionFailure(Settings.reconnectOnFail)
                 .build();
         Request request = new Request.Builder()
 //              .url("ws://echo.network.org")

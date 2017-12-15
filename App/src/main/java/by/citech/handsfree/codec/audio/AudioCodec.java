@@ -2,8 +2,9 @@ package by.citech.handsfree.codec.audio;
 
 import android.util.Log;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.settings.enumeration.AudioCodecType;
 
 public class AudioCodec implements ICodec {
 

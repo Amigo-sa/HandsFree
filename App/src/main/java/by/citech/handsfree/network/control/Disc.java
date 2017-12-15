@@ -2,7 +2,7 @@ package by.citech.handsfree.network.control;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Disc

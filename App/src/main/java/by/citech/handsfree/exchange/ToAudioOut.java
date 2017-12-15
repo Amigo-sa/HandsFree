@@ -6,7 +6,7 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.util.Log;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class ToAudioOut

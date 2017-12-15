@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class RedirectToNet

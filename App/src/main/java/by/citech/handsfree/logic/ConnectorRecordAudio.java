@@ -6,7 +6,7 @@ import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.FromAudioIn;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class ConnectorRecordAudio

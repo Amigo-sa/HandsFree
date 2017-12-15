@@ -3,14 +3,14 @@ package by.citech.handsfree.debug;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.AudioCodec;
-import by.citech.handsfree.codec.audio.AudioCodecType;
+import by.citech.handsfree.settings.enumeration.AudioCodecType;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ToAudioOut;
 import by.citech.handsfree.logic.IBase;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2AudOutLooper

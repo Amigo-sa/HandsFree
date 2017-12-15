@@ -1,13 +1,13 @@
 package by.citech.handsfree.logic;
 
-import by.citech.handsfree.gui.UiBtListener;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.gui.IUiToBtListener;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 15.12.2017.
  */
 
-public class BleUi implements UiBtListener{
+public class BleUi implements IUiToBtListener {
 
     private static final String TAG = "WSD_BleUi";
     private static final boolean debug = Settings.debug;

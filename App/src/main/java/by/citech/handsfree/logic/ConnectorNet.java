@@ -9,8 +9,8 @@ import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.RedirectFromNet;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
-import by.citech.handsfree.gui.ICallUiListener;
-import by.citech.handsfree.network.INetInfoListener;
+import by.citech.handsfree.gui.ICallToUiListener;
+import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.network.client.ClientConn;
 import by.citech.handsfree.network.client.IClientCtrl;
@@ -29,7 +29,7 @@ import by.citech.handsfree.network.server.IServerCtrl;
 import by.citech.handsfree.network.server.IServerCtrlReg;
 import by.citech.handsfree.network.server.IServerOff;
 import by.citech.handsfree.param.Messages;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.util.InetAddress;
 
@@ -37,7 +37,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg,
-        IMessage, IServerOff, IDisc, INetListener, ICallUiListener, IBase {
+        IMessage, IServerOff, IDisc, INetListener, ICallToUiListener, IBase {
 
     private static final String TAG = Tags.NET_CONNECTOR;
     private static final boolean debug = Settings.debug;
@@ -48,7 +48,7 @@ public class ConnectorNet
     private ITransmitterCtrl iTransmitterCtrl;
     private IConnCtrl iConnCtrl;
     private Handler handler;
-    private INetInfoListener iNetInfoListener;
+    private INetInfoGetter iNetInfoGetter;
     private ArrayList<ICallNetListener> iCallNetListeners;
     private ArrayList<ICallNetExchangeListener> iCallNetExchangeListeners;
     private StorageData<byte[]> storageBtToNet;
@@ -81,8 +81,8 @@ public class ConnectorNet
         return this;
     }
 
-    public ConnectorNet setiNetInfoListener(INetInfoListener iNetInfoListener) {
-        this.iNetInfoListener = iNetInfoListener;
+    public ConnectorNet setiNetInfoGetter(INetInfoGetter iNetInfoGetter) {
+        this.iNetInfoGetter = iNetInfoGetter;
         return this;
     }
 
@@ -122,7 +122,7 @@ public class ConnectorNet
         } else {
             iBaseAdder.addBase(this);
         }
-        new ServerOn(this, handler).execute(iNetInfoListener.getLocPort());
+        new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class ConnectorNet
         return Caller.getInstance().getCallerState();
     }
 
-    //--------------------- ICallUiListener
+    //--------------------- ICallToUiListener
 
     @Override
     public void callEndedInternally() {
@@ -335,8 +335,8 @@ public class ConnectorNet
 
     private boolean isValidIp() {
         if (debug) Log.i(TAG, "isValidIp");
-        String remAddr = iNetInfoListener.getRemAddr();
-        return !(remAddr.matches(getIpAddr(Settings.ipv4))
+        String remAddr = iNetInfoGetter.getRemAddr();
+        return !(remAddr.matches(getIpAddr(Settings.isIpv4Used))
                 || remAddr.matches("127.0.0.1")
                 || !InetAddress.checkForValidityIpAddress(remAddr));
     }
@@ -344,8 +344,8 @@ public class ConnectorNet
     private void connect() {
         if (debug) Log.i(TAG, "connect");
         new ClientConn(this, handler).execute(String.format("ws://%s:%s",
-                iNetInfoListener.getRemAddr(),
-                iNetInfoListener.getRemPort()));
+                iNetInfoGetter.getRemAddr(),
+                iNetInfoGetter.getRemPort()));
     }
 
     private void disconnect(IConnCtrl iConnCtrl) {

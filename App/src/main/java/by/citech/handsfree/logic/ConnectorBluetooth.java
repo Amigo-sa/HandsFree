@@ -55,13 +55,13 @@ import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.IDebugListener;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.gui.ICallUiExchangeListener;
-import by.citech.handsfree.gui.IbtToUiListener;
-import by.citech.handsfree.gui.UiBtListener;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.gui.ICallToUiExchangeListener;
+import by.citech.handsfree.gui.IBtToUiListener;
+import by.citech.handsfree.gui.IUiToBtListener;
+import by.citech.handsfree.settings.Settings;
 
 public class ConnectorBluetooth
-        implements ICallNetExchangeListener, ICallUiExchangeListener, IDebugListener, StorageListener, ConnectAction , IBase{
+        implements ICallNetExchangeListener, ICallToUiExchangeListener, IDebugListener, StorageListener, ConnectAction , IBase{
 
     private final static String TAG = "WSD_ConnectorBluetooth";
 
@@ -242,11 +242,11 @@ private volatile BluetoothLeState BLEState;
         return controlAdapter.getLeDeviceListAdapter();
     }
 
-    public UiBtListener getUiBtListener() {
+    public IUiToBtListener getUiBtListener() {
         return BleUi.getInstance();
     }
 
-    public IbtToUiListener getIbtToUiListener(){
+    public IBtToUiListener getIbtToUiListener(){
         return leScanner;
     }
 

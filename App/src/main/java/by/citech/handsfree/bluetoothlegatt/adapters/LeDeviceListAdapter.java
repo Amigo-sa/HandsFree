@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import by.citech.handsfree.R;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 26.10.2017.

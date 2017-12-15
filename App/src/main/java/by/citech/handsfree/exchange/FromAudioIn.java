@@ -5,7 +5,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class FromAudioIn

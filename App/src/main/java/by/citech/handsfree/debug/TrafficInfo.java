@@ -1,6 +1,6 @@
 package by.citech.handsfree.debug;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class TrafficInfo {

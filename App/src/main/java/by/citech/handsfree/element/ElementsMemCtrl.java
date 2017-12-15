@@ -5,9 +5,9 @@ import android.util.Log;
 import java.util.Collections;
 import java.util.List;
 
-import by.citech.handsfree.contact.ICopy;
-import by.citech.handsfree.contact.IIdentifier;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.common.ICopy;
+import by.citech.handsfree.common.IIdentifier;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> {

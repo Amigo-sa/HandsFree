@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 21.11.2017.

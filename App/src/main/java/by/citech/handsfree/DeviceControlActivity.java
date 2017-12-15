@@ -49,34 +49,34 @@ import by.citech.handsfree.bluetoothlegatt.IReceive;
 import by.citech.handsfree.bluetoothlegatt.IVisible;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
-import by.citech.handsfree.contact.ActiveContactState;
+import by.citech.handsfree.gui.helper.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
 import by.citech.handsfree.contact.ContactsRecyclerAdapter;
-import by.citech.handsfree.contact.EditorState;
+import by.citech.handsfree.gui.helper.state.EditorState;
 import by.citech.handsfree.dialog.DialogProcessor;
 import by.citech.handsfree.dialog.DialogState;
 import by.citech.handsfree.dialog.DialogType;
 import by.citech.handsfree.exchange.IMsgToUi;
-import by.citech.handsfree.gui.ActiveContactHelper;
-import by.citech.handsfree.gui.ChosenContactHelper;
-import by.citech.handsfree.gui.ContactEditorHelper;
+import by.citech.handsfree.gui.helper.ActiveContactHelper;
+import by.citech.handsfree.gui.helper.ChosenContactHelper;
+import by.citech.handsfree.gui.helper.ContactEditorHelper;
 import by.citech.handsfree.gui.IGetView;
 import by.citech.handsfree.gui.IGetViewGetter;
-import by.citech.handsfree.gui.IbtToUiListener;
-import by.citech.handsfree.gui.UiBtListener;
-import by.citech.handsfree.gui.ViewHelper;
+import by.citech.handsfree.gui.IBtToUiListener;
+import by.citech.handsfree.gui.IUiToBtListener;
+import by.citech.handsfree.gui.helper.ViewHelper;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBase;
 import by.citech.handsfree.logic.IBaseAdder;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.gui.IUiBtnGreenRedListener;
-import by.citech.handsfree.network.INetInfoListener;
+import by.citech.handsfree.gui.IUiToCallListener;
+import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.param.Colors;
-import by.citech.handsfree.param.OpMode;
-import by.citech.handsfree.param.PreferencesProcessor;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.PreferencesProcessor;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.threading.CraftedThreadPool;
 import by.citech.handsfree.util.Keyboard;
@@ -85,7 +85,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoListener, IBluetoothListener, LocationListener, IGetView,
+        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
         IMsgToUi, IBaseAdder, IReceive, IService, IVisible, IGetViewGetter {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
@@ -110,7 +110,7 @@ public class DeviceControlActivity
     private Intent gattServiceIntent;
 
     // основная логика
-    private IUiBtnGreenRedListener iUiBtnGreenRedListener;
+    private IUiToCallListener iUiToCallListener;
 
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
@@ -128,8 +128,8 @@ public class DeviceControlActivity
     private String provider;
     private List<IBase> iBaseList;
     // интерфейсы для работы gui с bt
-    private UiBtListener uiBtListener;
-    private IbtToUiListener ibtToUiListener;
+    private IUiToBtListener IUiToBtListener;
+    private IBtToUiListener IBtToUiListener;
 
 
 
@@ -162,8 +162,8 @@ public class DeviceControlActivity
         findViewById(R.id.btnDelContact).setOnClickListener((v) -> clickBtnDelContact());
         findViewById(R.id.btnSaveContact).setOnClickListener((v) -> clickBtnSaveContact());
         findViewById(R.id.btnCancelContact).setOnClickListener((v) -> clickBtnCancelContact());
-        findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnGreen());
-        findViewById(R.id.btnRed).setOnClickListener((v) -> iUiBtnGreenRedListener.onClickBtnRed());
+        findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiToCallListener.onClickBtnGreen());
+        findViewById(R.id.btnRed).setOnClickListener((v) -> iUiToCallListener.onClickBtnRed());
     }
 
     @Override
@@ -197,18 +197,18 @@ public class DeviceControlActivity
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
 
         Caller.getInstance()
-                .setiCallUiListener(viewHelper)
+                .setiCallToUiListener(viewHelper)
                 .setiDebugListener(viewHelper)
                 .setiCallNetListener(viewHelper)
-                .setiNetInfoListener(this)
+                .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiReceive(this)
                 .setiService(this)
                 .setiVisible(this)
                 .setiMsgToUi(this);
 
-        iUiBtnGreenRedListener = Caller.getInstance().getiUiBtnGreenRedListener();
-        uiBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
+        iUiToCallListener = Caller.getInstance().getiUiBtnGreenRedListener();
+        IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
 
         dialogProcessor = new DialogProcessor(this);
         threadPool = new CraftedThreadPool(Settings.threadNumber);
@@ -226,7 +226,7 @@ public class DeviceControlActivity
         Contactor.getInstance().baseStart(this);
         threadPool.addRunnable(() -> Contactor.getInstance().getAllContacts());
         Caller.getInstance().baseStart(this);
-        ibtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
+        IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
     //-------------------------- base
@@ -297,7 +297,7 @@ public class DeviceControlActivity
     private void onCreateScanMenu(Menu menu){
         if (debug) Log.i(TAG, "onCreateScanMenu()");
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        if (!ibtToUiListener.menuChangeCondition()) {
+        if (!IBtToUiListener.menuChangeCondition()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
             menu.findItem(R.id.menu_scan).setVisible(true);
             actionBar.setCustomView(null);
@@ -312,10 +312,10 @@ public class DeviceControlActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                uiBtListener.scanItemSelectedListener();
+                IUiToBtListener.scanItemSelectedListener();
                 break;
             case R.id.menu_stop:
-                uiBtListener.stopItemSelectedListener();
+                IUiToBtListener.stopItemSelectedListener();
                 break;
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -335,7 +335,7 @@ public class DeviceControlActivity
             actionBar.setCustomView(null);
             if (ContactEditorHelper.getInstance().getState() != EditorState.Inactive)
                 ContactEditorHelper.getInstance().goToState(EditorState.Inactive);
-            uiBtListener.stopItemSelectedListener();
+            IUiToBtListener.stopItemSelectedListener();
             invalidateOptionsMenu();
         } else {
             super.onBackPressed();
@@ -439,7 +439,7 @@ public class DeviceControlActivity
         if (debug) Log.i(TAG, "setupViewListDevices");
         listDevices.setAdapter(deviceListAdapter);//C.getmLeDeviceListAdapter()
         listDevices.setOnTouchListener(new LinearLayoutTouchListener());
-        listDevices.setOnItemClickListener((parent, view1, position, id) -> uiBtListener.clickItemListListener(position));
+        listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));
     }
 
     private void setupViewRecyclerContacts() {
@@ -484,7 +484,7 @@ public class DeviceControlActivity
             actionBar.setDisplayShowCustomEnabled(true);
             String title = String.format(Locale.US, "%s %s:%d %s",
                     getTitle().toString(),
-                    getIpAddr(Settings.ipv4),
+                    getIpAddr(Settings.isIpv4Used),
                     Settings.serverLocalPortNumber,
                     opMode.getSettingName()
             );
@@ -539,15 +539,15 @@ public class DeviceControlActivity
 
     public void clickBtnChangeDevice() {
         setVisibleList();
-        uiBtListener.clickBtnChangeDeviceListenerOne();
+        IUiToBtListener.clickBtnChangeDeviceListenerOne();
         setupViewListDevices();
         if (debug) Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
         // останавливаем сканирование и запускаем новое Activity
-        uiBtListener.clickBtnChangeDeviceListenerTwo();
+        IUiToBtListener.clickBtnChangeDeviceListenerTwo();
     }
 
-    //--------------------- INetInfoListener
+    //--------------------- INetInfoGetter
 
     @Override
     public String getRemAddr() {
@@ -639,13 +639,13 @@ public class DeviceControlActivity
 
     private void swipeScanStart(){
         if (!viewHelper.isScanViewHidden()) {
-            uiBtListener.swipeScanStartListener();
+            IUiToBtListener.swipeScanStartListener();
         }
     }
 
     private void swipeScanStop(){
         if (!viewHelper.isScanViewHidden()) {
-            uiBtListener.swipeScanStopListener();
+            IUiToBtListener.swipeScanStopListener();
         }
     }
 

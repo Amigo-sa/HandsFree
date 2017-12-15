@@ -4,16 +4,16 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.handsfree.debug.IDebugListener;
-import by.citech.handsfree.gui.ICallUiExchangeListener;
-import by.citech.handsfree.gui.ICallUiListener;
-import by.citech.handsfree.gui.IUiBtnGreenRedListener;
-import by.citech.handsfree.param.ISettings;
-import by.citech.handsfree.param.OpMode;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.gui.ICallToUiExchangeListener;
+import by.citech.handsfree.gui.ICallToUiListener;
+import by.citech.handsfree.gui.IUiToCallListener;
+import by.citech.handsfree.settings.ISettingsCtrl;
+import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class CallUi
-        implements IUiBtnGreenRedListener, IBase, ISettings {
+        implements IUiToCallListener, IBase, ISettingsCtrl {
 
     private static final String TAG = Tags.CALL_UI;
     private static final boolean debug = Settings.debug;
@@ -24,14 +24,14 @@ public class CallUi
     private boolean isInitiated;
 
     {
-        initiate();
+        initSettings();
     }
 
     @Override
-    public void initiate() {
+    public void initSettings() {
         takeSettings();
-        iCallUiListeners = new ArrayList<>();
-        iCallUiExchangeListeners = new ArrayList<>();
+        iCallToUiListeners = new ArrayList<>();
+        iCallToUiExchangeListeners = new ArrayList<>();
         iDebugListeners = new ArrayList<>();
         isInitiated = true;
     }
@@ -43,8 +43,8 @@ public class CallUi
 
     //--------------------- non-settings
 
-    private ArrayList<ICallUiListener> iCallUiListeners;
-    private ArrayList<ICallUiExchangeListener> iCallUiExchangeListeners;
+    private ArrayList<ICallToUiListener> iCallToUiListeners;
+    private ArrayList<ICallToUiExchangeListener> iCallToUiExchangeListeners;
     private ArrayList<IDebugListener> iDebugListeners;
 
     //--------------------- singleton
@@ -62,7 +62,7 @@ public class CallUi
                 }
             }
         } else if (!instance.isInitiated) {
-            instance.initiate();
+            instance.initSettings();
         }
         return instance;
     }
@@ -74,14 +74,14 @@ public class CallUi
         return this;
     }
 
-    public CallUi addiCallUiListener(ICallUiListener iCallUiListener) {
-        iCallUiListeners.add(iCallUiListener);
-        iCallUiExchangeListeners.add(iCallUiListener);
+    public CallUi addiCallUiListener(ICallToUiListener iCallToUiListener) {
+        iCallToUiListeners.add(iCallToUiListener);
+        iCallToUiExchangeListeners.add(iCallToUiListener);
         return this;
     }
 
-    public CallUi addiCallUiExchangeListener(ICallUiExchangeListener iCallUiExchangeListener) {
-        iCallUiExchangeListeners.add(iCallUiExchangeListener);
+    public CallUi addiCallUiExchangeListener(ICallToUiExchangeListener iCallToUiExchangeListener) {
+        iCallToUiExchangeListeners.add(iCallToUiExchangeListener);
         return this;
     }
 
@@ -111,20 +111,20 @@ public class CallUi
             iBaseAdder.addBase(this);
         }
         if (!isInitiated) {
-            initiate();
+            initSettings();
         }
     }
 
     @Override
     public void baseStop() {
         if (debug) Log.i(TAG, "baseStop");
-        if (iCallUiListeners != null) {
-            iCallUiListeners.clear();
-            iCallUiListeners = null;
+        if (iCallToUiListeners != null) {
+            iCallToUiListeners.clear();
+            iCallToUiListeners = null;
         }
-        if (iCallUiExchangeListeners != null) {
-            iCallUiExchangeListeners.clear();
-            iCallUiExchangeListeners = null;
+        if (iCallToUiExchangeListeners != null) {
+            iCallToUiExchangeListeners.clear();
+            iCallToUiExchangeListeners = null;
         }
         if (iDebugListeners != null) {
             iDebugListeners.clear();
@@ -184,13 +184,13 @@ public class CallUi
                     case Idle:
                         if (debug) Log.i(TAG, "onClickBtnGreen Idle");
                         if (setCallerState(CallerState.Idle, CallerState.OutcomingStarted))
-                            for (ICallUiListener listener : iCallUiListeners)
+                            for (ICallToUiListener listener : iCallToUiListeners)
                                 listener.callOutcomingStarted();
                         break;
                     case IncomingDetected:
                         if (debug) Log.i(TAG, "onClickBtnGreen IncomingDetected");
                         if (setCallerState(CallerState.IncomingDetected, CallerState.Call))
-                            for (ICallUiExchangeListener listener : iCallUiExchangeListeners)
+                            for (ICallToUiExchangeListener listener : iCallToUiExchangeListeners)
                                 listener.callIncomingAccepted();
                         break;
                     default:
@@ -248,25 +248,25 @@ public class CallUi
                     case Call:
                         if (debug) Log.i(TAG, "onClickBtnRed Call");
                         if (setCallerState(CallerState.Call, CallerState.Idle))
-                            for (ICallUiExchangeListener listener : iCallUiExchangeListeners)
+                            for (ICallToUiExchangeListener listener : iCallToUiExchangeListeners)
                                 listener.callEndedInternally();
                         break;
                     case OutcomingStarted:
                         if (debug) Log.i(TAG, "onClickBtnRed OutcomingStarted");
                         if (setCallerState(CallerState.OutcomingStarted, CallerState.Idle))
-                            for (ICallUiListener listener : iCallUiListeners)
+                            for (ICallToUiListener listener : iCallToUiListeners)
                                 listener.callOutcomingCanceled();
                         break;
                     case OutcomingConnected:
                         if (debug) Log.i(TAG, "onClickBtnRed OutcomingConnected");
                         if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle))
-                            for (ICallUiListener listener : iCallUiListeners)
+                            for (ICallToUiListener listener : iCallToUiListeners)
                                 listener.callOutcomingCanceled();
                         break;
                     case IncomingDetected:
                         if (debug) Log.i(TAG, "onClickBtnRed IncomingDetected");
                         if (setCallerState(CallerState.IncomingDetected, CallerState.Idle))
-                            for (ICallUiListener listener : iCallUiListeners)
+                            for (ICallToUiListener listener : iCallToUiListeners)
                                 listener.callIncomingRejected();
                         break;
                     default:

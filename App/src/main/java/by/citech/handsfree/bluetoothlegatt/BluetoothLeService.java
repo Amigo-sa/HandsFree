@@ -23,7 +23,7 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.CallbackWriteListener;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Requestable;
 import by.citech.handsfree.data.SampleGattAttributes;
 import by.citech.handsfree.debug.ITrafficUpdate;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

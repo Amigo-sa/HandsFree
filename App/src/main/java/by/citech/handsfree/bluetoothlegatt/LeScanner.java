@@ -5,15 +5,15 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.util.Log;
 
-import by.citech.handsfree.gui.IbtToUiListener;
+import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 21.11.2017.
  */
 
-public class LeScanner implements IbtToUiListener {
+public class LeScanner implements IBtToUiListener {
 
     private final static String TAG = "WSD_LeScanner";
     private static final long SCAN_PERIOD = 10000;

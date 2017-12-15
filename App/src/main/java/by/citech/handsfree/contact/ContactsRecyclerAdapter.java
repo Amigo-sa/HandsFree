@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 

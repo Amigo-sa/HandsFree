@@ -1,11 +1,9 @@
 package by.citech.handsfree.bluetoothlegatt.commands.adapter;
 
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 
 import by.citech.handsfree.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.param.Settings;
 
 /**
  * Created by tretyak on 10.12.2017.

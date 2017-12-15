@@ -5,11 +5,8 @@ import android.util.Log;
 import java.util.Arrays;
 
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.debug.TrafficAnalyzer;
 import by.citech.handsfree.debug.ITrafficUpdate;
-import by.citech.handsfree.debug.TrafficInfo;
-import by.citech.handsfree.debug.TrafficNodes;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 

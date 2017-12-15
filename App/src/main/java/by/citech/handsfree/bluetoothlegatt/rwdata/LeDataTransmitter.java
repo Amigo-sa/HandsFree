@@ -10,7 +10,7 @@ import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 22.11.2017.

@@ -5,7 +5,7 @@ import android.util.Log;
 import java.net.*;
 import java.util.*;
 
-import by.citech.handsfree.param.Settings;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Network {
