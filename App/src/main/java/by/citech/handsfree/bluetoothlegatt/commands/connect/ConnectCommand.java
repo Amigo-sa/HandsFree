@@ -1,6 +1,8 @@
 package by.citech.handsfree.bluetoothlegatt.commands.connect;
 
-import by.citech.handsfree.bluetoothlegatt.LeConnector;
+import android.bluetooth.BluetoothDevice;
+
+import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 
 /**
@@ -8,15 +10,19 @@ import by.citech.handsfree.bluetoothlegatt.commands.Command;
  */
 
 public class ConnectCommand implements Command {
-    private LeConnector leConnector;
+    private BluetoothDevice mBTDevice;
+    private BluetoothLeService mBluetoothLeService;
 
-    public ConnectCommand(LeConnector leConnector) {
-        this.leConnector = leConnector;
+    public ConnectCommand(BluetoothDevice mBTDevice, BluetoothLeService mBluetoothLeService) {
+        this.mBTDevice = mBTDevice;
+        this.mBluetoothLeService = mBluetoothLeService;
     }
 
     @Override
     public void execute() {
-        leConnector.onConnectBTDevice();
+        // если сервис привязан производим соединение
+        if (mBluetoothLeService != null)
+            mBluetoothLeService.connect(mBTDevice.getAddress());
     }
 
     @Override

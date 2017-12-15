@@ -19,7 +19,6 @@ import by.citech.handsfree.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.bluetoothlegatt.LeBroadcastReceiver;
-import by.citech.handsfree.bluetoothlegatt.LeConnector;
 import by.citech.handsfree.bluetoothlegatt.LeScanner;
 import by.citech.handsfree.bluetoothlegatt.commands.adapter.AddConnectDeviceToAdapterCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.adapter.AddToListCommand;
@@ -82,8 +81,6 @@ public class ConnectorBluetooth
     private ControlAdapter controlAdapter;
     // список сервисов и характеристик устройства
     private Characteristics characteristics;
-    // обьект производящий соединение/разьединение BLE устройства
-    private LeConnector leConnector;
     // приёмник/передатчик данных
     private LeDataTransmitter leDataTransmitter;
     //////////////////////////////////////////
@@ -171,7 +168,6 @@ private volatile BluetoothLeState BLEState;
                 mIBluetoothListener,
                 controlAdapter);
         leBroadcastReceiver = new LeBroadcastReceiver(this);
-        leConnector = new LeConnector(leScanner);
         leDataTransmitter = new LeDataTransmitter(characteristics, mIBluetoothListener);
         leDataTransmitter.addIRxDataListener(iTransmitter);
         // инициализация контроллера команд
@@ -185,9 +181,6 @@ private volatile BluetoothLeState BLEState;
         addToList = new AddToListCommand(controlAdapter);
         clearList = new ClearListCommand(controlAdapter);
         initList = new InitListCommand(controlAdapter);
-
-        connectDevice = new ConnectCommand(leConnector);
-        disconnectDevice = new DisconnectCommand(leConnector);
 
         exchangeDataOn = new DataExchangeOnCommand(leDataTransmitter);
         exchangeDataOff = new DataExchangeOffCommand(leDataTransmitter);
@@ -239,7 +232,6 @@ private volatile BluetoothLeState BLEState;
 
     private void setmBTDevice(BluetoothDevice mBTDevice) {
         this.mBTDevice = mBTDevice;
-        leConnector.setBTDevice(mBTDevice);
     }
 
     public BroadcastReceiver getBroadcastReceiver(){
@@ -312,6 +304,9 @@ private volatile BluetoothLeState BLEState;
         reconnDiaologOn = new ReconnectDialogCommand(mBTDevice, this, iMsgToUi);
         connDialogInfoOn = new ConnInfoDialogCommand(mBTDevice, iMsgToUi, iVisible);
         connDialogOn = new ConnectDialogCommand(mBTDevice, this, iMsgToUi);
+        //------------------ Команды соединения/разьединения -----------
+        connectDevice = new ConnectCommand(mBTDevice, mBluetoothLeService);
+        disconnectDevice = new DisconnectCommand(mBluetoothLeService);
         //------------------ Команды работы с адаптером -----------
         addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
         clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter, mBTDevice);
@@ -419,12 +414,14 @@ private volatile BluetoothLeState BLEState;
                 mIBluetoothListener.finishConnection();
             }
             // Automatically connects to the device upon successful start-up initialization.
-            if (mBluetoothLeService != null && leBroadcastReceiver != null && leConnector != null && leDataTransmitter != null) {
+            if (mBluetoothLeService != null && leBroadcastReceiver != null && leDataTransmitter != null) {
                 if (mBTDevice != null) {
-                    mBluetoothLeService.connect(mBTDevice.getAddress());
                     addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
+                    bleController.setCommand(connectDevice).
+                            setCommand(addConnDeviceToAdapter).execute();
+//                    mBluetoothLeService.connect(mBTDevice.getAddress());
+//
                 }
-                leConnector.setBluetoothLeService(mBluetoothLeService);
                 leDataTransmitter.setBluetoothLeService(mBluetoothLeService);
             }
         }
@@ -462,7 +459,6 @@ private volatile BluetoothLeState BLEState;
         characteristics = null;
         controlAdapter = null;
         leScanner = null;
-        leConnector = null;
         leDataTransmitter = null;
     }
 
