@@ -11,29 +11,48 @@ import by.citech.handsfree.param.Tags;
 public class ToNet
         implements ITransmitterCtrl {
 
-    private static final String TAG = Tags.TO_NET;
+    private static final String STAG = Tags.TO_NET;
+    private final String TAG;
     private static final boolean debug = Settings.debug;
 
     //--------------------- settings
 
-    private int dataChunkSize;
+    private boolean netSignificantAll;
     private int netSendSize;
     private int netChunkSignificantBytes;
-    private byte[] dataChunk;
+    private int netChunkSize;
+    private int netFactor;
+    private byte[] netChunk;
+
+    private static int objCount;
+    private final int objNumber;
+
+    static {
+        objCount = 0;
+    }
 
     {
+        objCount++;
+        objNumber = objCount;
+        TAG = STAG + " " + objNumber;
+        initiate();
+    }
+
+    private void initiate() {
         takeSettings();
         applySettings();
     }
 
     private void takeSettings() {
-        dataChunkSize = Settings.bt2btPacketSize;
-        netSendSize = Settings.netSendSize;
+        netSignificantAll = Settings.netSignificantAll;
         netChunkSignificantBytes = Settings.netChunkSignificantBytes;
+        netChunkSize = netSignificantAll ? Settings.netChunkSize : netChunkSignificantBytes;
+        netFactor = Settings.netFactor;
+        netSendSize = netChunkSize * netFactor;
     }
 
     private void applySettings() {
-        dataChunk = new byte[dataChunkSize];
+        netChunk = new byte[netChunkSize];
     }
 
     //--------------------- non-settings
@@ -56,8 +75,8 @@ public class ToNet
         if (debug) Log.i(TAG, "run");
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int bufferedDataSize;
-        //TODO: упростить логику
+//      int bufferedDataSize;
+        int netChunkCount = 0;
         while (isStreaming) {
             while (source.isEmpty()) {
                 try {
@@ -67,32 +86,43 @@ public class ToNet
                 }
                 if (!isStreaming) return;
             }
-            dataChunk = source.getData();
-            if (dataChunk != null && dataChunk.length != 0) {
-                baos.write(dataChunk, 0, netChunkSignificantBytes);
+            netChunk = source.getData();
+            if (netChunk != null && netChunk.length != 0) {
+                baos.write(netChunk, 0, netChunkSize);
+                netChunkCount++;
             } else {
-                Log.e(TAG, "readed null from storage");
+                Log.e(TAG, "streamOn readed invalid data from storage");
             }
             if (!isStreaming) return;
-            bufferedDataSize = baos.size();
-            if (debug) Log.i(TAG, String.format("run network output buffer contains %d bytes", bufferedDataSize));
-            //TODO: добавить логику обрезки на случай вычитки большего количества данных
-            if (bufferedDataSize == netSendSize) {
-                if (debug) Log.i(TAG, "run network output buffer contains enough data, sending");
+//          bufferedDataSize = baos.size();
+//          if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d bytes", bufferedDataSize));
+//          if (bufferedDataSize == netSendSize) {
+//              if (debug) Log.i(TAG, "streamOn net out buff contains enough data, sending");
+//              iTransmitter.sendData(baos.toByteArray());
+//          } else if (bufferedDataSize > netSendSize) {
+//              Log.e(TAG, "streamOn too much data in net out buff");
+//          }
+            if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
+            if (netChunkCount == netFactor) {
+                if (debug) Log.i(TAG, "streamOn net out buff contains enough data, sending");
                 iTransmitter.sendData(baos.toByteArray());
+                netChunkCount = 0;
                 baos.reset();
-            } else if (bufferedDataSize > netSendSize) {
-                Log.e(TAG, "run too much data in network output buffer");
+            } else if (netChunkCount > netFactor) {
+                Log.e(TAG, "streamOn too much data in net out buff");
+                netChunkCount = 0;
                 baos.reset();
             }
         }
-        if (debug) Log.i(TAG, "run done");
+        if (debug) Log.i(TAG, "streamOn done");
     }
 
     @Override
     public void streamOff() {
         if (debug) Log.i(TAG, "streamOff");
         isStreaming = false;
+        iTransmitter = null;
+        source = null;
     }
 
 }

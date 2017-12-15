@@ -215,7 +215,7 @@ public class ServerCtrlNanoWebSocket
 
         @Override
         protected void onException(IOException exception) {
-            if (debug) Log.i(TAG, "onException");
+            if (debug) Log.i(TAG, "onException " + exception.getMessage());
             if (debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
             status = StatusMessages.WEBSOCKET_FAILURE;
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);

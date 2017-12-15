@@ -376,11 +376,4 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         return mBluetoothGatt.getServices();
     }
 
-    //--------------------- debug
-
-    @Override
-    public long getBytesDelta() {
-        return 0;
-    }
-
 }

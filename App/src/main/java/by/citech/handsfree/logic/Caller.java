@@ -97,10 +97,6 @@ public class Caller
         return ConnectorNet.getInstance();
     }
 
-    public ConnectorBluetooth getConnectorBluetooth() {
-        return ConnectorBluetooth.getInstance();
-    }
-
     public Caller setiCallUiListener(ICallUiListener listener) {
         iCallUiListener = listener;
         return this;
@@ -454,8 +450,8 @@ public class Caller
                 .setiMsgToUi(iMsgToUi);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()
-                .setStorageBtToNet(storageBtToNet)
-                .setStorageNetToBt(storageNetToBt)
+                .setStorageToNet(storageBtToNet)
+                .setStorageFromNet(storageNetToBt)
                 .addiCallNetworkListener(iCallNetListener)
                 .addiCallNetworkExchangeListener(connectorBluetooth)
                 .setiNetInfoListener(iNetInfoListener)

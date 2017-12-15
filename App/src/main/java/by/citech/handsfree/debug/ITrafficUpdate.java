@@ -1,5 +1,5 @@
 package by.citech.handsfree.debug;
 
 public interface ITrafficUpdate {
-    long getBytesDelta();
+    default Long getBytesDelta() {return null;};
 }

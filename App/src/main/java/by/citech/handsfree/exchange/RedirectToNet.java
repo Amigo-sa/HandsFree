@@ -15,12 +15,12 @@ public class RedirectToNet
 
     private ITransmitterCtrlReg iTransmitterCtrlReg;
     private ITransmitter iTransmitter;
-    private StorageData<byte[]> storageBtToNet;
+    private StorageData<byte[]> storageToNet;
 
-    public RedirectToNet(ITransmitterCtrlReg iTransmitterCtrlReg, ITransmitter iTransmitter, StorageData<byte[]> storageBtToNet) {
+    public RedirectToNet(ITransmitterCtrlReg iTransmitterCtrlReg, ITransmitter iTransmitter, StorageData<byte[]> storageToNet) {
         this.iTransmitterCtrlReg = iTransmitterCtrlReg;
         this.iTransmitter = iTransmitter;
-        this.storageBtToNet = storageBtToNet;
+        this.storageToNet = storageToNet;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class RedirectToNet
                 break;
             case BLUETOOTH:
                 if (debug) Log.i(TAG, "doInBackground bluetooth");
-                if (storageBtToNet == null) {
+                if (storageToNet == null) {
                     if (debug) Log.e(TAG, "doInBackground bluetooth storage is null");
                     return null;
                 }
-                iTransmitterCtrl = new ToNet(iTransmitter, storageBtToNet);
+                iTransmitterCtrl = new ToNet(iTransmitter, storageToNet);
                 iTransmitterCtrl.prepareStream();
                 publishProgress(iTransmitterCtrl);
                 new Thread(iTransmitterCtrl::streamOn).start();
@@ -54,5 +54,8 @@ public class RedirectToNet
     protected void onProgressUpdate(ITransmitterCtrl... iTransmitterCtrl) {
         if (debug) Log.i(TAG, "onProgressUpdate");
         iTransmitterCtrlReg.registerTransmitterCtrl(iTransmitterCtrl[0]);
+        iTransmitterCtrlReg = null;
+        iTransmitter = null;
+        storageToNet = null;
     }
 }

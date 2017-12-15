@@ -11,7 +11,6 @@ import by.citech.handsfree.codec.audio.AudioCodecType;
 
 public class Settings {
 
-
     static {
         Log.w("WSD_SETTINGS", "static initializer");
     }
@@ -26,26 +25,21 @@ public class Settings {
     public static DataSource dataSource = DataSource.BLUETOOTH;
 //  public static DataSource dataSource = DataSource.MICROPHONE;
     public static OpMode opMode = OpMode.Normal;
-//  public static OpMode opMode = OpMode.AudIn2Bt;
-//  public static OpMode opMode = OpMode.Bt2AudOut;
-//  public static OpMode opMode = OpMode.AudIn2AudOut;
-//  public static OpMode opMode = OpMode.Bt2Bt;
-//  public static OpMode opMode = OpMode.Net2Net; //TODO: реализовать
-//  public static OpMode opMode = OpMode.Record;
     public static boolean showTraffic = true;
     public static boolean debug = true;
     public static boolean testSendOneOnCall = false;
+    public static int bt2NetFactor = 50;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
+    public static int audioIn2BtFactor = 1;  // кол-во буфферизированных пакетов BT2BT, принимаемое от аудиовхода
+    public static int bt2AudioOutFactor = 1;  // кол-во буфферизированных пакетов BT2BT, отправляемое на аудиовыход
 
     //---------------- BLUETOOTH
 
+    public static boolean btSignificantAll = true;  // все байты значащие
     public static boolean btSinglePacket = false;  // если возможно, не используем буфферизацию
     public static int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете
     public static int bt2btPacketSize = 20;  // bytes in one BT message
     public static int btSignificantBytes = 20;  // кол-во значащих байтов данных в BT2BT-пакете
     public static int btRsvdBytesOffset = 20;  // позиция начала незначащих байтов данных в BT2BT-пакете
-    public static int bt2NetFactor = 50;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
-    public static int audioIn2BtFactor = 1;  // кол-во буфферизированных пакетов BT2BT, принимаемое от аудиовхода
-    public static int bt2AudioOutFactor = 1;  // кол-во буфферизированных пакетов BT2BT, отправляемое на аудиовыход
     public static int btFactor = bt2NetFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
     public static int btLatencyMs = 9;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
     public static int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
@@ -86,9 +80,12 @@ public class Settings {
 
     //---------------- NETWORK
 
+    public static boolean netSignificantAll = btSignificantAll;
+    public static int netChunkSize = bt2btPacketSize;
     public static int netChunkSignificantBytes = btSignificantBytes;
     public static int netChunkRsvdBytesOffset = btRsvdBytesOffset;
-    public static int netSendSize = btSendSize;
+    public static int netFactor = btFactor;
+    public static int netSendSize = netChunkSignificantBytes * netFactor;
     public static String serverRemoteIpAddress = "192.168.0.126";
     public static int serverLocalPortNumber = 8080;
     public static int serverRemotePortNumber = 8080;

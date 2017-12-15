@@ -97,12 +97,12 @@ public class ConnectorNet
         return this;
     }
 
-    public ConnectorNet setStorageBtToNet(StorageData<byte[]> storageBtToNet) {
+    public ConnectorNet setStorageToNet(StorageData<byte[]> storageBtToNet) {
         this.storageBtToNet = storageBtToNet;
         return this;
     }
 
-    public ConnectorNet setStorageNetToBt(StorageData<byte[][]> storageNetToBt) {
+    public ConnectorNet setStorageFromNet(StorageData<byte[][]> storageNetToBt) {
         this.storageNetToBt = storageNetToBt;
         return this;
     }
@@ -253,8 +253,9 @@ public class ConnectorNet
                     for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingConnected();
                 break;
             default:
-                if (debug) Log.e(TAG, "cltOnOpen " + getStateName());
+                Log.e(TAG, "cltOnOpen " + getStateName());
                 disconnect(iClientCtrl); // TODO: обрываем, если не звонили?
+                break;
         }
     }
 
@@ -278,7 +279,8 @@ public class ConnectorNet
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
                 break;
             default:
-                if (debug) Log.e(TAG, "cltOnFailure " + getStateName());
+                Log.e(TAG, "cltOnFailure " + getStateName());
+                break;
         }
     }
 
@@ -470,22 +472,6 @@ public class ConnectorNet
         } else {
             this.iClientCtrl = iClientCtrl;
         }
-    }
-
-    //TODO: нафиг это здесь?
-    @Override
-    public void messageSended() {
-        if (debug) Log.i(TAG, "messageSended");
-    }
-
-    @Override
-    public void messageCantSend() {
-        if (debug) Log.i(TAG, "messageCantSend");
-    }
-
-    @Override
-    public void disconnected() {
-        if (debug) Log.i(TAG, "disconnected");
     }
 
 }
