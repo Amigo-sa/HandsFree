@@ -104,7 +104,7 @@ public class ToNet
 //          }
             if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
             if (netChunkCount == netFactor) {
-                if (debug) Log.i(TAG, "streamOn net out buff contains enough data, sending");
+                if (debug) Log.w(TAG, String.format("streamOn net out buff contains enough data of %d bytes, sending", baos.size()));
                 iTransmitter.sendData(baos.toByteArray());
                 netChunkCount = 0;
                 baos.reset();

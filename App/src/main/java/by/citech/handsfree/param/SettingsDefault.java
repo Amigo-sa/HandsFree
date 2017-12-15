@@ -33,7 +33,7 @@ public class SettingsDefault {
             public static final int bt2btPacketSize = 16;
             public static final int btSignificantBytes = 10;
             public static final int btRsvdBytesOffset = 10;
-            public static final int bt2NetFactor = 90;
+            public static final int bt2NetFactor = 50;
             public static final int audioIn2BtFactor = 1;
             public static final int bt2AudioOutFactor = 1;
             public static final int btFactor = bt2NetFactor;

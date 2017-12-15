@@ -127,6 +127,7 @@ public class ConnectorNet
 
     @Override
     public void baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
         new ThreadNetStop().start();
     }
 
@@ -217,6 +218,7 @@ public class ConnectorNet
                 if (debug) Log.i(TAG, "srvOnFailure Call");
                 if (setState(CallerState.Call, CallerState.Error))
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
+                exchangeStop();
                 break;
             default:
                 if (debug) Log.e(TAG, "srvOnFailure " + getStateName());
@@ -277,6 +279,7 @@ public class ConnectorNet
                 if (debug) Log.i(TAG, "cltOnFailure Call");
                 if (setState(CallerState.Call, CallerState.Error))
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callFailed();
+                exchangeStop();
                 break;
             default:
                 Log.e(TAG, "cltOnFailure " + getStateName());
@@ -414,7 +417,7 @@ public class ConnectorNet
             iTransmitterCtrl.streamOff();
             iTransmitterCtrl = null;
         }
-        if (debug) Log.i(TAG, "ThreadNetStop iTransmitterCtrl.streamOff() done");
+        if (debug) Log.i(TAG, "streamOff done");
     }
 
     @Override
@@ -439,7 +442,7 @@ public class ConnectorNet
                 }
                 break;
             default:
-                Log.e(TAG, "serverStarted on state default");
+                Log.e(TAG, "serverStarted state default");
                 break;
         }
     }

@@ -100,15 +100,27 @@ public class ToBluetooth
             if (btSinglePacket) {
                 dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
             } else {
-                if (data.length != btSendSize) return;
-                if (debug) Log.i(TAG, "onReceiveData received correct amount of bytes");
+                int receivedDataSize = data.length;
+                if (receivedDataSize != btSendSize) {
+                    Log.e(TAG, String.format("onReceiveData received wrong amount of data: %d bytes", receivedDataSize));
+                    return;
+                } else {
+                    if (debug) Log.w(TAG, String.format("onReceiveData received correct amount of data: %d bytes", receivedDataSize));
+                }
                 for (int i = 0; i < btFactor; i++) {
+                    if (debug) Log.w(TAG, String.format("onReceiveData dataAssembled[%d] assign to range of data[] from positions %d to %d, btFactor is %d",
+                            i,
+                            i * btSignificantBytes,
+                            (i + 1) * btSignificantBytes,
+                            btFactor
+                    ));
                     if (btSignificantAll) {
                         dataAssembled[i] = Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes);
                     } else {
                         dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
                     }
                 }
+                if (debug) Log.w(TAG, "onReceiveData data assembled, put");
             }
             storage.putData(dataAssembled);
         }
