@@ -3,6 +3,8 @@ package by.citech.handsfree.logic;
 import android.util.Log;
 import java.util.ArrayList;
 
+import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.debug.IDebugListener;
 import by.citech.handsfree.gui.ICallToUiExchangeListener;
 import by.citech.handsfree.gui.ICallToUiListener;

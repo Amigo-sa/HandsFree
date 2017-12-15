@@ -16,7 +16,7 @@ import by.citech.handsfree.dialog.DialogState;
 import by.citech.handsfree.dialog.DialogType;
 import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.exchange.IMsgToUi;
-import by.citech.handsfree.logic.IBase;
+import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;

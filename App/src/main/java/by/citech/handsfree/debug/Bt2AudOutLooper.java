@@ -9,7 +9,7 @@ import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ToAudioOut;
-import by.citech.handsfree.logic.IBase;
+import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 

@@ -7,23 +7,23 @@ import by.citech.handsfree.settings.Settings;
  * Created by tretyak on 15.12.2017.
  */
 
-public class BleUi implements IUiToBtListener {
+public class BluetoothUi implements IUiToBtListener {
 
     private static final String TAG = "WSD_BleUi";
     private static final boolean debug = Settings.debug;
 
     //--------------------- singleton
 
-    private static volatile BleUi instance = null;
+    private static volatile BluetoothUi instance = null;
 
-    private BleUi() {
+    private BluetoothUi() {
     }
 
-    public static BleUi getInstance() {
+    public static BluetoothUi getInstance() {
         if (instance == null) {
-            synchronized (BleUi.class) {
+            synchronized (BluetoothUi.class) {
                 if (instance == null) {
-                    instance = new BleUi();
+                    instance = new BluetoothUi();
                 }
             }
         }

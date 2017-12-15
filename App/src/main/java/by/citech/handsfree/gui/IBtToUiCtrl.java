@@ -1,10 +1,10 @@
-package by.citech.handsfree.bluetoothlegatt;
+package by.citech.handsfree.gui;
 
 /**
  * Created by tretyak on 08.12.2017.
  */
 
-public interface IVisible {
+public interface IBtToUiCtrl {
     void setVisibleMain();
     void setVisibleList();
 }

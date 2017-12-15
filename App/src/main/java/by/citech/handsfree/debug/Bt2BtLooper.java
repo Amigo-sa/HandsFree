@@ -3,8 +3,8 @@ package by.citech.handsfree.debug;
 import android.util.Log;
 
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.logic.IBase;
-import by.citech.handsfree.logic.IBaseAdder;
+import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 

@@ -75,6 +75,11 @@ public class Settings {
             setBt2AudioOutFactor(SettingsDefault.Common.bt2AudioOutFactor);
         }
 
+        @Override
+        public void resetSetting() {
+
+        }
+
         public void setThreadNumber(Integer threadNumber) {this.threadNumber = threadNumber;}
         public void setDataSource(DataSource dataSource) {this.dataSource = dataSource;}
         public void setOpMode(OpMode opMode) {this.opMode = opMode;}

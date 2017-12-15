@@ -79,7 +79,7 @@ public class Presetter {
 
     public static void setBt2NetFactor(int bt2NetFactor) {
         if (bt2NetFactor < 0) {
-            Settings.bt2NetFactor = SettingsDefault.Bluetooth.bt2NetFactor;
+            Settings.bt2NetFactor = SettingsDefault.Common.bt2NetFactor;
             Log.e(TAG, "setBt2NetFactor illegal value, set to default");
         } else {
             Settings.bt2NetFactor = bt2NetFactor;

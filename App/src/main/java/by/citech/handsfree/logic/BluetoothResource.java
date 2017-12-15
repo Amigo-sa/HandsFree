@@ -2,13 +2,13 @@ package by.citech.handsfree.logic;
 
 import java.io.Serializable;
 
-public class Resource
+public class BluetoothResource
         implements Serializable {
 
     private boolean callback;
     private int supportedMTU;
 
-    public Resource(boolean callback, int supportedMTU) {
+    public BluetoothResource(boolean callback, int supportedMTU) {
         this.callback = callback;
         this.supportedMTU = supportedMTU;
     }

@@ -57,7 +57,7 @@ public class PreferencesProcessor {
     private static void processBt2NetFactor(SharedPreferences prefs) {
         Presetter.setBt2NetFactor(Integer.parseInt(
                 prefs.getString(SettingsDefault.Key.bt2NetFactor,
-                Integer.toString(SettingsDefault.Bluetooth.bt2NetFactor))));
+                Integer.toString(SettingsDefault.Common.bt2NetFactor))));
     }
 
     private static void processBtSinglePacket(SharedPreferences prefs) {

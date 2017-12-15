@@ -45,8 +45,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import by.citech.handsfree.bluetoothlegatt.IReceive;
-import by.citech.handsfree.bluetoothlegatt.IVisible;
+import by.citech.handsfree.common.IBroadcastReceiver;
+import by.citech.handsfree.common.IService;
+import by.citech.handsfree.gui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.gui.helper.state.ActiveContactState;
@@ -68,8 +69,8 @@ import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.gui.helper.ViewHelper;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
-import by.citech.handsfree.logic.IBase;
-import by.citech.handsfree.logic.IBaseAdder;
+import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.gui.IUiToCallListener;
 import by.citech.handsfree.network.INetInfoGetter;
@@ -86,7 +87,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class DeviceControlActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IMsgToUi, IBaseAdder, IReceive, IService, IVisible, IGetViewGetter {
+        IMsgToUi, IBaseAdder, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter {
 
     private static final String TAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -202,9 +203,9 @@ public class DeviceControlActivity
                 .setiCallNetListener(viewHelper)
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
-                .setiReceive(this)
+                .setiBroadcastReceiver(this)
                 .setiService(this)
-                .setiVisible(this)
+                .setiBtToUiCtrl(this)
                 .setiMsgToUi(this);
 
         iUiToCallListener = Caller.getInstance().getiUiBtnGreenRedListener();

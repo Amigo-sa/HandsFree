@@ -10,11 +10,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import by.citech.handsfree.IService;
+import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
-import by.citech.handsfree.bluetoothlegatt.IReceive;
+import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeState;
-import by.citech.handsfree.bluetoothlegatt.IVisible;
+import by.citech.handsfree.gui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
@@ -33,17 +35,17 @@ import by.citech.handsfree.bluetoothlegatt.commands.adapter.ClearConnectDeviceFr
 import by.citech.handsfree.bluetoothlegatt.commands.adapter.ClearListCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.service.CloseServiceCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.bluetoothlegatt.commands.dialods.ConnInfoDialogCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ConnInfoDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.connect.ConnectCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dialods.ConnectDialogCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ConnectDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.DataExchangeOffCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.DataExchangeOnCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dialods.DisconnInfoDialogCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.dialogs.DisconnInfoDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.connect.DisconnectCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dialods.DisconnectDialogCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.dialogs.DisconnectDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.adapter.InitListCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.ReceiveDataOn;
-import by.citech.handsfree.bluetoothlegatt.commands.dialods.ReconnectDialogCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ReconnectDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOffCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOnCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.service.StartServiceCommand;
@@ -61,7 +63,7 @@ import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 public class ConnectorBluetooth
-        implements ICallNetExchangeListener, ICallToUiExchangeListener, IDebugListener, StorageListener, ConnectAction , IBase{
+        implements ICallNetExchangeListener, ICallToUiExchangeListener, IDebugListener, StorageListener, ConnectAction , IBase {
 
     private final static String TAG = "WSD_ConnectorBluetooth";
 
@@ -94,9 +96,9 @@ public class ConnectorBluetooth
 
 private volatile BluetoothLeState BLEState;
 
-    private IReceive iReceive;
+    private IBroadcastReceiver iBroadcastReceiver;
     private IService iService;
-    private IVisible iVisible;
+    private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
 
     private Intent serviceIntent = new Intent("by.citech.bluetoothlegatt.BluetoothLeService");
@@ -192,8 +194,8 @@ private volatile BluetoothLeState BLEState;
         bindService = new BindServiceCommand(iService, mServiceConnection);
         unbindService = new UnbindServiceCommand(mServiceConnection, iService);
 
-        registerReceiver = new RegisterReceiverCommand(iReceive, this);
-        unregisterReceiver = new UnregisterReceiverCommand(iReceive, this);
+        registerReceiver = new RegisterReceiverCommand(iBroadcastReceiver, this);
+        unregisterReceiver = new UnregisterReceiverCommand(iBroadcastReceiver, this);
 
         buttonViewColorChangeOn = new ButtonChangeViewOnCommand(mIBluetoothListener);
         buttonViewColorChangeOff = new ButtonChangeViewOffCommand(mIBluetoothListener);
@@ -243,7 +245,7 @@ private volatile BluetoothLeState BLEState;
     }
 
     public IUiToBtListener getUiBtListener() {
-        return BleUi.getInstance();
+        return BluetoothUi.getInstance();
     }
 
     public IBtToUiListener getIbtToUiListener(){
@@ -265,8 +267,8 @@ private volatile BluetoothLeState BLEState;
         return this;
     }
 
-     ConnectorBluetooth setiReceive(IReceive iReceive) {
-        this.iReceive = iReceive;
+     ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
+        this.iBroadcastReceiver = iBroadcastReceiver;
         return this;
     }
 
@@ -275,8 +277,8 @@ private volatile BluetoothLeState BLEState;
         return this;
     }
 
-     ConnectorBluetooth setiVisible(IVisible iVisible) {
-        this.iVisible = iVisible;
+     ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
+        this.iBtToUiCtrl = iBtToUiCtrl;
         return this;
     }
 
@@ -300,9 +302,9 @@ private volatile BluetoothLeState BLEState;
         // инициализация комманд работающих с устройством
         //----------- Команды вызова диалоговых окон --------------
         discDialogOn = new DisconnectDialogCommand(mBTDevice, this, iMsgToUi);
-        disconnDialogInfoOn = new DisconnInfoDialogCommand(mBTDevice, iMsgToUi, iVisible);
+        disconnDialogInfoOn = new DisconnInfoDialogCommand(mBTDevice, iMsgToUi, iBtToUiCtrl);
         reconnDiaologOn = new ReconnectDialogCommand(mBTDevice, this, iMsgToUi);
-        connDialogInfoOn = new ConnInfoDialogCommand(mBTDevice, iMsgToUi, iVisible);
+        connDialogInfoOn = new ConnInfoDialogCommand(mBTDevice, iMsgToUi, iBtToUiCtrl);
         connDialogOn = new ConnectDialogCommand(mBTDevice, this, iMsgToUi);
         //------------------ Команды соединения/разьединения -----------
         connectDevice = new ConnectCommand(mBTDevice, mBluetoothLeService);

@@ -2,7 +2,7 @@ package by.citech.handsfree.bluetoothlegatt.commands.service;
 
 import android.content.ServiceConnection;
 
-import by.citech.handsfree.IService;
+import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 
 /**

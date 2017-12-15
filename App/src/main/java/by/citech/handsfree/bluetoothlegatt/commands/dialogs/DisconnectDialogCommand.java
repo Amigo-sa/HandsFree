@@ -1,4 +1,4 @@
-package by.citech.handsfree.bluetoothlegatt.commands.dialods;
+package by.citech.handsfree.bluetoothlegatt.commands.dialogs;
 
 import android.bluetooth.BluetoothDevice;
 
@@ -15,12 +15,12 @@ import by.citech.handsfree.logic.ConnectorBluetooth;
  * Created by tretyak on 08.12.2017.
  */
 
-public class ReconnectDialogCommand implements Command {
+public class DisconnectDialogCommand implements Command {
     private BluetoothDevice device;
     private ConnectorBluetooth connectorBluetooth;
     private IMsgToUi iMsgToUi;
 
-    public ReconnectDialogCommand(BluetoothDevice device, ConnectorBluetooth connectorBluetooth, IMsgToUi iMsgToUi) {
+    public DisconnectDialogCommand(BluetoothDevice device, ConnectorBluetooth connectorBluetooth, IMsgToUi iMsgToUi) {
         this.device = device;
         this.connectorBluetooth = connectorBluetooth;
         this.iMsgToUi = iMsgToUi;
@@ -29,15 +29,12 @@ public class ReconnectDialogCommand implements Command {
     @Override
     public void execute() {
         Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Proceed, () -> {
-            connectorBluetooth.disconnect();
-            connectorBluetooth.connecting();
-        });
-        iMsgToUi.sendToUiDialog(true, DialogType.Reconnect, map, device.getName());
+        map.put(DialogState.Proceed, () -> connectorBluetooth.disconnect());
+        iMsgToUi.sendToUiDialog(true, DialogType.Disconnecting, map, device.getName());
     }
 
     @Override
     public void undo() {
-        iMsgToUi.recallFromUiDialog(true, DialogType.Reconnect, DialogState.Idle);
+        iMsgToUi.recallFromUiDialog(true, DialogType.Disconnecting, DialogState.Cancel);
     }
 }

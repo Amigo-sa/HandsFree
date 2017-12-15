@@ -1,6 +1,6 @@
 package by.citech.handsfree.bluetoothlegatt.commands.receiver;
 
-import by.citech.handsfree.bluetoothlegatt.IReceive;
+import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 
@@ -9,17 +9,17 @@ import by.citech.handsfree.logic.ConnectorBluetooth;
  */
 
 public class UnregisterReceiverCommand implements Command {
-    private IReceive iReceive;
+    private IBroadcastReceiver iBroadcastReceiver;
     private ConnectorBluetooth connectorBluetooth;
 
-    public UnregisterReceiverCommand(IReceive iReceive, ConnectorBluetooth connectorBluetooth) {
-        this.iReceive = iReceive;
+    public UnregisterReceiverCommand(IBroadcastReceiver iBroadcastReceiver, ConnectorBluetooth connectorBluetooth) {
+        this.iBroadcastReceiver = iBroadcastReceiver;
         this.connectorBluetooth = connectorBluetooth;
     }
 
     @Override
     public void execute() {
-        iReceive.unregisterReceiver(connectorBluetooth.getBroadcastReceiver());
+        iBroadcastReceiver.unregisterReceiver(connectorBluetooth.getBroadcastReceiver());
     }
 
     @Override

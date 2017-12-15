@@ -1,4 +1,4 @@
-package by.citech.handsfree.bluetoothlegatt;
+package by.citech.handsfree.common;
 
 /**
  * Created by tretyak on 15.12.2017.

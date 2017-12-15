@@ -1,4 +1,4 @@
-package by.citech.handsfree;
+package by.citech.handsfree.common;
 
 import android.content.Intent;
 import android.content.ServiceConnection;

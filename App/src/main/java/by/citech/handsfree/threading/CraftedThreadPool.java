@@ -5,8 +5,8 @@ import android.util.Log;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import by.citech.handsfree.logic.IBase;
-import by.citech.handsfree.logic.IBaseAdder;
+import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 

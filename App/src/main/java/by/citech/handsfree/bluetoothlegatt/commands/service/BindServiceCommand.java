@@ -3,7 +3,7 @@ package by.citech.handsfree.bluetoothlegatt.commands.service;
 import android.content.ServiceConnection;
 import android.util.Log;
 
-import by.citech.handsfree.IService;
+import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 
 import static android.content.Context.BIND_AUTO_CREATE;

@@ -158,10 +158,10 @@ public class SettingsActivity
             if (debug) Log.i(TAG, "prepareBt2NetFactorPref");
             EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.bt2NetFactor));
             if (pref == null) return;
-            pref.setDefaultValue(SettingsDefault.Bluetooth.bt2NetFactor);
+            pref.setDefaultValue(SettingsDefault.Common.bt2NetFactor);
             String entry = pref.getText();
             if (entry == null || entry.length() == 0) {
-                pref.setText(String.valueOf(SettingsDefault.Bluetooth.bt2NetFactor));
+                pref.setText(String.valueOf(SettingsDefault.Common.bt2NetFactor));
             }
             pref.setSummary(pref.getText());
         }
