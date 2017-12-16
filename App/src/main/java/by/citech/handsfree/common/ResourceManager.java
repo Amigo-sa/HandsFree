@@ -2,12 +2,8 @@ package by.citech.handsfree.common;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;

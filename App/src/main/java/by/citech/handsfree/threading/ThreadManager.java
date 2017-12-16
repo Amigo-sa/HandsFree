@@ -77,17 +77,20 @@ public class ThreadManager
     @Override
     public boolean baseStart() {
         IBase.super.baseStart();
-        prepareObject();
-        threadPool.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        if (!prepareObject()) {
+            Log.i(TAG, "baseStart threadPool is still null, return");
+            return false;
+        } else {
+            threadPool.baseStart();
+        }
         return true;
     }
 
     @Override
     public boolean baseStop() {
-//        IBase.super.baseStop();
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
-        threadPool = null;
         return true;
     }
 

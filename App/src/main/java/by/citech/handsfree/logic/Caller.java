@@ -221,7 +221,7 @@ public class Caller
 
     @Override
     public boolean baseStop() {
-//        IBase.super.baseStop();
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         iCallToUiListener = null;
         iCallNetListener = null;
