@@ -24,16 +24,19 @@ public class LeScanner implements IBtToUiListener {
     private IScannListener iScannListener;
     private BluetoothAdapter bluetoothAdapter;
 
-    public LeScanner(Handler mHandler,
-                     IBluetoothListener mIBluetoothListener,
-                     IScannListener iScannListener) {
-        this.mHandler = mHandler;
-        this.mIBluetoothListener = mIBluetoothListener;
+    public LeScanner(IScannListener iScannListener) {
         this.iScannListener = iScannListener;
     }
 
     //--------------------- getters and setters
 
+    public void setHandler(Handler mHandler) {
+        this.mHandler = mHandler;
+    }
+
+    public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
+        this.mIBluetoothListener = mIBluetoothListener;
+    }
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
             if (Settings.debug) Log.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");

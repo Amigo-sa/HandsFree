@@ -20,13 +20,13 @@ public class Characteristics {
 
     private final static String TAG = "WSD_Characteristics";
     // список характеристик устройства
-    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics;
     private IBluetoothListener mIBluetoothListener;
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
 
-    public Characteristics(IBluetoothListener mIBluetoothListener) {
-        this.mIBluetoothListener = mIBluetoothListener;
+    public Characteristics() {
+        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     }
 
     public boolean isEmpty(){
@@ -35,6 +35,9 @@ public class Characteristics {
         return true;
     }
 
+    public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
+        this.mIBluetoothListener = mIBluetoothListener;
+    }
     //Собираем все имеющиеся характеристики устройства в коллекции
     public void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;

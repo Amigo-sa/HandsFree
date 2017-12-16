@@ -18,7 +18,7 @@ public class ControlAdapter implements IScannListener {
 
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private boolean Connected;
-    private volatile BluetoothDevice mBTDevice;
+    private BluetoothDevice mBTDevice;
     private IBluetoothListener mIBluetoothListener;
 
     //--------------------- TEST
@@ -38,7 +38,11 @@ public class ControlAdapter implements IScannListener {
 
     //--------------------- TEST
 
-    public ControlAdapter(IBluetoothListener mIBluetoothListener) {
+    public ControlAdapter() {
+
+    }
+
+    public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
     }
 

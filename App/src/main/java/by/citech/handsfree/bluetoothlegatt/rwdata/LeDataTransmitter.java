@@ -36,15 +36,16 @@ public class LeDataTransmitter implements CallbackWriteListener {
     private boolean isMtuChanged = false;
     private boolean notifyDescriptorWritten = false;
 
-    public LeDataTransmitter(Characteristics characteristics,
-                             IBluetoothListener mIBluetoothListener) {
+    public LeDataTransmitter(Characteristics characteristics) {
         this.characteristics = characteristics;
-        this.mIBluetoothListener = mIBluetoothListener;
         iRxDataListeners = new ArrayList<>();
     }
 
     //-------------------- setters -----------------------------
 
+    public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
+        this.mIBluetoothListener = mIBluetoothListener;
+    }
     public void setBluetoothLeService(BluetoothLeService mBluetoothLeService) {
         this.mBluetoothLeService = mBluetoothLeService;
     }
