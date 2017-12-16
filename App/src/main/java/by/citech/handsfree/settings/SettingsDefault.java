@@ -12,7 +12,7 @@ import by.citech.handsfree.settings.enumeration.OpMode;
 
 public class SettingsDefault {
 
-        public static class Key {
+        public static class TypeName {
             public static final String opMode = "opMode";
             public static final String btLatencyMs = "btLatencyMs";
             public static final String btSinglePacket = "btSinglePacket";

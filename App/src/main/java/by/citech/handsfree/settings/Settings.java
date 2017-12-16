@@ -10,6 +10,7 @@ import android.util.Log;
 import by.citech.handsfree.settings.enumeration.AudioCodecType;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.enumeration.DataSource;
+import by.citech.handsfree.settings.enumeration.ISettingCategory;
 import by.citech.handsfree.settings.enumeration.OpMode;
 
 public class Settings {
@@ -42,12 +43,19 @@ public class Settings {
 
     //--------------------- getters and setters
 
+    public Common getCommon() {
+        return Common.getInstance();
+    }
 
+    public static boolean subscribe(SettingsSubscriber settingsSubscriber) {
+        return false;
+    }
 
     //---------------- Common
 
-    private static class Common
+    public static class Common
             implements ISettingsReset {
+
         private static final String STAG = Tags.SETTINGS_COMMON;
         private static int objCount;
         private final String TAG;
@@ -61,10 +69,8 @@ public class Settings {
             return instance;
         }
 
-
-
         @Override
-        public void resetSettings() {
+        public boolean resetSettings() {
             setThreadNumber(SettingsDefault.Common.threadNumber);
             setDataSource(SettingsDefault.Common.dataSource);
             setOpMode(SettingsDefault.Common.opMode);
@@ -73,11 +79,12 @@ public class Settings {
             setAudioIn2BtFactor(SettingsDefault.Common.audioIn2BtFactor);
             setBt2NetFactor(SettingsDefault.Common.bt2NetFactor);
             setBt2AudioOutFactor(SettingsDefault.Common.bt2AudioOutFactor);
+            return false;
         }
 
         @Override
-        public void resetSetting() {
-
+        public boolean resetSetting(ISettingCategory iSettingCategory) {
+            return false;
         }
 
         public void setThreadNumber(Integer threadNumber) {this.threadNumber = threadNumber;}
@@ -109,6 +116,7 @@ public class Settings {
         private Integer bt2NetFactor;
         private Integer bt2AudioOutFactor;
         private Integer storageMaxSize;
+
     }
 
     public static int threadNumber = 2;

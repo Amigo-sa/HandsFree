@@ -34,17 +34,17 @@ public enum AudioCodecType implements ISettingEnum<AudioCodecType> {
     };
 
     @Override
-    public String getDefaultSettingName() {
-        return getDefaultSetting().getSettingName();
+    public String getDefaultName() {
+        return getDefaultValue().getSettingName();
     };
 
     @Override
-    public String getSettingKey() {
-        return SettingsDefault.Key.audioCodecType;
+    public String getTypeName() {
+        return SettingsDefault.TypeName.audioCodecType;
     };
 
     @Override
-    public AudioCodecType getDefaultSetting() {
+    public AudioCodecType getDefaultValue() {
         return SettingsDefault.AudioCommon.audioCodecType;
     }
 

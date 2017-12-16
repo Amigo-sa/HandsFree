@@ -16,7 +16,7 @@ public class ToBluetooth
     private static final String TAG = Tags.TO_BLUETOOTH;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private int btFactor;
     private int btToBtSendSize;

@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.common.IBroadcastReceiver;
+import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.gui.IBtToUiCtrl;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.Bt2AudOutLooper;
@@ -17,7 +18,6 @@ import by.citech.handsfree.debug.Bt2BtLooper;
 import by.citech.handsfree.debug.Bt2BtRecorder;
 import by.citech.handsfree.debug.AudIn2AudOutLooper;
 import by.citech.handsfree.debug.AudIn2BtLooper;
-import by.citech.handsfree.debug.IDebugListener;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.gui.ICallToUiListener;
 import by.citech.handsfree.gui.IUiToCallListener;
@@ -29,31 +29,46 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Caller
-        implements IBase, ISettingsCtrl, IBaseAdder {
+        implements IBase, ISettingsCtrl, IPrepareObject {
 
-    private final String TAG = Tags.CALLER;
-    private final boolean debug = Settings.debug;
+    private static final String STAG = Tags.CALLER;
+    private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
 
-    //--------------------- settings
+    static {
+        objCount = 0;
+    }
 
-    private boolean isInitiated;
+    //--------------------- preparation
+
+    private boolean isPrepared;
     private OpMode opMode;
 
     {
-        initSettings();
+        objCount++;
+        TAG = STAG + " " + objCount;
+        prepareObject();
     }
 
     @Override
-    public void initSettings() {
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         callerState = CallerState.Null;
-        iBaseList = new ArrayList<>();
         takeSettings();
-        isInitiated = true;
+        isPrepared = true;
+        return isObjectPrepared();
     }
 
     @Override
-    public void takeSettings() {
-        opMode = Settings.opMode;
+    public boolean isObjectPrepared() {
+        return isPrepared;
+    }
+
+    @Override
+    public boolean takeSettings() {
+        opMode = Settings.getInstance().getCommon().getOpMode();
+        return true;
     }
 
     //--------------------- non-settings
@@ -63,8 +78,7 @@ public class Caller
     private ICallNetListener iCallNetListener;
     private INetInfoGetter iNetInfoGetter;
     private IBluetoothListener iBluetoothListener;
-    private IDebugListener iDebugListener;
-    private List<IBase> iBaseList;
+    private IDebugCtrl iDebugCtrl;
     private IBroadcastReceiver iBroadcastReceiver;
     private IService iService;
     private IBtToUiCtrl iBtToUiCtrl;
@@ -84,8 +98,8 @@ public class Caller
                     instance = new Caller();
                 }
             }
-        } else if (!instance.isInitiated) {
-            instance.initSettings();
+        } else {
+            instance.prepareObject();
         }
         return instance;
     }
@@ -120,8 +134,8 @@ public class Caller
         return this;
     }
 
-    public Caller setiDebugListener(IDebugListener listener) {
-        this.iDebugListener = listener;
+    public Caller setiDebugCtrl(IDebugCtrl listener) {
+        this.iDebugCtrl = listener;
         return this;
     }
 
@@ -175,16 +189,13 @@ public class Caller
     //--------------------- main
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (!isInitiated) {
-            initSettings();
-        }
-        if (iCallToUiListener == null || iBaseAdder == null) {
+        prepareObject();
+        if (iCallToUiListener == null) {
             if (debug) Log.e(TAG, "baseStart illegal parameters");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
+            return false;
         }
         switch (opMode) {
             case Bt2Bt:
@@ -210,39 +221,33 @@ public class Caller
                 buildNormal();
                 break;
         }
+        return true;
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
-        if (iBaseList != null) {
-            for (IBase iBase : iBaseList) {
-                if (iBase != null) {
-                    iBase.baseStop();
-                }
-            }
-            iBaseList.clear();
-            iBaseList = null;
-        }
         iCallToUiListener = null;
         iCallNetListener = null;
         iNetInfoGetter = null;
         iBluetoothListener = null;
-        iDebugListener = null;
+        iDebugCtrl = null;
         opMode = null;
         callerState = null;
         iBroadcastReceiver = null;
         iService = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
-        isInitiated = false;
+        isPrepared = false;
+        return true;
     }
 
     //--------------------- data from microphone redirects to bluetooth
 
     private void buildDebugAudIn2Bt() {
         if (debug) Log.i(TAG, "buildDebugAudIn2Bt");
-        if (iDebugListener == null
+        if (iDebugCtrl == null
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
@@ -265,21 +270,21 @@ public class Caller
                 .setiMsgToUi(iMsgToUi);
 
         CallUi callUi = CallUi.getInstance()
-                .addiDebugListener(iDebugListener)
+                .addiDebugListener(iDebugCtrl)
                 .addiDebugListener(audIn2BtLooper)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallToUiListener);
 
-        callUi.baseStart(this);
-        connectorBluetooth.baseStart(this);
-        audIn2BtLooper.baseStart(this);
+        callUi.baseStart();
+        connectorBluetooth.baseStart();
+        audIn2BtLooper.baseStart();
     }
 
     //--------------------- data from bluetooth redirects to dynamic
 
     private void buildBt2AudOut() {
         if (debug) Log.i(TAG, "buildBt2AudOut");
-        if (iDebugListener == null
+        if (iDebugCtrl == null
                 || iBluetoothListener == null
                 || iService == null
                 || iBroadcastReceiver == null
@@ -301,21 +306,21 @@ public class Caller
                 .setiMsgToUi(iMsgToUi);
 
         CallUi callUi = CallUi.getInstance()
-                .addiDebugListener(iDebugListener)
+                .addiDebugListener(iDebugCtrl)
                 .addiDebugListener(bt2AudOutLooper)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallToUiListener);
 
-        callUi.baseStart(this);
-        connectorBluetooth.baseStart(this);
-        bt2AudOutLooper.baseStart(this);
+        callUi.baseStart();
+        connectorBluetooth.baseStart();
+        bt2AudOutLooper.baseStart();
     }
 
     //--------------------- data from microphone redirects to dynamic
 
     private void buildDebugAudIn2AudOut() {
         if (debug) Log.i(TAG, "buildDebugAudIn2AudOut");
-        if (iDebugListener == null) {
+        if (iDebugCtrl == null) {
             if (debug) Log.e(TAG, "buildDebugAudIn2AudOut illegal parameters");
             return;
         }
@@ -323,19 +328,19 @@ public class Caller
         AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper();
 
         CallUi callUi = CallUi.getInstance()
-                .addiDebugListener(iDebugListener)
+                .addiDebugListener(iDebugCtrl)
                 .addiDebugListener(audIn2AudOutLooper)
                 .addiCallUiListener(iCallToUiListener);
 
-        callUi.baseStart(this);
-        audIn2AudOutLooper.baseStart(this);
+        callUi.baseStart();
+        audIn2AudOutLooper.baseStart();
     }
 
     //--------------------- data from bluetooth loops back to bluetooth
 
     private void buildDebugBt2Bt() {
         if (debug) Log.i(TAG, "buildDebugBt2Bt");
-        if (iDebugListener == null
+        if (iDebugCtrl == null
                 || iBluetoothListener == null
                 || iService == null
                 || iBroadcastReceiver == null
@@ -362,21 +367,21 @@ public class Caller
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
-                .addiDebugListener(iDebugListener)
+                .addiDebugListener(iDebugCtrl)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallToUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
-        callUi.baseStart(this);
-        connectorBluetooth.baseStart(this);
-        bt2BtLooper.baseStart(this);
+        callUi.baseStart();
+        connectorBluetooth.baseStart();
+        bt2BtLooper.baseStart();
     }
 
     //--------------------- data from bluetooth recorded and looped back to bluetooth
 
     private void buildDebugRecord() {
         if (debug) Log.i(TAG, "buildDebugRecord");
-        if (iDebugListener == null
+        if (iDebugCtrl == null
                 || iBluetoothListener == null
                 || iService == null
                 || iBroadcastReceiver == null
@@ -403,21 +408,21 @@ public class Caller
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
-                .addiDebugListener(iDebugListener)
+                .addiDebugListener(iDebugCtrl)
                 .addiDebugListener(connectorBluetooth)
                 .addiCallUiListener(iCallToUiListener)
                 .addiCallUiExchangeListener(connectorBluetooth);
 
-        callUi.baseStart(this);
-        connectorBluetooth.baseStart(this);
-        bt2BtRecorder.baseStart(this);
+        callUi.baseStart();
+        connectorBluetooth.baseStart();
+        bt2BtRecorder.baseStart();
     }
 
     //--------------------- data from network looped back to network
 
     private void buildDebugNet2Net() {
         if (debug) Log.i(TAG, "buildDebugNet2Net");
-        if (iDebugListener == null) {
+        if (iDebugCtrl == null) {
             Log.e(TAG, "buildDebugNet2Net illegal parameters");
             return;
         }
@@ -465,19 +470,9 @@ public class Caller
                 .addiCallUiExchangeListener(connectorBluetooth)
                 .addiCallUiListener(connectorNet);
 
-        callUi.baseStart(this);
-        connectorBluetooth.baseStart(this);
-        connectorNet.baseStart(this);
-    }
-
-    @Override
-    public void addBase(IBase iBase) {
-        if (debug) Log.i(TAG, "addBase");
-        if (iBaseList == null || iBase == null) {
-            Log.e(TAG, "addBase iBaseList or iBase is null");
-        } else {
-            iBaseList.add(iBase);
-        }
+        callUi.baseStart();
+        connectorBluetooth.baseStart();
+        connectorNet.baseStart();
     }
 
 }

@@ -17,12 +17,12 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class AudIn2BtLooper
-        implements IDebugListener, IBase, ITransmitter, IReceiverReg {
+        implements IDebugCtrl, IBase, ITransmitter, IReceiverReg {
 
     private static final String TAG = Tags.AUDIN2BT_LOOPER;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private AudioCodecType codecType;
     private AudioCodec audioCodec;

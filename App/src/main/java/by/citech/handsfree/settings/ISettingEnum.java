@@ -3,8 +3,8 @@ package by.citech.handsfree.settings;
 public interface ISettingEnum<T extends ISettingEnum> {
     String getSettingName();
     String getSettingNumber();
-    String getDefaultSettingName();
-    String getSettingKey();
-    T getDefaultSetting();
+    String getDefaultName();
+    String getTypeName();
+    T getDefaultValue();
     T[] getValues();
 }

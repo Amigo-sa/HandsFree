@@ -8,21 +8,15 @@ import by.citech.handsfree.param.Tags;
 public interface ISettingsCtrl {
 
     String TAG = Tags.I_SETTINGS;
-    String MSG_ERR = StatusMessages.ERR_NOT_OVERRIDED;
-    String MSG_WRN = StatusMessages.WRN_NOT_OVERRIDED;
+    String ERR_OVR = StatusMessages.ERR_NOT_OVERRIDED;
 
-    default void initSettings() {
-        Log.w(TAG, "initSettings" + MSG_WRN);
-        takeSettings();
-        applySettings();
+    default boolean takeSettings() {
+        return Settings.subscribe(new SettingsSubscriber(this));
     }
 
-    default void takeSettings() {
-        Log.e(TAG, "takeSettings" + MSG_ERR);
-    }
-
-    default void applySettings() {
-        Log.e(TAG, "applySettings" + MSG_ERR);
+    default boolean applySettings(SeverityLevel severityLevel) {
+        Log.e(TAG, "applySettings" + ERR_OVR);
+        return false;
     }
 
 }

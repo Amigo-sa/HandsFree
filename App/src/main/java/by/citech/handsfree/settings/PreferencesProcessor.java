@@ -33,7 +33,7 @@ public class PreferencesProcessor {
     }
 
     private static <T extends ISettingEnum<T>> T processEnum(SharedPreferences prefs, T defaultT) {
-        String read = prefs.getString(defaultT.getSettingKey(), defaultT.getDefaultSettingName());
+        String read = prefs.getString(defaultT.getTypeName(), defaultT.getDefaultName());
         if (read == null || read.isEmpty()) {
             Log.e(TAG, "processEnum read illegal value" + read);
         } else {
@@ -50,19 +50,19 @@ public class PreferencesProcessor {
 
     private static void processBtLatencyMs(SharedPreferences prefs) {
         Presetter.setBtLatencyMs(Integer.parseInt(
-                prefs.getString(SettingsDefault.Key.btLatencyMs,
+                prefs.getString(SettingsDefault.TypeName.btLatencyMs,
                 Integer.toString(SettingsDefault.Bluetooth.btLatencyMs))));
     }
 
     private static void processBt2NetFactor(SharedPreferences prefs) {
         Presetter.setBt2NetFactor(Integer.parseInt(
-                prefs.getString(SettingsDefault.Key.bt2NetFactor,
+                prefs.getString(SettingsDefault.TypeName.bt2NetFactor,
                 Integer.toString(SettingsDefault.Common.bt2NetFactor))));
     }
 
     private static void processBtSinglePacket(SharedPreferences prefs) {
         Presetter.setBtSinglePacket(
-                prefs.getBoolean(SettingsDefault.Key.btSinglePacket,
+                prefs.getBoolean(SettingsDefault.TypeName.btSinglePacket,
                 SettingsDefault.Bluetooth.btSinglePacket));
     }
 

@@ -6,7 +6,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
@@ -21,7 +21,7 @@ public class CraftedThreadPool
     private ThreadShard[] threads;
     private boolean isActive;
 
-    public CraftedThreadPool() {
+    private CraftedThreadPool() {
         this(Runtime.getRuntime().availableProcessors());
     }
 
@@ -36,16 +36,16 @@ public class CraftedThreadPool
     //-------------------------- IBase
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public void baseStart(IBaseCtrl iBaseCtrl) {
         if (isActive) {
             Log.e(TAG,"baseStart already active");
             return;
         }
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
+        if (iBaseCtrl == null) {
+            Log.e(TAG, "baseStart iBaseCtrl is null");
             return;
         } else {
-            iBaseAdder.addBase(this);
+            iBaseCtrl.addBase(this);
         }
         isActive = true;
         for (ThreadShard thread : threads) {

@@ -11,7 +11,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.common.IBroadcastReceiver;
@@ -54,7 +54,7 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.bluetoothlegatt.StorageListener;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.debug.IDebugListener;
+import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.gui.ICallToUiExchangeListener;
@@ -63,9 +63,14 @@ import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 public class ConnectorBluetooth
-        implements ICallNetExchangeListener, ICallToUiExchangeListener, IDebugListener, StorageListener, ConnectAction , IBase {
+        implements ICallNetExchangeListener, ICallToUiExchangeListener, IDebugCtrl, StorageListener, ConnectAction, IBase, ICaller {
 
-    private final static String TAG = "WSD_ConnectorBluetooth";
+    private final static String STAG = "WSD_ConnectorBluetooth";
+
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++; TAG = STAG + " " + objCount;}
 
     private AlertDialog alertDialog;
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
@@ -214,12 +219,12 @@ private volatile BluetoothLeState BLEState;
     }
 
     //TODO: добавить
-    public IDebugListener getiDebugBtToNetListener() {
+    public IDebugCtrl getiDebugBtToNetListener() {
         return null;
     }
 
     //TODO: добавить
-    public IDebugListener getiDebugNetToBtListener() {
+    public IDebugCtrl getiDebugNetToBtListener() {
         return null;
     }
 
@@ -436,19 +441,16 @@ private volatile BluetoothLeState BLEState;
     };
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (Settings.debug) Log.i(TAG, "baseStart");
-        if (iBaseAdder == null) {
-            if (Settings.debug) Log.e(TAG, "baseStart illegal parameters");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
         build();
+        return true;
     }
 
     @Override
-    public void baseStop(){
+    public boolean baseStop(){
+        IBase.super.baseStop();
         if (Settings.debug) Log.i(TAG, "baseStop");
 
         bleController.setCommand(exchangeDataOff)
@@ -462,6 +464,7 @@ private volatile BluetoothLeState BLEState;
         controlAdapter = null;
         leScanner = null;
         leDataTransmitter = null;
+        return true;
     }
 
     //---------------------------- blecontroller states ------------------------------
@@ -585,14 +588,6 @@ private volatile BluetoothLeState BLEState;
             default:
                 break;
         }
-    }
-
-    private String getCallerStateName() {
-        return Caller.getInstance().getCallerState().getName();
-    }
-
-    private CallerState getCallerState() {
-        return Caller.getInstance().getCallerState();
     }
 
 }

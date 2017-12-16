@@ -14,12 +14,12 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2AudOutLooper
-        implements IDebugListener, IBase, ITransmitter, IReceiverReg {
+        implements IDebugCtrl, IBase, ITransmitter, IReceiverReg {
 
     private static final String TAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private AudioCodecType codecType;
     private AudioCodec audioCodec;

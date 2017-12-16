@@ -7,33 +7,48 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import by.citech.handsfree.common.IBaseCtrl;
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.element.ElementsMemCtrl;
 import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 
 public class Contactor
-        implements IElement<Contact>, IBase, ISettingsCtrl {
+        implements IElement<Contact>, IBase, IPrepareObject {
 
+    private static final String STAG = Tags.CONTACTOR;
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.CONTACTOR;
+    private static int objCount;
+    private final String TAG;
 
-    //--------------------- settings
+    static {
+        objCount = 0;
+    }
+
+    //--------------------- preparation
 
     {
-        initSettings();
+        objCount++;
+        TAG = STAG + " " + objCount;
+        prepareObject();
     }
 
     @Override
-    public void initSettings() {
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         contacts = Collections.synchronizedList(new ArrayList<>());
         memCtrl = new ElementsMemCtrl<>(contacts);
-        isInitiated = true;
+        return isObjectPrepared();
+    }
+
+    @Override
+    public boolean isObjectPrepared() {
+        return contacts != null && memCtrl != null;
     }
 
     //--------------------- non-settings
@@ -43,8 +58,6 @@ public class Contactor
     private ElementsMemCtrl<Contact> memCtrl;
     private List<Contact> contacts;
     private IMsgToUi iMsgToUi;
-    private Context context;
-    private boolean isInitiated;
     private boolean isReady;
 
     //--------------------- singleton
@@ -61,8 +74,8 @@ public class Contactor
                     instance = new Contactor();
                 }
             }
-        } else if (!instance.isInitiated) {
-            instance.initSettings();
+        } else {
+            instance.prepareObject();
         }
         return instance;
     }
@@ -85,64 +98,55 @@ public class Contactor
     }
 
     public Contactor setContext(Context context) {
-        this.context = context;
+        dbCtrl = new ContactsDbCtrl(context);
         return this;
     }
 
     //--------------------- main
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (!isInitiated) {
-            initSettings();
-        }
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
-        if (context == null || listener == null || iMsgToUi == null) {
+        prepareObject();
+        if (dbCtrl == null || listener == null || iMsgToUi == null) {
             Log.e(TAG, "baseStart illegal parameters");
-            return;
+            return true;
         }
-        dbCtrl = new ContactsDbCtrl(context);
         isReady = true;
+        return true;
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
-        if (!isInitiated) {
-            Log.e(TAG, "baseStop already stopped");
-        } else {
-            dbCtrl = null;
-            if (contacts != null) {
-                contacts.clear();
-                contacts = null;
-            }
-            listener = null;
-            memCtrl = null;
-            isInitiated = false;
-            isReady = false;
-            iMsgToUi = null;
+        dbCtrl = null;
+        if (contacts != null) {
+            contacts.clear();
+            contacts = null;
         }
+        listener = null;
+        memCtrl = null;
+        iMsgToUi = null;
+        isReady = false;
+        return true;
     }
 
-    public void getAllContacts() {
+    @Override
+    public boolean initiateElements() {
         if (debug) Log.i(TAG, "getAllContacts");
         if (!isReady) {
             Log.e(TAG, "getAllContacts not ready");
-            return;
+            return false;
         }
         dbCtrl.test(); //TODO: remove, test
         if (!dbCtrl.downloadAllContacts(contacts)) {
             Log.e(TAG, "getAllContacts downloadAllContacts fail");
-            return;
+            return false;
         } else if (contacts.isEmpty()) {
             if (debug) Log.i(TAG, "getAllContacts contacts is empty");
-            return;
+            return false;
         }
         memCtrl.sort();
         for (Contact contact : contacts) {
@@ -154,6 +158,7 @@ public class Contactor
             }
         }
         reportContact(contacts.toArray(new Contact[contacts.size()]));
+        return true;
     }
 
     private boolean check(Contact toUpdate, Contact toCopy) {

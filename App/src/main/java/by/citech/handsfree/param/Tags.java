@@ -72,4 +72,7 @@ public class Tags {
     public static final String I_MSG2UI            = "WSD_I_MSG2UI";
     public static final String THREADPOOL          = "WSD_THREADPOOL";
     public static final String SETTINGS_COMMON     = "WSD_SETTINGS_COMMON";
+    public static final String ENUM_CHECK          = "WSD_ENUM_CHECK";
+    public static final String I_CHECK             = "WSD_I_CHECK";
+    public static final String RESOURCE_MANAGER    = "WSD_RESOURCE_MANAGER";
 }

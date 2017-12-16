@@ -5,47 +5,30 @@ import by.citech.handsfree.settings.SettingsDefault;
 
 public enum OpMode implements ISettingEnum<OpMode> {
 
-    Normal {
-        @Override public String getSettingName() {return "Normal";}
-        @Override public String getSettingNumber() {return "1";}
-    },
-    Bt2Bt {
-        @Override public String getSettingName() {return "Bt2Bt";}
-        @Override public String getSettingNumber() {return "2";}
-    },
-    Net2Net {
-        @Override public String getSettingName() {return "Net2Net";}
-        @Override public String getSettingNumber() {return "3";}
-    },
-    Record {
-        @Override public String getSettingName() {return "Record";}
-        @Override public String getSettingNumber() {return "4";}
-    },
-    Bt2AudOut {
-        @Override public String getSettingName() {return "Bt2AudOut";}
-        @Override public String getSettingNumber() {return "5";}
-    },
-    AudIn2Bt {
-        @Override public String getSettingName() {return "AudIn2Bt";}
-        @Override public String getSettingNumber() {return "6";}
-    },
-    AudIn2AudOut {
-        @Override public String getSettingName() {return "AudIn2AudOut";}
-        @Override public String getSettingNumber() {return "7";}
+    Normal {},
+    Bt2Bt {},
+    Net2Net {},
+    Record {},
+    Bt2AudOut {},
+    AudIn2Bt {},
+    AudIn2AudOut {};
+
+    @Override public String getSettingName() {return this.toString();}
+
+    @Override public String getSettingNumber() {return String.valueOf(this.ordinal() + 1);}
+
+    @Override
+    public String getDefaultName() {
+        return getDefaultValue().getSettingName();
     };
 
     @Override
-    public String getDefaultSettingName() {
-        return getDefaultSetting().getSettingName();
-    };
-
-    @Override
-    public String getSettingKey() {
-        return SettingsDefault.Key.opMode;
+    public String getTypeName() {
+        return SettingsDefault.TypeName.opMode;
     }
 
     @Override
-    public OpMode getDefaultSetting() {
+    public OpMode getDefaultValue() {
         return SettingsDefault.Common.opMode;
     }
 

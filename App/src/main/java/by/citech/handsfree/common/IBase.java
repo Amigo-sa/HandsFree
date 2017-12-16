@@ -9,16 +9,13 @@ public interface IBase {
 
     String TAG = Tags.I_BASE;
     String ERR_MSG = StatusMessages.ERR_NOT_OVERRIDED;
-    String WRN_MSG = StatusMessages.WRN_NOT_OVERRIDED;
 
-    default void baseStart(IBaseAdder iBaseAdder) {
-        Log.w(TAG, "baseStart" + WRN_MSG);
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
+    default boolean baseStart() {
+        return ResourceManager.getInstance().addBase(this);
+    }
+
+    default boolean baseStop() {
+        return ResourceManager.getInstance().removeBase(this);
     }
 
     default void basePause() {
@@ -27,10 +24,6 @@ public interface IBase {
 
     default void baseResume() {
         Log.e(TAG, "baseResume" + ERR_MSG);
-    }
-
-    default void baseStop() {
-        Log.e(TAG, "baseStop" + ERR_MSG);
     }
 
 }

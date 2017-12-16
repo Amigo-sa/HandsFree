@@ -4,17 +4,16 @@ import android.util.Log;
 
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2BtLooper
-        implements IDebugListener, IBase {
+        implements IDebugCtrl, IBase {
 
     private static final String TAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private int btFactor;
     private int bt2btPacketSize;
@@ -49,14 +48,9 @@ public class Bt2BtLooper
     }
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
         isRunning = false;
         isActive = true;
         new Thread(() -> {
@@ -74,6 +68,7 @@ public class Bt2BtLooper
             storageBtToNet = null;
             storageNetToBt = null;
         }).start();
+        return true;
     }
 
     private void looping() {
@@ -100,10 +95,12 @@ public class Bt2BtLooper
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         isActive = false;
+        return true;
     }
 
     @Override

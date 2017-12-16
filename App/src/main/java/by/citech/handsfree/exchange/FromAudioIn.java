@@ -14,7 +14,7 @@ public class FromAudioIn
     private final String TAG = Tags.FROM_AUDIN;
     private final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private boolean audioBuffIsShorts;
     private int audioSource;

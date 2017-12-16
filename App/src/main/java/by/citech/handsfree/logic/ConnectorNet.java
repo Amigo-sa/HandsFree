@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.RedirectFromNet;
@@ -39,10 +39,15 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg,
-        IMessage, IServerOff, IDisc, INetListener, ICallToUiListener, IBase {
+        IMessage, IServerOff, IDisc, INetListener, ICallToUiListener, IBase, ICaller {
 
-    private static final String TAG = Tags.NET_CONNECTOR;
+    private static final String STAG = Tags.NET_CONNECTOR;
     private static final boolean debug = Settings.debug;
+
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++; TAG = STAG + " " + objCount;}
 
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
@@ -116,35 +121,25 @@ public class ConnectorNet
     //--------------------- main
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
         new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
+        return true;
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         new ThreadNetStop().start();
+        return true;
     }
 
     //--------------------- common
 
     private boolean setState(CallerState fromCallerState, CallerState toCallerState) {
         return Caller.getInstance().setState(fromCallerState, toCallerState);
-    }
-
-    private String getStateName() {
-        return Caller.getInstance().getCallerState().getName();
-    }
-
-    private CallerState getState() {
-        return Caller.getInstance().getCallerState();
     }
 
     //--------------------- ICallToUiListener
@@ -195,14 +190,14 @@ public class ConnectorNet
     @Override
     public void srvOnOpen() {
         if (debug) Log.i(TAG, "srvOnOpen");
-        switch (getState()) {
+        switch (getCallerState()) {
             case Idle:
                 if (debug) Log.i(TAG, "srvOnOpen Idle");
                 if (setState(CallerState.Idle, CallerState.IncomingDetected))
                     for (ICallNetListener listener : iCallNetListeners) listener.callIncomingDetected();
                 break;
             default:
-                if (debug) Log.e(TAG, "srvOnOpen " + getStateName());
+                if (debug) Log.e(TAG, "srvOnOpen " + getCallerStateName());
                 disconnect(iServerCtrl); // TODO: обрываем, если не ждём звонка?
         }
     }
@@ -210,7 +205,7 @@ public class ConnectorNet
     @Override
     public void srvOnFailure() {
         if (debug) Log.i(TAG, "srvOnFailure");
-        switch (getState()) {
+        switch (getCallerState()) {
             case IncomingDetected:
                 if (debug) Log.i(TAG, "srvOnFailure IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Error))
@@ -223,14 +218,14 @@ public class ConnectorNet
                 exchangeStop();
                 break;
             default:
-                if (debug) Log.e(TAG, "srvOnFailure " + getStateName());
+                if (debug) Log.e(TAG, "srvOnFailure " + getCallerStateName());
         }
     }
 
     @Override
     public void srvOnClose() {
         if (debug) Log.i(TAG, "srvOnClose");
-        switch (getState()) {
+        switch (getCallerState()) {
             case IncomingDetected:
                 if (debug) Log.i(TAG, "srvOnClose IncomingDetected");
                 if (setState(CallerState.IncomingDetected, CallerState.Idle))
@@ -243,21 +238,21 @@ public class ConnectorNet
                 exchangeStop();
                 break;
             default:
-                if (debug) Log.e(TAG, "srvOnClose " + getStateName());
+                if (debug) Log.e(TAG, "srvOnClose " + getCallerStateName());
         }
     }
 
     @Override
     public void cltOnOpen() {
         if (debug) Log.i(TAG, "cltOnOpen");
-        switch (getState()) {
+        switch (getCallerState()) {
             case OutcomingStarted:
                 if (debug) Log.i(TAG, "cltOnOpen Call");
                 if (setState(CallerState.OutcomingStarted, CallerState.OutcomingConnected))
                     for (ICallNetListener listener : iCallNetListeners) listener.callOutcomingConnected();
                 break;
             default:
-                Log.e(TAG, "cltOnOpen " + getStateName());
+                Log.e(TAG, "cltOnOpen " + getCallerStateName());
                 disconnect(iClientCtrl); // TODO: обрываем, если не звонили?
                 break;
         }
@@ -266,7 +261,7 @@ public class ConnectorNet
     @Override
     public void cltOnFailure() {
         if (debug) Log.i(TAG, "cltOnFailure");
-        switch (getState()) {
+        switch (getCallerState()) {
             case OutcomingConnected:
                 if (debug) Log.i(TAG, "cltOnFailure OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
@@ -284,14 +279,14 @@ public class ConnectorNet
                 exchangeStop();
                 break;
             default:
-                Log.e(TAG, "cltOnFailure " + getStateName());
+                Log.e(TAG, "cltOnFailure " + getCallerStateName());
                 break;
         }
     }
 
     @Override
     public void cltOnMessageText(String message) {
-        switch (getState()) {
+        switch (getCallerState()) {
             case OutcomingConnected:
                 if (debug) Log.i(TAG, "cltOnMessageText OutcomingConnected");
                 if (message.equals(Messages.RESPONSE_ACCEPT)) {
@@ -312,7 +307,7 @@ public class ConnectorNet
     @Override
     public void cltOnClose() {
         if (debug) Log.i(TAG, "cltOnClose");
-        switch (getState()) {
+        switch (getCallerState()) {
             case OutcomingConnected:
                 if (debug) Log.i(TAG, "cltOnClose OutcomingConnected");
                 if (setState(CallerState.OutcomingConnected, CallerState.Idle))
@@ -324,7 +319,7 @@ public class ConnectorNet
                     for (ICallNetExchangeListener listener : iCallNetExchangeListeners) listener.callEndedExternally();
                 break;
             default:
-                if (debug) Log.e(TAG, "cltOnClose " + getStateName());
+                if (debug) Log.e(TAG, "cltOnClose " + getCallerStateName());
         }
     }
 
@@ -430,7 +425,7 @@ public class ConnectorNet
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
         if (debug) Log.i(TAG, "serverStarted");
-        switch (getState()) {
+        switch (getCallerState()) {
             case Null:
                 if (iServerCtrl == null) {
                     if (setState(CallerState.Null, CallerState.GeneralFailure))

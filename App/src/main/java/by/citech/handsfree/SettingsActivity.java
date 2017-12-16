@@ -214,12 +214,12 @@ public class SettingsActivity
                 return;
             }
             switch (s) {
-                case SettingsDefault.Key.opMode:
-                case SettingsDefault.Key.audioCodecType:
+                case SettingsDefault.TypeName.opMode:
+                case SettingsDefault.TypeName.audioCodecType:
                     refreshListPref(s);
                     break;
-                case SettingsDefault.Key.bt2NetFactor:
-                case SettingsDefault.Key.btLatencyMs:
+                case SettingsDefault.TypeName.bt2NetFactor:
+                case SettingsDefault.TypeName.btLatencyMs:
                     refreshEditTextPref(s);
                     break;
             }

@@ -15,7 +15,7 @@ public class ToAudioOut
     private static final String TAG = Tags.TO_AUDOUT;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private boolean audioBuffIsShorts;
     private int audioStreamType;

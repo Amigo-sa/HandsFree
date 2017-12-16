@@ -2,12 +2,14 @@ package by.citech.handsfree.gui.helper;
 
 import android.util.Log;
 
+import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.gui.helper.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
-public class ActiveContactHelper {
+public class ActiveContactHelper
+        implements IBase {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.ACTIVE_HELPER;
@@ -21,6 +23,27 @@ public class ActiveContactHelper {
         this.viewHelper = viewHelper;
         activeContactState = ActiveContactState.IpFromSearch;
     }
+
+    //--------------------- IBase
+
+    @Override
+    public boolean baseStart() {
+        IBase.super.baseStart();
+        if (debug) Log.i(TAG, "baseStart");
+        return true;
+    }
+
+    @Override
+    public boolean baseStop() {
+        IBase.super.baseStop();
+        if (debug) Log.i(TAG, "baseStop");
+        activeContactState = null;
+        chosenContactHelper = null;
+        viewHelper = null;
+        return true;
+    }
+
+    //--------------------- getters and setters
 
     public Contact getContact() {
         switch (activeContactState) {
@@ -42,7 +65,9 @@ public class ActiveContactHelper {
         return null;
     }
 
-    public ActiveContactState getState() {return activeContactState;}
+    public ActiveContactState getState() {
+        return activeContactState;
+    }
 
     public void goToState(ActiveContactState toState) {
         if (debug) Log.i(TAG, "goToState");
@@ -69,7 +94,7 @@ public class ActiveContactHelper {
     }
 
     public String getName() {
-        if (debug) Log.i(TAG, "getSettingName");
+        if (debug) Log.i(TAG, "getName");
         switch (activeContactState) {
             case FromChosen:
                 return getContact().getName();

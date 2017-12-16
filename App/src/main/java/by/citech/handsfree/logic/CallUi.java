@@ -4,8 +4,8 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
-import by.citech.handsfree.debug.IDebugListener;
+import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.gui.ICallToUiExchangeListener;
 import by.citech.handsfree.gui.ICallToUiListener;
 import by.citech.handsfree.gui.IUiToCallListener;
@@ -15,39 +15,47 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class CallUi
-        implements IUiToCallListener, IBase, ISettingsCtrl {
+        implements IUiToCallListener, IBase, ISettingsCtrl, IPrepareObject, ICaller {
 
     private static final String TAG = Tags.CALL_UI;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private OpMode opMode;
-    private boolean isInitiated;
+    private boolean isPrepared;
 
     {
-        initSettings();
+        prepareObject();
     }
 
     @Override
-    public void initSettings() {
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         takeSettings();
         iCallToUiListeners = new ArrayList<>();
         iCallToUiExchangeListeners = new ArrayList<>();
-        iDebugListeners = new ArrayList<>();
-        isInitiated = true;
+        iDebugCtrls = new ArrayList<>();
+        isPrepared = true;
+        return isObjectPrepared();
     }
 
     @Override
-    public void takeSettings() {
-        opMode = Settings.opMode;
+    public boolean isObjectPrepared() {
+        return isPrepared && iCallToUiListeners != null && iCallToUiExchangeListeners != null && iDebugCtrls != null;
+    }
+
+    @Override
+    public boolean takeSettings() {
+        opMode = Settings.getInstance().getCommon().getOpMode();
+        return true;
     }
 
     //--------------------- non-settings
 
     private ArrayList<ICallToUiListener> iCallToUiListeners;
     private ArrayList<ICallToUiExchangeListener> iCallToUiExchangeListeners;
-    private ArrayList<IDebugListener> iDebugListeners;
+    private ArrayList<IDebugCtrl> iDebugCtrls;
 
     //--------------------- singleton
 
@@ -63,16 +71,16 @@ public class CallUi
                     instance = new CallUi();
                 }
             }
-        } else if (!instance.isInitiated) {
-            instance.initSettings();
+        } else {
+            instance.prepareObject();
         }
         return instance;
     }
 
     //--------------------- getters and setters
 
-    public CallUi addiDebugListener(IDebugListener iDebugListener) {
-        iDebugListeners.add(iDebugListener);
+    public CallUi addiDebugListener(IDebugCtrl iDebugCtrl) {
+        iDebugCtrls.add(iDebugCtrl);
         return this;
     }
 
@@ -87,38 +95,19 @@ public class CallUi
         return this;
     }
 
-    //--------------------- common
-
-    private String getCallerStateName() {
-        return Caller.getInstance().getCallerState().getName();
-    }
-
-    private CallerState getCallerState() {
-        return Caller.getInstance().getCallerState();
-    }
-
-    private boolean setCallerState(CallerState fromCallerState, CallerState toCallerState) {
-         return Caller.getInstance().setState(fromCallerState, toCallerState);
-    }
-
     //--------------------- base
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
-        if (!isInitiated) {
-            initSettings();
-        }
+        prepareObject();
+        return true;
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         if (iCallToUiListeners != null) {
             iCallToUiListeners.clear();
@@ -128,12 +117,12 @@ public class CallUi
             iCallToUiExchangeListeners.clear();
             iCallToUiExchangeListeners = null;
         }
-        if (iDebugListeners != null) {
-            iDebugListeners.clear();
-            iDebugListeners = null;
+        if (iDebugCtrls != null) {
+            iDebugCtrls.clear();
+            iDebugCtrls = null;
         }
         opMode = null;
-        isInitiated = false;
+        return true;
     }
 
     //--------------------- main
@@ -141,7 +130,7 @@ public class CallUi
     @Override
     public void onClickBtnGreen() {
         if (debug) Log.i(TAG, "onClickBtnGreen");
-        if (!isInitiated) {
+        if (!isPrepared) {
             Log.e(TAG, "onClickBtnGreen not initiated");
             return;
         }
@@ -155,7 +144,7 @@ public class CallUi
                 switch (getCallerState()) {
                     case Null:
                         if (setCallerState(CallerState.Null, CallerState.DebugLoopBack))
-                            for (IDebugListener listener : iDebugListeners)
+                            for (IDebugCtrl listener : iDebugCtrls)
                                 listener.startDebug();
                         break;
                     default:
@@ -167,12 +156,12 @@ public class CallUi
                 switch (getCallerState()) {
                     case DebugRecorded:
                         if (setCallerState(CallerState.DebugRecorded, CallerState.DebugPlay))
-                            for (IDebugListener listener : iDebugListeners)
+                            for (IDebugCtrl listener : iDebugCtrls)
                                 listener.startDebug();
                         break;
                     case Null:
                         if (setCallerState(CallerState.Null, CallerState.DebugRecord))
-                            for (IDebugListener listener : iDebugListeners)
+                            for (IDebugCtrl listener : iDebugCtrls)
                                 listener.startDebug();
                         break;
                     default:
@@ -206,7 +195,7 @@ public class CallUi
     @Override
     public void onClickBtnRed() {
         if (debug) Log.i(TAG, "onClickBtnRed");
-        if (!isInitiated) {
+        if (!isPrepared) {
             Log.e(TAG, "onClickBtnRed not initiated");
             return;
         }
@@ -219,7 +208,7 @@ public class CallUi
                 switch (getCallerState()) {
                     case DebugLoopBack:
                         if (setCallerState(CallerState.DebugLoopBack, CallerState.Null))
-                            for (IDebugListener listener : iDebugListeners)
+                            for (IDebugCtrl listener : iDebugCtrls)
                                 listener.stopDebug();
                         break;
                     default:
@@ -231,12 +220,12 @@ public class CallUi
                 switch (getCallerState()) {
                     case DebugPlay:
                         if (setCallerState(CallerState.DebugPlay, CallerState.DebugRecorded))
-                            for (IDebugListener listener : iDebugListeners)
+                            for (IDebugCtrl listener : iDebugCtrls)
                                 listener.stopDebug();
                         break;
                     case DebugRecord:
                         if (setCallerState(CallerState.DebugRecord, CallerState.DebugRecorded))
-                            for (IDebugListener listener : iDebugListeners)
+                            for (IDebugCtrl listener : iDebugCtrls)
                                 listener.stopDebug();
                         break;
                     default:
@@ -277,6 +266,15 @@ public class CallUi
                 }
                 break;
         }
+    }
+
+    private void report(Runnable runnable) {
+        if (debug) Log.i(TAG, "report");
+        if (runnable == null) {
+            Log.e(TAG, "report runnable is null");
+            return;
+        }
+
     }
 
 }

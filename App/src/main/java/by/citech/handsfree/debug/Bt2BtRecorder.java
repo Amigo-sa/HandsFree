@@ -5,17 +5,17 @@ import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.CallerState;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.logic.ICaller;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2BtRecorder
-        implements IDebugListener, IBase {
+        implements IDebugCtrl, IBase, ICaller {
 
     private final String TAG = Tags.BT2BT_RECORDER;
     private final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private int recordSize;
     private int btFactor;
@@ -53,15 +53,12 @@ public class Bt2BtRecorder
         this.storageToBt = storageToBt;
     }
 
+    //--------------------- IBase
+
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
         isActive = true;
         new Thread(() -> {
             while (isActive) {
@@ -85,7 +82,19 @@ public class Bt2BtRecorder
             dataAssembled = null;
             dataSaved = null;
         }).start();
+        return true;
     }
+
+    @Override
+    public boolean baseStop() {
+        IBase.super.baseStop();
+        if (debug) Log.i(TAG, "baseStop");
+        stopDebug();
+        isActive = false;
+        return true;
+    }
+
+    //--------------------- main
 
     private void record() {
         if (debug) Log.i(TAG, "record");
@@ -111,13 +120,6 @@ public class Bt2BtRecorder
         }
     }
 
-    @Override
-    public void baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        stopDebug();
-        isActive = false;
-    }
-
     private void play() {
         if (debug) Log.i(TAG, "play");
         for (int i = 0; i < dataSavedCount; i++) {
@@ -125,6 +127,8 @@ public class Bt2BtRecorder
         }
         isPlaying = false;
     }
+
+    //--------------------- IDebugCtrl
 
     @Override
     public void startDebug() {
@@ -147,10 +151,6 @@ public class Bt2BtRecorder
         isPlaying = false;
         isRecording = false;
         storageToBt.clear();
-    }
-
-    private CallerState getCallerState() {
-        return Caller.getInstance().getCallerState();
     }
 
 }

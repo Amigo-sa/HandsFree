@@ -3,10 +3,6 @@ package by.citech.handsfree.logic;
 import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
-/**
- * Created by tretyak on 15.12.2017.
- */
-
 public class BluetoothUi implements IUiToBtListener {
 
     private static final String TAG = "WSD_BleUi";

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import by.citech.handsfree.common.IBaseCtrl;
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.gui.helper.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.ContactState;
@@ -20,28 +22,43 @@ import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.threading.CraftedThreadPool;
+import by.citech.handsfree.threading.IThreadManager;
 
 public class ContactEditorHelper
-        implements IBase, IContactsListener, ISettingsCtrl {
+        implements IBase, IContactsListener, IPrepareObject, IThreadManager {
 
+    private static final String STAG = Tags.EDITOR_HELPER;
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.EDITOR_HELPER;
+    private static int objCount;
+    private final String TAG;
 
-    //--------------------- settings
+    static {
+        objCount = 0;
+    }
 
-    private boolean isInitiated;
+    //--------------------- preparation
+
+    private boolean isPrepared;
 
     {
-        initSettings();
+        objCount++;
+        TAG = STAG + " " + objCount;
+        prepareObject();
     }
 
     @Override
-    public void initSettings() {
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         contactToEditPosition = -1;
         contactToDeletePosition = -1;
         editorState = EditorState.Inactive;
-        isInitiated = true;
+        isPrepared = true;
+        return isObjectPrepared();
+    }
+
+    @Override
+    public boolean isObjectPrepared() {
+        return isPrepared;
     }
 
     //--------------------- non-settings
@@ -57,7 +74,6 @@ public class ContactEditorHelper
     private IElement<Contact> iContact;
     private ContactsRecyclerAdapter contactsAdapter;
     private IMsgToUi iMsgToUi;
-    private CraftedThreadPool threadPool;
 
     //--------------------- singleton
 
@@ -73,10 +89,43 @@ public class ContactEditorHelper
                     instance = new ContactEditorHelper();
                 }
             }
-        } else if (!instance.isInitiated) {
-            instance.initSettings();
+        } else {
+            instance.prepareObject();
         }
         return instance;
+    }
+
+    //--------------------- base
+
+    @Override
+    public boolean baseStart() {
+        IBase.super.baseStart();
+        if (debug) Log.i(TAG, "baseStart");
+        return true;
+    }
+
+    @Override
+    public boolean baseStop() {
+        IBase.super.baseStop();
+        if (debug) Log.i(TAG, "baseStart");
+        contactToEdit = null;
+        contactToAdd = null;
+        contactToEditPosition = -1;
+        contactToDeletePosition = -1;
+        isEditPending = false;
+        isAddPending = false;
+        isDeletePending = false;
+        isEdited = false;
+        isDeleted = false;
+        isSwipedIn = false;
+        editorState = null;
+        viewHelper = null;
+        swipeCrutch = null;
+        activeContactHelper = null;
+        iContact = null;
+        contactsAdapter = null;
+        iMsgToUi = null;
+        return true;
     }
 
     //--------------------- getters and setters
@@ -98,11 +147,6 @@ public class ContactEditorHelper
 
     public ContactEditorHelper setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
-        return this;
-    }
-
-    public ContactEditorHelper setThreadPool(CraftedThreadPool threadPool) {
-        this.threadPool = threadPool;
         return this;
     }
 
@@ -227,7 +271,7 @@ public class ContactEditorHelper
         freezeState();
         contactToDeletePosition = contactToEditPosition;
         Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Proceed, () -> threadPool.addRunnable(() -> iContact.deleteElement(contactToEdit)));
+        map.put(DialogState.Proceed, () -> addRunnable(() -> iContact.deleteElement(contactToEdit)));
         map.put(DialogState.Cancel, this::releaseState);
         iMsgToUi.sendToUiDialog(true, DialogType.Delete, map);
     }
@@ -239,12 +283,12 @@ public class ContactEditorHelper
                 freezeState();
                 isAddPending = true;
                 contactToAdd = activeContactHelper.getContact();
-                threadPool.addRunnable(() -> iContact.addElement(contactToAdd));
+                addRunnable(() -> iContact.addElement(contactToAdd));
                 break;
             case Edit:
                 freezeState();
                 isEditPending = true;
-                threadPool.addRunnable(() -> iContact.updateElement(contactToEdit, activeContactHelper.getContact()));
+                addRunnable(() -> iContact.updateElement(contactToEdit, activeContactHelper.getContact()));
                 break;
             case Inactive:
                 Log.e(TAG, "saveContact editorState Inactive");

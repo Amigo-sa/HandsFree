@@ -40,13 +40,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.common.IService;
+import by.citech.handsfree.common.ResourceManager;
 import by.citech.handsfree.gui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
@@ -69,8 +68,6 @@ import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.gui.helper.ViewHelper;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
-import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.gui.IUiToCallListener;
 import by.citech.handsfree.network.INetInfoGetter;
@@ -79,7 +76,6 @@ import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.threading.CraftedThreadPool;
 import by.citech.handsfree.util.Keyboard;
 
 import static by.citech.handsfree.util.Network.getIpAddr;
@@ -87,10 +83,16 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class DeviceControlActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IMsgToUi, IBaseAdder, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter {
+        IMsgToUi, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter {
 
-    private static final String TAG = Tags.ACT_DEVICECTRL;
+    private static final String STAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
+
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++; TAG = STAG + " " + objCount;}
+
     private OpMode opMode;
 
     public static final int REQUEST_LOCATION = 99;
@@ -122,12 +124,9 @@ public class DeviceControlActivity
     private ActiveContactHelper activeContactHelper;
     private ChosenContactHelper chosenContactHelper;
 
-    private CraftedThreadPool threadPool;
-
     // для включения разрешения местоположения
     private LocationManager locationManager;
     private String provider;
-    private List<IBase> iBaseList;
     // интерфейсы для работы gui с bt
     private IUiToBtListener IUiToBtListener;
     private IBtToUiListener IBtToUiListener;
@@ -142,11 +141,10 @@ public class DeviceControlActivity
 
         PreferencesProcessor.process(this);
         opMode = Settings.opMode;
-        if (debug) Log.w(TAG, "onCreate opMode is " + opMode.getSettingName());
-        iBaseList = new ArrayList<>();
+        if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
         viewHelper = new ViewHelper();
-        viewHelper.setiGetGetter(this).baseStart(this);
+        viewHelper.setiGetGetter(this).baseStart();
 
         mainView = findViewById(R.id.mainView);
         scanView = findViewById(R.id.scanView);
@@ -199,7 +197,7 @@ public class DeviceControlActivity
 
         Caller.getInstance()
                 .setiCallToUiListener(viewHelper)
-                .setiDebugListener(viewHelper)
+                .setiDebugCtrl(viewHelper)
                 .setiCallNetListener(viewHelper)
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
@@ -212,8 +210,6 @@ public class DeviceControlActivity
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
 
         dialogProcessor = new DialogProcessor(this);
-        threadPool = new CraftedThreadPool(Settings.threadNumber);
-        threadPool.baseStart(this);
 
         setupViewRecyclerContacts();
         setupContactEditor();
@@ -224,9 +220,8 @@ public class DeviceControlActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        Contactor.getInstance().baseStart(this);
-        threadPool.addRunnable(() -> Contactor.getInstance().getAllContacts());
-        Caller.getInstance().baseStart(this);
+        Contactor.getInstance().baseStart();
+        Caller.getInstance().baseStart();
         IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
@@ -261,15 +256,7 @@ public class DeviceControlActivity
     protected void onStop() {
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
-        if (iBaseList != null) {
-            for (IBase iBase : iBaseList) {
-                if (iBase != null) {
-                    iBase.baseStop();
-                }
-            }
-            iBaseList.clear();
-            iBaseList = null;
-        }
+        ResourceManager.getInstance().baseStop();
     }
 
     @Override
@@ -424,7 +411,6 @@ public class DeviceControlActivity
                 .setSwipeCrutch(swipeCrutch)
                 .setActiveContactHelper(activeContactHelper)
                 .setiMsgToUi(this)
-                .setThreadPool(threadPool)
                 .setiContact(Contactor.getInstance())
                 .setContactsAdapter(contactsAdapter);
         TextWatcher textWatcher = new TextWatcher() {
@@ -742,18 +728,6 @@ public class DeviceControlActivity
             invalidateOptionsMenu();
             viewHelper.showScaner();
         });
-    }
-
-    //--------------------- IBaseAdder
-
-    @Override
-    public void addBase(IBase iBase) {
-        if (debug) Log.i(TAG, "addBase");
-        if (iBaseList == null || iBase == null) {
-            Log.e(TAG, "addBase iBaseList or iBase is null");
-        } else {
-            iBaseList.add(iBase);
-        }
     }
 
     //--------------------- IGetViewGetter, IGetView

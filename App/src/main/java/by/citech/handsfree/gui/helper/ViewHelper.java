@@ -9,16 +9,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.debug.IDebugListener;
+import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.gui.ICallToUiListener;
 import by.citech.handsfree.gui.IGetView;
 import by.citech.handsfree.gui.IGetViewGetter;
-import by.citech.handsfree.logic.Caller;
-import by.citech.handsfree.logic.CallerState;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseAdder;
+import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.logic.ICallNetListener;
+import by.citech.handsfree.logic.ICaller;
 import by.citech.handsfree.param.Colors;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.OpMode;
@@ -27,48 +27,53 @@ import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.util.Contacts;
 
 public class ViewHelper
-        implements ICallToUiListener, ICallNetListener, IDebugListener, IBase, ISettingsCtrl {
+        implements ICallToUiListener, ICallNetListener, IDebugCtrl, IBase, ISettingsCtrl, ICaller, IPrepareObject {
 
+    private static final String STAG = Tags.VIEW_HELPER;
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.VIEW_HELPER;
+
+    private static int objCount;
+    private final String TAG;
 
     private static final int DARKCYAN = Colors.DARKCYAN;
     private static final int DARKKHAKI = Colors.DARKKHAKI;
 
-    //--------------------- debug
-
-    private static int objCount;
-
     static {
-        if (debug) Log.i(TAG,"static initiate");
+        if (debug) Log.i(STAG,"static initiate");
         objCount = 0;
     }
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private OpMode opMode;
 
     {
-        if (debug) Log.i(TAG,"non-static initiate");
         objCount++;
-        initSettings();
+        TAG = STAG + " " + objCount;
+        prepareObject();
     }
 
     @Override
-    public void initSettings() {
-        if (debug) Log.i(TAG,"initiate");
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         takeSettings();
-        isInitiated = true;
+        isPrepared = true;
+        return isObjectPrepared();
     }
 
     @Override
-    public void takeSettings() {
-        opMode = Settings.opMode;
+    public boolean isObjectPrepared() {
+        return isPrepared && (iGetGetter != null);
+    }
+
+    @Override
+    public boolean takeSettings() {
+        opMode = Settings.getInstance().getCommon().getOpMode();
+        return true;
     }
 
     //--------------------- non-settings
 
-    private final int objNumber;
     private IGetViewGetter iGetGetter;
     private IGetView iGetter;
     private View scanView;
@@ -88,11 +93,9 @@ public class ViewHelper
     private Button btnChangeDevice;
     private Animation animCall;
     private boolean isCallAnim;
-    private boolean isInitiated;
+    private boolean isPrepared;
 
     public ViewHelper() {
-        objNumber = objCount;
-        if (debug) Log.w(TAG, "this object's number is " + objNumber);
     }
 
     //--------------------- getters and setters
@@ -105,23 +108,18 @@ public class ViewHelper
     //--------------------- base
 
     @Override
-    public void baseStart(IBaseAdder iBaseAdder) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        if (iBaseAdder == null) {
-            Log.e(TAG, "baseStart iBaseAdder is null");
-            return;
-        } else {
-            iBaseAdder.addBase(this);
-        }
-        if (!isInitiated) {
-            initSettings();
-        }
+        prepareObject();
 //      takeViews();
         setDefaultView();
+        return true;
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         scanView = null;
         mainView = null;
@@ -142,17 +140,18 @@ public class ViewHelper
         iGetter = null;
         iGetGetter = null;
         isCallAnim = false;
-        isInitiated = false;
+        isPrepared = false;
+        return true;
     }
+
+    //--------------------- main
 
     private void setDefaultView() {
         if (debug) Log.i(TAG, "setDefaultView");
-        if (!isInitiated) {
-            initSettings();
-            if (debug) Log.w(TAG, "setDefaultView opMode is " + opMode.getSettingName());
-        }
+
         getBtnChangeDevice().setText(R.string.connect_device);
         getBtnChangeDevice().setBackgroundColor(DARKCYAN);
+
         switch (opMode) {
             case Bt2AudOut:
                 enableBtnCall(getBtnGreen(), "RECEIVING");
@@ -191,10 +190,7 @@ public class ViewHelper
                 getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
         }
-        prepare();
-    }
 
-    private void prepare() {
         getAnimCall().setAnimationListener(new Animation.AnimationListener() {
             @Override public void onAnimationStart(Animation animation) {}
             @Override public void onAnimationEnd(Animation animation) {if (isCallAnim) {startCallAnim();}}
@@ -468,15 +464,7 @@ public class ViewHelper
         isCallAnim = false;
     }
 
-    //--------------------- IDebugListener
-
-    private CallerState getCallerState() {
-        return Caller.getInstance().getCallerState();
-    }
-
-    private String getCallerStateName() {
-        return Caller.getInstance().getCallerState().getName();
-    }
+    //--------------------- IDebugCtrl
 
     @Override
     public void startDebug() {

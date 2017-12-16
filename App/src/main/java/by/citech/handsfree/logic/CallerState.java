@@ -9,17 +9,11 @@ public enum CallerState {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Idle, GeneralFailure, DebugLoopBack, DebugRecord));
         }
-        public String getName() {
-            return "Null";
-        }
     },
 
     Idle {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, OutcomingStarted, IncomingDetected));
-        }
-        public String getName() {
-            return "Idle";
         }
     },
 
@@ -27,17 +21,11 @@ public enum CallerState {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, Idle, OutcomingConnected));
         }
-        public String getName() {
-            return "OutcomingStarted";
-        }
     },
 
     OutcomingConnected {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, Idle, Call));
-        }
-        public String getName() {
-            return "OutcomingConnected";
         }
     },
 
@@ -45,17 +33,11 @@ public enum CallerState {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, Idle, Call));
         }
-        public String getName() {
-            return "IncomingDetected";
-        }
     },
 
     Call {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, Idle));
-        }
-        public String getName() {
-            return "Call";
         }
     },
 
@@ -63,17 +45,11 @@ public enum CallerState {
         public HashSet<CallerState> availableStates() {
             return new HashSet<>(Arrays.asList(Idle));
         }
-        public String getName() {
-            return "Error";
-        }
     },
 
     GeneralFailure {
         public HashSet<CallerState> availableStates() {
             return new HashSet<>();
-        }
-        public String getName() {
-            return "GeneralFailure";
         }
     },
 
@@ -83,17 +59,11 @@ public enum CallerState {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(DebugRecorded));
         }
-        public String getName() {
-            return "DebugRecord";
-        }
     },
 
     DebugRecorded {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(DebugPlay));
-        }
-        public String getName() {
-            return "DebugRecorded";
         }
     },
 
@@ -101,20 +71,15 @@ public enum CallerState {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(DebugRecorded));
         }
-        public String getName() {
-            return "DebugPlay";
-        }
     },
 
     DebugLoopBack {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Null));
         }
-        public String getName() {
-            return "DebugLoopBack";
-        }
     };
 
+    public String getName() {return this.toString();}
     public abstract HashSet<CallerState> availableStates();
-    public abstract String getName();
+
 }

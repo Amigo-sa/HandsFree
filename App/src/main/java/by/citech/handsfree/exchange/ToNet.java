@@ -15,7 +15,7 @@ public class ToNet
     private final String TAG;
     private static final boolean debug = Settings.debug;
 
-    //--------------------- settings
+    //--------------------- preparation
 
     private boolean netSignificantAll;
     private int netSendSize;
