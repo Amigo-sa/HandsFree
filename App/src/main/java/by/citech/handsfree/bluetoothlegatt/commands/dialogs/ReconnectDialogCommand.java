@@ -20,9 +20,15 @@ public class ReconnectDialogCommand implements Command {
     private ConnectorBluetooth connectorBluetooth;
     private IMsgToUi iMsgToUi;
 
-    public ReconnectDialogCommand(BluetoothDevice device, ConnectorBluetooth connectorBluetooth, IMsgToUi iMsgToUi) {
-        this.device = device;
+    public ReconnectDialogCommand(ConnectorBluetooth connectorBluetooth) {
         this.connectorBluetooth = connectorBluetooth;
+    }
+
+    public void setDevice(BluetoothDevice device) {
+        this.device = device;
+    }
+
+    public void setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
     }
 

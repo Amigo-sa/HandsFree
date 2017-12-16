@@ -73,7 +73,7 @@ public class ControlAdapter implements IScannListener {
             mLeDeviceListAdapter = mIBluetoothListener.addLeDeviceListAdapter();
             //if (Settings.debug) Log.i(TAG, "mLeDeviceListAdapter() = " + mLeDeviceListAdapter);
         } else {
-            Log.e(TAG, "initializeListBluetoothDevice adapter is null");
+            Log.e(TAG, "initializeListBluetoothDevice adapter = " + mLeDeviceListAdapter);
             clearAllDevicesFromList();
         }
         if (Connected) {
@@ -84,11 +84,10 @@ public class ControlAdapter implements IScannListener {
     public void addConnectDeviceToList(){
         if (Connected) {
             if (Settings.debug) Log.i(TAG, "ADD DEVICE TO LIST " + mBTDevice + "\n");
-            if (Settings.debug) Log.i(TAG, "mLeDeviceListAdapter = " + mLeDeviceListAdapter + "\n");
             if ((mBTDevice != null) && mLeDeviceListAdapter != null) {
                 mLeDeviceListAdapter.addDevice(mBTDevice, 200);
-                // чтобы не сыпался в исклюение adapter
-                mLeDeviceListAdapter.notifyDataSetChanged();
+//                // чтобы не сыпался в исклюение adapter
+//                mLeDeviceListAdapter.notifyDataSetChanged();
             }
         }
     }

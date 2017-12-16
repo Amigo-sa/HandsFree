@@ -13,8 +13,11 @@ public class AddConnectDeviceToAdapterCommand implements Command {
     private ControlAdapter controlAdapter;
     private BluetoothDevice bluetoothDevice;
 
-    public AddConnectDeviceToAdapterCommand(ControlAdapter controlAdapter, BluetoothDevice bluetoothDevice) {
+    public AddConnectDeviceToAdapterCommand(ControlAdapter controlAdapter) {
         this.controlAdapter = controlAdapter;
+    }
+
+    public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
         this.bluetoothDevice = bluetoothDevice;
     }
 

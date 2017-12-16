@@ -22,9 +22,19 @@ public class DisconnInfoDialogCommand implements Command {
     private IMsgToUi iMsgToUi;
     private IBtToUiCtrl iBtToUiCtrl;
 
-    public DisconnInfoDialogCommand(BluetoothDevice device, IMsgToUi iMsgToUi, IBtToUiCtrl iBtToUiCtrl) {
+    public DisconnInfoDialogCommand() {
+
+    }
+
+    public void setDevice(BluetoothDevice device) {
         this.device = device;
+    }
+
+    public void setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
+    }
+
+    public void setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
         this.iBtToUiCtrl = iBtToUiCtrl;
     }
 

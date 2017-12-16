@@ -16,8 +16,14 @@ public class BindServiceCommand implements Command {
     private IService iService;
     private ServiceConnection serviceConnection;
 
-    public BindServiceCommand(IService iService, ServiceConnection serviceConnection) {
+    public BindServiceCommand() {
+    }
+
+    public void setiService(IService iService) {
         this.iService = iService;
+    }
+
+    public void setServiceConnection(ServiceConnection serviceConnection) {
         this.serviceConnection = serviceConnection;
     }
 

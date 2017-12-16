@@ -13,8 +13,15 @@ public class ConnectCommand implements Command {
     private BluetoothDevice mBTDevice;
     private BluetoothLeService mBluetoothLeService;
 
-    public ConnectCommand(BluetoothDevice mBTDevice, BluetoothLeService mBluetoothLeService) {
+    public ConnectCommand() {
+
+    }
+
+    public void setmBTDevice(BluetoothDevice mBTDevice) {
         this.mBTDevice = mBTDevice;
+    }
+
+    public void setmBluetoothLeService(BluetoothLeService mBluetoothLeService) {
         this.mBluetoothLeService = mBluetoothLeService;
     }
 

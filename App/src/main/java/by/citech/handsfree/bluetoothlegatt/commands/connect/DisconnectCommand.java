@@ -10,7 +10,11 @@ import by.citech.handsfree.bluetoothlegatt.commands.Command;
 public class DisconnectCommand implements Command {
     private BluetoothLeService mBluetoothLeService;
 
-    public DisconnectCommand(BluetoothLeService mBluetoothLeService) {
+    public DisconnectCommand() {
+
+    }
+
+    public void setmBluetoothLeService(BluetoothLeService mBluetoothLeService) {
         this.mBluetoothLeService = mBluetoothLeService;
     }
 

@@ -13,8 +13,15 @@ public class UnbindServiceCommand implements Command {
     private ServiceConnection serviceConnection;
     private IService iService;
 
-    public UnbindServiceCommand(ServiceConnection serviceConnection, IService iService) {
+    public UnbindServiceCommand() {
+
+    }
+
+    public void setServiceConnection(ServiceConnection serviceConnection) {
         this.serviceConnection = serviceConnection;
+    }
+
+    public void setiService(IService iService) {
         this.iService = iService;
     }
 

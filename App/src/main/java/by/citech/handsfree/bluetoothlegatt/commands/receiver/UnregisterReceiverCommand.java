@@ -12,9 +12,12 @@ public class UnregisterReceiverCommand implements Command {
     private IBroadcastReceiver iBroadcastReceiver;
     private ConnectorBluetooth connectorBluetooth;
 
-    public UnregisterReceiverCommand(IBroadcastReceiver iBroadcastReceiver, ConnectorBluetooth connectorBluetooth) {
-        this.iBroadcastReceiver = iBroadcastReceiver;
+    public UnregisterReceiverCommand(ConnectorBluetooth connectorBluetooth) {
         this.connectorBluetooth = connectorBluetooth;
+    }
+
+    public void setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
+        this.iBroadcastReceiver = iBroadcastReceiver;
     }
 
     @Override

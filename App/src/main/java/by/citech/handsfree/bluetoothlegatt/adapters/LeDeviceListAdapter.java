@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import by.citech.handsfree.R;
+import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;
 
 /**
@@ -19,7 +20,13 @@ import by.citech.handsfree.settings.Settings;
 // останавливаем сканирование и запускаем новое Activity
 public class LeDeviceListAdapter extends BaseAdapter {
 
-    private final static String TAG = "WSD_LeListAdapter";
+    private final static String STAG = "WSD_LeListAdapter";
+    private static int objCount;
+    private final String TAG;
+
+    static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
+
     // View, которые будут содержаться в списке
     private ArrayList<BluetoothDevice> mLeDevices;
     private ArrayList<String> mLeRssi;

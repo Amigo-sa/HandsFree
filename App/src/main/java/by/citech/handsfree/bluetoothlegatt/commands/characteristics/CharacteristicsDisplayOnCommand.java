@@ -13,8 +13,11 @@ public class CharacteristicsDisplayOnCommand implements Command {
     private Characteristics characteristics;
     private BluetoothLeService bluetoothLeService;
 
-    public CharacteristicsDisplayOnCommand(Characteristics characteristics, BluetoothLeService bluetoothLeService) {
+    public CharacteristicsDisplayOnCommand(Characteristics characteristics) {
         this.characteristics = characteristics;
+    }
+
+    public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
         this.bluetoothLeService = bluetoothLeService;
     }
 

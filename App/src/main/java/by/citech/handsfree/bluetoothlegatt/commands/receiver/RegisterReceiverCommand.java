@@ -13,9 +13,12 @@ public class RegisterReceiverCommand implements Command {
     private IBroadcastReceiver iBroadcastReceiver;
     private ConnectorBluetooth connectorBluetooth;
 
-    public RegisterReceiverCommand(IBroadcastReceiver iBroadcastReceiver, ConnectorBluetooth connectorBluetooth) {
-        this.iBroadcastReceiver = iBroadcastReceiver;
+    public RegisterReceiverCommand(ConnectorBluetooth connectorBluetooth) {
         this.connectorBluetooth = connectorBluetooth;
+    }
+
+    public void setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
+        this.iBroadcastReceiver = iBroadcastReceiver;
     }
 
     @Override
@@ -27,4 +30,8 @@ public class RegisterReceiverCommand implements Command {
     public void undo() {
 
     }
+
+
+
+
 }

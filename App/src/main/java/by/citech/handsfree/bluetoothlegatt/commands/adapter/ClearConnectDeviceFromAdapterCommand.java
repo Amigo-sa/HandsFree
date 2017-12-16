@@ -13,8 +13,11 @@ public class ClearConnectDeviceFromAdapterCommand implements Command {
     private ControlAdapter controlAdapter;
     private BluetoothDevice bluetoothDevice;
 
-    public ClearConnectDeviceFromAdapterCommand(ControlAdapter controlAdapter, BluetoothDevice bluetoothDevice) {
+    public ClearConnectDeviceFromAdapterCommand(ControlAdapter controlAdapter) {
         this.controlAdapter = controlAdapter;
+    }
+
+    public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
         this.bluetoothDevice = bluetoothDevice;
     }
 

@@ -113,35 +113,35 @@ private volatile BluetoothLeState BLEState;
     private Command clearList;
     private Command initList;
 
-    private Command connectDevice;
-    private Command disconnectDevice;
+    private ConnectCommand connectDevice;
+    private DisconnectCommand disconnectDevice;
 
     private Command exchangeDataOn;
     private Command exchangeDataOff;
     private Command receiveDataOn;
 
-    private Command closeService;
+    private CloseServiceCommand closeService;
 //    private Command startService;
 
-    private Command bindService;
-    private Command unbindService;
+    private BindServiceCommand bindService;
+    private UnbindServiceCommand unbindService;
 
-    private Command connDialogOn;
-    private Command discDialogOn;
-    private Command reconnDiaologOn;
-    private Command connDialogInfoOn;
-    private Command disconnDialogInfoOn;
+    private ConnectDialogCommand connDialogOn;
+    private DisconnectDialogCommand discDialogOn;
+    private ReconnectDialogCommand reconnDiaologOn;
+    private ConnInfoDialogCommand connDialogInfoOn;
+    private DisconnInfoDialogCommand disconnDialogInfoOn;
 
-    private Command buttonViewColorChangeOn;
-    private Command buttonViewColorChangeOff;
+    private ButtonChangeViewOnCommand buttonViewColorChangeOn;
+    private ButtonChangeViewOffCommand buttonViewColorChangeOff;
 
-    private Command addConnDeviceToAdapter;
-    private Command clrConnDeviceFromAdapter;
+    private AddConnectDeviceToAdapterCommand addConnDeviceToAdapter;
+    private ClearConnectDeviceFromAdapterCommand clrConnDeviceFromAdapter;
 
-    private Command registerReceiver;
-    private Command unregisterReceiver;
+    private RegisterReceiverCommand registerReceiver;
+    private UnregisterReceiverCommand unregisterReceiver;
 
-    private Command characteristicDisplayOn;
+    private CharacteristicsDisplayOnCommand characteristicDisplayOn;
     //--------------------- singleton
 
     private static volatile ConnectorBluetooth instance = null;
@@ -149,26 +149,36 @@ private volatile BluetoothLeState BLEState;
     private ConnectorBluetooth() {
         BLEState = BluetoothLeState.DISCONECTED;
         leBroadcastReceiver = new LeBroadcastReceiver(this);
-        controlAdapter = new ControlAdapter();
-        leScanner = new LeScanner(controlAdapter);
+
         characteristics = new Characteristics();
         leDataTransmitter = new LeDataTransmitter(characteristics);
         // инициализация контроллера команд
         bleController = new BLEController();
 
-        // инициализация комманд
-        scanOn = new ScanOnCommand(leScanner);
-        scanOff = new ScanOffCommand(leScanner);
-
-        addToList = new AddToListCommand(controlAdapter);
-        clearList = new ClearListCommand(controlAdapter);
-        initList = new InitListCommand(controlAdapter);
-
         exchangeDataOn = new DataExchangeOnCommand(leDataTransmitter);
         exchangeDataOff = new DataExchangeOffCommand(leDataTransmitter);
         receiveDataOn = new ReceiveDataOn(leDataTransmitter);
 
+        closeService = new CloseServiceCommand();
+//      startService = new StartServiceCommand(iService, serviceIntent);
 
+        bindService = new BindServiceCommand();
+        unbindService = new UnbindServiceCommand();
+
+        registerReceiver = new RegisterReceiverCommand(this);
+        unregisterReceiver = new UnregisterReceiverCommand(this);
+
+        buttonViewColorChangeOn = new ButtonChangeViewOnCommand();
+        buttonViewColorChangeOff = new ButtonChangeViewOffCommand();
+
+        discDialogOn = new DisconnectDialogCommand(this);
+        reconnDiaologOn = new ReconnectDialogCommand(this);
+        connDialogOn = new ConnectDialogCommand(this);
+        disconnDialogInfoOn = new DisconnInfoDialogCommand();
+        connDialogInfoOn = new ConnInfoDialogCommand();
+
+
+        characteristicDisplayOn = new CharacteristicsDisplayOnCommand(characteristics);
     }
 
     public static ConnectorBluetooth getInstance() {
@@ -185,6 +195,13 @@ private volatile BluetoothLeState BLEState;
     private void build(){
         if (Settings.debug) Log.i(TAG,"build()");
 
+        controlAdapter = new ControlAdapter();
+        leScanner = new LeScanner(controlAdapter);
+
+        addToList = new AddToListCommand(controlAdapter);
+        clearList = new ClearListCommand(controlAdapter);
+        initList = new InitListCommand(controlAdapter);
+
          leScanner.setHandler(mHandler);
          leScanner.setIBluetoothListener(mIBluetoothListener);
          controlAdapter.setIBluetoothListener(mIBluetoothListener);
@@ -192,19 +209,28 @@ private volatile BluetoothLeState BLEState;
          leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
          leDataTransmitter.addIRxDataListener(iTransmitter);
 
+         //-----------------set data for command -------------
+        // инициализация комманд
+        scanOn = new ScanOnCommand(leScanner);
+        scanOff = new ScanOffCommand(leScanner);
 
 
-        closeService = new CloseServiceCommand(mBluetoothLeService);
-//        startService = new StartServiceCommand(iService, serviceIntent);
-
-        bindService = new BindServiceCommand(iService, mServiceConnection);
-        unbindService = new UnbindServiceCommand(mServiceConnection, iService);
-
-        registerReceiver = new RegisterReceiverCommand(iBroadcastReceiver, this);
-        unregisterReceiver = new UnregisterReceiverCommand(iBroadcastReceiver, this);
-
-        buttonViewColorChangeOn = new ButtonChangeViewOnCommand(mIBluetoothListener);
-        buttonViewColorChangeOff = new ButtonChangeViewOffCommand(mIBluetoothListener);
+        closeService.setBluetoothLeService(mBluetoothLeService);
+        bindService.setiService(iService);
+        bindService.setServiceConnection(mServiceConnection);
+        unbindService.setiService(iService);
+        unbindService.setServiceConnection(mServiceConnection);
+        registerReceiver.setiBroadcastReceiver(iBroadcastReceiver);
+        unregisterReceiver.setiBroadcastReceiver(iBroadcastReceiver);
+        buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
+        buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
+        connDialogOn.setiMsgToUi(iMsgToUi);
+        discDialogOn.setiMsgToUi(iMsgToUi);
+        reconnDiaologOn.setiMsgToUi(iMsgToUi);
+        disconnDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
+        disconnDialogInfoOn.setiMsgToUi(iMsgToUi);
+        connDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
+        connDialogInfoOn.setiMsgToUi(iMsgToUi);
 
         // привязываем сервис и регистрируем BroadcastReceiver
         bleController.setCommand(bindService)
@@ -294,37 +320,26 @@ private volatile BluetoothLeState BLEState;
 
     private void initCommandForDevice(){
         // инициализация комманд работающих с устройством
-        //----------- Команды вызова диалоговых окон --------------
-        discDialogOn = new DisconnectDialogCommand(mBTDevice, this, iMsgToUi);
-        disconnDialogInfoOn = new DisconnInfoDialogCommand(mBTDevice, iMsgToUi, iBtToUiCtrl);
-        reconnDiaologOn = new ReconnectDialogCommand(mBTDevice, this, iMsgToUi);
-        connDialogInfoOn = new ConnInfoDialogCommand(mBTDevice, iMsgToUi, iBtToUiCtrl);
-        connDialogOn = new ConnectDialogCommand(mBTDevice, this, iMsgToUi);
-        //------------------ Команды соединения -----------
-        connectDevice = new ConnectCommand(mBTDevice, mBluetoothLeService);
-        disconnectDevice = new DisconnectCommand(mBluetoothLeService);
+        //----------- установка устройства для команд --------------
+        connDialogOn.setDevice(mBTDevice);
+        discDialogOn.setDevice(mBTDevice);
+        reconnDiaologOn.setDevice(mBTDevice);
+        disconnDialogInfoOn.setDevice(mBTDevice);
+        connDialogInfoOn.setDevice(mBTDevice);
+        //------------------ Команда соединения -----------
+        connectDevice = new ConnectCommand();
+        disconnectDevice = new DisconnectCommand();
+        connectDevice.setmBluetoothLeService(mBluetoothLeService);
+        disconnectDevice.setmBluetoothLeService(mBluetoothLeService);
+        connectDevice.setmBTDevice(mBTDevice);
         //------------------ Команды работы с адаптером -----------
-        addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
-        clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter, mBTDevice);
+        addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter);
+        clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter);
+        addConnDeviceToAdapter.setBluetoothDevice(mBTDevice);
+        clrConnDeviceFromAdapter.setBluetoothDevice(mBTDevice);
         //-------------------Команды для определения характеристик --------
-        characteristicDisplayOn = new CharacteristicsDisplayOnCommand(characteristics, mBluetoothLeService);
+        characteristicDisplayOn.setBluetoothLeService(mBluetoothLeService);
     }
-
-//    private void destroyCommandForDevice(){
-//        discDialogOn = null;
-//        disconnDialogInfoOn = null;
-//        reconnDiaologOn = null;
-//        connDialogInfoOn = null;
-//        connDialogOn = null;
-//        //------------------ Команды соединения/разьединения -----------
-//        connectDevice = null;
-//        disconnectDevice = null;
-//        //------------------ Команды работы с адаптером -----------
-//        addConnDeviceToAdapter = null;
-//        clrConnDeviceFromAdapter = null;
-//        //------------------- Отображение характеристик устройства -----------------------
-//        characteristicDisplayOn = null;
-//    }
 
     //------------------ inittialization List-------------------------
 
@@ -443,11 +458,7 @@ private volatile BluetoothLeState BLEState;
             // Automatically connects to the device upon successful start-up initialization.
             if (mBluetoothLeService != null && leBroadcastReceiver != null && leDataTransmitter != null) {
                 if (mBTDevice != null) {
-                    addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter, mBTDevice);
-                    bleController.setCommand(connectDevice).
-                            setCommand(addConnDeviceToAdapter).execute();
-//                    mBluetoothLeService.connect(mBTDevice.getAddress());
-//
+                    bleController.setCommand(connectDevice).execute();
                 }
                 leDataTransmitter.setBluetoothLeService(mBluetoothLeService);
             }

@@ -20,9 +20,15 @@ public class DisconnectDialogCommand implements Command {
     private ConnectorBluetooth connectorBluetooth;
     private IMsgToUi iMsgToUi;
 
-    public DisconnectDialogCommand(BluetoothDevice device, ConnectorBluetooth connectorBluetooth, IMsgToUi iMsgToUi) {
-        this.device = device;
+    public DisconnectDialogCommand(ConnectorBluetooth connectorBluetooth) {
         this.connectorBluetooth = connectorBluetooth;
+    }
+
+    public void setDevice(BluetoothDevice device) {
+        this.device = device;
+    }
+
+    public void setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
     }
 

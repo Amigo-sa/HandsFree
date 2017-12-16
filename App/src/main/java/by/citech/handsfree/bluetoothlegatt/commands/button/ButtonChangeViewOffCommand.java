@@ -10,7 +10,10 @@ import by.citech.handsfree.logic.IBluetoothListener;
 public class ButtonChangeViewOffCommand implements Command {
     private IBluetoothListener iBluetoothListener;
 
-    public ButtonChangeViewOffCommand(IBluetoothListener iBluetoothListener) {
+    public ButtonChangeViewOffCommand() {
+    }
+
+    public void setBluetoothListener(IBluetoothListener iBluetoothListener) {
         this.iBluetoothListener = iBluetoothListener;
     }
 

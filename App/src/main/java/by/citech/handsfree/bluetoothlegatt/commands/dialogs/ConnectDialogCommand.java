@@ -20,9 +20,15 @@ public class ConnectDialogCommand implements Command {
     private ConnectorBluetooth connectorBluetooth;
     private IMsgToUi iMsgToUi;
 
-    public ConnectDialogCommand(BluetoothDevice device, ConnectorBluetooth connectorBluetooth, IMsgToUi iMsgToUi) {
-        this.device = device;
+    public ConnectDialogCommand(ConnectorBluetooth connectorBluetooth) {
         this.connectorBluetooth = connectorBluetooth;
+    }
+
+    public void setDevice(BluetoothDevice device) {
+        this.device = device;
+    }
+
+    public void setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
     }
 
