@@ -265,7 +265,6 @@ public class DeviceControlActivity
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
         addRunnable(() -> ResourceManager.getInstance().baseStop());
-        deviceListAdapter = null;
     }
 
     @Override
