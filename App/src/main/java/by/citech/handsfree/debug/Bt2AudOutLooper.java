@@ -3,6 +3,9 @@ package by.citech.handsfree.debug;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.AudioCodec;
+import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.settings.ISettingsCtrl;
+import by.citech.handsfree.settings.SeverityLevel;
 import by.citech.handsfree.settings.enumeration.AudioCodecType;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverCtrl;
@@ -14,7 +17,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2AudOutLooper
-        implements IDebugCtrl, IBase, ITransmitter, IReceiverReg {
+        implements IDebugCtrl, IBase, ITransmitter, IReceiverReg, IPrepareObject, ISettingsCtrl {
 
     private static final String TAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -25,16 +28,33 @@ public class Bt2AudOutLooper
     private AudioCodec audioCodec;
 
     {
+        prepareObject();
+    }
+
+    @Override
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         takeSettings();
-        applySettings();
+        applySettings(null);
+        return isObjectPrepared();
     }
 
-    private void applySettings() {
+    @Override
+    public boolean isObjectPrepared() {
+        return audioCodec != null;
+    }
+
+    @Override
+    public boolean applySettings(SeverityLevel severityLevel) {
         audioCodec = new AudioCodec(codecType);
+        return true;
     }
 
-    private void takeSettings() {
+    @Override
+    public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         codecType = Settings.audioCodecType;
+        return true;
     }
 
     //--------------------- non-settings
@@ -47,12 +67,22 @@ public class Bt2AudOutLooper
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStart() {
+        if (debug) Log.i(TAG, "baseStart");
+        IBase.super.baseStart();
+
+        return true;
+    }
+
+    @Override
+    public boolean baseStop() {
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         codecType = null;
         audioCodec = null;
         iReceiverCtrl = null;
+        return true;
     }
 
     @Override

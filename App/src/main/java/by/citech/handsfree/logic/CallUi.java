@@ -107,7 +107,7 @@ public class CallUi
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         if (iCallToUiListeners != null) {
             iCallToUiListeners.clear();

@@ -42,7 +42,16 @@ public class Caller
 
     //--------------------- preparation
 
-    private boolean isPrepared;
+    private volatile CallerState callerState;
+    private ICallToUiListener iCallToUiListener;
+    private ICallNetListener iCallNetListener;
+    private INetInfoGetter iNetInfoGetter;
+    private IBluetoothListener iBluetoothListener;
+    private IDebugCtrl iDebugCtrl;
+    private IBroadcastReceiver iBroadcastReceiver;
+    private IService iService;
+    private IBtToUiCtrl iBtToUiCtrl;
+    private IMsgToUi iMsgToUi;
     private OpMode opMode;
 
     {
@@ -56,13 +65,12 @@ public class Caller
         if (isObjectPrepared()) return true;
         callerState = CallerState.Null;
         takeSettings();
-        isPrepared = true;
         return isObjectPrepared();
     }
 
     @Override
     public boolean isObjectPrepared() {
-        return isPrepared;
+        return callerState != null;
     }
 
     @Override
@@ -70,19 +78,6 @@ public class Caller
         opMode = Settings.getInstance().getCommon().getOpMode();
         return true;
     }
-
-    //--------------------- non-settings
-
-    private volatile CallerState callerState;
-    private ICallToUiListener iCallToUiListener;
-    private ICallNetListener iCallNetListener;
-    private INetInfoGetter iNetInfoGetter;
-    private IBluetoothListener iBluetoothListener;
-    private IDebugCtrl iDebugCtrl;
-    private IBroadcastReceiver iBroadcastReceiver;
-    private IService iService;
-    private IBtToUiCtrl iBtToUiCtrl;
-    private IMsgToUi iMsgToUi;
 
     //--------------------- singleton
 
@@ -226,7 +221,7 @@ public class Caller
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         iCallToUiListener = null;
         iCallNetListener = null;
@@ -239,7 +234,6 @@ public class Caller
         iService = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
-        isPrepared = false;
         return true;
     }
 

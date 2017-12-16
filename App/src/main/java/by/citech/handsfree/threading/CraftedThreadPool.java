@@ -7,19 +7,48 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IBaseCtrl;
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class CraftedThreadPool
-        implements IBase {
+        implements IBase, IPrepareObject {
 
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.THREADPOOL;
+    private static final String STAG = Tags.THREADPOOL;
+    private static int objCount;
+    private final String TAG;
     private static final long QUIZ_PERIOD = 10;
+
+    static {
+        objCount = 0;
+    }
+
+    //--------------------- preparation
 
     private Queue<Runnable> runnables;
     private ThreadShard[] threads;
     private boolean isActive;
+
+    {
+        objCount++;
+        TAG = STAG + " " + objCount;
+        prepareObject();
+    }
+
+    @Override
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
+        runnables = new ConcurrentLinkedQueue<>();
+        return isObjectPrepared();
+    }
+
+    @Override
+    public boolean isObjectPrepared() {
+        return runnables != null;
+    }
+
+    //--------------------- constructor
 
     private CraftedThreadPool() {
         this(Runtime.getRuntime().availableProcessors());
@@ -30,32 +59,36 @@ public class CraftedThreadPool
         for (int i = 0; i < threadNumber; i++) {
             threads[i] = new ThreadShard();
         }
-        runnables = new ConcurrentLinkedQueue<>();
     }
 
     //-------------------------- IBase
 
     @Override
-    public void baseStart(IBaseCtrl iBaseCtrl) {
+    public boolean baseStart() {
+        IBase.super.baseStart();
+        if (debug) Log.i(TAG,"baseStart");
         if (isActive) {
             Log.e(TAG,"baseStart already active");
-            return;
-        }
-        if (iBaseCtrl == null) {
-            Log.e(TAG, "baseStart iBaseCtrl is null");
-            return;
-        } else {
-            iBaseCtrl.addBase(this);
+            return false;
         }
         isActive = true;
         for (ThreadShard thread : threads) {
             thread.start();
         }
+        return true;
     }
 
     @Override
-    public void baseStop() {
+    public boolean baseStop() {
+//        IBase.super.baseStop();
+        if (debug) Log.i(TAG,"baseStop");
+        if (runnables != null) {
+            runnables.clear();
+            runnables = null;
+        }
+        threads = null;
         isActive = false;
+        return true;
     }
 
     //-------------------------- main

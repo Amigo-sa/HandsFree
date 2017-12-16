@@ -3,7 +3,11 @@ package by.citech.handsfree.common;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;
@@ -13,10 +17,12 @@ public class ResourceManager
 
     private static final String STAG = Tags.RESOURCE_MANAGER;
     private static final boolean debug = Settings.debug;
-
     private static int objCount;
     private final String TAG;
-    static {objCount = 0;}
+
+    static {
+        objCount = 0;
+    }
 
     {
         objCount++;
@@ -24,18 +30,22 @@ public class ResourceManager
         prepareObject();
     }
 
-    private List<IBase> list;
+    //--------------------- preparation
+
+    private Collection<IBase> iBases;
 
     @Override
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
-        list = new ArrayList<>();
+//      iBases = Collections.synchronizedList(new ArrayList<>());
+//      iBases = new CopyOnWriteArrayList<>();
+        iBases = new ConcurrentLinkedQueue<>();
         return isObjectPrepared();
     }
 
     @Override
     public boolean isObjectPrepared() {
-        return (list != null);
+        return iBases != null;
     }
 
     //--------------------- singleton
@@ -52,6 +62,8 @@ public class ResourceManager
                     instance = new ResourceManager();
                 }
             }
+        } else {
+            instance.prepareObject();
         }
         return instance;
     }
@@ -60,14 +72,19 @@ public class ResourceManager
 
     @Override
     public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        if (list != null) {
-            for (IBase iBase : list) {
+        if (debug) Log.w(TAG, "baseStop iBases size before stop is " + iBases.size());
+        if (iBases != null) {
+            for (IBase iBase : iBases) {
                 if (iBase != null) {
                     iBase.baseStop();
                 }
+                iBases.remove(iBase);
             }
-            list.clear();
+            if (debug) Log.w(TAG, "baseStop iBases size after stop is " + iBases.size());
+            iBases.clear();
+            if (debug) Log.w(TAG, "baseStop iBases size after clear is " + iBases.size());
+        } else {
+            Log.e(TAG, "baseStop iBases is null" );
         }
         return false;
     }
@@ -81,15 +98,15 @@ public class ResourceManager
         if (iBase == null) {
             Log.e(TAG, "addBase iBase is null");
             return false;
-        } else if (list == null) {
-            Log.e(TAG, "addBase list is null, prepareObject");
+        } else if (iBases == null) {
+            Log.e(TAG, "addBase iBases is null, prepareObject");
             prepareObject();
         }
-        if (list == null) {
-            Log.e(TAG, "addBase list is still null, return");
+        if (iBases == null) {
+            Log.e(TAG, "addBase iBases is still null, return");
             return false;
         } else {
-            list.add(iBase);
+            iBases.add(iBase);
         }
         return true;
     }
@@ -97,10 +114,10 @@ public class ResourceManager
     @Override
     public boolean removeBase(IBase iBase) {
         if (debug) Log.i(TAG, "removeBase");
-        if (list == null) {
-            Log.w(TAG, "removeBase list is null, return");
+        if (iBases == null) {
+            Log.w(TAG, "removeBase iBases is null, return");
         }
-        if (!list.remove(iBase)) {
+        if (!iBases.remove(iBase)) {
             Log.w(TAG, "removeBase no such element, return");
         }
         return true;

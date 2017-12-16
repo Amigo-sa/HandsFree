@@ -43,7 +43,7 @@ public class ThreadManager
 
     @Override
     public boolean isObjectPrepared() {
-        return (threadPool != null);
+        return threadPool != null;
     }
 
     @Override
@@ -66,6 +66,8 @@ public class ThreadManager
                     instance = new ThreadManager();
                 }
             }
+        } else {
+            instance.prepareObject();
         }
         return instance;
     }
@@ -75,13 +77,15 @@ public class ThreadManager
     @Override
     public boolean baseStart() {
         IBase.super.baseStart();
+        prepareObject();
+        threadPool.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         return true;
     }
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         threadPool = null;
         return true;

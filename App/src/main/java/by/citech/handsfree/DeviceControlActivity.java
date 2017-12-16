@@ -76,6 +76,8 @@ import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.ThreadManager;
 import by.citech.handsfree.util.Keyboard;
 
 import static by.citech.handsfree.util.Network.getIpAddr;
@@ -83,15 +85,21 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class DeviceControlActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IMsgToUi, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter {
+        IMsgToUi, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter, IThreadManager {
 
     private static final String STAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
-
     private static int objCount;
     private final String TAG;
-    static {objCount = 0;}
-    {objCount++; TAG = STAG + " " + objCount;}
+
+    static {
+        objCount = 0;
+    }
+
+    {
+        objCount++;
+        TAG = STAG + " " + objCount;
+    }
 
     private OpMode opMode;
 
@@ -127,11 +135,10 @@ public class DeviceControlActivity
     // для включения разрешения местоположения
     private LocationManager locationManager;
     private String provider;
+
     // интерфейсы для работы gui с bt
     private IUiToBtListener IUiToBtListener;
     private IBtToUiListener IBtToUiListener;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +152,7 @@ public class DeviceControlActivity
 
         viewHelper = new ViewHelper();
         viewHelper.setiGetGetter(this).baseStart();
+        ThreadManager.getInstance().baseStart();
 
         mainView = findViewById(R.id.mainView);
         scanView = findViewById(R.id.scanView);
@@ -256,7 +264,7 @@ public class DeviceControlActivity
     protected void onStop() {
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
-        ResourceManager.getInstance().baseStop();
+        addRunnable(() -> ResourceManager.getInstance().baseStop());
     }
 
     @Override

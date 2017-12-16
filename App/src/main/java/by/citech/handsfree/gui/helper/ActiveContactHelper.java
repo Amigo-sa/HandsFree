@@ -35,7 +35,7 @@ public class ActiveContactHelper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         activeContactState = null;
         chosenContactHelper = null;

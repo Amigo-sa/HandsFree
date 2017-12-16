@@ -96,7 +96,7 @@ public class Bt2BtLooper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         isActive = false;

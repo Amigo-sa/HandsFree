@@ -57,13 +57,12 @@ public class ViewHelper
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
         takeSettings();
-        isPrepared = true;
         return isObjectPrepared();
     }
 
     @Override
     public boolean isObjectPrepared() {
-        return isPrepared && (iGetGetter != null);
+        return iGetGetter != null;
     }
 
     @Override
@@ -93,10 +92,6 @@ public class ViewHelper
     private Button btnChangeDevice;
     private Animation animCall;
     private boolean isCallAnim;
-    private boolean isPrepared;
-
-    public ViewHelper() {
-    }
 
     //--------------------- getters and setters
 
@@ -119,7 +114,7 @@ public class ViewHelper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         scanView = null;
         mainView = null;
@@ -140,7 +135,6 @@ public class ViewHelper
         iGetter = null;
         iGetGetter = null;
         isCallAnim = false;
-        isPrepared = false;
         return true;
     }
 

@@ -3,6 +3,9 @@ package by.citech.handsfree.debug;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.AudioCodec;
+import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.settings.ISettingsCtrl;
+import by.citech.handsfree.settings.SeverityLevel;
 import by.citech.handsfree.settings.enumeration.AudioCodecType;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.FromAudioIn;
@@ -17,10 +20,12 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class AudIn2BtLooper
-        implements IDebugCtrl, IBase, ITransmitter, IReceiverReg {
+        implements IDebugCtrl, IBase, ITransmitter, IReceiverReg, IPrepareObject, ISettingsCtrl {
 
-    private static final String TAG = Tags.AUDIN2BT_LOOPER;
+    private static final String STAG = Tags.AUDIN2BT_LOOPER;
     private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
 
     //--------------------- preparation
 
@@ -28,20 +33,34 @@ public class AudIn2BtLooper
     private AudioCodec audioCodec;
 
     {
-        initiate();
+        objCount++;
+        TAG = STAG + " " + objCount;
+        prepareObject();
     }
 
-    private void initiate() {
+    @Override
+    public boolean prepareObject() {
         takeSettings();
-        applySettings();
+        applySettings(null);
+        return isObjectPrepared();
     }
 
-    private void takeSettings() {
+    @Override
+    public boolean isObjectPrepared() {
+        return audioCodec != null;
+    }
+
+    @Override
+    public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         codecType = Settings.audioCodecType;
+        return true;
     }
 
-    private void applySettings() {
+    @Override
+    public boolean applySettings(SeverityLevel severityLevel) {
         audioCodec = new AudioCodec(codecType);
+        return true;
     }
 
     //--------------------- non-settings
@@ -55,13 +74,27 @@ public class AudIn2BtLooper
         iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
     }
 
+    //--------------------- IBase
+
     @Override
-    public void baseStop() {
+    public boolean baseStart() {
+        IBase.super.baseStart();
+        if (debug) Log.i(TAG, "baseStart");
+        prepareObject();
+        return false;
+    }
+
+    @Override
+    public boolean baseStop() {
+//        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         iReceiverCtrl = null;
         iTransmitterCtrl = null;
+        return true;
     }
+
+    //--------------------- IDebugCtrl
 
     @Override
     public void startDebug() {
@@ -83,6 +116,8 @@ public class AudIn2BtLooper
         iReceiverCtrl.redirectOff();
         iTransmitterCtrl.streamOff();
     }
+
+    //--------------------- main
 
     @Override
     public void sendData(short[] data) {

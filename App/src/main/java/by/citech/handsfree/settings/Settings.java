@@ -97,9 +97,15 @@ public class Settings {
         public void setBt2AudioOutFactor(Integer bt2AudioOutFactor) {this.bt2AudioOutFactor = bt2AudioOutFactor;}
         public void setStorageMaxSize(Integer storageMaxSize) {this.storageMaxSize = storageMaxSize;}
 
-        public Integer getThreadNumber() {return threadNumber;}
+        public Integer getThreadNumber() {
+            return Settings.threadNumber;
+//            return threadNumber;
+        }
         public DataSource getDataSource() {return dataSource;}
-        public OpMode getOpMode() {return opMode;}
+        public OpMode getOpMode() {
+            return Settings.opMode;
+//            return opMode;
+        }
         public Boolean getShowTraffic() {return showTraffic;}
         public Boolean getDebug() {return debug;}
         public Integer getAudioIn2BtFactor() {return audioIn2BtFactor;}
@@ -119,7 +125,7 @@ public class Settings {
 
     }
 
-    public static int threadNumber = 2;
+    public static int threadNumber = 3;
     public static DataSource dataSource = DataSource.BLUETOOTH;
 //  public static DataSource dataSource = DataSource.MICROPHONE;
     public static OpMode opMode = OpMode.Normal;
