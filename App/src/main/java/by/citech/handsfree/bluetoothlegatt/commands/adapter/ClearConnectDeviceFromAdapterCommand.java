@@ -11,20 +11,20 @@ import by.citech.handsfree.bluetoothlegatt.commands.Command;
 
 public class ClearConnectDeviceFromAdapterCommand implements Command {
     private ControlAdapter controlAdapter;
-    private BluetoothDevice bluetoothDevice;
+//    private BluetoothDevice bluetoothDevice;
 
     public ClearConnectDeviceFromAdapterCommand(ControlAdapter controlAdapter) {
         this.controlAdapter = controlAdapter;
     }
 
-    public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
-        this.bluetoothDevice = bluetoothDevice;
-    }
+//    public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
+//        this.bluetoothDevice = bluetoothDevice;
+//    }
 
     @Override
     public void execute() {
         //if (Settings.debug) Log.i("LIST", "Device set to null connected set to false");
-        controlAdapter.setBTDevice(null);
+        //controlAdapter.setBTDevice(null);
         controlAdapter.setConnected(false);
     }
 

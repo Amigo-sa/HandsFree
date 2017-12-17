@@ -179,7 +179,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
 
     @Override
     public void requestMtu() {
-        mBluetoothGatt.requestMtu(Settings.btMtuSize);
+        if (mBluetoothGatt != null)
+            mBluetoothGatt.requestMtu(Settings.btMtuSize);
         if (Settings.debug) Log.i(TAG, "requestMtu was sendet, await callback ...");
     }
 

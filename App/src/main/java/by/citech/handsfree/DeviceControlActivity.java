@@ -190,6 +190,7 @@ public class DeviceControlActivity
 
         chosenContactHelper = new ChosenContactHelper(viewManager);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
+        deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
 
         Caller.getInstance()
                 .setiCallToUiListener(viewManager)
@@ -200,7 +201,8 @@ public class DeviceControlActivity
                 .setiBroadcastReceiver(this)
                 .setiService(this)
                 .setiBtToUiCtrl(this)
-                .setiMsgToUi(this);
+                .setiMsgToUi(this)
+                .setiList(deviceListAdapter);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
 
@@ -254,6 +256,7 @@ public class DeviceControlActivity
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
         addRunnable(() -> ResourceManager.getInstance().baseStop());
+        deviceListAdapter = null;
     }
 
     @Override
@@ -421,7 +424,7 @@ public class DeviceControlActivity
 
     private void setupViewListDevices() {
         if (debug) Log.i(TAG, "setupViewListDevices");
-        listDevices.setAdapter(deviceListAdapter);//C.getmLeDeviceListAdapter()
+        listDevices.setAdapter(deviceListAdapter);
         listDevices.setOnTouchListener(new LinearLayoutTouchListener());
         listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));
     }
@@ -537,15 +540,6 @@ public class DeviceControlActivity
     @Override
     public BluetoothManager getBluetoothManager() {
         return (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-    }
-
-    @Override
-    public LeDeviceListAdapter addLeDeviceListAdapter() {
-        if (deviceListAdapter == null) {
-            if (debug) Log.w(TAG, "addLeDeviceListAdapter deviceListAdapter is null, initiate");
-            deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
-        }
-        return deviceListAdapter;
     }
 
     @Override

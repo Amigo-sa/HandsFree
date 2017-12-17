@@ -6,6 +6,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import by.citech.handsfree.bluetoothlegatt.IList;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.common.IService;
@@ -52,6 +53,7 @@ public class Caller
     private IService iService;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
+    private IList iList;
     private OpMode opMode;
 
     {
@@ -154,6 +156,11 @@ public class Caller
         return this;
     }
 
+    public Caller setiList(IList iList) {
+        this.iList = iList;
+        return this;
+    }
+
     //--------------------- work with fsm
 
     public synchronized CallerState getCallerState() {
@@ -234,6 +241,7 @@ public class Caller
         iService = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
+        iList = null;
         return true;
     }
 
@@ -245,7 +253,8 @@ public class Caller
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null) {
+                || iMsgToUi == null
+                || iList == null) {
             if (debug) Log.e(TAG, "buildDebugAudIn2Bt illegal parameters");
             return;
         }
@@ -261,7 +270,8 @@ public class Caller
                 .setiService(iService)
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi);
+                .setiMsgToUi(iMsgToUi)
+                .setiList(iList);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugCtrl)
@@ -283,7 +293,8 @@ public class Caller
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null) {
+                || iMsgToUi == null
+                || iList == null) {
             if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
             return;
         }
@@ -297,7 +308,8 @@ public class Caller
                 .setiService(iService)
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi);
+                .setiMsgToUi(iMsgToUi)
+                .setiList(iList);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugCtrl)
@@ -339,7 +351,8 @@ public class Caller
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null) {
+                || iMsgToUi == null
+                || iList == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -357,7 +370,8 @@ public class Caller
                 .setiService(iService)
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi);
+                .setiMsgToUi(iMsgToUi)
+                .setiList(iList);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
@@ -380,7 +394,8 @@ public class Caller
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null) {
+                || iMsgToUi == null
+                || iList == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -398,7 +413,8 @@ public class Caller
                 .setiService(iService)
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi);
+                .setiMsgToUi(iMsgToUi)
+                .setiList(iList);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
@@ -432,7 +448,8 @@ public class Caller
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null) {
+                || iMsgToUi == null
+                || iList == null) {
             Log.e(TAG, "buildNormal illegal parameters");
             return;
         }
@@ -449,7 +466,8 @@ public class Caller
                 .setiService(iService)
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi);
+                .setiMsgToUi(iMsgToUi)
+                .setiList(iList);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)

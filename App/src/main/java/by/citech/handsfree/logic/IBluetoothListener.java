@@ -8,7 +8,6 @@ import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 public interface IBluetoothListener {
     void changeOptionMenu();
     BluetoothManager getBluetoothManager();
-    LeDeviceListAdapter addLeDeviceListAdapter();
     void finishConnection();
     void disconnectToast();
     void withoutDeviceView();

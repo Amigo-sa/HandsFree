@@ -1,8 +1,8 @@
 package by.citech.handsfree.bluetoothlegatt;
 
-import by.citech.handsfree.dialog.DialogProcessor;
+import android.bluetooth.BluetoothDevice;
 
 public interface IList {
-    void initList();
-    void clickItemList(int position, DialogProcessor dialogProcessor);
+    void addDevice(BluetoothDevice device, int rssi);
+    void clear();
 }

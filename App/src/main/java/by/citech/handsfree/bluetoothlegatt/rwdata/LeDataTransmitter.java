@@ -19,7 +19,7 @@ import by.citech.handsfree.settings.Settings;
 public class LeDataTransmitter implements CallbackWriteListener {
 
     private final static String TAG = "WSD_LeDataTransmitter";
-    private static final long WAIT_PERIOD = 10;
+    private static final long WAIT_PERIOD = 20;
 
     private BluetoothLeService mBluetoothLeService;
     private Characteristics characteristics;

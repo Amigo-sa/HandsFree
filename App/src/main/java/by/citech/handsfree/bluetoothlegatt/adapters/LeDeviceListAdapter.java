@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import by.citech.handsfree.R;
+import by.citech.handsfree.bluetoothlegatt.IList;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;
 
@@ -18,7 +19,7 @@ import by.citech.handsfree.settings.Settings;
  */
 // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
 // останавливаем сканирование и запускаем новое Activity
-public class LeDeviceListAdapter extends BaseAdapter {
+public class LeDeviceListAdapter extends BaseAdapter implements IList {
 
     private final static String STAG = "WSD_LeListAdapter";
     private static int objCount;
@@ -69,6 +70,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
     public void clear() {
         mLeDevices.clear();
         mLeRssi.clear();
+        notifyDataSetChanged();
     }
 
     @Override

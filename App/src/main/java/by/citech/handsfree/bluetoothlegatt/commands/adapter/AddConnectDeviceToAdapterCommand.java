@@ -11,19 +11,13 @@ import by.citech.handsfree.bluetoothlegatt.commands.Command;
 
 public class AddConnectDeviceToAdapterCommand implements Command {
     private ControlAdapter controlAdapter;
-    private BluetoothDevice bluetoothDevice;
 
     public AddConnectDeviceToAdapterCommand(ControlAdapter controlAdapter) {
         this.controlAdapter = controlAdapter;
     }
 
-    public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
-        this.bluetoothDevice = bluetoothDevice;
-    }
-
     @Override
     public void execute() {
-        controlAdapter.setBTDevice(bluetoothDevice);
         controlAdapter.setConnected(true);
     }
 

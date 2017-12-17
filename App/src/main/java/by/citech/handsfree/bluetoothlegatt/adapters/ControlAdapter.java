@@ -3,23 +3,26 @@ package by.citech.handsfree.bluetoothlegatt.adapters;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
+import by.citech.handsfree.bluetoothlegatt.IList;
 import by.citech.handsfree.bluetoothlegatt.IScannListener;
+import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 21.11.2017.
  */
-
+// implements IElement
 public class ControlAdapter implements IScannListener {
 
 //    private final static String TAG = "WSD_ControlAdapter";
     private final String TAG;
 
-    private LeDeviceListAdapter mLeDeviceListAdapter;
     private boolean Connected;
-    private BluetoothDevice mBTDevice;
-    private IBluetoothListener mIBluetoothListener;
+    private ConnectorBluetooth connectorBluetooth;
+    private IList iList;
+
+//    private  IElement iElement;
 
     //--------------------- TEST
 
@@ -37,72 +40,41 @@ public class ControlAdapter implements IScannListener {
     }
 
     //--------------------- TEST
-
-    public ControlAdapter() {
-
-    }
-
-    public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
-        this.mIBluetoothListener = mIBluetoothListener;
-    }
-
-    public LeDeviceListAdapter getLeDeviceListAdapter() {
-        return mLeDeviceListAdapter;
+    public ControlAdapter(ConnectorBluetooth connectorBluetooth) {
+        this.connectorBluetooth = connectorBluetooth;
     }
 
     public void setConnected(boolean connected) {
-        Connected = connected;
+        if (Settings.debug) Log.i(TAG, "setConnected = " + connected);
+        this.Connected = connected;
     }
 
-    public void setBTDevice(BluetoothDevice mBTDevice) {
-        this.mBTDevice = mBTDevice;
-        if (Settings.debug) Log.w(TAG, "set mBTDevice 1 to " + this.mBTDevice );
-        if (mBTDevice == null) {
-            if (Settings.debug) Log.w(TAG, "set mBTDevice 2 to " + mBTDevice );
-            this.mBTDevice = null;
-            if (this.mBTDevice != null) {
-                this.mBTDevice = null;
-                if (Settings.debug) Log.w(TAG, "set mBTDevice 3 is " + this.mBTDevice );
-            }
-        }
-    }
-
-    public void initializeListBluetoothDevice() {
+    public void initializeListBluetoothDevice(BluetoothDevice device) {
         if (Settings.debug) Log.i(TAG, "initializeListBluetoothDevice()");
-        if (mLeDeviceListAdapter == null) {
-            mLeDeviceListAdapter = mIBluetoothListener.addLeDeviceListAdapter();
-            //if (Settings.debug) Log.i(TAG, "mLeDeviceListAdapter() = " + mLeDeviceListAdapter);
-        } else {
-            Log.e(TAG, "initializeListBluetoothDevice adapter = " + mLeDeviceListAdapter);
-            clearAllDevicesFromList();
-        }
+        iList = connectorBluetooth.getiList();
+        clearAllDevicesFromList();
         if (Connected) {
-            addConnectDeviceToList();
+            addConnectDeviceToList(device);
+            Connected = false;
         }
     }
 
-    public void addConnectDeviceToList(){
-        if (Connected) {
-            if (Settings.debug) Log.i(TAG, "ADD DEVICE TO LIST " + mBTDevice + "\n");
-            if ((mBTDevice != null) && mLeDeviceListAdapter != null) {
-                mLeDeviceListAdapter.addDevice(mBTDevice, 200);
-//                // чтобы не сыпался в исклюение adapter
-//                mLeDeviceListAdapter.notifyDataSetChanged();
-            }
-        }
+    public void addConnectDeviceToList(BluetoothDevice device){
+            if (Settings.debug) Log.i(TAG, "ADD DEVICE TO LIST " + device + "\n");
+            if ((device != null) && iList != null)
+                iList.addDevice(device, 200);
     }
 
     public void clearAllDevicesFromList(){
         if (Settings.debug) Log.e(TAG, "clearAllDevicesFromList()");
-        if (mLeDeviceListAdapter != null){
-            mLeDeviceListAdapter.clear();
-            mLeDeviceListAdapter.notifyDataSetChanged();
+        if (iList != null){
+            iList.clear();
         }
     }
 
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
-        if (mLeDeviceListAdapter != null)
-            mLeDeviceListAdapter.addDevice(device, rssi);
+        if (iList != null)
+            iList.addDevice(device, rssi);
     }
 }
