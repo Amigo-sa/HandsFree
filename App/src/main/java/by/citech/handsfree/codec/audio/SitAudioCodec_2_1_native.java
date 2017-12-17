@@ -16,8 +16,8 @@ public class SitAudioCodec_2_1_native implements ICodec {
     private byte[] encodedData;
     private short[] decodedData;
 
-//    public native void nativeEncode(short[] dataToEncode, byte[] encodedData, CodecState codecState);
-//    public native void nativeDecode(byte[] dataToDecode, short[] decodedData, CodecState codecState);
+//  public native void nativeEncode(short[] dataToEncode, byte[] encodedData, CodecState codecState);
+//  public native void nativeDecode(byte[] dataToDecode, short[] decodedData, CodecState codecState);
 
     public SitAudioCodec_2_1_native() {
         decodedData = new short[decodedShortCnt];

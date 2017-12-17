@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.gui.helper.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
@@ -19,7 +18,6 @@ import by.citech.handsfree.dialog.DialogType;
 import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.threading.IThreadManager;
@@ -39,6 +37,16 @@ public class ContactEditorHelper
     //--------------------- preparation
 
     private boolean isPrepared;
+    private Contact contactToEdit, contactToAdd;
+    private int contactToEditPosition, contactToDeletePosition;
+    private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
+    private EditorState editorState;
+    private ViewManager viewManager;
+    private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
+    private ActiveContactHelper activeContactHelper;
+    private IElement<Contact> iContact;
+    private ContactsRecyclerAdapter contactsAdapter;
+    private IMsgToUi iMsgToUi;
 
     {
         objCount++;
@@ -60,20 +68,6 @@ public class ContactEditorHelper
     public boolean isObjectPrepared() {
         return isPrepared;
     }
-
-    //--------------------- non-settings
-
-    private Contact contactToEdit, contactToAdd;
-    private int contactToEditPosition, contactToDeletePosition;
-    private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
-    private EditorState editorState;
-
-    private ViewHelper viewHelper;
-    private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
-    private ActiveContactHelper activeContactHelper;
-    private IElement<Contact> iContact;
-    private ContactsRecyclerAdapter contactsAdapter;
-    private IMsgToUi iMsgToUi;
 
     //--------------------- singleton
 
@@ -119,7 +113,7 @@ public class ContactEditorHelper
         isDeleted = false;
         isSwipedIn = false;
         editorState = null;
-        viewHelper = null;
+        viewManager = null;
         swipeCrutch = null;
         activeContactHelper = null;
         iContact = null;
@@ -130,8 +124,8 @@ public class ContactEditorHelper
 
     //--------------------- getters and setters
 
-    public ContactEditorHelper setViewHelper(ViewHelper viewHelper) {
-        this.viewHelper = viewHelper;
+    public ContactEditorHelper setViewManager(ViewManager viewManager) {
+        this.viewManager = viewManager;
         return this;
     }
 
@@ -161,7 +155,7 @@ public class ContactEditorHelper
     }
 
 
-    public void setSwipedIn() {
+    public void setEditorSwipedIn() {
         isSwipedIn = true;
     }
 
@@ -185,13 +179,13 @@ public class ContactEditorHelper
 
     //--------------------- enter point
 
-    public void startEditorEditContact(Contact contact, int position) {
-        if (debug) Log.i(TAG, "startEditorEditContact");
+    public void startEditorEdit(Contact contact, int position) {
+        if (debug) Log.i(TAG, "startEditorEdit");
         goToState(EditorState.Edit, contact, position);
     }
 
-    public void startEditorAddContact() {
-        if (debug) Log.i(TAG, "startEditorAddContact");
+    public void startEditorAdd() {
+        if (debug) Log.i(TAG, "startEditorAdd");
         goToState(EditorState.Add);
     }
 
@@ -209,18 +203,18 @@ public class ContactEditorHelper
         editorState = toState;
         switch (editorState) {
             case Add:
-                viewHelper.setEditorAdd();
+                viewManager.setEditorAdd();
                 break;
             case Edit:
                 contactToEdit = contact;
                 contactToEditPosition = position;
-                viewHelper.setEditorEdit(contactToEdit);
+                viewManager.setEditorEdit(contactToEdit);
                 break;
             case Inactive:
                 contactToEdit = null;
                 contactToAdd = null;
                 contactToEditPosition = -1;
-                viewHelper.hideEditor();
+                viewManager.hideEditor();
                 if (isSwipedIn) {
                     if (debug) Log.i(TAG, "goToState Inactive isSwipedIn");
                     if (isDeleted || isEdited) {
@@ -241,11 +235,16 @@ public class ContactEditorHelper
                 Log.e(TAG, "goToState editorState default");
                 return;
         }
-        viewHelper.showEditor();
+        viewManager.showEditor();
         activeContactHelper.goToState(ActiveContactState.FromEditor);
     }
 
     //--------------------- commands
+
+    public void getAllContacts() {
+        if (debug) Log.i(TAG, "getAllContacts");
+        addRunnable(() -> iContact.initiateElements());
+    }
 
     public void cancelContact() {
         if (debug) Log.i(TAG, "cancelContact");
@@ -257,16 +256,16 @@ public class ContactEditorHelper
                 goToState(EditorState.Add);
                 break;
             case Inactive:
-                Log.e(TAG, "cancelContact editorState Inactive");
+                Log.e(TAG, "cancelInEditor editorState Inactive");
                 break;
             default:
-                Log.e(TAG, "cancelContact editorState default");
+                Log.e(TAG, "cancelInEditor editorState default");
                 break;
         }
     }
 
     public void deleteContact() {
-        if (debug) Log.i(TAG, "tryToDeleteContact");
+        if (debug) Log.i(TAG, "deleteContact");
         isDeletePending = true;
         freezeState();
         contactToDeletePosition = contactToEditPosition;
@@ -291,10 +290,10 @@ public class ContactEditorHelper
                 addRunnable(() -> iContact.updateElement(contactToEdit, activeContactHelper.getContact()));
                 break;
             case Inactive:
-                Log.e(TAG, "saveContact editorState Inactive");
+                Log.e(TAG, "saveInEditor editorState Inactive");
                 break;
             default:
-                Log.e(TAG, "saveContact editorState default");
+                Log.e(TAG, "saveInEditor editorState default");
                 break;
         }
     }
@@ -350,17 +349,17 @@ public class ContactEditorHelper
     //--------------------- additional
 
     public void contactFieldChanged() {
-        viewHelper.setEditorFieldChanged();
+        viewManager.setEditorFieldChanged();
     }
 
     private void freezeState() {
         if (debug) Log.i(TAG, "freezeState");
-        viewHelper.setEditorButtonsFreeze();
+        viewManager.setEditorButtonsFreeze();
     }
 
     private void releaseState() {
         if (debug) Log.i(TAG, "releaseState");
-        viewHelper.setEditorButtonsRelease();
+        viewManager.setEditorButtonsRelease();
     }
 
     //--------------------- IContactsListener

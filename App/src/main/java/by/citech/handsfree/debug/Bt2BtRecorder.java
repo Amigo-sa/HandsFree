@@ -1,42 +1,69 @@
 package by.citech.handsfree.debug;
 
 import android.util.Log;
+
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.logic.Caller;
-import by.citech.handsfree.logic.CallerState;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.logic.ICaller;
+import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.settings.SeverityLevel;
 
 public class Bt2BtRecorder
-        implements IDebugCtrl, IBase, ICaller {
+        implements IDebugCtrl, IBase, ICaller, ISettingsCtrl, IPrepareObject {
 
-    private final String TAG = Tags.BT2BT_RECORDER;
-    private final boolean debug = Settings.debug;
+    private static final String STAG = Tags.BT2BT_RECORDER;
+    private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
+
+    static {
+        objCount = 0;
+    }
 
     //--------------------- preparation
 
     private int recordSize;
     private int btFactor;
     private int bt2btPacketSize;
-    private byte[][] dataAssembled;
+    private byte[][] dataBuff;
     private byte[][][] dataSaved;
 
     {
+        objCount++;
+        TAG = STAG + " " + objCount;
+        prepareObject();
+    }
+
+    @Override
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         takeSettings();
-        applySettings();
+        applySettings(null);
+        return isObjectPrepared();
     }
 
-    private void applySettings() {
-        dataAssembled = new byte[btFactor][bt2btPacketSize];
+    @Override
+    public boolean isObjectPrepared() {
+        return dataBuff != null && dataSaved != null;
+    }
+
+    @Override
+    public boolean applySettings(SeverityLevel severityLevel) {
+        dataBuff = new byte[btFactor][bt2btPacketSize];
         dataSaved = new byte[recordSize][btFactor][bt2btPacketSize];
+        return true;
     }
 
-    private void takeSettings() {
+    @Override
+    public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         recordSize = 100;
         btFactor = Settings.btFactor;
         bt2btPacketSize = Settings.bt2btPacketSize;
+        return true;
     }
 
     //--------------------- non-settings
@@ -79,7 +106,7 @@ public class Bt2BtRecorder
             }
             storageFromBt = null;
             storageToBt = null;
-            dataAssembled = null;
+            dataBuff = null;
             dataSaved = null;
         }).start();
         return true;
@@ -108,11 +135,11 @@ public class Bt2BtRecorder
                     e.printStackTrace();
                 }
             }
-            dataAssembled[dataAssembledCount] = storageFromBt.getData();
+            dataBuff[dataAssembledCount] = storageFromBt.getData();
             dataAssembledCount++;
             if (dataAssembledCount == btFactor) {
                 if (debug) Log.i(TAG, "run recorder output buffer contains enough data, saving");
-                dataSaved[dataSavedCount] = dataAssembled;
+                dataSaved[dataSavedCount] = dataBuff;
                 dataSavedCount++;
                 if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.bt2btPacketSize));
                 dataAssembledCount = 0;

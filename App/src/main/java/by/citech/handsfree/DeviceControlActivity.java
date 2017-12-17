@@ -35,7 +35,6 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +48,7 @@ import by.citech.handsfree.common.ResourceManager;
 import by.citech.handsfree.gui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
+import by.citech.handsfree.gui.helper.IContactEditor;
 import by.citech.handsfree.gui.helper.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
@@ -65,7 +65,8 @@ import by.citech.handsfree.gui.IGetView;
 import by.citech.handsfree.gui.IGetViewGetter;
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
-import by.citech.handsfree.gui.helper.ViewHelper;
+import by.citech.handsfree.gui.helper.ViewManager;
+import by.citech.handsfree.logic.CallUi;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
@@ -85,21 +86,15 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class DeviceControlActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IMsgToUi, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter, IThreadManager {
+        IContactEditor, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter,
+        IThreadManager, IUiToCallListener, IMsgToUi {
 
     private static final String STAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
-
-    static {
-        objCount = 0;
-    }
-
-    {
-        objCount++;
-        TAG = STAG + " " + objCount;
-    }
+    static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
 
     private OpMode opMode;
 
@@ -109,19 +104,14 @@ public class DeviceControlActivity
     // TODO: отображение траффика для дебага
     private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
-    private ViewHelper viewHelper;
+    private ViewManager viewManager;
     private ActionBar actionBar;
 
     // список найденных устройств
     private ListView listDevices;
-    private LinearLayout mainView;
-    private LinearLayout scanView;
     private LeDeviceListAdapter deviceListAdapter;
 
     private Intent gattServiceIntent;
-
-    // основная логика
-    private IUiToCallListener iUiToCallListener;
 
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
@@ -150,12 +140,10 @@ public class DeviceControlActivity
         opMode = Settings.opMode;
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
-        viewHelper = new ViewHelper();
-        viewHelper.setiGetGetter(this).baseStart();
+        viewManager = new ViewManager();
+        viewManager.setiGetGetter(this).baseStart();
         ThreadManager.getInstance().baseStart();
 
-        mainView = findViewById(R.id.mainView);
-        scanView = findViewById(R.id.scanView);
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecycler);
         editTextSearch = findViewById(R.id.editTextSearch);
@@ -165,12 +153,12 @@ public class DeviceControlActivity
         findViewById(R.id.btnChangeDevice).setOnClickListener((v) -> clickBtnChangeDevice());
         findViewById(R.id.baseView).setOnTouchListener(new LinearLayoutTouchListener());
         findViewById(R.id.btnClearContact).setOnClickListener((v) -> clickBtnClearContact());
-        findViewById(R.id.btnAddContact).setOnClickListener((v) -> clickBtnAddContact());
-        findViewById(R.id.btnDelContact).setOnClickListener((v) -> clickBtnDelContact());
-        findViewById(R.id.btnSaveContact).setOnClickListener((v) -> clickBtnSaveContact());
-        findViewById(R.id.btnCancelContact).setOnClickListener((v) -> clickBtnCancelContact());
-        findViewById(R.id.btnGreen).setOnClickListener((v) -> iUiToCallListener.onClickBtnGreen());
-        findViewById(R.id.btnRed).setOnClickListener((v) -> iUiToCallListener.onClickBtnRed());
+        findViewById(R.id.btnAddContact).setOnClickListener((v) -> startEditorAddContact());
+        findViewById(R.id.btnDelContact).setOnClickListener((v) -> deleteFromEditor());
+        findViewById(R.id.btnSaveContact).setOnClickListener((v) -> saveInEditor());
+        findViewById(R.id.btnCancelContact).setOnClickListener((v) -> cancelInEditor());
+        findViewById(R.id.btnGreen).setOnClickListener((v) -> onClickBtnGreen());
+        findViewById(R.id.btnRed).setOnClickListener((v) -> onClickBtnRed());
     }
 
     @Override
@@ -200,13 +188,13 @@ public class DeviceControlActivity
             Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
         }
 
-        chosenContactHelper = new ChosenContactHelper(viewHelper);
-        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewHelper);
+        chosenContactHelper = new ChosenContactHelper(viewManager);
+        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
 
         Caller.getInstance()
-                .setiCallToUiListener(viewHelper)
-                .setiDebugCtrl(viewHelper)
-                .setiCallNetListener(viewHelper)
+                .setiCallToUiListener(viewManager)
+                .setiDebugCtrl(viewManager)
+                .setiCallNetListener(viewManager)
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiBroadcastReceiver(this)
@@ -214,7 +202,6 @@ public class DeviceControlActivity
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this);
 
-        iUiToCallListener = Caller.getInstance().getiUiBtnGreenRedListener();
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
 
         dialogProcessor = new DialogProcessor(this);
@@ -230,6 +217,8 @@ public class DeviceControlActivity
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
         Contactor.getInstance().baseStart();
         Caller.getInstance().baseStart();
+        ContactEditorHelper.getInstance().baseStart();
+        getAllContacts();
         IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
@@ -277,7 +266,7 @@ public class DeviceControlActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!viewHelper.isMainViewHidden())
+        if (!viewManager.isMainViewHidden())
             onCreateConnectMenu(menu);
         else
             onCreateScanMenu(menu);
@@ -325,12 +314,12 @@ public class DeviceControlActivity
     public void onBackPressed() {
         if (debug) Log.i(TAG, "onBackPressed");
         Keyboard.hideSoftKeyboard(this);
-        if (viewHelper.isMainViewHidden()) {
+        if (viewManager.isMainViewHidden()) {
             if (debug) Log.i(TAG, "onBackPressed get main_menu visible");
-            viewHelper.showMainView();
+            viewManager.showMainView();
             actionBar.setCustomView(null);
-            if (ContactEditorHelper.getInstance().getState() != EditorState.Inactive)
-                ContactEditorHelper.getInstance().goToState(EditorState.Inactive);
+            if (getEditorState() != EditorState.Inactive)
+                goToEditorState(EditorState.Inactive);
             IUiToBtListener.stopItemSelectedListener();
             invalidateOptionsMenu();
         } else {
@@ -415,7 +404,7 @@ public class DeviceControlActivity
     private void setupContactEditor() {
         if (debug) Log.i(TAG, "setupContactEditor");
         ContactEditorHelper.getInstance()
-                .setViewHelper(viewHelper)
+                .setViewManager(viewManager)
                 .setSwipeCrutch(swipeCrutch)
                 .setActiveContactHelper(activeContactHelper)
                 .setiMsgToUi(this)
@@ -461,8 +450,8 @@ public class DeviceControlActivity
                 swipeCrutch.designateSwipe(viewHolder.itemView, position);
                 switch (swipeDir) {
                     case ItemTouchHelper.RIGHT:
-                        ContactEditorHelper.getInstance().setSwipedIn();
-                        ContactEditorHelper.getInstance().startEditorEditContact(contactsAdapter.getItem(position), position);
+                        setEditorSwipedIn();
+                        startEditorEditContact(contactsAdapter.getItem(position), position);
                         break;
                     default:
                         if (debug) Log.i(TAG, "swipe swipeDir is " + swipeDir);
@@ -495,34 +484,13 @@ public class DeviceControlActivity
 
     //--------------------- actions
 
-    void clickBtnCancelContact() {
-        if (debug) Log.i(TAG, "clickBtnCancelContact");
-        ContactEditorHelper.getInstance().cancelContact();
-    }
-
-    void clickBtnSaveContact() {
-        if (debug) Log.i(TAG, "clickBtnSaveContact");
-        ContactEditorHelper.getInstance().saveContact();
-    }
-
-    void clickBtnDelContact() {
-        if (debug) Log.i(TAG, "clickBtnDelContact");
-        ContactEditorHelper.getInstance().deleteContact();
-    }
-
-    void clickBtnAddContact() {
-        if (debug) Log.i(TAG, "clickBtnAddContact");
-        ContactEditorHelper.getInstance().startEditorAddContact();
-    }
-
     void clickBtnClearContact() {
         if (debug) Log.i(TAG, "clickBtnClearContact");
         if (chosenContactHelper.isChosen()) {
             chosenContactHelper.clear();
             activeContactHelper.goToState(ActiveContactState.Default);
-        }
-        else {
-            editTextSearch.setText("");
+        } else {
+            viewManager.clearSearch();
         }
     }
 
@@ -536,7 +504,7 @@ public class DeviceControlActivity
         setVisibleList();
         IUiToBtListener.clickBtnChangeDeviceListenerOne();
         setupViewListDevices();
-        if (debug) Log.i("WSD_ACTIVITY","befor caller getBluetoothAdapter");
+        if (debug) Log.i(TAG,"before caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
         // останавливаем сканирование и запускаем новое Activity
         IUiToBtListener.clickBtnChangeDeviceListenerTwo();
@@ -592,13 +560,13 @@ public class DeviceControlActivity
 
     @Override
     public void withoutDeviceView() {
-        viewHelper.setMainNoDevice();
+        viewManager.setMainNoDevice();
         invalidateOptionsMenu();
     }
 
     @Override
     public void withDeviceView() {
-        viewHelper.setMainDeviceConnected();
+        viewManager.setMainDeviceConnected();
         invalidateOptionsMenu();
    }
 
@@ -633,13 +601,13 @@ public class DeviceControlActivity
     }
 
     private void swipeScanStart(){
-        if (!viewHelper.isScanViewHidden()) {
+        if (!viewManager.isScanViewHidden()) {
             IUiToBtListener.swipeScanStartListener();
         }
     }
 
     private void swipeScanStop(){
-        if (!viewHelper.isScanViewHidden()) {
+        if (!viewManager.isScanViewHidden()) {
             IUiToBtListener.swipeScanStopListener();
         }
     }
@@ -721,20 +689,19 @@ public class DeviceControlActivity
 
     }
 
-    //--------------------- ViewHelper
+    //--------------------- ViewManager
 
     public void setVisibleMain() {
         runOnUiThread(() -> {
             invalidateOptionsMenu();
-            mainView.setVisibility(View.VISIBLE);
-            scanView.setVisibility(View.GONE);
+            viewManager.showMainView();
         });
     }
 
     public void setVisibleList() {
         runOnUiThread(() -> {
             invalidateOptionsMenu();
-            viewHelper.showScaner();
+            viewManager.showScaner();
         });
     }
 

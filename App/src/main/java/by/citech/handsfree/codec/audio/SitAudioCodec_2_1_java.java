@@ -1,12 +1,18 @@
 package by.citech.handsfree.codec.audio;
 
+import android.util.Log;
+
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.enumeration.AudioCodecType;
 
-public class SitAudioCodec_2_1_java implements ICodec {
+public class SitAudioCodec_2_1_java
+        implements ICodec {
 
     //------------------- AHTUNG ГОВНОКОД НАЧАЛО
 
+    private static final boolean debug = Settings.debug;
     private static final AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
+    private static final String TAG = audioCodecType.getSettingName();
     private static final int decodedShortsSize = audioCodecType.getDecodedShortsSize();
     private static final int encodedBytesSize = audioCodecType.getEncodedBytesSize();
     private static final short[] decodedData = new short[decodedShortsSize];
@@ -14,7 +20,6 @@ public class SitAudioCodec_2_1_java implements ICodec {
 
     private CodecState decoderState;
     private CodecState encoderState;
-
 
     @Override
     public void initiateDecoder() {
@@ -39,7 +44,7 @@ public class SitAudioCodec_2_1_java implements ICodec {
         if (decoderState == null) {
             initiateDecoder();
         }
-        SitDecoder(dataToDecode, decodedData, decoderState);
+        decode(dataToDecode, decodedData, decoderState);
         return decodedData;
     }
 
@@ -48,7 +53,7 @@ public class SitAudioCodec_2_1_java implements ICodec {
         if (encoderState == null) {
             initiateDecoder();
         }
-        SitEncoder(dataToEncode, encodedData, encoderState);
+        encode(dataToEncode, encodedData, encoderState);
         return encodedData;
     }
 
@@ -99,7 +104,7 @@ public class SitAudioCodec_2_1_java implements ICodec {
     private static final int[] qtab_723_16 = {261};
     private static final int[] power2 = {1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000};
 
-    private static void SitEncoder(short[] u, byte[] y, CodecState state_ptr) {
+    private static void encode(short[] u, byte[] y, CodecState state_ptr) {
         int i;
         byte smp;
 
@@ -114,10 +119,9 @@ public class SitAudioCodec_2_1_java implements ICodec {
         }
     }
 
-    private static void SitDecoder(byte[] u, short[] y, CodecState state_ptr) {
+    private static void decode(byte[] u, short[] y, CodecState state_ptr) {
         int i;
         int smp;
-
 
         for (i = 0; i < 10; i++) {
             smp = (int) (u[i] & 0x03);
@@ -171,7 +175,6 @@ public class SitAudioCodec_2_1_java implements ICodec {
     private static int predictor_zero(CodecState state_ptr) {
         int i;
         int sezi;
-
         sezi = fmult(state_ptr.b[0] >> 2, state_ptr.dq[0]);
         for (i = 1; i < 6; i++) { // ACCUM
             sezi += fmult(state_ptr.b[i] >> 2, state_ptr.dq[i]);
@@ -285,7 +288,6 @@ public class SitAudioCodec_2_1_java implements ICodec {
         int pk0;
 
         pk0 = (dqsez < 0) ? 1 : 0; // needed in updating predictor poles
-
         mag = dq & 0x7FFF; // prediction difference magnitude
 		/* TRANS */
         ylint = state_ptr.yl >> 15; // exponent part of yl
@@ -490,18 +492,12 @@ public class SitAudioCodec_2_1_java implements ICodec {
         sez = sezi >> 1;
         sei = sezi + predictor_pole(state_ptr);
         se = sei >> 1; // se = estimated signal
-
         y = step_size(state_ptr); // adaptive quantizer step size
         dq = reconstruct(i & 0x02, _dqlntab[i], y); // unquantize pred diff
-
         sr = (dq < 0) ? (se - (dq & 0x3FFF)) : (se + dq); // reconst. signal
-
         dqsez = sr - se + sez; // pole prediction diff.
-
         update(2, y, _witab[i], _fitab[i], dq, sr, dqsez, state_ptr);
-
         return (sr << 2); // sr was of 14-bit dynamic range
-
     }
 
     private static int gsit_16_encoder(int sl, CodecState state_ptr) {
@@ -517,21 +513,19 @@ public class SitAudioCodec_2_1_java implements ICodec {
         int dqsez; // ADDC
 
         sl >>= 2; // sl of 14-bit dynamic range
-
         sezi = predictor_zero(state_ptr);
         sez = sezi >> 1;
         sei = sezi + predictor_pole(state_ptr);
         se = sei >> 1; // se = estimated signal
-
         d = sl - se; // d = estimation diff.
 
 		/* quantize prediction difference d */
         y = step_size(state_ptr); // quantizer step size
         i = quantize(d, y, qtab_723_16, 1); // i = ADPCM code
 
-			  /* Since quantize() only produces a three level output
-			   * (1, 2, or 3), we must create the fourth one on our own
-			   */
+		/* Since quantize() only produces a three level output
+		 * (1, 2, or 3), we must create the fourth one on our own
+		 */
         if (i == 3) // i code for the zero region
         {
             if ((d & 0x8000) == 0) // If d > 0, i=3 isn't right...
@@ -541,13 +535,9 @@ public class SitAudioCodec_2_1_java implements ICodec {
         }
 
         dq = reconstruct(i & 2, _dqlntab[i], y); // quantized diff.
-
         sr = (dq < 0) ? se - (dq & 0x3FFF) : se + dq; // reconstructed signal
-
         dqsez = sr + sez - se; // pole prediction diff.
-
         update(2, y, _witab[i], _fitab[i], dq, sr, dqsez, state_ptr);
-
         return (i);
     }
 

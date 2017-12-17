@@ -17,14 +17,25 @@ import by.citech.handsfree.param.Tags;
 public class CallUi
         implements IUiToCallListener, IBase, ISettingsCtrl, IPrepareObject, ICaller {
 
-    private static final String TAG = Tags.CALL_UI;
+    private static final String STAG = Tags.CALL_UI;
     private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
+
+    static {
+        objCount = 0;
+    }
 
     //--------------------- preparation
 
     private OpMode opMode;
+    private ArrayList<ICallToUiListener> iToUis;
+    private ArrayList<ICallToUiExchangeListener> iToUiExs;
+    private ArrayList<IDebugCtrl> iDebugs;
 
     {
+        objCount++;
+        TAG = STAG + " " + objCount;
         prepareObject();
     }
 
@@ -48,12 +59,6 @@ public class CallUi
         opMode = Settings.getInstance().getCommon().getOpMode();
         return true;
     }
-
-    //--------------------- non-settings
-
-    private ArrayList<ICallToUiListener> iToUis;
-    private ArrayList<ICallToUiExchangeListener> iToUiExs;
-    private ArrayList<IDebugCtrl> iDebugs;
 
     //--------------------- singleton
 
@@ -109,17 +114,13 @@ public class CallUi
         if (debug) Log.i(TAG, "baseStop");
         if (iToUis != null) {
             iToUis.clear();
-            iToUis = null;
         }
         if (iToUiExs != null) {
             iToUiExs.clear();
-            iToUiExs = null;
         }
         if (iDebugs != null) {
             iDebugs.clear();
-            iDebugs = null;
         }
-        opMode = null;
         return true;
     }
 
@@ -137,8 +138,9 @@ public class CallUi
     public void onClickBtnGreen() {
         if (debug) Log.i(TAG, "onClickBtnGreen");
         if (!prepareObject()) {Log.e(TAG, "onClickBtnGreen not initiated");return;}
-        CallerState callerState = getCallerState();
         if (debug) Log.w(TAG, "onClickBtnGreen opMode is " + opMode.getSettingName());
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "onClickBtnGreen callerState is " + callerState.getName());
         switch (opMode) {
             case Net2Net:
                 Log.e(TAG, "onClickBtnGreen opMode Net2Net not implemented yet"); break;
@@ -188,6 +190,7 @@ public class CallUi
     public void onClickBtnRed() {
         if (debug) Log.i(TAG, "onClickBtnRed");
         if (!prepareObject()) {Log.e(TAG, "onClickBtnRed not prepared, return"); return;}
+        if (debug) Log.i(TAG, "onClickBtnRed opMode is " + opMode.getSettingName());
         CallerState callerState = getCallerState();
         if (debug) Log.i(TAG, "onClickBtnRed callerState is " + callerState.getName());
         switch (opMode) {

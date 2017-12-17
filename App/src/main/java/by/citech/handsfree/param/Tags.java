@@ -59,9 +59,9 @@ public class Tags {
     public static final String ELEMENTS_MEM_CTRL   = "WSD_ELEMENTS_MEM_CTRL";
     public static final String PREF_PROCESSOR      = "WSD_PREF_PROCESSOR";
     public static final String CHOSEN_HELPER       = "WSD_CHOSEN_HELPER";
-    public static final String VIEW_HELPER         = "WSD_VIEW_HELPER";
+    public static final String VIEW_MANAGER        = "WSD_VIEW_MANAGER";
     public static final String EDITOR_HELPER       = "WSD_EDITOR_HELPER";
-    public static final String BUTTON_HELPER       = "WSD_BUTTON_HELPER";
+    public static final String VIEW_HELPER         = "WSD_VIEW_HELPER";
     public static final String ACTIVE_HELPER       = "WSD_ACTIVE_HELPER";
     public static final String PRESETTER           = "WSD_PRESETTER";
 
@@ -75,4 +75,6 @@ public class Tags {
     public static final String ENUM_CHECK          = "WSD_ENUM_CHECK";
     public static final String I_CHECK             = "WSD_I_CHECK";
     public static final String RESOURCE_MANAGER    = "WSD_RESOURCE_MANAGER";
+    public static final String CONTACT_HELPER      = "WSD_CONTACT_HELPER";
+    public static final String VIEW_KEEPER         = "WSD_VIEW_KEEPER";
 }

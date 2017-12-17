@@ -9,13 +9,14 @@ import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 
-/**
- * Created by tretyak on 21.11.2017.
- */
-
 public class LeScanner implements IBtToUiListener {
 
-    private final static String TAG = "WSD_LeScanner";
+    private final static String STAG = "WSD_LeScanner";
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
+
     private static final long SCAN_PERIOD = 10000;
     private Handler mHandler;
     private boolean mScanning;

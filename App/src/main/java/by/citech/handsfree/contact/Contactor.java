@@ -84,7 +84,12 @@ public class Contactor
 
     public List<Contact> getContacts() {
         if (debug) Log.i(TAG, "getContacts");
-        return memCtrl.getList();
+        if (!prepareObject()) {
+            Log.e(TAG, "getContacts object not prepared, return");
+            return null;
+        } else {
+            return memCtrl.getList();
+        }
     }
 
     public Contactor setListener(IContactsListener listener) {
@@ -108,10 +113,13 @@ public class Contactor
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        prepareObject();
+        if (!prepareObject()) {
+            Log.e(TAG, "baseStart object not prepared, return");
+            return false;
+        }
         if (dbCtrl == null || listener == null || iMsgToUi == null) {
             Log.e(TAG, "baseStart illegal parameters");
-            return true;
+            return false;
         }
         isReady = true;
         return true;
@@ -172,6 +180,8 @@ public class Contactor
                 return true;
             } else if (!memCtrl.checkForUniq(toCopy)) {
                 toUpdate.setState(ContactState.FailNotUnique);
+            } else {
+                return true;
             }
         }
         reportContact(toUpdate);
@@ -212,6 +222,7 @@ public class Contactor
             return;
         }
         if (check(toAdd)) {
+            if (debug) Log.w(TAG, "addElement toAdd is " + toAdd.toString());
             long contactId = dbCtrl.add(toAdd);
             if (contactId == -1) {
                 toAdd.setState(ContactState.FailToAdd);
@@ -226,6 +237,7 @@ public class Contactor
                 }
             }
             reportContact(toAdd);
+            if (debug) Log.w(TAG, "addElement added is " + toAdd.toString());
         }
     }
 
@@ -257,22 +269,9 @@ public class Contactor
             Log.e(TAG, "updateElement not ready");
             return;
         }
-
-        //TODO: to remove, test area start
-        Contact backup = null;
-        if (toUpdate != null) {
-            try {
-                backup = toUpdate.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (backup == null) {
-            Log.e(TAG, "updateElement backup is null");
-        }
-        //TODO: to remove, test area end
-
         if (check(toUpdate, toCopy)) {
+            if (debug) Log.w(TAG, "updateElement toCopy is " + toCopy.toString());
+            if (debug) Log.w(TAG, "updateElement toUpdate is " + toUpdate.toString());
             if (!dbCtrl.update(toUpdate, toCopy)) {
                 toUpdate.setState(ContactState.FailUpdate);
                 Log.e(TAG, "updateElement db fail");
@@ -283,6 +282,7 @@ public class Contactor
                 toUpdate.setState(ContactState.SuccessUpdate);
             }
             reportContact(toUpdate);
+            if (debug) Log.w(TAG, "updateElement updated is " + toUpdate.toString());
         }
     }
 

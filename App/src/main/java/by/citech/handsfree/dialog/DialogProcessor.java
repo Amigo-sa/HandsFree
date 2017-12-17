@@ -1,7 +1,7 @@
 package by.citech.handsfree.dialog;
 
+import android.content.Context;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,16 +15,20 @@ import by.citech.handsfree.param.Tags;
 
 public class DialogProcessor {
 
+    private static final String STAG = Tags.DIALOG_PROC;
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.DIALOG_PROC;
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
 
-    private AppCompatActivity activity;
+    private Context context;
     private DialogState currentState;
     private DialogType currentType;
     private AlertDialog currentDialog;
 
-    public DialogProcessor(AppCompatActivity activity) {
-        this.activity = activity;
+    public DialogProcessor(Context context) {
+        this.context = context;
         currentState = DialogState.Idle;
     }
 
@@ -101,7 +105,7 @@ public class DialogProcessor {
 
     private void dialogReconnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogReconnect");
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogDelete onDismiss");
                     switch (currentState) {
@@ -140,7 +144,7 @@ public class DialogProcessor {
 
     private void dialogDisconnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogDisconnecting");
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogDelete onDismiss");
                     switch (currentState) {
@@ -182,7 +186,7 @@ public class DialogProcessor {
     private void dialogDisconnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogDisconnect");
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnect just dismiss");
                     toDoMap.get(DialogState.Idle).run();
@@ -202,7 +206,7 @@ public class DialogProcessor {
     private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogConnect");
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnect just dismiss");
                     toDoMap.get(DialogState.Idle).run();
@@ -222,7 +226,7 @@ public class DialogProcessor {
     private void dialogConnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogConnecting");
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnecting onDismiss");
                     switch (currentState) {
@@ -261,7 +265,7 @@ public class DialogProcessor {
     private void dialogDelete(final Map<DialogState, Runnable> toDoMap) {
         if (debug) Log.i(TAG, "dialogDelete");
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogDelete onDismiss");
                     switch (currentState) {
@@ -287,7 +291,7 @@ public class DialogProcessor {
         AlertDialog dialog = builder.create();
         currentDialog = dialog;
 
-        View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_proceed, null);
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_proceed, null);
 
         dialogView.findViewById(R.id.btnProceed).setOnClickListener((v) -> {
             currentState = DialogState.Proceed;

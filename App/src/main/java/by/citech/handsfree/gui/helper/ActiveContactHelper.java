@@ -16,11 +16,11 @@ public class ActiveContactHelper
 
     private ActiveContactState activeContactState;
     private ChosenContactHelper chosenContactHelper;
-    private ViewHelper viewHelper;
+    private ViewManager viewManager;
 
-    public ActiveContactHelper(ChosenContactHelper chosenContactHelper, ViewHelper viewHelper) {
+    public ActiveContactHelper(ChosenContactHelper chosenContactHelper, ViewManager viewManager) {
         this.chosenContactHelper = chosenContactHelper;
-        this.viewHelper = viewHelper;
+        this.viewManager = viewManager;
         activeContactState = ActiveContactState.IpFromSearch;
     }
 
@@ -39,7 +39,7 @@ public class ActiveContactHelper
         if (debug) Log.i(TAG, "baseStop");
         activeContactState = null;
         chosenContactHelper = null;
-        viewHelper = null;
+        viewManager = null;
         return true;
     }
 
@@ -99,7 +99,7 @@ public class ActiveContactHelper
             case FromChosen:
                 return getContact().getName();
             case FromEditor:
-                return viewHelper.getEditorContactNameText();
+                return viewManager.getEditorContactNameText();
             case IpFromSearch:
                 return "";
             default:
@@ -116,10 +116,10 @@ public class ActiveContactHelper
                 return getContact().getIp();
             case FromEditor:
                 if (debug) Log.i(TAG, "getIp FromEditor");
-                return viewHelper.getEditorContactIpText();
+                return viewManager.getEditorContactIpText();
             case IpFromSearch:
                 if (debug) Log.i(TAG, "getIp IpFromSearch");
-                return viewHelper.getSearchText();
+                return viewManager.getSearchText();
             default:
                 Log.e(TAG, "getIp editorState default");
                 return "";

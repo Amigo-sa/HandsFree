@@ -1,6 +1,15 @@
 package by.citech.handsfree.gui;
 
+import by.citech.handsfree.logic.CallUi;
+
 public interface IUiToCallListener {
-    void onClickBtnRed();
-    void onClickBtnGreen();
+
+    default void onClickBtnRed() {
+        CallUi.getInstance().onClickBtnRed();
+    }
+
+    default void onClickBtnGreen() {
+        CallUi.getInstance().onClickBtnGreen();
+    }
+
 }

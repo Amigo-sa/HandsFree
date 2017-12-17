@@ -3,6 +3,7 @@ package by.citech.handsfree.debug;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.AudioCodec;
+import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.SeverityLevel;
@@ -27,10 +28,17 @@ public class AudIn2BtLooper
     private static int objCount;
     private final String TAG;
 
+    static {
+        objCount = 0;
+    }
+
     //--------------------- preparation
 
     private AudioCodecType codecType;
-    private AudioCodec audioCodec;
+    private ICodec codec;
+    private IReceiverCtrl iReceiverCtrl;
+    private ITransmitterCtrl iTransmitterCtrl;
+    private IReceiver iReceiver;
 
     {
         objCount++;
@@ -47,7 +55,7 @@ public class AudIn2BtLooper
 
     @Override
     public boolean isObjectPrepared() {
-        return audioCodec != null;
+        return codec != null && codecType != null;
     }
 
     @Override
@@ -59,15 +67,11 @@ public class AudIn2BtLooper
 
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
-        audioCodec = new AudioCodec(codecType);
+        codec = AudioCodec.getAudioCodec(codecType);
         return true;
     }
 
-    //--------------------- non-settings
-
-    private IReceiverCtrl iReceiverCtrl;
-    private ITransmitterCtrl iTransmitterCtrl;
-    private IReceiver iReceiver;
+    //--------------------- constructor
 
     public AudIn2BtLooper(StorageData<byte[][]> micToBtStorage) {
         iTransmitterCtrl = new FromAudioIn(this);
@@ -100,8 +104,8 @@ public class AudIn2BtLooper
     public void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
         if (iReceiver == null) {
-            audioCodec.initiateEncoder();
-            audioCodec.initiateDecoder();
+            codec.initiateEncoder();
+            codec.initiateDecoder();
             iReceiverCtrl.prepareRedirect();
             iReceiverCtrl.redirectOn();
             iTransmitterCtrl.prepareStream();
@@ -123,7 +127,7 @@ public class AudIn2BtLooper
     public void sendData(short[] data) {
         if (debug) Log.i(TAG, "sendData short[]");
         if (iReceiver != null) {
-            iReceiver.onReceiveData(audioCodec.getEncodedData(data));
+            iReceiver.onReceiveData(codec.getEncodedData(data));
         }
     }
 

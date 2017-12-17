@@ -13,10 +13,10 @@ public class ChosenContactHelper {
     private Contact chosenContact;
     private int chosenContactPosition;
 
-    private ViewHelper viewHelper;
+    private ViewManager viewManager;
 
-    public ChosenContactHelper(ViewHelper viewHelper) {
-        this.viewHelper = viewHelper;
+    public ChosenContactHelper(ViewManager viewManager) {
+        this.viewManager = viewManager;
         chosenContactPosition = -1;
     }
 
@@ -32,16 +32,16 @@ public class ChosenContactHelper {
         isChosen = true;
         chosenContact = contact;
         chosenContactPosition = position;
-        viewHelper.showChosen();
-        viewHelper.setChosenContactInfo(chosenContact);
+        viewManager.showChosen();
+        viewManager.setChosenContactInfo(chosenContact);
     }
 
     public void clear() {
         isChosen = false;
         chosenContact = null;
         chosenContactPosition = -1;
-        viewHelper.hideChosen();
-        viewHelper.clearChosenContactInfo();
+        viewManager.hideChosen();
+        viewManager.clearChosenContactInfo();
     }
 
 }

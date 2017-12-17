@@ -16,8 +16,12 @@ import by.citech.handsfree.param.Tags;
 public class ContactsDbCtrl
         extends SQLiteOpenHelper {
 
+    private static final String STAG = Tags.CONTACTS_DB_CTRL + " ST";
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.CONTACTS_DB_CTRL;
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
 
     private static final int DB_CONTACTS_VERSION = 1;
     private static final String DB_CONTACTS_NAME = "DB_CONTACTS";
@@ -57,7 +61,7 @@ public class ContactsDbCtrl
     //--------------------- main
 
     private static ContentValues buildContent(Contact contact) {
-        if (debug) Log.d(TAG, "buildContent");
+        if (debug) Log.d(STAG, "buildContent");
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contact.Contract.COLUMN_NAME_NAME, contact.getName());
         contentValues.put(Contact.Contract.COLUMN_NAME_IP, contact.getIp());
@@ -66,7 +70,7 @@ public class ContactsDbCtrl
 
     private static boolean proc(SQLiteDatabase db, Runnable runnable) {
         if (db == null || runnable == null) {
-            Log.e(TAG, "proc illegal parameters");
+            Log.e(STAG, "proc illegal parameters");
             return false;
         }
         db.beginTransaction();
@@ -177,18 +181,17 @@ public class ContactsDbCtrl
     //--------------------- test
 
     void test() {
-        Log.w(TAG, "TEST DB");
+        Log.w(TAG, "TEST DB START");
         printDb();
         getSizeDb();
-        if (!isEmptyDb()) {
-            clearDb();
+        if (isEmptyDb()) {
+            testFillDb();
         }
-        fillDb();
-        Log.w(TAG, "TEST DB DONE");
+        Log.w(TAG, "TEST DB END");
     }
 
     private void getSizeDb() {
-        Log.i(TAG, "getSizeDb");
+        if (debug) Log.i(TAG, "getSizeDb");
         long size = DatabaseUtils.queryNumEntries(getReadableDatabase(), Contact.Contract.TABLE_NAME);
         this.close();
         Log.i(TAG, "getSizeDb db size is " + size);
@@ -212,7 +215,7 @@ public class ContactsDbCtrl
     }
 
     private boolean isEmptyDb() {
-        Log.i(TAG, "isEmptyDb");
+        if (debug) Log.i(TAG, "isEmptyDb");
         boolean isClear = (DatabaseUtils.queryNumEntries(getReadableDatabase(), Contact.Contract.TABLE_NAME) == 0);
         this.close();
         Log.i(TAG, "isEmptyDb db is " + (isClear ? "" : "not ") + "empty");
@@ -220,20 +223,23 @@ public class ContactsDbCtrl
     }
 
     private void clearDb() {
-        Log.i(TAG, "clearDb");
+        if (debug) Log.i(TAG, "clearDb");
         getWritableDatabase().delete(Contact.Contract.TABLE_NAME, null, null);
         this.close();
     }
 
-    private void fillDb() {
-        Log.i(TAG, "fillDb");
+    private void testFillDb() {
+        Log.w(TAG, "TEST FILL DB START");
         add(new Contact("Петька", "192.168.0.1"));
         add(new Contact("Саня", "192.12.0.1"));
         add(new Contact("Федя", "192.238.0.1"));
         add(new Contact("Коля", "192.38.0.1"));
+        add(new Contact("Николаша", "19.38.0.1"));
+        add(new Contact("Ушат Отходов", "76.3.0.1"));
         add(new Contact("Google", "8.8.8.8"));
         add(new Contact("КГБ", "127.0.0.1"));
         add(new Contact("Петька", "192.168.0.113"));
+        add(new Contact("Бука Сука Димка", "66.18.0.263"));
         add(new Contact("Василий", "192.168.10.16"));
         add(new Contact("Борис Моисеев", "176.168.0.1"));
         add(new Contact("Илона", "176.95.0.11"));
@@ -242,8 +248,10 @@ public class ContactsDbCtrl
         add(new Contact("Урукхай", "80.80.8.80"));
         add(new Contact("Щука", "80.0.0.80"));
         add(new Contact("Бодряк", "255.255.255.255"));
+        add(new Contact("Zoltan", "35.2.255.255"));
         add(new Contact("Silvia Saint", "255.255.2.3"));
         add(new Contact("Иозя", "123.255.255.255"));
+        Log.w(TAG, "TEST FILL DB END");
     }
 
 }

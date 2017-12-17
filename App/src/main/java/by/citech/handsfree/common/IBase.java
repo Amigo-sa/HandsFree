@@ -18,6 +18,10 @@ public interface IBase {
         return ResourceManager.getInstance().removeBase(this);
     }
 
+    default void baseDestroy() {
+        Log.e(TAG, "baseDestroy" + ERR_MSG);
+    }
+
     default void basePause() {
         Log.e(TAG, "basePause" + ERR_MSG);
     }

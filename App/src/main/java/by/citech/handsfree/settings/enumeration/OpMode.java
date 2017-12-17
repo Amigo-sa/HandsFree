@@ -13,9 +13,13 @@ public enum OpMode implements ISettingEnum<OpMode> {
     AudIn2Bt {},
     AudIn2AudOut {};
 
-    @Override public String getSettingName() {return this.toString();}
+    @Override public String getSettingName() {
+        return this.toString();
+    }
 
-    @Override public String getSettingNumber() {return String.valueOf(this.ordinal() + 1);}
+    @Override public String getSettingNumber() {
+        return String.valueOf(this.ordinal() + 1);
+    }
 
     @Override
     public String getDefaultName() {

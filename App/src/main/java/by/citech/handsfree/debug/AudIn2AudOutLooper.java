@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.Arrays;
 
 import by.citech.handsfree.codec.audio.AudioCodec;
+import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.AudioCodecType;
@@ -22,22 +23,32 @@ import by.citech.handsfree.param.Tags;
 public class AudIn2AudOutLooper
         implements IDebugCtrl, IReceiverReg, ITransmitter, IBase, IPrepareObject, ISettingsCtrl {
 
-    private static final String TAG = Tags.AUDIN2AUDOUT_LOOPER;
+    private static final String STAG = Tags.AUDIN2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
+
+    static {
+        objCount = 0;
+    }
 
     //--------------------- preparation
 
     private AudioCodecType codecType;
-    private AudioCodec audioCodec;
+    private ICodec codec;
     private int codecFactor;
     private int audioBuffSizeBytes;
     private int audioBuffSizeShorts;
     private int buff2CodecFactor;
     private boolean audioSingleFrame;
     private short[] dataBuff;
-    private boolean isPrepared;
+    private IReceiver iReceiver;
+    private ITransmitterCtrl iTransmitterCtrl;
+    private IReceiverCtrl iReceiverCtrl;
 
     {
+        objCount++;
+        TAG = STAG + " " + objCount;
         prepareObject();
     }
 
@@ -51,8 +62,7 @@ public class AudIn2AudOutLooper
 
     @Override
     public boolean isObjectPrepared() {
-        isPrepared = true;
-        return isPrepared;
+        return codecType != null && dataBuff != null && codec != null;
     }
 
     @Override
@@ -69,15 +79,11 @@ public class AudIn2AudOutLooper
 
     public boolean applySettings() {
         dataBuff = new short[audioBuffSizeShorts];
-        audioCodec = new AudioCodec(codecType);
+        codec = AudioCodec.getAudioCodec(codecType);
         return true;
     }
 
-    //--------------------- non-settings
-
-    private IReceiver iReceiver;
-    private ITransmitterCtrl iTransmitterCtrl;
-    private IReceiverCtrl iReceiverCtrl;
+    //--------------------- constructor
 
     public AudIn2AudOutLooper() {
         iReceiverCtrl = new ToAudioOut(this);
@@ -102,7 +108,7 @@ public class AudIn2AudOutLooper
         iTransmitterCtrl = null;
         iReceiverCtrl = null;
         codecType = null;
-        audioCodec = null;
+        codec = null;
         dataBuff = null;
         return true;
     }
@@ -113,8 +119,8 @@ public class AudIn2AudOutLooper
     public void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
         if (iReceiver == null) {
-            audioCodec.initiateEncoder();
-            audioCodec.initiateDecoder();
+            codec.initiateEncoder();
+            codec.initiateDecoder();
             iReceiverCtrl.prepareRedirect();
             iTransmitterCtrl.prepareStream();
             iReceiverCtrl.redirectOn();
@@ -153,14 +159,14 @@ public class AudIn2AudOutLooper
         if (iReceiver != null) {
             if (audioSingleFrame) {
 //              iReceiver.onReceiveData(data);
-                iReceiver.onReceiveData(audioCodec.getDecodedData(audioCodec.getEncodedData(data)));
+                iReceiver.onReceiveData(codec.getDecodedData(codec.getEncodedData(data)));
             } else {
                 dataBuff = data;
                 int from;
                 for (int i = 0; i < buff2CodecFactor; i++) {
                     from = i * codecFactor;
                     if (debug) Log.i(TAG, "sendData from is " + from);
-                    System.arraycopy(audioCodec.getDecodedData(audioCodec.getEncodedData(Arrays.copyOfRange(dataBuff, from, from + codecFactor))), 0, dataBuff, from, codecFactor);
+                    System.arraycopy(codec.getDecodedData(codec.getEncodedData(Arrays.copyOfRange(dataBuff, from, from + codecFactor))), 0, dataBuff, from, codecFactor);
                 }
                 iReceiver.onReceiveData(dataBuff);
             }

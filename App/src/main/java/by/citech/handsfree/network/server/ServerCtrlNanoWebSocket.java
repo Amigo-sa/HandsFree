@@ -25,8 +25,13 @@ public class ServerCtrlNanoWebSocket
         implements IServerCtrl, IReceiverReg, ITransmitter {
 
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
-    private static final String TAG = Tags.SRV_WSOCKETCTRL;
+
+    private static final String STAG = Tags.SRV_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
 
     private WebSocket webSocket;
     private Handler handler;
@@ -64,11 +69,6 @@ public class ServerCtrlNanoWebSocket
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void sendData(short[] data) {
-        Log.e(TAG, "sendData short[]");
     }
 
     //--------------------- IExchangeCtrl
@@ -156,8 +156,9 @@ public class ServerCtrlNanoWebSocket
         this.listener = listener;
     }
 
-//    private static class DebugWebSocket extends WebSocket {
+//  private static class DebugWebSocket extends WebSocket {
     private class DebugWebSocket extends WebSocket {
+
         private DebugWebSocket(IHTTPSession handshakeRequest) {
             super(handshakeRequest);
         }
@@ -195,15 +196,6 @@ public class ServerCtrlNanoWebSocket
                 if (debug) Log.i(TAG, "onMessage not redirecting");
                 handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message).sendToTarget();
             }
-//          handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message.getTextPayload()).sendToTarget();
-//          handler.sendEmptyMessage(StatusMessages.SRV_ONMESSAGE);
-//          activity.textViewSrvFromCltText.setText(message.getTextPayload());
-//          try {
-//               message.setUnmasked();
-//               sendFrame(message);
-//          } catch (IOException e) {
-//              throw new RuntimeException(e);
-//          }
         }
 
         @Override
@@ -225,7 +217,7 @@ public class ServerCtrlNanoWebSocket
         protected void debugFrameReceived(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameReceived");
             if (debug) Log.i(TAG, "debugFrameReceived " + bytesToHexMark1(frame.getBinaryPayload()));
-//            if (debug) Log.i(TAG, "debugFrameReceived " + frame);
+//          if (debug) Log.i(TAG, "debugFrameReceived " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }
 
@@ -233,9 +225,10 @@ public class ServerCtrlNanoWebSocket
         protected void debugFrameSent(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameSent");
             if (debug) Log.i(TAG, "debugFrameSent " + bytesToHexMark1(frame.getBinaryPayload()));
-//            if (debug) Log.i(TAG, "debugFrameSent " + frame);
+//          if (debug) Log.i(TAG, "debugFrameSent " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMETX);
         }
+
     }
 
 }

@@ -3,6 +3,7 @@ package by.citech.handsfree.debug;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.AudioCodec;
+import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.SeverityLevel;
@@ -19,15 +20,25 @@ import by.citech.handsfree.param.Tags;
 public class Bt2AudOutLooper
         implements IDebugCtrl, IBase, ITransmitter, IReceiverReg, IPrepareObject, ISettingsCtrl {
 
-    private static final String TAG = Tags.BT2AUDOUT_LOOPER;
+    private static final String STAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
+
+    static {
+        objCount = 0;
+    }
 
     //--------------------- preparation
 
     private AudioCodecType codecType;
-    private AudioCodec audioCodec;
+    private ICodec codec;
+    private IReceiver iReceiver;
+    private IReceiverCtrl iReceiverCtrl;
 
     {
+        objCount++;
+        TAG = STAG + " " + objCount;
         prepareObject();
     }
 
@@ -41,12 +52,12 @@ public class Bt2AudOutLooper
 
     @Override
     public boolean isObjectPrepared() {
-        return audioCodec != null;
+        return codec != null && codecType != null;
     }
 
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
-        audioCodec = new AudioCodec(codecType);
+        codec = AudioCodec.getAudioCodec(codecType);
         return true;
     }
 
@@ -57,14 +68,13 @@ public class Bt2AudOutLooper
         return true;
     }
 
-    //--------------------- non-settings
-
-    private IReceiver iReceiver;
-    private IReceiverCtrl iReceiverCtrl;
+    //--------------------- constructor
 
     public Bt2AudOutLooper() {
         iReceiverCtrl = new ToAudioOut(this);
     }
+
+    //--------------------- IBase
 
     @Override
     public boolean baseStart() {
@@ -80,7 +90,7 @@ public class Bt2AudOutLooper
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         codecType = null;
-        audioCodec = null;
+        codec = null;
         iReceiverCtrl = null;
         return true;
     }
@@ -91,8 +101,8 @@ public class Bt2AudOutLooper
         if (iReceiver == null) {
             iReceiverCtrl.prepareRedirect();
             iReceiverCtrl.redirectOn();
-            audioCodec.initiateEncoder();
-            audioCodec.initiateDecoder();
+            codec.initiateEncoder();
+            codec.initiateDecoder();
         }
     }
 
@@ -113,7 +123,7 @@ public class Bt2AudOutLooper
     public void sendData(byte[] data) {
         if (debug) Log.i(TAG, "sendData byte[]");
         if (iReceiver != null) {
-            iReceiver.onReceiveData(audioCodec.getDecodedData(data));
+            iReceiver.onReceiveData(codec.getDecodedData(data));
         }
     }
 

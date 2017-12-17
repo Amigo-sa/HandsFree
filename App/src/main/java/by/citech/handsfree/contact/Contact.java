@@ -55,6 +55,7 @@ public class Contact
     }
 
     public static boolean checkForEqual(Contact toCheck1, Contact toCheck2) {
+        if (debug) Log.i(TAG, "checkForEqual");
         return toCheck1.ip.equals(toCheck2.ip);
     }
 
@@ -104,9 +105,9 @@ public class Contact
     }
 
     @Override
-    public void doCopy(Contact contact) {
-        this.name = contact.name;
-        this.ip = contact.ip;
+    public void doCopy(Contact toCopy) {
+        this.name = toCopy.name;
+        this.ip = toCopy.ip;
     }
 
     //--------------------- base
