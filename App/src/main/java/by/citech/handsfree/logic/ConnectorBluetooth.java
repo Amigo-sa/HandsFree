@@ -315,7 +315,7 @@ private volatile BluetoothLeState BLEState;
         return this;
     }
 
-    public ConnectorBluetooth setiList(IList iList) {
+     ConnectorBluetooth setiList(IList iList) {
         this.iList = iList;
         return this;
     }
@@ -326,21 +326,22 @@ private volatile BluetoothLeState BLEState;
 
     //------------------------ init command when device is chosen -------
 
-    private void initCommandForDevice(){
+    private void initCommandForDevice(BluetoothDevice device){
         // инициализация комманд работающих с устройством
         //----------- установка устройства для команд --------------
-        connDialogOn.setDevice(mBTDevice);
-        discDialogOn.setDevice(mBTDevice);
-        reconnDiaologOn.setDevice(mBTDevice);
-        disconnDialogInfoOn.setDevice(mBTDevice);
-        connDialogInfoOn.setDevice(mBTDevice);
+        if (Settings.debug) Log.i(TAG, "initCommandForDevice mBTDevice = " + device);
+        connDialogOn.setDevice(device);
+        discDialogOn.setDevice(device);
+        reconnDiaologOn.setDevice(device);
+        disconnDialogInfoOn.setDevice(device);
+        connDialogInfoOn.setDevice(device);
         //------------------ Команда соединения -----------
 
         connectDevice.setmBluetoothLeService(mBluetoothLeService);
         disconnectDevice.setmBluetoothLeService(mBluetoothLeService);
-        connectDevice.setmBTDevice(mBTDevice);
+        connectDevice.setmBTDevice(device);
         //------------------ Команды работы с адаптером -----------
-        initList.setDevice(mBTDevice);
+        initList.setDevice(device);
         //clrConnDeviceFromAdapter.setBluetoothDevice(mBTDevice);
         //-------------------Команды для определения характеристик --------
         characteristicDisplayOn.setBluetoothLeService(mBluetoothLeService);
@@ -358,12 +359,12 @@ private volatile BluetoothLeState BLEState;
         final BluetoothDevice device = ((LeDeviceListAdapter) iList).getDevice(position);
         if (device == null) return;
         setmBTDevice(device);
-        initCommandForDevice();
+        initCommandForDevice(device);
 
         bleController.setCommand(scanOff).execute();
         if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
         if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + mBTDeviceConn);
-        if (mBTDevice.equals(mBTDeviceConn)) {
+        if (device.equals(mBTDeviceConn)) {
             bleController.setCommand(discDialogOn).execute();
         } else if (mBTDeviceConn != null) {
             bleController.setCommand(reconnDiaologOn).execute();
@@ -499,6 +500,20 @@ private volatile BluetoothLeState BLEState;
         iList = null;
         mBTDevice = null;
         mBTDeviceConn = null;
+
+        //обнуляем от ссылок на устройство все команды
+        connDialogOn.setDevice(null);
+        discDialogOn.setDevice(null);
+        reconnDiaologOn.setDevice(null);
+        disconnDialogInfoOn.setDevice(null);
+        connDialogInfoOn.setDevice(null);
+        //------------------ Команда соединения -----------
+        connectDevice.setmBluetoothLeService(mBluetoothLeService);
+        disconnectDevice.setmBluetoothLeService(mBluetoothLeService);
+        connectDevice.setmBTDevice(null);
+        //------------------ Команды работы с адаптером -----------
+        initList.setDevice(null);
+
         return true;
     }
 
