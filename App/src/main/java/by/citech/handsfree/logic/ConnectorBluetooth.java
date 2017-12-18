@@ -500,16 +500,6 @@ private volatile BluetoothLeState BLEState;
         iList = null;
         mBTDevice = null;
         mBTDeviceConn = null;
-
-        //обнуляем от ссылок на устройство все команды
-//        connDialogOn.setDevice(null);
-//        discDialogOn.setDevice(null);
-//        reconnDiaologOn.setDevice(null);
-//        disconnDialogInfoOn.setDevice(null);
-//        connDialogInfoOn.setDevice(null);
-        //------------------ Команда соединения -----------
-//        connectDevice.setmBTDevice(null);
-        //------------------ Команды работы с адаптером -----------
         initList.setDevice(null);
 
         return true;
