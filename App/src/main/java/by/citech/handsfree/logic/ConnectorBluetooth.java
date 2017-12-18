@@ -502,15 +502,13 @@ private volatile BluetoothLeState BLEState;
         mBTDeviceConn = null;
 
         //обнуляем от ссылок на устройство все команды
-        connDialogOn.setDevice(null);
-        discDialogOn.setDevice(null);
-        reconnDiaologOn.setDevice(null);
-        disconnDialogInfoOn.setDevice(null);
-        connDialogInfoOn.setDevice(null);
+//        connDialogOn.setDevice(null);
+//        discDialogOn.setDevice(null);
+//        reconnDiaologOn.setDevice(null);
+//        disconnDialogInfoOn.setDevice(null);
+//        connDialogInfoOn.setDevice(null);
         //------------------ Команда соединения -----------
-        connectDevice.setmBluetoothLeService(mBluetoothLeService);
-        disconnectDevice.setmBluetoothLeService(mBluetoothLeService);
-        connectDevice.setmBTDevice(null);
+//        connectDevice.setmBTDevice(null);
         //------------------ Команды работы с адаптером -----------
         initList.setDevice(null);
 

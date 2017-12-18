@@ -55,7 +55,6 @@ public class ControlAdapter implements IScannListener {
         clearAllDevicesFromList();
         if (Connected) {
             addConnectDeviceToList(device);
-            Connected = false;
         }
     }
 

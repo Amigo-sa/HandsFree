@@ -25,9 +25,7 @@ public class AddToListCommand implements Command {
 
     @Override
     public void execute() {
-        if (Settings.debug) Log.w("AddToListCommand", "add device command = " + device);
         controlAdapter.addConnectDeviceToList(device);
-        device = null;
     }
 
     @Override
