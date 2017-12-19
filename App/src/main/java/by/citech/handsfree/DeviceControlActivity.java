@@ -11,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -66,7 +67,6 @@ import by.citech.handsfree.gui.IGetViewGetter;
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.gui.helper.ViewManager;
-import by.citech.handsfree.logic.CallUi;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
@@ -141,8 +141,9 @@ public class DeviceControlActivity
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
         viewManager = new ViewManager();
-        viewManager.setiGetGetter(this).baseStart();
-        ThreadManager.getInstance().baseStart();
+        viewManager.setiGetGetter(this);
+        viewManager.setDefaultView();
+        viewManager.baseStart();
 
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecycler);
@@ -159,6 +160,8 @@ public class DeviceControlActivity
         findViewById(R.id.btnCancelContact).setOnClickListener((v) -> cancelInEditor());
         findViewById(R.id.btnGreen).setOnClickListener((v) -> onClickBtnGreen());
         findViewById(R.id.btnRed).setOnClickListener((v) -> onClickBtnRed());
+
+        setupActionBar();
     }
 
     @Override
@@ -188,6 +191,7 @@ public class DeviceControlActivity
             Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
         }
 
+        ThreadManager.getInstance().baseStart();
         chosenContactHelper = new ChosenContactHelper(viewManager);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
@@ -211,9 +215,7 @@ public class DeviceControlActivity
         setupViewRecyclerContacts();
         setupContactEditor();
         setupContactor();
-        setupActionBar();
 
-//      getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -255,13 +257,14 @@ public class DeviceControlActivity
     protected void onStop() {
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
-        addRunnable(() -> ResourceManager.getInstance().baseStop());
+        addRunnable(() -> ResourceManager.getInstance().stop());
         deviceListAdapter = null;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        addRunnable(() -> ResourceManager.getInstance().destroy());
         if (debug) Log.w(TAG, "onDestroy");
     }
 

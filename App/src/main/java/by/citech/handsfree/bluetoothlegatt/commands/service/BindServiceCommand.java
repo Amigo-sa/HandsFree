@@ -3,8 +3,10 @@ package by.citech.handsfree.bluetoothlegatt.commands.service;
 import android.content.ServiceConnection;
 import android.util.Log;
 
+import by.citech.handsfree.bluetoothlegatt.LeBroadcastReceiver;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
+import by.citech.handsfree.settings.Settings;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -29,11 +31,16 @@ public class BindServiceCommand implements Command {
 
     @Override
     public void execute() {
-        Log.i("command", "iService = " + iService);
-        Log.i("command", "serviceConnection = " + serviceConnection);
-        Log.i("command", "BIND_AUTO_CREATE = " + BIND_AUTO_CREATE);
-        Log.i("command", "getServiceIntent = " + iService.getServiceIntent());
-        iService.bindService(iService.getServiceIntent(), serviceConnection,  BIND_AUTO_CREATE);
+
+        try {
+            if (iService != null) {
+                iService.bindService(iService.getServiceIntent(), serviceConnection,  BIND_AUTO_CREATE);
+            }
+        } catch (IllegalArgumentException e) {
+            if (Settings.debug) Log.e("BindServiceCommand", "now Service are binded");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

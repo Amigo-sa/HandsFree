@@ -114,10 +114,10 @@ public class Bt2BtRecorder
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         isActive = false;
+        IBase.super.baseStop();
         return true;
     }
 

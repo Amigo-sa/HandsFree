@@ -228,7 +228,6 @@ public class Caller
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         iCallToUiListener = null;
         iCallNetListener = null;
@@ -242,6 +241,7 @@ public class Caller
         iBtToUiCtrl = null;
         iMsgToUi = null;
         iList = null;
+        IBase.super.baseStop();
         return true;
     }
 
@@ -385,6 +385,7 @@ public class Caller
 
         callUi.baseStart();
         connectorBluetooth.baseStart();
+        connectorBluetooth.baseCreate();
         bt2BtLooper.baseStart();
     }
 

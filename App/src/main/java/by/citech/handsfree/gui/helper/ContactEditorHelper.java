@@ -100,7 +100,6 @@ public class ContactEditorHelper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStart");
         contactToEdit = null;
         contactToAdd = null;
@@ -119,6 +118,7 @@ public class ContactEditorHelper
         iContact = null;
         contactsAdapter = null;
         iMsgToUi = null;
+        IBase.super.baseStop();
         return true;
     }
 

@@ -117,15 +117,11 @@ public class ViewManager
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        prepareObject();
-//      takeViews();
-        setDefaultView();
         return true;
     }
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         scanView = null;
         mainView = null;
@@ -146,13 +142,16 @@ public class ViewManager
         iGetter = null;
         iGetGetter = null;
         isCallAnim = false;
+        IBase.super.baseStop();
         return true;
     }
 
     //--------------------- main
 
-    private void setDefaultView() {
+    public void setDefaultView() {
         if (debug) Log.i(TAG, "setDefaultView");
+        prepareObject();
+//      takeViews();
 
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
 

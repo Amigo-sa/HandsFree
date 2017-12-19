@@ -82,11 +82,11 @@ public class ViewKeeper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         if (pairMap != null) {
             pairMap.clear();
         }
+        IBase.super.baseStop();
         return true;
     }
 

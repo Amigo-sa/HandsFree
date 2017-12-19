@@ -7,13 +7,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.element.ElementsMemCtrl;
 import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
@@ -127,7 +125,6 @@ public class Contactor
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         dbCtrl = null;
         if (contacts != null) {
@@ -138,6 +135,7 @@ public class Contactor
         memCtrl = null;
         iMsgToUi = null;
         isReady = false;
+        IBase.super.baseStop();
         return true;
     }
 

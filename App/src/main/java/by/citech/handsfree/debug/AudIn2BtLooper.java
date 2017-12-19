@@ -90,11 +90,11 @@ public class AudIn2BtLooper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         iReceiverCtrl = null;
         iTransmitterCtrl = null;
+        IBase.super.baseStop();
         return true;
     }
 

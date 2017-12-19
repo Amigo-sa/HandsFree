@@ -113,7 +113,7 @@ private volatile BluetoothLeState BLEState;
     private Command scanOn;
     private Command scanOff;
 
-    private Command addToList;
+    private AddToListCommand addToList;
     private Command clearList;
     private InitListCommand initList;
 
@@ -239,8 +239,9 @@ private volatile BluetoothLeState BLEState;
         connDialogInfoOn.setiMsgToUi(iMsgToUi);
 
         // привязываем сервис и регистрируем BroadcastReceiver
-        bleController.setCommand(bindService)
-                     .setCommand(registerReceiver)
+        if (Settings.debug) Log.i(TAG,"registerReceiver ...");
+        bleController.setCommand(registerReceiver)
+                     .setCommand(bindService)
                      .execute();
     }
 
@@ -276,7 +277,7 @@ private volatile BluetoothLeState BLEState;
     }
 
     public BroadcastReceiver getBroadcastReceiver(){
-        return  leBroadcastReceiver.getGattUpdateReceiver();
+        return leBroadcastReceiver.getGattUpdateReceiver();
     }
 
     public IUiToBtListener getUiBtListener() {
@@ -388,6 +389,7 @@ private volatile BluetoothLeState BLEState;
         setBLEState(getBLEState(), BluetoothLeState.CONNECTED);
         if (Settings.debug) Log.i(TAG, "mBTDevice = " + mBTDevice);
         mBTDeviceConn = mBTDevice;
+        addToList.setDevice(mBTDeviceConn);
 
         bleController.setCommand(connDialogOn).undo();
 
@@ -407,6 +409,7 @@ private volatile BluetoothLeState BLEState;
         bleController.setCommand(connDialogOn).undo();
         bleController.setCommand(disconnDialogInfoOn).execute();
         bleController.setCommand(disconnDialogInfoOn).undo();
+        addToList.setDevice(null);
 
         if (BLEState != BluetoothLeState.DISCONECTED) {
             processState();
@@ -515,7 +518,6 @@ private volatile BluetoothLeState BLEState;
 
     @Override
     public boolean baseStop(){
-//        IBase.super.baseStop();
         if (Settings.debug) Log.i(TAG, "baseStop");
 
         bleController.setCommand(exchangeDataOff)
@@ -528,11 +530,27 @@ private volatile BluetoothLeState BLEState;
         mBTDevice = null;
         mBTDeviceConn = null;
         initList.setDevice(null);
+        addToList.setDevice(null);
 
         if (iCallExs != null) {
             iCallExs.clear();
         }
 
+        IBase.super.baseStop();
+        return true;
+    }
+
+    @Override
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (Settings.debug) Log.i(TAG, "baseCreate");
+        return true;
+    }
+
+    @Override
+    public boolean baseDestroy(){
+        if (Settings.debug) Log.i(TAG, "baseDestroy");
+        IBase.super.baseDestroy();
         return true;
     }
 

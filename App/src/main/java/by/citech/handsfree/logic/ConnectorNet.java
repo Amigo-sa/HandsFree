@@ -6,7 +6,6 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.RedirectFromNet;
@@ -130,9 +129,9 @@ public class ConnectorNet
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         new ThreadNetStop().start();
+        IBase.super.baseStop();
         return true;
     }
 

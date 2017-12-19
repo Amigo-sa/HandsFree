@@ -102,7 +102,6 @@ public class AudIn2AudOutLooper
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         iTransmitterCtrl = null;
@@ -110,6 +109,7 @@ public class AudIn2AudOutLooper
         codecType = null;
         codec = null;
         dataBuff = null;
+        IBase.super.baseStop();
         return true;
     }
 

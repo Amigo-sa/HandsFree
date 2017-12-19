@@ -89,8 +89,8 @@ public class ThreadManager
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
+        IBase.super.baseStop();
         return true;
     }
 
