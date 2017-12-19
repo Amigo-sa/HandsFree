@@ -9,17 +9,21 @@ import java.util.Arrays;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
+import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
+import by.citech.handsfree.logic.ICallNetExchangeListener;
+import by.citech.handsfree.logic.ICaller;
 import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 22.11.2017.
  */
 
-public class LeDataTransmitter implements CallbackWriteListener {
+public class LeDataTransmitter implements CallbackWriteListener, ICaller {
 
     private final static String TAG = "WSD_LeDataTransmitter";
-    private static final long WAIT_PERIOD = 20;
+    private static final long WAIT_PERIOD = 30;
 
     private BluetoothLeService mBluetoothLeService;
     private Characteristics characteristics;
@@ -91,8 +95,10 @@ public class LeDataTransmitter implements CallbackWriteListener {
             if (notifyCharacteristicStart()) {  
                 characteristic_write = characteristics.getWriteCharacteristic();
                  writeThreadStart();
-             } else
-                   if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
+             } else {
+                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
+                ConnectorBluetooth.getInstance().processState();
+            }
         } else{
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
             mIBluetoothListener.disconnectToast();
@@ -106,6 +112,7 @@ public class LeDataTransmitter implements CallbackWriteListener {
         if (!notifyCharacteristicStop())
             if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
     }
+
 
     //---------------------- Methods for notify -------------------------
 

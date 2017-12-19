@@ -271,7 +271,8 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList);
+                .setiList(iList)
+                .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugCtrl)
@@ -309,7 +310,8 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList);
+                .setiList(iList)
+                .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(iDebugCtrl)
@@ -371,7 +373,8 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList);
+                .setiList(iList)
+                .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtLooper)
@@ -414,7 +417,8 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList);
+                .setiList(iList)
+                .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
                 .addiDebugListener(bt2BtRecorder)
@@ -467,7 +471,8 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList);
+                .setiList(iList)
+                .addiCallNetExchangeListener(null);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)

@@ -8,9 +8,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import by.citech.handsfree.bluetoothlegatt.IList;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.common.IBaseCtrl;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.common.IBroadcastReceiver;
@@ -47,7 +48,6 @@ import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.ReceiveDataOn;
 import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ReconnectDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOffCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOnCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.service.StartServiceCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.service.UnbindServiceCommand;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
@@ -96,6 +96,8 @@ public class ConnectorBluetooth
     private ITransmitter iTransmitter;
     //для дебага
     private boolean isDebugRunning;
+
+    private ArrayList<ICallNetExchangeListener> iCallExs;
 
 private volatile BluetoothLeState BLEState;
 
@@ -149,6 +151,7 @@ private volatile BluetoothLeState BLEState;
     private static volatile ConnectorBluetooth instance = null;
 
     private ConnectorBluetooth() {
+        iCallExs = new ArrayList<>();
         BLEState = BluetoothLeState.DISCONECTED;
         leBroadcastReceiver = new LeBroadcastReceiver(this);
         controlAdapter = new ControlAdapter(this);
@@ -263,6 +266,10 @@ private volatile BluetoothLeState BLEState;
        return this;
     }
 
+    public ConnectorBluetooth addiCallNetExchangeListener(ICallNetExchangeListener iCallNetExchangeListener) {
+        iCallExs.add(iCallNetExchangeListener);
+        return this;
+    }
 
     private void setmBTDevice(BluetoothDevice mBTDevice) {
         this.mBTDevice = mBTDevice;
@@ -397,16 +404,19 @@ private volatile BluetoothLeState BLEState;
     @Override
     public void actionDisconnected() {
         if (Settings.debug) Log.i(TAG, "actionDisconnected()");
+        bleController.setCommand(connDialogOn).undo();
+        bleController.setCommand(disconnDialogInfoOn).execute();
+        bleController.setCommand(disconnDialogInfoOn).undo();
+
         if (BLEState != BluetoothLeState.DISCONECTED) {
+            processState();
             mBTDeviceConn = null;
 
-            bleController.setCommand(connDialogOn).undo();
-
-            if (BLEState == BluetoothLeState.TRANSMIT_DATA)
+            if (BLEState == BluetoothLeState.TRANSMIT_DATA) {
                 bleController.setCommand(exchangeDataOff).execute();
 
-            bleController.setCommand(disconnDialogInfoOn).execute();
-            bleController.setCommand(disconnDialogInfoOn).undo();
+            }
+
             bleController.setCommand(clrConnDeviceFromAdapter)
                     .setCommand(buttonViewColorChangeOff)
                     .setCommand(clearList)
@@ -414,6 +424,23 @@ private volatile BluetoothLeState BLEState;
                     .execute();
         }
         setBLEState(BLEState, BluetoothLeState.DISCONECTED);
+    }
+
+     public void processState() {
+        switch (getCallerState()) {
+            case Call:
+                if (Settings.debug) Log.i(TAG, "processState Call");
+                if (setCallerState(CallerState.Call, CallerState.Error)) {
+                    for (ICallNetExchangeListener listener : iCallExs) listener.callFailed();
+                    return;
+                }
+                break;
+            default:
+                if (Settings.debug) Log.e(TAG, "processState " + getCallerStateName());
+                return;
+        }
+        Log.w(TAG, "processState recursive call");
+        processState();
     }
 
     @Override
@@ -501,6 +528,10 @@ private volatile BluetoothLeState BLEState;
         mBTDevice = null;
         mBTDeviceConn = null;
         initList.setDevice(null);
+
+        if (iCallExs != null) {
+            iCallExs.clear();
+        }
 
         return true;
     }
