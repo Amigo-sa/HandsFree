@@ -36,7 +36,6 @@ public class ContactEditorHelper
 
     //--------------------- preparation
 
-    private boolean isPrepared;
     private Contact contactToEdit, contactToAdd;
     private int contactToEditPosition, contactToDeletePosition;
     private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
@@ -60,13 +59,12 @@ public class ContactEditorHelper
         contactToEditPosition = -1;
         contactToDeletePosition = -1;
         editorState = EditorState.Inactive;
-        isPrepared = true;
         return isObjectPrepared();
     }
 
     @Override
     public boolean isObjectPrepared() {
-        return isPrepared;
+        return editorState != null;
     }
 
     //--------------------- singleton
@@ -95,6 +93,7 @@ public class ContactEditorHelper
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        prepareObject();
         return true;
     }
 

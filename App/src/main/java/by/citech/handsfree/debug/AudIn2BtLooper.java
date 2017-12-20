@@ -94,6 +94,8 @@ public class AudIn2BtLooper
         stopDebug();
         iReceiverCtrl = null;
         iTransmitterCtrl = null;
+        codecType = null;
+        codec = null;
         IBase.super.baseStop();
         return true;
     }

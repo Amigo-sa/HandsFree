@@ -72,7 +72,7 @@ public class Caller
 
     @Override
     public boolean isObjectPrepared() {
-        return callerState != null;
+        return callerState != null && opMode != null;
     }
 
     @Override

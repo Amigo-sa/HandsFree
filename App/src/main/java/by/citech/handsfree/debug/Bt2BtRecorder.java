@@ -86,6 +86,7 @@ public class Bt2BtRecorder
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        prepareObject();
         isActive = true;
         new Thread(() -> {
             while (isActive) {
@@ -117,6 +118,8 @@ public class Bt2BtRecorder
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         isActive = false;
+        dataBuff = null;
+        dataSaved = null;
         IBase.super.baseStop();
         return true;
     }

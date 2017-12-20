@@ -121,6 +121,7 @@ public class CallUi
         if (iDebugs != null) {
             iDebugs.clear();
         }
+        opMode = null;
         return true;
     }
 

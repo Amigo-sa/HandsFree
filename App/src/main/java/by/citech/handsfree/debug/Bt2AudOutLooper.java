@@ -78,9 +78,9 @@ public class Bt2AudOutLooper
 
     @Override
     public boolean baseStart() {
-        if (debug) Log.i(TAG, "baseStart");
         IBase.super.baseStart();
-
+        if (debug) Log.i(TAG, "baseStart");
+        prepareObject();
         return true;
     }
 

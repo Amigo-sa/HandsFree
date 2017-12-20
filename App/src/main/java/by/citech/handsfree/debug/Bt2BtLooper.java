@@ -78,6 +78,7 @@ public class Bt2BtLooper
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        prepareObject();
         isRunning = false;
         isActive = true;
         new Thread(() -> {
@@ -126,6 +127,7 @@ public class Bt2BtLooper
         if (debug) Log.i(TAG, "baseStop");
         stopDebug();
         isActive = false;
+        dataBuff = null;
         IBase.super.baseStop();
         return true;
     }

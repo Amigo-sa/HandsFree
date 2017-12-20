@@ -95,8 +95,8 @@ public class AudIn2AudOutLooper
     @Override
     public boolean baseStart() {
         IBase.super.baseStart();
-        prepareObject();
         if (debug) Log.i(TAG, "baseStart");
+        prepareObject();
         return true;
     }
 
