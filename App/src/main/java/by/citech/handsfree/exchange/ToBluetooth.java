@@ -3,6 +3,7 @@ package by.citech.handsfree.exchange;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.ITrafficUpdate;
@@ -77,6 +78,20 @@ public class ToBluetooth
         if (debug) Log.i(TAG, "redirectOn");
         isRedirecting = true;
         iReceiverReg.registerReceiver(this);
+        Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
+                        " btSignificantAll is %b," +
+                        " btSinglePacket is %b" +
+                        " btFactor is %d" +
+                        " btToBtSendSize is %d" +
+                        " btSignificantBytes is %d" +
+                        " btSendSize is %d",
+                btSignificantAll,
+                btSinglePacket,
+                btFactor,
+                btToBtSendSize,
+                btSignificantBytes,
+                btSendSize
+        ));
         if (Settings.debug) Log.i(TAG, "redirectOn done");
     }
 

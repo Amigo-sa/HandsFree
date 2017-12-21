@@ -79,9 +79,9 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
     //нотификацию с устройства
     public void onlyReceiveData() {
         if (Settings.debug) Log.i(TAG, "onlyReceiveData()");
-        if(!characteristics.isEmpty()){
+        if (!characteristics.isEmpty()) {
             notifyCharacteristicStart();
-        } else{
+        } else {
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
             mIBluetoothListener.disconnectToast();
         }
@@ -91,7 +91,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
         if (Settings.debug) Log.i(TAG, "enableTransmitData()");
 
         setMTU();
-        if(!characteristics.isEmpty()){
+        if (!characteristics.isEmpty()) {
             if (notifyCharacteristicStart()) {  
                 characteristic_write = characteristics.getWriteCharacteristic();
                  writeThreadStart();
@@ -99,7 +99,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
                 if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
                 ConnectorBluetooth.getInstance().processState();
             }
-        } else{
+        } else {
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
             mIBluetoothListener.disconnectToast();
         }
@@ -188,7 +188,6 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
 
     private boolean awaitMTUChange(){
         int time = 0;
-
         while (!isMtuChanged) {
             if (Settings.debug) Log.e(TAG, "awaitMTUChange...");
             try {
@@ -201,8 +200,6 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
                 return false;
         }
         return true;
-
-
     }
 
     // Прослушка  калбэка onMtuChanged
@@ -213,48 +210,45 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
     }
 
     private void writeThreadStart() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                byte[][] arrayData;
-                int numBtPkt = 0;
-                isRunning = true;
-                int pktSize = (Settings.btSinglePacket) ? 1 : Settings.btFactor;
-                while (isRunning) {
-                    while (storageToBt.isEmpty()) {
-                        try {
-                            Thread.sleep(5);
-                            if (!isRunning) return;
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+        new Thread(() -> {
+            byte[][] arrayData;
+            int numBtPkt = 0;
+            isRunning = true;
+            int pktSize = (Settings.btSinglePacket) ? 1 : Settings.btFactor;
+            while (isRunning) {
+                while (storageToBt.isEmpty()) {
+                    try {
+                        Thread.sleep(5);
+                        if (!isRunning) return;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    arrayData = storageToBt.getData();
-                    while (numBtPkt != pktSize) {
-                        // запись данных производим с учётом Калбэка onWriteCharacteristic
-                        if (Callback) {
-                            if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
-                            writeByteArrayData(arrayData[numBtPkt]);
-                            //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
-                            Callback = false;
-                        }
-                        // выдерживаем коннект интервал
-                        try {
-                            Thread.sleep(Settings.btLatencyMs);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        if (Settings.debug) Log.w(TAG, "numBtPkt = " + numBtPkt);
-                        numBtPkt++;
-                        // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
-                        if (!Callback) {
-                            Callback = true;
-                            if (Settings.debug)
-                                Log.e(TAG, "num lost write package is " + lostWritePkt++);
-                        }
-                    }
-                    numBtPkt = 0;
                 }
+                arrayData = storageToBt.getData();
+                while (numBtPkt != pktSize) {
+                    // запись данных производим с учётом Калбэка onWriteCharacteristic
+                    if (Callback) {
+                        if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
+                        writeByteArrayData(arrayData[numBtPkt]);
+                        //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
+                        Callback = false;
+                    }
+                    // выдерживаем коннект интервал
+                    try {
+                        Thread.sleep(Settings.btLatencyMs);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (Settings.debug) Log.w(TAG, "numBtPkt = " + numBtPkt);
+                    numBtPkt++;
+                    // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
+                    if (!Callback) {
+                        Callback = true;
+                        if (Settings.debug)
+                            Log.e(TAG, "num lost write package is " + lostWritePkt++);
+                    }
+                }
+                numBtPkt = 0;
             }
         }).start();
     }

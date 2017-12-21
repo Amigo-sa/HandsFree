@@ -3,13 +3,17 @@ package by.citech.handsfree.exchange;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Locale;
 
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
+import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.settings.SeverityLevel;
 
 public class ToNet
-        implements ITransmitterCtrl {
+        implements ITransmitterCtrl, ISettingsCtrl, IPrepareObject {
 
     private static final String STAG = Tags.TO_NET;
     private final String TAG;
@@ -35,24 +39,37 @@ public class ToNet
         objCount++;
         objNumber = objCount;
         TAG = STAG + " " + objNumber;
-        initiate();
+        prepareObject();
     }
 
-    private void initiate() {
+    @Override
+    public boolean prepareObject() {
+        if (isObjectPrepared()) return true;
         takeSettings();
-        applySettings();
+        applySettings(null);
+        return isObjectPrepared();
     }
 
-    private void takeSettings() {
+    @Override
+    public boolean isObjectPrepared() {
+        return netChunk != null;
+    }
+
+    @Override
+    public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         netSignificantAll = Settings.netSignificantAll;
         netChunkSignificantBytes = Settings.netChunkSignificantBytes;
         netChunkSize = netSignificantAll ? Settings.netChunkSize : netChunkSignificantBytes;
         netFactor = Settings.netFactor;
         netSendSize = netChunkSize * netFactor;
+        return true;
     }
 
-    private void applySettings() {
+    @Override
+    public boolean applySettings(SeverityLevel severityLevel) {
         netChunk = new byte[netChunkSize];
+        return true;
     }
 
     //--------------------- non-settings
@@ -68,15 +85,31 @@ public class ToNet
 
     public void prepareStream() {
         if (debug) Log.i(TAG, "prepareStream");
+        prepareObject();
     }
 
     @Override
     public void streamOn() {
         if (debug) Log.i(TAG, "run");
+        if (source == null) {
+            Log.e(TAG, "streamOn source is null, return");
+            return;
+        }
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//      int bufferedDataSize;
         int netChunkCount = 0;
+        Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
+                " netSignificantAll is %b," +
+                " netChunkSignificantBytes is %d" +
+                " netChunkSize is %d" +
+                " netFactor is %d" +
+                " netSendSize is %d",
+                netSignificantAll,
+                netChunkSignificantBytes,
+                netChunkSize,
+                netFactor,
+                netSendSize
+        ));
         while (isStreaming) {
             while (source.isEmpty()) {
                 try {
@@ -88,20 +121,16 @@ public class ToNet
             }
             netChunk = source.getData();
             if (netChunk != null && netChunk.length != 0) {
-                baos.write(netChunk, 0, netChunkSize);
-                netChunkCount++;
+                if (netChunk.length != netChunkSize) {
+                    Log.e(TAG, String.format(Locale.US, "streamOn readed chunk of length %d, expected %d", netChunk.length, netChunkSize));
+                } else {
+                    baos.write(netChunk, 0, netChunkSize);
+                    netChunkCount++;
+                }
             } else {
                 Log.e(TAG, "streamOn readed invalid data from storage");
             }
             if (!isStreaming) return;
-//          bufferedDataSize = baos.size();
-//          if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d bytes", bufferedDataSize));
-//          if (bufferedDataSize == netSendSize) {
-//              if (debug) Log.i(TAG, "streamOn net out buff contains enough data, sending");
-//              iTransmitter.sendData(baos.toByteArray());
-//          } else if (bufferedDataSize > netSendSize) {
-//              Log.e(TAG, "streamOn too much data in net out buff");
-//          }
             if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
             if (netChunkCount == netFactor) {
                 if (debug) Log.w(TAG, String.format("streamOn net out buff contains enough data of %d bytes, sending", baos.size()));
