@@ -143,7 +143,7 @@ public class DeviceControlActivity
         viewManager = new ViewManager();
         viewManager.setiGetGetter(this);
         viewManager.setDefaultView();
-        viewManager.baseStart();
+        viewManager.baseCreate();
 
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecycler);
@@ -280,13 +280,13 @@ public class DeviceControlActivity
     }
 
     private void onCreateConnectMenu(Menu menu){
-        if (debug) Log.i(TAG, "onCreateConnectMenu()");
+        if (debug) Log.i(TAG, "onCreateConnectMenu");
         getMenuInflater().inflate(R.menu.scan_menu, menu);
         actionBar.setCustomView(null);
     }
 
     private void onCreateScanMenu(Menu menu){
-        if (debug) Log.i(TAG, "onCreateScanMenu()");
+        if (debug) Log.i(TAG, "onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
         if (!IBtToUiListener.menuChangeCondition()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
@@ -321,7 +321,7 @@ public class DeviceControlActivity
         if (debug) Log.i(TAG, "onBackPressed");
         Keyboard.hideSoftKeyboard(this);
         if (viewManager.isMainViewHidden()) {
-            if (debug) Log.i(TAG, "onBackPressed get main_menu visible");
+            if (debug) Log.i(TAG, "onBackPressed showMainView");
             viewManager.showMainView();
             actionBar.setCustomView(null);
             if (getEditorState() != EditorState.Inactive)

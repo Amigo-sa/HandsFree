@@ -114,15 +114,15 @@ public class ViewManager
     //--------------------- base
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (debug) Log.i(TAG, "baseCreate");
         return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public boolean baseDestroy() {
+        if (debug) Log.i(TAG, "baseDestroy");
         scanView = null;
         mainView = null;
         viewContactEditor = null;
@@ -142,7 +142,7 @@ public class ViewManager
         iGetter = null;
         iGetGetter = null;
         isCallAnim = false;
-        IBase.super.baseStop();
+        IBase.super.baseDestroy();
         return true;
     }
 

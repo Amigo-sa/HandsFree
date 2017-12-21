@@ -125,7 +125,7 @@ public class ResourceManager
         return false;
     }
 
-    //--------------------- IBaseCtrl
+    //--------------------- IBaseCtrl start-stop
 
     boolean doBaseStart(IBase iBase) {
         if (debug) Log.i(TAG, "doBaseStart");
@@ -155,6 +155,8 @@ public class ResourceManager
         }
         return true;
     }
+
+    //--------------------- IBaseCtrl create-destroy
 
     boolean doBaseCreate(IBase iBase) {
         if (debug) Log.i(TAG, "doBaseCreate");
