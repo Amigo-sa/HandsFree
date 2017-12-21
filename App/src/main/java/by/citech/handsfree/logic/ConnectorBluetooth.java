@@ -430,20 +430,20 @@ private volatile BluetoothLeState BLEState;
     }
 
      public void processState() {
-        switch (getCallerState()) {
-            case Call:
-                if (Settings.debug) Log.i(TAG, "processState Call");
-                if (setCallerState(CallerState.Call, CallerState.Error)) {
-                    for (ICallNetExchangeListener listener : iCallExs) listener.callFailed();
-                    return;
-                }
-                break;
-            default:
-                if (Settings.debug) Log.e(TAG, "processState " + getCallerStateName());
-                return;
-        }
-        Log.w(TAG, "processState recursive call");
-        processState();
+//       switch (getCallerState()) {
+//           case Call:
+//               if (Settings.debug) Log.i(TAG, "processState Call");
+//               if (setCallerState(CallerState.Call, CallerState.Error)) {
+//                   for (ICallNetExchangeListener listener : iCallExs) listener.callFailed();
+//                   return;
+//               }
+//               break;
+//           default:
+//               if (Settings.debug) Log.e(TAG, "processState " + getCallerStateName());
+//               return;
+//       }
+//       Log.w(TAG, "processState recursive call");
+//       processState();
     }
 
     @Override

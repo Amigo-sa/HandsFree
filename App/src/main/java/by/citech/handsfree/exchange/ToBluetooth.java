@@ -120,12 +120,9 @@ public class ToBluetooth
                     if (debug) Log.w(TAG, String.format("onReceiveData received correct amount of data: %d bytes", receivedDataSize));
                 }
                 for (int i = 0; i < btFactor; i++) {
-                    if (debug) Log.w(TAG, String.format("onReceiveData dataAssembled[%d] assign to range of data[] from positions %d to %d, btFactor is %d",
-                            i,
-                            i * btSignificantBytes,
-                            (i + 1) * btSignificantBytes,
-                            btFactor
-                    ));
+//                  if (debug) Log.w(TAG, String.format("onReceiveData dataAssembled[%d] assign to range of data[] from positions %d to %d, btFactor is %d",
+//                          i, i * btSignificantBytes, (i + 1) * btSignificantBytes, btFactor
+//                  ));
                     if (btSignificantAll) {
                         dataAssembled[i] = Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes);
                     } else {
