@@ -105,7 +105,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
                 if (mCallbackWriteListener != null)
                     mCallbackWriteListener.callbackIsDone();
                 if(status==BluetoothGatt.GATT_SUCCESS) {
-                    if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA WRITE:");
+                    //if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA WRITE:");
                 }
                 if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");

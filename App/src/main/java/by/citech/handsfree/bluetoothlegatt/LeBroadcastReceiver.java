@@ -36,7 +36,7 @@ public class LeBroadcastReceiver {
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Settings.debug) Log.i(TAG, "onReceive");
+            //if (Settings.debug) Log.i(TAG, "onReceive");
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 connectAction.actionConnected();

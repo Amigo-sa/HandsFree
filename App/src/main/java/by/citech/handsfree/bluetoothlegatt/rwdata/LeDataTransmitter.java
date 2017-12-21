@@ -245,7 +245,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
                     if (!Callback) {
                         Callback = true;
                         if (Settings.debug)
-                            Log.e(TAG, "num lost write package is " + lostWritePkt++);
+                            Log.e(TAG, "num write package without callback " + lostWritePkt++);
                     }
                 }
                 numBtPkt = 0;
