@@ -120,17 +120,17 @@ public class LeDeviceListAdapter extends BaseAdapter implements IList {
 
         BluetoothDevice device = mLeDevices.get(i);
         final String deviceName = device.getName();
+        final String deviceAddr = device.getAddress();
 
-        if (deviceName != null && deviceName.length() > 0) {
+        if (deviceAddr != null && deviceName != null) {
             viewHolder.deviceName.setText(deviceName);
-            if (deviceName.length() > 13)
-                if (deviceName.substring(0,13).equals("CIT HandsFree")) {
-                    viewHolder.deviceIcon.setVisibility(View.GONE);
-                    viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
-                } else {
-                    viewHolder.deviceIcon.setVisibility(View.VISIBLE);
-                    viewHolder.deviceHeadSet.setVisibility(View.GONE);
-                }
+            if (deviceAddr.substring(0, 8).equals("54:6C:0E")) {
+                viewHolder.deviceIcon.setVisibility(View.GONE);
+                viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.deviceIcon.setVisibility(View.VISIBLE);
+                viewHolder.deviceHeadSet.setVisibility(View.GONE);
+            }
         } else {
             viewHolder.deviceName.setText(R.string.unknown_device);
             viewHolder.deviceIcon.setVisibility(View.VISIBLE);
