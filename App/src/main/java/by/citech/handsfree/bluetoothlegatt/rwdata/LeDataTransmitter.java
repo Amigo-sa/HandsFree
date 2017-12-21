@@ -159,7 +159,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
 
     @Override
     public void rcvBtPktIsDone(byte[] data) {
-        if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone()");
+        //if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone()");
         switch (Settings.opMode) {
             case Bt2AudOut:
                 updateRxData(data);
@@ -228,7 +228,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
                 while (numBtPkt != pktSize) {
                     // запись данных производим с учётом Калбэка onWriteCharacteristic
                     if (Callback) {
-                        if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
+                        //if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
                         writeByteArrayData(arrayData[numBtPkt]);
                         //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
                         Callback = false;
@@ -239,7 +239,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (Settings.debug) Log.w(TAG, "numBtPkt = " + numBtPkt);
+                    //if (Settings.debug) Log.w(TAG, "numBtPkt = " + numBtPkt);
                     numBtPkt++;
                     // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
                     if (!Callback) {
@@ -256,7 +256,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
     @Override
     public void callbackIsDone() {
         Callback = true;
-        if (Settings.debug) Log.i(TAG, "callbackIsDone()");
+        //if (Settings.debug) Log.i(TAG, "callbackIsDone()");
     }
 
     private void writeThreadStop(){

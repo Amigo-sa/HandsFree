@@ -101,11 +101,11 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicWrite(gatt, characteristic, status);
-                if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
+                //if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
                 if (mCallbackWriteListener != null)
                     mCallbackWriteListener.callbackIsDone();
                 if(status==BluetoothGatt.GATT_SUCCESS) {
-                    if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA :");
+                    if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA WRITE:");
                 }
                 if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED) {
                     if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");
@@ -126,7 +126,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
                     if (Settings.debug) Log.i(TAG,"GATT WRITE authentication");
                 }
                 else {
-                    if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
+                    //if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
                 }
                 broadcastUpdate(ACTION_DATA_WRITE);
         }
@@ -322,7 +322,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
      */
 
     public void  oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
-        if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
+        //if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -351,10 +351,10 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
                 else
                     descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
 
-                if (Settings.debug) Log.i(TAG, "descriptorValue = " + descriptor.getValue());
+                //if (Settings.debug) Log.i(TAG, "descriptorValue = " + descriptor.getValue());
                 if (Settings.debug) Log.i(TAG, "descriptorCharacteristic = " + descriptor.getCharacteristic());
-                if (Settings.debug) Log.i(TAG, "descriptorUUID = " + descriptor.getUuid());
-                if (Settings.debug) Log.i(TAG, "descriptorPermissions = " + descriptor.getPermissions());
+                //if (Settings.debug) Log.i(TAG, "descriptorUUID = " + descriptor.getUuid());
+                //if (Settings.debug) Log.i(TAG, "descriptorPermissions = " + descriptor.getPermissions());
 
                 mBluetoothGatt.writeDescriptor(descriptor);
 
