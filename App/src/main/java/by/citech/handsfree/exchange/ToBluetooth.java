@@ -80,10 +80,10 @@ public class ToBluetooth
         iReceiverReg.registerReceiver(this);
         Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
                         " btSignificantAll is %b," +
-                        " btSinglePacket is %b" +
-                        " btFactor is %d" +
-                        " btToBtSendSize is %d" +
-                        " btSignificantBytes is %d" +
+                        " btSinglePacket is %b," +
+                        " btFactor is %d," +
+                        " btToBtSendSize is %d," +
+                        " btSignificantBytes is %d," +
                         " btSendSize is %d",
                 btSignificantAll,
                 btSinglePacket,

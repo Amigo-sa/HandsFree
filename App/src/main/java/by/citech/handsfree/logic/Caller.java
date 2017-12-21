@@ -472,8 +472,8 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList)
-                .addiCallNetExchangeListener(null);
+                .setiList(iList);
+                //.addiCallNetExchangeListener(null);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)

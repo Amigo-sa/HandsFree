@@ -100,9 +100,9 @@ public class ToNet
         int netChunkCount = 0;
         Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
                 " netSignificantAll is %b," +
-                " netChunkSignificantBytes is %d" +
-                " netChunkSize is %d" +
-                " netFactor is %d" +
+                " netChunkSignificantBytes is %d," +
+                " netChunkSize is %d," +
+                " netFactor is %d," +
                 " netSendSize is %d",
                 netSignificantAll,
                 netChunkSignificantBytes,
@@ -128,7 +128,7 @@ public class ToNet
                     netChunkCount++;
                 }
             } else {
-                Log.e(TAG, "streamOn readed invalid data from storage");
+                Log.e(TAG, "streamOn readed invalid data from storage, netChunk is null or zero length");
             }
             if (!isStreaming) return;
             if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
