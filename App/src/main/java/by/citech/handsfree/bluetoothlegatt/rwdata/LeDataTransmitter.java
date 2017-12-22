@@ -96,8 +96,22 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
                 characteristic_write = characteristics.getWriteCharacteristic();
                  writeThreadStart();
              } else {
-                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
+                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive one ");
                 ConnectorBluetooth.getInstance().processState();
+                if (notifyCharacteristicStart()) {
+                    characteristic_write = characteristics.getWriteCharacteristic();
+                    writeThreadStart();
+                } else {
+                    if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive two");
+                    ConnectorBluetooth.getInstance().processState();
+                    if (notifyCharacteristicStart()) {
+                        characteristic_write = characteristics.getWriteCharacteristic();
+                        writeThreadStart();
+                    } else{
+                        if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive three");
+                        ConnectorBluetooth.getInstance().processState();
+                    }
+                }
             }
         } else {
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
