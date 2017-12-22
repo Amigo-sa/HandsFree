@@ -15,15 +15,16 @@ import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.logic.ICallNetExchangeListener;
 import by.citech.handsfree.logic.ICaller;
 import by.citech.handsfree.settings.Settings;
+import by.citech.handsfree.threading.IThreadManager;
 
 /**
  * Created by tretyak on 22.11.2017.
  */
 
-public class LeDataTransmitter implements CallbackWriteListener, ICaller {
+public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThreadManager {
 
     private final static String TAG = "WSD_LeDataTransmitter";
-    private static final long WAIT_PERIOD = 30;
+    private static final long WAIT_PERIOD = 10;
 
     private BluetoothLeService mBluetoothLeService;
     private Characteristics characteristics;
@@ -34,6 +35,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
     private StorageData<byte[][]> storageToBt;
     private StorageData<byte[]> storageFromBt;
     private boolean isRunning;
+    private boolean isNotyfyRequestRunning;
     private boolean Callback = true;
     private int lostWritePkt = 0;
     private ArrayList<ITransmitter> iRxDataListeners;
@@ -87,51 +89,54 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
         }
     }
 
+//    public void enableTransmitData() {
+//        if (Settings.debug) Log.i(TAG, "enableTransmitData()");
+//
+//        setMTU();
+//        if (!characteristics.isEmpty()) {
+//            if (notifyCharacteristicStart()) {
+//                characteristic_write = characteristics.getWriteCharacteristic();
+//                 writeThreadStart();
+//            } else {
+//                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
+//                ConnectorBluetooth.getInstance().processState();
+//            }
+//        } else {
+//            if (Settings.debug) Log.i(TAG, "disconnectToast()");
+//            mIBluetoothListener.disconnectToast();
+//        }
+//    }
+
     public void enableTransmitData() {
         if (Settings.debug) Log.i(TAG, "enableTransmitData()");
 
         setMTU();
         if (!characteristics.isEmpty()) {
-            if (notifyCharacteristicStart()) {  
-                characteristic_write = characteristics.getWriteCharacteristic();
-                 writeThreadStart();
-             } else {
-                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive one ");
-                ConnectorBluetooth.getInstance().processState();
-                if (notifyCharacteristicStart()) {
-                    characteristic_write = characteristics.getWriteCharacteristic();
-                    writeThreadStart();
-                } else {
-                    if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive two");
-                    ConnectorBluetooth.getInstance().processState();
-                    if (notifyCharacteristicStart()) {
-                        characteristic_write = characteristics.getWriteCharacteristic();
-                        writeThreadStart();
-                    } else{
-                        if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive three");
-                        ConnectorBluetooth.getInstance().processState();
-                    }
-                }
-            }
+            notifyThreadStart();
+            characteristic_write = characteristics.getWriteCharacteristic();
+            writeThreadStart();
         } else {
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
             mIBluetoothListener.disconnectToast();
         }
     }
 
+
+
+//    //отключаем поток записи и нотификации
+//    public void disableTransmitData() {
+//        if (Settings.debug) Log.i(TAG, "disableTransmitData()");
+//        writeThreadStop();
+//        if (!notifyCharacteristicStop()) {
+//            if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
+//        }
+//    }
+
     //отключаем поток записи и нотификации
     public void disableTransmitData() {
         if (Settings.debug) Log.i(TAG, "disableTransmitData()");
         writeThreadStop();
-        if (!notifyCharacteristicStop()) {
-            if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive one");
-            if (!notifyCharacteristicStop()) {
-                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive two");
-                if (!notifyCharacteristicStop())
-                    if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive three");
-            }
-        }
-
+        notifyThreadStop();
     }
 
 
@@ -147,35 +152,85 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
         return setCharacteristicNotification(false);
     }
 
+
+    private void notifyThreadStart() {
+        addRunnable(() -> {
+            int time = 0;
+            isNotyfyRequestRunning = true;
+            while (isNotyfyRequestRunning) {
+
+                notifyCharacteristicStart();
+                if (Settings.debug) Log.i(TAG, "DescriptorWriteAwait for start...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                time++;
+                if (time == WAIT_PERIOD) {
+                    isNotyfyRequestRunning = false;
+                    if (Settings.debug) Log.e(TAG, "Device not started notify ");
+                }
+            }
+        });
+    }
+
+    private void notifyThreadStop() {
+        addRunnable(() -> {
+            int time = 0;
+            isNotyfyRequestRunning = true;
+            while (isNotyfyRequestRunning) {
+                notifyCharacteristicStop();
+                if (Settings.debug) Log.i(TAG, "DescriptorWriteAwait for stop...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (time == WAIT_PERIOD) {
+                    isNotyfyRequestRunning = false;
+                    if (Settings.debug) Log.e(TAG, "Device not stop notify ");
+                }
+                time++;
+            }
+        });
+    }
+
+
     private boolean setCharacteristicNotification(boolean enable){
         //if (Settings.debug) Log.i(TAG, "setNotifyCharacteristic = " + enable);
         mNotifyCharacteristic = characteristics.getNotifyCharacteristic();
         if(mBluetoothLeService != null) {
             mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, enable);
-            return callbackDescriptorWriteAwait();
+            //return callbackDescriptorWriteAwait();
+            return  true;
         }
         return false;
     }
-    private boolean callbackDescriptorWriteAwait() {
-        int time = 0;
 
-        while (!notifyDescriptorWritten) {
-            if (Settings.debug) Log.e(TAG, "DescriptorWriteAwait...");
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            time++;
-            if (time == WAIT_PERIOD)
-                return false;
-        }
-        return true;
-    }
+//    private boolean callbackDescriptorWriteAwait() {
+//        int time = 0;
+//
+//        while (!notifyDescriptorWritten) {
+//            if (Settings.debug) Log.e(TAG, "DescriptorWriteAwait...");
+//            try {
+//                Thread.sleep(10);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            time++;
+//            if (time == WAIT_PERIOD)
+//                return false;
+//        }
+//        return true;
+//    }
+
+
     @Override
     public void callbackDescriptorIsDone() {
         if (Settings.debug) Log.i(TAG, "callbackDescriptorIsDone");
-        notifyDescriptorWritten = true;
+        //notifyDescriptorWritten = true;
+        isNotyfyRequestRunning = false;
     }
 
     @Override
