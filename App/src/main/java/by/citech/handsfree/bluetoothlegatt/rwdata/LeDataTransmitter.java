@@ -109,8 +109,15 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller {
     public void disableTransmitData() {
         if (Settings.debug) Log.i(TAG, "disableTransmitData()");
         writeThreadStop();
-        if (!notifyCharacteristicStop())
-            if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive");
+        if (!notifyCharacteristicStop()) {
+            if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive one");
+            if (!notifyCharacteristicStop()) {
+                if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive two");
+                if (!notifyCharacteristicStop())
+                    if (Settings.debug) Log.i(TAG, "CallbackDescriptorWrite was'nt receive three");
+            }
+        }
+
     }
 
 
