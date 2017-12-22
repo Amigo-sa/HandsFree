@@ -125,7 +125,7 @@ public class Settings {
 
     }
 
-    public static int threadNumber = 3;
+    public static int threadNumber = 5;
     public static DataSource dataSource = DataSource.BLUETOOTH;
 //  public static DataSource dataSource = DataSource.MICROPHONE;
     public static OpMode opMode = OpMode.Normal;

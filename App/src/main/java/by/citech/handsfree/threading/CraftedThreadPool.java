@@ -2,6 +2,9 @@ package by.citech.handsfree.threading;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -35,8 +38,9 @@ public class CraftedThreadPool
     //--------------------- preparation
 
     private Queue<Runnable> runnables;
-    private ThreadShard[] threads;
+    private List<ThreadShard> threads;
     private int threadNumber;
+    private int idleThreadNumber;
     private boolean isActive;
 
     {
@@ -49,12 +53,13 @@ public class CraftedThreadPool
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
         runnables = new ConcurrentLinkedQueue<>();
+        threads = new ArrayList<>();
         return isObjectPrepared();
     }
 
     @Override
     public boolean isObjectPrepared() {
-        return runnables != null;
+        return runnables != null && threads != null && idleThreadNumber == 0;
     }
 
     //--------------------- constructor
@@ -63,20 +68,9 @@ public class CraftedThreadPool
         this(Runtime.getRuntime().availableProcessors());
     }
 
-    public CraftedThreadPool(int threadNumber) {
+    CraftedThreadPool(int threadNumber) {
         this.threadNumber = threadNumber;
         upThreads(this.threadNumber);
-    }
-
-    private void upThreads(int threadNumber) {
-        if (debug) Log.i(TAG,"upThreads");
-        if (threadNumber < minThreadsNumber) {
-            threadNumber = minThreadsNumber;
-        }
-        threads = new ThreadShard[threadNumber];
-        for (int i = 0; i < threadNumber; i++) {
-            threads[i] = new ThreadShard();
-        }
     }
 
     //-------------------------- IBase
@@ -90,11 +84,11 @@ public class CraftedThreadPool
             return false;
         }
         isActive = true;
-        if (threads == null || threads.length < minThreadsNumber) {
+        if (threads == null || threads.size() < minThreadsNumber) {
             Log.e(TAG,"baseStart threads is null or thread number less then minThreadsNumber, upThreads");
             upThreads(this.threadNumber);
         }
-        if (threads == null || threads.length < 1) {
+        if (threads == null || threads.size() < 1) {
             Log.e(TAG,"baseStart threads is still null or thread number is less then 1, return");
             return false;
         }
@@ -110,27 +104,54 @@ public class CraftedThreadPool
         if (runnables != null) {
             runnables.clear();
         }
+        if (threads != null) {
+            threads.clear();
+        }
         isActive = false;
         return true;
     }
 
     //-------------------------- main
 
+    private synchronized void countThreads(Summand summand) {
+        switch (summand) {
+            case plusOne:
+                idleThreadNumber = ++idleThreadNumber;
+                break;
+            case minusOne:
+                idleThreadNumber = --idleThreadNumber;
+                break;
+        }
+        if (idleThreadNumber < 1) {
+            if (debug) Log.w(TAG, String.format(Locale.US,
+                    "countThreads %d of %d threads is idle",
+                    idleThreadNumber, threads.size()));
+        } else {
+            if (debug) Log.i(TAG, String.format(Locale.US,
+                    "countThreads %d of %d threads is idle",
+                    idleThreadNumber, threads.size()));
+        }
+    }
+
+    private void upThreads(int threadNumber) {
+        if (debug) Log.i(TAG,"upThreads");
+        if (threadNumber < minThreadsNumber) {
+            threadNumber = minThreadsNumber;
+        }
+        for (int i = 0; i < threadNumber; i++) {
+            threads.add(new ThreadShard());
+        }
+    }
+
     @Override
     public boolean addRunnable(Runnable runnable) {
-        if (debug) Log.i(TAG,"addRunnable");
-        if (runnables == null) {
-            Log.e(TAG,"addRunnable runnables is null, prepareObject");
-            prepareObject();
-        }
-        if (runnables == null) {
-            Log.e(TAG,"addRunnable runnables is still null, return");
+        if (debug) Log.i(TAG, "addRunnable");
+        if (runnable == null) {
+            Log.e(TAG, "addRunnable runnable is null, return");
             return false;
-        } else {
-            if (!runnables.offer(runnable)) {
-                Log.e(TAG, "addRunnable add fail");
-                return false;
-            }
+        } else if (!runnables.offer(runnable)) {
+            Log.e(TAG, "addRunnable add fail");
+            return false;
         }
         return true;
     }
@@ -150,12 +171,30 @@ public class CraftedThreadPool
 
     private class ThreadShard
             extends Thread {
+        Runnable toRun;
         @Override
         public void run() {
             if (debug) Log.i(TAG,"ThreadShard run");
-            while (isActive) getAvailableRun().run();
+            countThreads(Summand.plusOne);
+            while (isActive) {
+                toRun = getAvailableRun();
+                if (toRun == null) {
+                    if (debug) Log.w(TAG,"ThreadShard run toRun is null");
+                    waiting.run();
+                } else if (toRun != waiting) {
+                    countThreads(Summand.minusOne);
+                    toRun.run();
+                    countThreads(Summand.plusOne);
+                } else {
+                    toRun.run();
+                }
+            }
+            countThreads(Summand.minusOne);
         }
     }
 
-}
+    private enum Summand {
+        minusOne, plusOne
+    }
 
+}
