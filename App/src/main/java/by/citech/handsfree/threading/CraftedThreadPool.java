@@ -52,6 +52,7 @@ public class CraftedThreadPool
     @Override
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
+        idleThreadNumber = 0;
         runnables = new ConcurrentLinkedQueue<>();
         threads = new ArrayList<>();
         return isObjectPrepared();
