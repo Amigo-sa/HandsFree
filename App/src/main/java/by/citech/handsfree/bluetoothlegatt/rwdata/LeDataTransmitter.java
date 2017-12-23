@@ -21,7 +21,8 @@ import by.citech.handsfree.threading.IThreadManager;
 public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThreadManager {
 
     private final static String TAG = "WSD_LeDataTransmitter";
-    private static final long WAIT_PERIOD = 10;
+    private static final long WAIT_PERIOD = 5;//
+    private static final long NOTIFY_SET_PERIOD = 200;//ms
 
     private BluetoothLeService mBluetoothLeService;
     private Characteristics characteristics;
@@ -141,12 +142,12 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
     //---------------------- Methods for notify -------------------------
 
     private boolean notifyCharacteristicStart() {
-        notifyDescriptorWritten = false;
+        //notifyDescriptorWritten = false;
         return setCharacteristicNotification(true);
     }
 
        private boolean notifyCharacteristicStop() {
-        notifyDescriptorWritten = false;
+        //notifyDescriptorWritten = false;
         return setCharacteristicNotification(false);
     }
 
@@ -160,7 +161,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                 notifyCharacteristicStart();
                 if (Settings.debug) Log.i(TAG, "DescriptorWriteAwait for start...");
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(NOTIFY_SET_PERIOD);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -183,7 +184,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                 notifyCharacteristicStop();
                 if (Settings.debug) Log.i(TAG, "DescriptorWriteAwait for stop...");
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(NOTIFY_SET_PERIOD);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
