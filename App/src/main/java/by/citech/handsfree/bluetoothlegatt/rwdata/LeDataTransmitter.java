@@ -9,10 +9,7 @@ import java.util.Arrays;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.logic.CallerState;
-import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.logic.ICallNetExchangeListener;
 import by.citech.handsfree.logic.ICaller;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreadManager;
@@ -35,7 +32,8 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
     private StorageData<byte[][]> storageToBt;
     private StorageData<byte[]> storageFromBt;
     private boolean isRunning;
-    private boolean isNotyfyRequestRunning;
+    private boolean isNotyfyStopRunning;
+    private boolean isNotyfyStartRunning;
     private boolean Callback = true;
     private int lostWritePkt = 0;
     private ArrayList<ITransmitter> iRxDataListeners;
@@ -113,8 +111,8 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
         setMTU();
         if (!characteristics.isEmpty()) {
             notifyThreadStart();
-            characteristic_write = characteristics.getWriteCharacteristic();
-            writeThreadStart();
+//            characteristic_write = characteristics.getWriteCharacteristic();
+//            writeThreadStart();
         } else {
             if (Settings.debug) Log.i(TAG, "disconnectToast()");
             mIBluetoothListener.disconnectToast();
@@ -156,8 +154,8 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
     private void notifyThreadStart() {
         addRunnable(() -> {
             int time = 0;
-            isNotyfyRequestRunning = true;
-            while (isNotyfyRequestRunning) {
+            isNotyfyStartRunning = true;
+            while (isNotyfyStartRunning) {
 
                 notifyCharacteristicStart();
                 if (Settings.debug) Log.i(TAG, "DescriptorWriteAwait for start...");
@@ -168,8 +166,10 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                 }
                 time++;
                 if (time == WAIT_PERIOD) {
-                    isNotyfyRequestRunning = false;
+                    isNotyfyStartRunning = false;
                     if (Settings.debug) Log.e(TAG, "Device not started notify ");
+                    if(mBluetoothLeService != null)
+                        mBluetoothLeService.disconnect();
                 }
             }
         });
@@ -178,8 +178,8 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
     private void notifyThreadStop() {
         addRunnable(() -> {
             int time = 0;
-            isNotyfyRequestRunning = true;
-            while (isNotyfyRequestRunning) {
+            isNotyfyStopRunning = true;
+            while (isNotyfyStopRunning) {
                 notifyCharacteristicStop();
                 if (Settings.debug) Log.i(TAG, "DescriptorWriteAwait for stop...");
                 try {
@@ -188,14 +188,13 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                     e.printStackTrace();
                 }
                 if (time == WAIT_PERIOD) {
-                    isNotyfyRequestRunning = false;
+                    isNotyfyStopRunning = false;
                     if (Settings.debug) Log.e(TAG, "Device not stop notify ");
                 }
                 time++;
             }
         });
     }
-
 
     private boolean setCharacteristicNotification(boolean enable){
         //if (Settings.debug) Log.i(TAG, "setNotifyCharacteristic = " + enable);
@@ -230,7 +229,16 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
     public void callbackDescriptorIsDone() {
         if (Settings.debug) Log.i(TAG, "callbackDescriptorIsDone");
         //notifyDescriptorWritten = true;
-        isNotyfyRequestRunning = false;
+        // после запуска нотификации запускаем и запись
+        if (isNotyfyStartRunning) {
+            if (Settings.debug) Log.i(TAG, "Notyfy Started");
+            characteristic_write = characteristics.getWriteCharacteristic();
+            writeThreadStart();
+            isNotyfyStartRunning = false;
+        }
+        if (isNotyfyStopRunning)
+            if (Settings.debug) Log.i(TAG, "Notyfy Stoped");
+            isNotyfyStopRunning = false;
     }
 
     @Override
@@ -304,7 +312,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                 while (numBtPkt != pktSize) {
                     // запись данных производим с учётом Калбэка onWriteCharacteristic
                     if (Callback) {
-                        //if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
+                        if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
                         writeByteArrayData(arrayData[numBtPkt]);
                         //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
                         Callback = false;
