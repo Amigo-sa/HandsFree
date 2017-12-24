@@ -9,7 +9,7 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 
 public class ThreadManager
-        implements ISettingsCtrl, IRunnableCtrl, IBase, IPrepareObject {
+        implements ISettingsCtrl, IBase, IPrepareObject {
 
     private static final String STAG = Tags.NET_CONNECTOR;
     private static final boolean debug = Settings.debug;
@@ -95,24 +95,15 @@ public class ThreadManager
         return true;
     }
 
-    //--------------------- IRunnableCtrl
+    //--------------------- main
 
-    @Override
-    public boolean addRunnable(Runnable runnable) {
+    boolean addRunnable(Runnable runnable) {
         if (debug) Log.i(TAG, "addRunnable");
         if (runnable == null) {
             Log.e(TAG, "addRunnable runnable is null");
             return false;
-        } else if (threadPool == null) {
-            Log.e(TAG, "addRunnable threadPool is null, prepareObject");
-            prepareObject();
         }
-        if (threadPool == null) {
-            Log.e(TAG, "addRunnable threadPool is still null, return");
-            return false;
-        } else {
-            threadPool.addRunnable(runnable);
-        }
+        threadPool.addRunnable(runnable);
         return true;
     }
 

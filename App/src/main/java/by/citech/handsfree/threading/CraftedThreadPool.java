@@ -11,7 +11,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class CraftedThreadPool
-        implements IPrepareObject, IRunnableCtrl {
+        implements IPrepareObject {
 
     private static final boolean debug = Settings.debug;
     private static final String STAG = Tags.THREADPOOL;
@@ -51,7 +51,6 @@ public class CraftedThreadPool
     @Override
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
-        idleThreadNumber = 0;
         threads = new ConcurrentLinkedQueue<>();
         runnables = new ConcurrentLinkedQueue<>();
         return isObjectPrepared();
@@ -59,7 +58,7 @@ public class CraftedThreadPool
 
     @Override
     public boolean isObjectPrepared() {
-        return runnables != null && idleThreadNumber == 0;
+        return runnables != null && threads != null;
     }
 
     //--------------------- constructor
@@ -78,35 +77,44 @@ public class CraftedThreadPool
 
     //-------------------------- activate/deactivate
 
-    public boolean activate() {
+    void activate() {
         prepareObject();
         if (debug) Log.i(TAG,"activate");
         if (isActive) {
-            Log.e(TAG,"activate already active");
-            return false;
+            Log.e(TAG,"activate already active, return");
+            return;
         }
         isActive = true;
         upThread();
-        return true;
     }
 
-    public boolean deactivate() {
-        if (debug) Log.i(TAG,"deactivate");
-        if (runnables != null) {
-            runnables.clear();
-        }
-        if (threads != null) {
-            for (ThreadShard thread : threads) {
-                if (thread != null) {
-                    thread.deactivate();
-                }
+    void deactivate() {
+        if (debug) Log.i(TAG, "deactivate");
+        runnables.clear();
+        for (ThreadShard thread : threads) {
+            if (thread != null) {
+                thread.deactivate();
+            } else {
+                threads.remove(thread);
             }
         }
         isActive = false;
-        return true;
     }
 
     //-------------------------- main
+
+    void addRunnable(Runnable runnable) {
+        if (runnable == null) {
+            if (debug) Log.w(TAG, "addRunnable runnable is null, return");
+        } else if (!runnables.offer(runnable)) {
+            if (debug) Log.w(TAG, "addRunnable add fail, return");
+        } else if (idleThreadNumber < 1) {
+            if (debug) Log.i(TAG, "addRunnable low on threads, creating new one");
+            if (!upThread()) {
+                new ExtraThreadShard().start();
+            }
+        }
+    }
 
     private synchronized boolean upThread() {
         if (debug) Log.i(TAG,"upThread");
@@ -135,6 +143,7 @@ public class CraftedThreadPool
                     } else {
                         idleThreadNumber = --idleThreadNumber;
                     }
+                    break;
                 case plusOneIdle:
                     if (threads.contains(threadToProcess)) {
                         idleThreadNumber = ++idleThreadNumber;
@@ -176,29 +185,8 @@ public class CraftedThreadPool
         if (debug) Log.w(TAG, "procExtraThread running extra threads: " + runningExtraThreadNumber);
     }
 
-    @Override
-    public boolean addRunnable(Runnable runnable) {
-        if (debug) Log.i(TAG, "addRunnable");
-        if (runnable == null) {
-            Log.e(TAG, "addRunnable runnable is null, return");
-            return false;
-        } else if (!runnables.offer(runnable)) {
-            Log.e(TAG, "addRunnable add fail");
-            return false;
-        } else if (idleThreadNumber < 1) {
-            if (!upThread()) {
-                new ExtraThreadShard().start();
-            }
-        }
-        return true;
-    }
-
     private synchronized Runnable getAvailableRun() {
-        if (runnables == null) {
-            Log.e(TAG,"getAvailableRun runnables is null, prepareObject and return waiting");
-            prepareObject();
-            return waiting;
-        } else if (!runnables.isEmpty()) {
+        if (!runnables.isEmpty()) {
             if (Settings.debug) Log.i(TAG,"getAvailableRun run available");
             return runnables.poll();
         } else {
@@ -218,7 +206,7 @@ public class CraftedThreadPool
             while (isActive) {
                 toRun = getAvailableRun();
                 if (toRun == null) {
-                    if (debug) Log.w(TAG,"ThreadShard run toRun is null, return");
+                    if (debug) Log.w(TAG,"ThreadShard run toRun is null, waiting");
                     waiting.run();
                 } else if (toRun != waiting) {
                     procThreadNumber(Event.minusOneIdle, this);

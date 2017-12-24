@@ -70,45 +70,21 @@ public class ResourceManager
         return instance;
     }
 
-    public boolean isDone() {
-        if (iBaseStarts == null) {
-            Log.w(TAG, "isDone iBaseStarts is null, done");
-            return true;
-        } else if (!iBaseStarts.isEmpty()) {
-            Log.w(TAG, "isDone iBaseStarts is not done, size is " + iBaseStarts.size());
-            return false;
-        } else {
-            return iBaseStarts.isEmpty();
-        }
-    }
-
-    public boolean checkIfDoneOrStop() {
-        if (!isDone()) {
-            stop();
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     //--------------------- IBase
 
     public boolean stop() {
         if (debug) Log.w(TAG, "stop iBaseStarts size before stop is " + iBaseStarts.size());
         procOnStop(true);
-        if (iBaseStarts != null) {
-            for (IBase iBase : iBaseStarts) {
-                if (iBase != null) {
-                    iBase.baseStop();
-                } else {
-                    iBaseStarts.remove(iBase);
-                }
+        for (IBase iBase : iBaseStarts) {
+            if (iBase != null) {
+                iBase.baseStop();
+            } else {
+                iBaseStarts.remove(iBase);
             }
-            if (debug) Log.w(TAG, "stop iBaseStarts size after stop is " + iBaseStarts.size());
-            iBaseStarts.clear();
-            if (debug) Log.w(TAG, "stop iBaseStarts size after clear is " + iBaseStarts.size());
-        } else {
-            Log.e(TAG, "baseStop iBaseStarts is null" );
+        }
+        int sizeAfterStop = iBaseStarts.size();
+        if (sizeAfterStop != 0) {
+            if (debug) Log.w(TAG, "stop iBaseStarts size after stop is " + sizeAfterStop);
         }
         procOnStop(false);
         iBaseStarts.addAll(iBaseStartsDelayed);
@@ -117,21 +93,18 @@ public class ResourceManager
     }
 
     public boolean destroy() {
-        if (debug) Log.w(TAG, "destroy iBaseCreates size before stop is " + iBaseCreates.size());
+        if (debug) Log.w(TAG, "destroy iBaseCreates size before destroy is " + iBaseCreates.size());
         procOnDestroy(true);
-        if (iBaseCreates != null) {
-            for (IBase iBase : iBaseCreates) {
-                if (iBase != null) {
-                    iBase.baseDestroy();
-                } else {
-                    iBaseCreates.remove(iBase);
-                }
+        for (IBase iBase : iBaseCreates) {
+            if (iBase != null) {
+                iBase.baseDestroy();
+            } else {
+                iBaseCreates.remove(iBase);
             }
-            if (debug) Log.w(TAG, "destroy iBaseCreates size after stop is " + iBaseCreates.size());
-            iBaseCreates.clear();
-            if (debug) Log.w(TAG, "destroy iBaseCreates size after clear is " + iBaseCreates.size());
-        } else {
-            Log.e(TAG, "destroy iBaseCreates is null" );
+        }
+        int sizeAfterDestroy = iBaseCreates.size();
+        if (sizeAfterDestroy != 0) {
+            if (debug) Log.w(TAG, "destroy iBaseCreates size after destroy is " + sizeAfterDestroy);
         }
         procOnDestroy(false);
         iBaseCreates.addAll(iBaseCreatesDelayed);
