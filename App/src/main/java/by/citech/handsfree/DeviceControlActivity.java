@@ -144,6 +144,7 @@ public class DeviceControlActivity
         viewManager.setiGetGetter(this);
         viewManager.setDefaultView();
         viewManager.baseCreate();
+        ThreadManager.getInstance().baseCreate();
 
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecycler);
@@ -191,7 +192,6 @@ public class DeviceControlActivity
             Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
         }
 
-        ThreadManager.getInstance().baseStart();
         chosenContactHelper = new ChosenContactHelper(viewManager);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());

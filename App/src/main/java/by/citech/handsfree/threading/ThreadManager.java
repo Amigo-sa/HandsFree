@@ -75,22 +75,23 @@ public class ThreadManager
     //--------------------- IBase
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (debug) Log.i(TAG, "baseCreate");
         if (!prepareObject()) {
-            Log.i(TAG, "baseStart threadPool is still null, return");
+            Log.i(TAG, "baseCreate threadPool is still null, return");
             return false;
         } else {
-            threadPool.baseStart();
+            threadPool.activate();
         }
         return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        IBase.super.baseStop();
+    public boolean baseDestroy() {
+        if (debug) Log.i(TAG, "baseDestroy");
+        threadPool.deactivate();
+        IBase.super.baseDestroy();
         return true;
     }
 

@@ -28,8 +28,10 @@ public class ResourceManager
 
     //--------------------- preparation
 
-    private Collection<IBase> iBaseStarts;
-    private Collection<IBase> iBaseCreates;
+    private Collection<IBase> iBaseStarts, iBaseStartsDelayed;
+    private Collection<IBase> iBaseCreates, iBaseCreatesDelayed;
+    private volatile boolean isOnDestroy;
+    private volatile boolean isOnStop;
 
     @Override
     public boolean prepareObject() {
@@ -37,7 +39,9 @@ public class ResourceManager
 //      iBaseStarts = Collections.synchronizedList(new ArrayList<>());
 //      iBaseStarts = new CopyOnWriteArrayList<>();
         iBaseStarts = new ConcurrentLinkedQueue<>();
+        iBaseStartsDelayed = new ConcurrentLinkedQueue<>();
         iBaseCreates = new ConcurrentLinkedQueue<>();
+        iBaseCreatesDelayed = new ConcurrentLinkedQueue<>();
         return isObjectPrepared();
     }
 
@@ -91,12 +95,14 @@ public class ResourceManager
 
     public boolean stop() {
         if (debug) Log.w(TAG, "stop iBaseStarts size before stop is " + iBaseStarts.size());
+        procOnStop(true);
         if (iBaseStarts != null) {
             for (IBase iBase : iBaseStarts) {
                 if (iBase != null) {
                     iBase.baseStop();
+                } else {
+                    iBaseStarts.remove(iBase);
                 }
-//              iBaseStarts.remove(iBase);
             }
             if (debug) Log.w(TAG, "stop iBaseStarts size after stop is " + iBaseStarts.size());
             iBaseStarts.clear();
@@ -104,17 +110,22 @@ public class ResourceManager
         } else {
             Log.e(TAG, "baseStop iBaseStarts is null" );
         }
+        procOnStop(false);
+        iBaseStarts.addAll(iBaseStartsDelayed);
+        iBaseStartsDelayed.clear();
         return false;
     }
 
     public boolean destroy() {
         if (debug) Log.w(TAG, "destroy iBaseCreates size before stop is " + iBaseCreates.size());
+        procOnDestroy(true);
         if (iBaseCreates != null) {
             for (IBase iBase : iBaseCreates) {
                 if (iBase != null) {
                     iBase.baseDestroy();
+                } else {
+                    iBaseCreates.remove(iBase);
                 }
-//              iBaseCreates.remove(iBase);
             }
             if (debug) Log.w(TAG, "destroy iBaseCreates size after stop is " + iBaseCreates.size());
             iBaseCreates.clear();
@@ -122,35 +133,47 @@ public class ResourceManager
         } else {
             Log.e(TAG, "destroy iBaseCreates is null" );
         }
+        procOnDestroy(false);
+        iBaseCreates.addAll(iBaseCreatesDelayed);
+        iBaseCreatesDelayed.clear();
         return false;
+    }
+
+    private synchronized boolean procOnDestroy(Boolean isOnDestroy) {
+        if (isOnDestroy != null) {
+            if (debug) Log.w(TAG, "procOnDestroy is onDestroy: " + isOnDestroy);
+            this.isOnDestroy = isOnDestroy;
+        }
+        return this.isOnDestroy;
+    }
+
+    private synchronized boolean procOnStop(Boolean isOnStop) {
+        if (isOnStop != null) {
+            if (debug) Log.w(TAG, "procOnStop is onStop: " + isOnStop);
+            this.isOnStop = isOnStop;
+        }
+        return this.isOnStop;
     }
 
     //--------------------- IBaseCtrl start-stop
 
-    boolean doBaseStart(IBase iBase) {
-        if (debug) Log.i(TAG, "doBaseStart");
-        prepareObject();
+    synchronized boolean doBaseStart(IBase iBase) {
         if (iBase == null) {
-            Log.e(TAG, "doBaseStart iBase is null");
+            Log.e(TAG, "doBaseStart iBase is null, return");
             return false;
-        } else if (iBaseStarts == null) {
-            Log.e(TAG, "doBaseStart iBaseStarts is null, prepareObject");
-            prepareObject();
         }
-        if (iBaseStarts == null) {
-            Log.e(TAG, "doBaseStart iBaseStarts is still null, return");
-            return false;
+        if (procOnStop(null)) {
+            if (debug) Log.w(TAG, "doBaseStart register delayed");
+            return iBaseStartsDelayed.add(iBase);
         } else {
-            iBaseStarts.add(iBase);
+            if (debug) Log.i(TAG, "doBaseStart register");
+            return iBaseStarts.add(iBase);
         }
-        return true;
     }
 
-    boolean doBaseStop(IBase iBase) {
-        if (debug) Log.i(TAG, "doBaseStop");
-        if (iBaseStarts == null) {
-            Log.w(TAG, "doBaseStop iBaseStarts is null");
-        } else if (!iBaseStarts.remove(iBase)) {
+    synchronized boolean doBaseStop(IBase iBase) {
+        if (debug) Log.i(TAG, "doBaseStop unregister");
+        if (!iBaseStarts.remove(iBase)) {
             Log.w(TAG, "doBaseStop no such element");
         }
         return true;
@@ -158,32 +181,26 @@ public class ResourceManager
 
     //--------------------- IBaseCtrl create-destroy
 
-    boolean doBaseCreate(IBase iBase) {
-        if (debug) Log.i(TAG, "doBaseCreate");
-        prepareObject();
+    synchronized boolean doBaseCreate(IBase iBase) {
         if (iBase == null) {
-            Log.e(TAG, "doBaseCreate iBase is null");
+            Log.e(TAG, "doBaseCreate iBase is null, return");
             return false;
-        } else if (iBaseCreates == null) {
-            Log.e(TAG, "doBaseCreate iBaseCreates is null, prepareObject");
-            prepareObject();
         }
-        if (iBaseCreates == null) {
-            Log.e(TAG, "doBaseCreate iBaseCreates is still null, return");
-            return false;
+        if (procOnDestroy(null)) {
+            if (debug) Log.w(TAG, "doBaseCreate register delayed");
+            return iBaseCreatesDelayed.add(iBase);
         } else {
-            iBaseCreates.add(iBase);
+            if (debug) Log.i(TAG, "doBaseCreate register");
+            return iBaseCreates.add(iBase);
         }
-        return true;
     }
 
-    boolean doBaseDestroy(IBase iBase) {
-        if (debug) Log.i(TAG, "doBaseDestroy");
-        if (iBaseCreates == null) {
-            Log.w(TAG, "doBaseDestroy iBaseCreates is null");
-        } else if (!iBaseCreates.remove(iBase)) {
+    synchronized boolean doBaseDestroy(IBase iBase) {
+        if (debug) Log.i(TAG, "doBaseDestroy unregister");
+        if (!iBaseCreates.remove(iBase)) {
             Log.w(TAG, "doBaseDestroy no such element");
         }
         return true;
     }
+
 }

@@ -109,9 +109,9 @@ public class ContactsDbCtrl
                         cursor.getLong(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_ID)),
                         cursor.getString(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_NAME)),
                         cursor.getString(cursor.getColumnIndex(Contact.Contract.COLUMN_NAME_IP))));
-                if (debug) Log.i(TAG, "downloadAllContacts added contact to list: " + ++i);
+                ++i;
             } while (cursor.moveToNext());
-            if (debug) Log.i(TAG, "downloadAllContacts added all contacts to list");
+            if (debug) Log.i(TAG, "downloadAllContacts added all contacts to list: " + i);
         } else {
             if (debug) Log.i(TAG, "downloadAllContacts db have no contacts");
         }
