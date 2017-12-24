@@ -353,7 +353,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
      * WRITE_TYPE_DEFAULT -
      * WRITE_TYPE_SIGNED -
      * */
-    public void writeByteArrayData(byte[] data){
+    private void writeByteArrayData(byte[] data){
 
         if (Settings.debug) Log.w(TAG, Arrays.toString(data));
 

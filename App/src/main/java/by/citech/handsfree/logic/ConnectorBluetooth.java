@@ -520,8 +520,10 @@ private volatile BluetoothLeState BLEState;
     public boolean baseStop(){
         if (Settings.debug) Log.i(TAG, "baseStop");
 
-        bleController.setCommand(exchangeDataOff)
-                     .setCommand(unregisterReceiver)
+        if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
+            bleController.setCommand(exchangeDataOff).execute();
+
+        bleController.setCommand(unregisterReceiver)
                      .setCommand(unbindService)
                      .setCommand(closeService)
                      .execute();

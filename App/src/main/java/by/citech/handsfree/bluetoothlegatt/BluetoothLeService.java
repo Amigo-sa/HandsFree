@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -247,14 +248,17 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         }
 
         // Previously connected device.  Try to reconnect.
-        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
-                && mBluetoothGatt != null) {
+        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress) && mBluetoothGatt != null) {
             if (Settings.debug) Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
-            if (mBluetoothGatt.connect()) {
-                mConnectionState = STATE_CONNECTING;
-                return true;
-            } else {
-                return false;
+            try {
+                if (mBluetoothGatt.connect()) {
+                    mConnectionState = STATE_CONNECTING;
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception e){
+                mBluetoothGatt.disconnect();
             }
         }
 
