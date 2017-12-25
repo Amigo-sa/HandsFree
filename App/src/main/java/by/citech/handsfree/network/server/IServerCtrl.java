@@ -8,5 +8,4 @@ public interface IServerCtrl
     IServerCtrl startServer(int serverTimeout) throws IOException;
     void stopServer();
     boolean isAliveServer();
-    String getStatus();
 }

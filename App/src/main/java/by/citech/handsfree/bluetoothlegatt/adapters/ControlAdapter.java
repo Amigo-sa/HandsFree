@@ -3,10 +3,9 @@ package by.citech.handsfree.bluetoothlegatt.adapters;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import by.citech.handsfree.bluetoothlegatt.IList;
+import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.bluetoothlegatt.IScannListener;
 import by.citech.handsfree.logic.ConnectorBluetooth;
-import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 
 /**
@@ -20,7 +19,7 @@ public class ControlAdapter implements IScannListener {
 
     private boolean Connected;
     private ConnectorBluetooth connectorBluetooth;
-    private IList iList;
+    private IBtList iBtList;
 
 //    private  IElement iElement;
 
@@ -51,7 +50,7 @@ public class ControlAdapter implements IScannListener {
 
     public void initializeListBluetoothDevice(BluetoothDevice device) {
         if (Settings.debug) Log.i(TAG, "initializeListBluetoothDevice()");
-        iList = connectorBluetooth.getiList();
+        iBtList = connectorBluetooth.getiBtList();
         clearAllDevicesFromList();
         if (Connected) {
             addConnectDeviceToList(device);
@@ -60,20 +59,20 @@ public class ControlAdapter implements IScannListener {
 
     public void addConnectDeviceToList(BluetoothDevice device){
             if (Settings.debug) Log.i(TAG, "ADD DEVICE TO LIST " + device + "\n");
-            if ((device != null) && iList != null)
-                iList.addDevice(device, 200);
+            if ((device != null) && iBtList != null)
+                iBtList.addDevice(device, 200);
     }
 
     public void clearAllDevicesFromList(){
         if (Settings.debug) Log.e(TAG, "clearAllDevicesFromList()");
-        if (iList != null){
-            iList.clear();
+        if (iBtList != null){
+            iBtList.clear();
         }
     }
 
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
-        if (iList != null)
-            iList.addDevice(device, rssi);
+        if (iBtList != null)
+            iBtList.addDevice(device, rssi);
     }
 }

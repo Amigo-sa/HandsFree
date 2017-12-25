@@ -4,13 +4,13 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.RedirectFromNet;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
-import by.citech.handsfree.gui.ICallToUiListener;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.network.client.ClientConn;
@@ -32,13 +32,14 @@ import by.citech.handsfree.network.server.IServerOff;
 import by.citech.handsfree.param.Messages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.util.InetAddress;
 
 import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg,
-        IMessage, IServerOff, IDisc, INetListener, ICallToUiListener, IBase, ICaller {
+        IMessage, IServerOff, IDisc, INetListener, ICallToUiListener, IBase, ICaller, IThreadManager {
 
     private static final String STAG = Tags.NET_CONNECTOR;
     private static final boolean debug = Settings.debug;
@@ -58,8 +59,31 @@ public class ConnectorNet
     private ArrayList<ICallNetListener> iCalls;
     private ArrayList<ICallNetExchangeListener> iCallExs;
     private StorageData<byte[]> storageToNet;
-    private StorageData<byte[][]> storageToBt;
+    private StorageData<byte[][]> storageFromNet;
     private boolean isBaseStop;
+
+    //--------------------- runnables
+
+    private Runnable exchangeStop = new Runnable() {
+        @Override
+        public void run() {
+            if (debug) Log.i(TAG, "exchangeStop run");
+            streamOff();
+            redirectOff();
+        }
+    };
+
+    private Runnable netStop = new Runnable() {
+        @Override
+        public void run() {
+            if (debug) Log.i(TAG, "netStop run");
+            streamOff();
+            redirectOff();
+            disconnect(iClientCtrl);
+            disconnect(iServerCtrl);
+            serverOff();
+        }
+    };
 
     //--------------------- singleton
 
@@ -83,34 +107,34 @@ public class ConnectorNet
 
     //--------------------- getters and setters
 
-    public ConnectorNet setHandler(Handler handler) {
+    ConnectorNet setHandler(Handler handler) {
         this.handler = handler;
         return this;
     }
 
-    public ConnectorNet setiNetInfoGetter(INetInfoGetter iNetInfoGetter) {
+    ConnectorNet setiNetInfoGetter(INetInfoGetter iNetInfoGetter) {
         this.iNetInfoGetter = iNetInfoGetter;
         return this;
     }
 
-    public ConnectorNet addiCallNetworkExchangeListener(ICallNetExchangeListener iCallNetExchangeListener) {
-        iCallExs.add(iCallNetExchangeListener);
+    ConnectorNet addiCallNetworkExchangeListener(ICallNetExchangeListener listener) {
+        iCallExs.add(listener);
         return this;
     }
 
-    public ConnectorNet addiCallNetworkListener(ICallNetListener iCallNetworkListener) {
-        iCalls.add(iCallNetworkListener);
-        iCallExs.add(iCallNetworkListener);
+    ConnectorNet addiCallNetworkListener(ICallNetListener listener) {
+        iCalls.add(listener);
+        iCallExs.add(listener);
         return this;
     }
 
-    public ConnectorNet setStorageToNet(StorageData<byte[]> storageBtToNet) {
+    ConnectorNet setStorageToNet(StorageData<byte[]> storageBtToNet) {
         this.storageToNet = storageBtToNet;
         return this;
     }
 
-    public ConnectorNet setStorageFromNet(StorageData<byte[][]> storageNetToBt) {
-        this.storageToBt = storageNetToBt;
+    ConnectorNet setStorageFromNet(StorageData<byte[][]> storageNetToBt) {
+        this.storageFromNet = storageNetToBt;
         return this;
     }
 
@@ -132,7 +156,7 @@ public class ConnectorNet
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
         isBaseStop = true;
-        new ThreadNetStop().start();
+        addRunnable(netStop);
         return true;
     }
 
@@ -147,7 +171,7 @@ public class ConnectorNet
         }
         handler = null;
         storageToNet = null;
-        storageToBt = null;
+        storageFromNet = null;
         iServerCtrl = null;
         iClientCtrl = null;
         iReceiverCtrl = null;
@@ -157,12 +181,14 @@ public class ConnectorNet
         IBase.super.baseStop();
     }
 
-    private void processReport(Report report) {
-        if (debug) Log.i(TAG, "processReport");
-        if (report == null || !isBaseStop) return;
+    private void procReport(Report report) {
+        if (debug) Log.i(TAG, "procReport");
+        if (report == null) return;
         switch (report) {
             case ServerStopped:
-                finishBaseStop();
+                if (isBaseStop) {
+                    finishBaseStop();
+                }
                 break;
             default:
                 break;
@@ -177,9 +203,10 @@ public class ConnectorNet
 
     @Override
     public void callEndedInternally() {
-        if (debug) Log.i(TAG, "callEndedInternally");
-        if (debug) Log.i(TAG, "callEndedInternally iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
-        if (debug) Log.i(TAG, "callEndedInternally iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
+        if (debug) Log.i(TAG, String.format(Locale.US,
+                "callEndedInternally iConnCtrl is instance of %s",
+                (iConnCtrl == iServerCtrl) ? "iServerCtrl" :
+                (iConnCtrl == iClientCtrl) ? "iClientCtrl" : "unknown"));
         exchangeStop();
         disconnect(iConnCtrl);
     }
@@ -188,17 +215,6 @@ public class ConnectorNet
     public void callOutcomingCanceled() {
         if (debug) Log.i(TAG, "callOutcomingCanceled");
         disconnect(iClientCtrl);
-    }
-
-    @Override
-    public void callOutcomingStarted() {
-        if (debug) Log.i(TAG, "callOutcomingStarted");
-        if (!isValidIp()) {
-            if (debug) Log.w(TAG, "callOutcomingStarted isValidIp()");
-            if (setCallerState(CallerState.OutcomingStarted, CallerState.Idle)) for (ICallNetListener l : iCalls) l.callOutcomingInvalid();
-            return;
-        }
-        connect();
     }
 
     @Override
@@ -215,129 +231,210 @@ public class ConnectorNet
         exchangeStart();
     }
 
+    @Override
+    public void callOutcomingStarted() {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "callOutcomingStarted callerState is " + callerState.getName());
+        switch (callerState) {
+            case OutcomingStarted:
+                if (!isValidIp()) {
+                    if (debug) Log.w(TAG, "callOutcomingStarted invalid ip");
+                    if (setCallerState(CallerState.OutcomingStarted, CallerState.Idle)) {for (ICallNetListener l : iCalls) l.callOutcomingInvalid(); return;}
+                    else break;
+                } else {
+                    connect();
+                    return;
+                }
+            default:
+                if (debug) Log.w(TAG, "callOutcomingStarted " + callerState.getName()); return;
+        }
+        if (debug) Log.w(TAG, "callOutcomingStarted recursive call");
+        callOutcomingStarted();
+    }
+
     //--------------------- INetListener
 
     @Override
     public void srvOnOpen() {
-        if (debug) Log.i(TAG, "srvOnOpen");
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "srvOnOpen callerState is " + callerState.getName());
+        switch (callerState) {
             case Idle:
                 if (debug) Log.i(TAG, "srvOnOpen Idle");
-                if (setCallerState(CallerState.Idle, CallerState.IncomingDetected)) for (ICallNetListener l : iCalls) l.callIncomingDetected();
-                break;
+                if (setCallerState(CallerState.Idle, CallerState.IncomingDetected)) {for (ICallNetListener l : iCalls) l.callIncomingDetected(); return;}
+                else break;
             default:
-                if (debug) Log.e(TAG, "srvOnOpen " + getCallerStateName());
+                if (debug) Log.w(TAG, "srvOnOpen " + callerState.getName());
                 disconnect(iServerCtrl); // TODO: обрываем, если не ждём звонка?
+                return;
         }
+        if (debug) Log.w(TAG, "srvOnOpen recursive call");
+        srvOnOpen();
     }
 
     @Override
     public void srvOnFailure() {
-        if (debug) Log.i(TAG, "srvOnFailure");
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "srvOnFailure callerState is " + callerState.getName());
+        switch (callerState) {
             case IncomingDetected:
                 if (debug) Log.i(TAG, "srvOnFailure IncomingDetected");
-                if (setCallerState(CallerState.IncomingDetected, CallerState.Error)) for (ICallNetListener l : iCalls) l.callIncomingFailed();
-                break;
+                if (setCallerState(CallerState.IncomingDetected, CallerState.Error)) {for (ICallNetListener l : iCalls) l.callIncomingFailed(); return;}
+                else break;
             case Call:
                 if (debug) Log.i(TAG, "srvOnFailure Call");
-                if (setCallerState(CallerState.Call, CallerState.Error)) for (ICallNetExchangeListener l : iCallExs) l.callFailed();
-                exchangeStop();
-                break;
+                if (setCallerState(CallerState.Call, CallerState.Error)) {
+                    for (ICallNetExchangeListener l : iCallExs) l.callFailed();
+                    exchangeStop();
+                    return;
+                }
+                else break;
             default:
-                if (debug) Log.e(TAG, "srvOnFailure " + getCallerStateName());
+                if (debug) Log.w(TAG, "srvOnFailure " + callerState.getName()); return;
         }
+        if (debug) Log.w(TAG, "srvOnFailure recursive call");
+        srvOnFailure();
     }
 
     @Override
     public void srvOnClose() {
-        if (debug) Log.i(TAG, "srvOnClose");
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "srvOnClose callerState is " + callerState.getName());
+        switch (callerState) {
             case IncomingDetected:
                 if (debug) Log.i(TAG, "srvOnClose IncomingDetected");
-                if (setCallerState(CallerState.IncomingDetected, CallerState.Idle)) for (ICallNetListener listener : iCalls) listener.callIncomingCanceled();
-                break;
+                if (setCallerState(CallerState.IncomingDetected, CallerState.Idle)) {for (ICallNetListener listener : iCalls) listener.callIncomingCanceled(); return;}
+                else break;
             case Call:
                 if (debug) Log.i(TAG, "srvOnClose Call");
-                if (setCallerState(CallerState.Call, CallerState.Idle)) for (ICallNetExchangeListener listener : iCallExs) listener.callEndedExternally();
-                exchangeStop();
-                break;
+                if (setCallerState(CallerState.Call, CallerState.Idle)) {
+                    for (ICallNetExchangeListener listener : iCallExs) listener.callEndedExternally();
+                    exchangeStop();
+                    return;
+                }
+                else break;
             default:
-                if (debug) Log.e(TAG, "srvOnClose " + getCallerStateName());
+                if (debug) Log.e(TAG, "srvOnClose " + callerState.getName()); return;
         }
+        if (debug) Log.w(TAG, "srvOnClose recursive call");
+        srvOnClose();
     }
 
     @Override
     public void cltOnOpen() {
-        if (debug) Log.i(TAG, "cltOnOpen");
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "cltOnOpen callerState is " + callerState.getName());
+        switch (callerState) {
             case OutcomingStarted:
-                if (debug) Log.i(TAG, "cltOnOpen Call");
-                if (setCallerState(CallerState.OutcomingStarted, CallerState.OutcomingConnected)) for (ICallNetListener l : iCalls) l.callOutcomingConnected();
-                break;
+                if (setCallerState(CallerState.OutcomingStarted, CallerState.OutcomingConnected)) {for (ICallNetListener l : iCalls) l.callOutcomingConnected(); return;}
+                else break;
             default:
-                Log.e(TAG, "cltOnOpen " + getCallerStateName());
+                if (debug) Log.w(TAG, "cltOnOpen " + callerState.getName());
                 disconnect(iClientCtrl); // TODO: обрываем, если не звонили?
-                break;
+                return;
         }
+        if (debug) Log.w(TAG, "cltOnOpen recursive call");
+        cltOnOpen();
     }
 
     @Override
     public void cltOnFailure() {
-        if (debug) Log.i(TAG, "cltOnFailure");
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "cltOnFailure callerState is " + callerState.getName());
+        switch (callerState) {
             case OutcomingConnected:
                 if (debug) Log.i(TAG, "cltOnFailure OutcomingConnected");
-                if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) for (ICallNetListener l : iCalls) l.callOutcomingRejected();
-                break;
+                if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) {for (ICallNetListener l : iCalls) l.callOutcomingRejected(); return;}
+                else break;
             case OutcomingStarted:
                 if (debug) Log.i(TAG, "cltOnFailure OutcomingStarted");
-                if (setCallerState(CallerState.OutcomingStarted, CallerState.Error)) for (ICallNetListener l : iCalls) l.callOutcomingFailed();
-                break;
+                if (setCallerState(CallerState.OutcomingStarted, CallerState.Error)) {for (ICallNetListener l : iCalls) l.callOutcomingFailed(); return;}
+                else break;
             case Call:
                 if (debug) Log.i(TAG, "cltOnFailure Call");
-                if (setCallerState(CallerState.Call, CallerState.Error)) for (ICallNetExchangeListener l : iCallExs) l.callFailed();
-                exchangeStop();
-                break;
+                if (setCallerState(CallerState.Call, CallerState.Error)) {
+                    for (ICallNetExchangeListener l : iCallExs) l.callFailed();
+                    exchangeStop();
+                    return;
+                }
+                else break;
             default:
-                Log.e(TAG, "cltOnFailure " + getCallerStateName());
-                break;
+                Log.e(TAG, "cltOnFailure " + callerState.getName()); return;
         }
+        if (debug) Log.w(TAG, "cltOnFailure recursive call");
+        cltOnFailure();
     }
 
     @Override
     public void cltOnMessageText(String message) {
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "cltOnMessageText callerState is " + callerState.getName());
+        switch (callerState) {
             case OutcomingConnected:
-                if (debug) Log.i(TAG, "cltOnMessageText OutcomingConnected");
                 if (message.equals(Messages.RESPONSE_ACCEPT)) {
-                    if (debug) Log.i(TAG, "cltOnMessageText ACCEPT");
-                    if (setCallerState(CallerState.OutcomingConnected, CallerState.Call)) for (ICallNetExchangeListener l : iCallExs) l.callOutcomingAccepted();
-                    setiConnCtrl(iClientCtrl);
-                    exchangeStart();
+                    if (debug) Log.i(TAG, "cltOnMessageText RESPONSE_ACCEPT");
+                    if (setCallerState(CallerState.OutcomingConnected, CallerState.Call)) {
+                        for (ICallNetExchangeListener l : iCallExs) l.callOutcomingAccepted();
+                        setiConnCtrl(iClientCtrl);
+                        exchangeStart();
+                    } else {
+                        break;
+                    }
                 } else if (message.equals(Messages.RESPONSE_REJECT)) {
-                    if (debug) Log.i(TAG, "cltOnMessageText REJECT");
-                    if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) for (ICallNetListener l : iCalls) l.callOutcomingRejected();
-                    disconnect(iClientCtrl);
+                    if (debug) Log.i(TAG, "cltOnMessageText RESPONSE_REJECT");
+                    if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) {
+                        for (ICallNetListener l : iCalls) l.callOutcomingRejected();
+                        disconnect(iClientCtrl);
+                    } else {
+                        break;
+                    }
                 }
+                return;
+            default:
+                if (debug) Log.w(TAG, "cltOnMessageText " + callerState.getName()); return;
         }
+        if (debug) Log.w(TAG, "cltOnMessageText recursive call");
+        cltOnMessageText(message);
     }
 
     @Override
     public void cltOnClose() {
-        if (debug) Log.i(TAG, "cltOnClose");
-        switch (getCallerState()) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "cltOnClose callerState is " + callerState.getName());
+        switch (callerState) {
             case OutcomingConnected:
-                if (debug) Log.i(TAG, "cltOnClose OutcomingConnected");
-                if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) for (ICallNetListener l : iCalls) l.callOutcomingRejected();
-                break;
+                if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) {for (ICallNetListener l : iCalls) l.callOutcomingRejected(); return;}
+                else break;
             case Call:
-                if (debug) Log.i(TAG, "cltOnClose Call");
-                if (setCallerState(CallerState.Call, CallerState.Idle)) for (ICallNetExchangeListener l : iCallExs) l.callEndedExternally();
+                if (setCallerState(CallerState.Call, CallerState.Idle)) {for (ICallNetExchangeListener l : iCallExs) l.callEndedExternally(); return;}
+                else break;
+            default:
+                if (debug) Log.w(TAG, "cltOnClose " + callerState.getName()); return;
+        }
+        if (debug) Log.w(TAG, "cltOnClose recursive call");
+        cltOnClose();
+    }
+
+    @Override
+    public void serverStarted(IServerCtrl iServerCtrl) {
+        CallerState callerState = getCallerState();
+        if (debug) Log.i(TAG, "serverStarted callerState is " + callerState.getName());
+        switch (callerState) {
+            case Null:
+                if (iServerCtrl == null) {
+                    if (setCallerState(CallerState.Null, CallerState.GeneralFailure)) {for (ICallNetListener l : iCalls) l.connectorFailure(); return;}
+                } else {
+                    if (setCallerState(CallerState.Null, CallerState.Idle)) {for (ICallNetListener l : iCalls) l.connectorReady();
+                        this.iServerCtrl = iServerCtrl;
+                        return;
+                    }
+                }
                 break;
             default:
-                if (debug) Log.e(TAG, "cltOnClose " + getCallerStateName());
+                if (debug) Log.w(TAG, "serverStarted " + callerState.getName()); return;
         }
+        if (debug) Log.w(TAG, "serverStarted recursive call");
+        serverStarted(iServerCtrl);
     }
 
     //--------------------- network
@@ -372,42 +469,20 @@ public class ConnectorNet
     }
 
     private void exchangeStart() {
-        if (debug) Log.i(TAG, "exchangeStart");
-        if (debug) Log.i(TAG, "exchangeStart iConnCtrl is instance of iServerCtrl: " + (iConnCtrl == iServerCtrl));
-        if (debug) Log.i(TAG, "exchangeStart iConnCtrl is instance of iClientCtrl: " + (iConnCtrl == iClientCtrl));
+        if (debug) Log.i(TAG, String.format(Locale.US,
+                "exchangeStart iConnCtrl is instance of %s",
+                (iConnCtrl == iServerCtrl) ? "iServerCtrl" :
+                (iConnCtrl == iClientCtrl) ? "iClientCtrl" : "unknown"));
         new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute();
-        new RedirectFromNet(this, iConnCtrl.getReceiverReg(), storageToBt).execute();
+        new RedirectFromNet(this, iConnCtrl.getReceiverReg(), storageFromNet).execute();
     }
 
     private void exchangeStop() {
         if (debug) Log.i(TAG, "exchangeStop");
-        new ThreadExchangeStop().start();
+        addRunnable(exchangeStop);
     }
 
     //--------------------- network low level
-
-    private class ThreadExchangeStop
-            extends Thread {
-        @Override
-        public void run() {
-            if (debug) Log.i(TAG, "ThreadExchangeStop");
-            streamOff();
-            redirectOff();
-        }
-    }
-
-    private class ThreadNetStop
-            extends Thread {
-        @Override
-        public void run() {
-            if (debug) Log.i(TAG, "ThreadNetStop");
-            streamOff();
-            redirectOff();
-            disconnect(iClientCtrl);
-            disconnect(iServerCtrl);
-            serverOff();
-        }
-    }
 
     private void serverOff() {
         if (debug) Log.i(TAG, "serverOff");
@@ -437,25 +512,7 @@ public class ConnectorNet
     @Override
     public void serverStopped() {
         if (debug) Log.i(TAG, "serverStopped");
-        processReport(Report.ServerStopped);
-    }
-
-    @Override
-    public void serverStarted(IServerCtrl iServerCtrl) {
-        if (debug) Log.i(TAG, "serverStarted");
-        switch (getCallerState()) {
-            case Null:
-                if (iServerCtrl == null) {
-                    if (setCallerState(CallerState.Null, CallerState.GeneralFailure)) for (ICallNetListener l : iCalls) l.connectorFailure();
-                } else {
-                    if (setCallerState(CallerState.Null, CallerState.Idle)) for (ICallNetListener l : iCalls) l.connectorReady();
-                    this.iServerCtrl = iServerCtrl;
-                }
-                break;
-            default:
-                Log.e(TAG, "serverStarted state default");
-                break;
-        }
+        procReport(Report.ServerStopped);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package by.citech.handsfree.logic;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 public enum CallerState {
@@ -43,7 +44,7 @@ public enum CallerState {
 
     Error {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<>(Arrays.asList(Idle));
+            return new HashSet<>(Collections.singletonList(Idle));
         }
     },
 
@@ -57,25 +58,25 @@ public enum CallerState {
 
     DebugRecord {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(DebugRecorded));
+            return new HashSet<> (Collections.singletonList(DebugRecorded));
         }
     },
 
     DebugRecorded {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(DebugPlay));
+            return new HashSet<> (Collections.singletonList(DebugPlay));
         }
     },
 
     DebugPlay {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(DebugRecorded));
+            return new HashSet<> (Collections.singletonList(DebugRecorded));
         }
     },
 
     DebugLoopBack {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Null));
+            return new HashSet<> (Collections.singletonList(Null));
         }
     };
 

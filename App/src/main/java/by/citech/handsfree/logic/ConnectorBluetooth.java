@@ -10,7 +10,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-import by.citech.handsfree.bluetoothlegatt.IList;
+import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
@@ -56,7 +56,6 @@ import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.gui.ICallToUiExchangeListener;
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
@@ -105,7 +104,7 @@ private volatile BluetoothLeState BLEState;
     private IService iService;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
-    private IList iList;
+    private IBtList iBtList;
 
     private BLEController bleController;
 
@@ -323,13 +322,13 @@ private volatile BluetoothLeState BLEState;
         return this;
     }
 
-     ConnectorBluetooth setiList(IList iList) {
-        this.iList = iList;
+     ConnectorBluetooth setiBtList(IBtList iBtList) {
+        this.iBtList = iBtList;
         return this;
     }
 
-    public IList getiList() {
-        return iList;
+    public IBtList getiBtList() {
+        return iBtList;
     }
 
     //------------------------ init command when device is chosen -------
@@ -364,7 +363,7 @@ private volatile BluetoothLeState BLEState;
     //------------------ inittialization List-------------------------
 
      void clickItemList(int position){
-        final BluetoothDevice device = ((LeDeviceListAdapter) iList).getDevice(position);
+        final BluetoothDevice device = ((LeDeviceListAdapter) iBtList).getDevice(position);
         if (device == null) return;
         setmBTDevice(device);
         initCommandForDevice(device);
@@ -528,7 +527,7 @@ private volatile BluetoothLeState BLEState;
                      .setCommand(closeService)
                      .execute();
 
-        iList = null;
+        iBtList = null;
         mBTDevice = null;
         mBTDeviceConn = null;
         initList.setDevice(null);

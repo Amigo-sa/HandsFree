@@ -3,10 +3,7 @@ package by.citech.handsfree.logic;
 import android.os.Handler;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import by.citech.handsfree.bluetoothlegatt.IList;
+import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.common.IService;
@@ -20,8 +17,6 @@ import by.citech.handsfree.debug.Bt2BtRecorder;
 import by.citech.handsfree.debug.AudIn2AudOutLooper;
 import by.citech.handsfree.debug.AudIn2BtLooper;
 import by.citech.handsfree.exchange.IMsgToUi;
-import by.citech.handsfree.gui.ICallToUiListener;
-import by.citech.handsfree.gui.IUiToCallListener;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.settings.ISettingsCtrl;
@@ -53,7 +48,7 @@ public class Caller
     private IService iService;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
-    private IList iList;
+    private IBtList iBtList;
     private OpMode opMode;
 
     {
@@ -103,14 +98,6 @@ public class Caller
 
     //--------------------- getters and setters
 
-    public IUiToCallListener getiUiBtnGreenRedListener() {
-        return CallUi.getInstance();
-    }
-
-    public INetListener getiNetworkListener() {
-        return ConnectorNet.getInstance();
-    }
-
     public Caller setiCallToUiListener(ICallToUiListener listener) {
         iCallToUiListener = listener;
         return this;
@@ -156,19 +143,19 @@ public class Caller
         return this;
     }
 
-    public Caller setiList(IList iList) {
-        this.iList = iList;
+    public Caller setiBtList(IBtList iBtList) {
+        this.iBtList = iBtList;
         return this;
     }
 
     //--------------------- work with fsm
 
-    public synchronized CallerState getCallerState() {
+    synchronized CallerState getCallerState() {
         if (debug) Log.i(TAG, "getCallerState is " + callerState.getName());
         return callerState;
     }
 
-    public synchronized boolean setState(CallerState fromCallerState, CallerState toCallerState) {
+    synchronized boolean setState(CallerState fromCallerState, CallerState toCallerState) {
         if (debug) Log.w(TAG, String.format("setState from %s to %s", fromCallerState.getName(), toCallerState.getName()));
         if (callerState == fromCallerState) {
             if (fromCallerState.availableStates().contains(toCallerState)) {
@@ -240,7 +227,7 @@ public class Caller
         iService = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
-        iList = null;
+        iBtList = null;
         IBase.super.baseStop();
         return true;
     }
@@ -254,7 +241,7 @@ public class Caller
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iList == null) {
+                || iBtList == null) {
             if (debug) Log.e(TAG, "buildDebugAudIn2Bt illegal parameters");
             return;
         }
@@ -271,7 +258,7 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList)
+                .setiBtList(iBtList)
                 .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
@@ -295,7 +282,7 @@ public class Caller
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iList == null) {
+                || iBtList == null) {
             if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
             return;
         }
@@ -310,7 +297,7 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList)
+                .setiBtList(iBtList)
                 .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
@@ -354,7 +341,7 @@ public class Caller
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iList == null) {
+                || iBtList == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -373,7 +360,7 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList)
+                .setiBtList(iBtList)
                 .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
@@ -399,7 +386,7 @@ public class Caller
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iList == null) {
+                || iBtList == null) {
             if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
             return;
         }
@@ -418,7 +405,7 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList)
+                .setiBtList(iBtList)
                 .addiCallNetExchangeListener(null);
 
         CallUi callUi = CallUi.getInstance()
@@ -454,14 +441,14 @@ public class Caller
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iList == null) {
+                || iBtList == null) {
             Log.e(TAG, "buildNormal illegal parameters");
             return;
         }
 
         StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
-        HandlerExtended handlerExtended = new HandlerExtended(getiNetworkListener());
+        HandlerExtended handlerExtended = new HandlerExtended(ConnectorNet.getInstance());
 
         ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -472,7 +459,7 @@ public class Caller
                 .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
-                .setiList(iList);
+                .setiBtList(iBtList);
                 //.addiCallNetExchangeListener(null);
 
         ConnectorNet connectorNet = ConnectorNet.getInstance()

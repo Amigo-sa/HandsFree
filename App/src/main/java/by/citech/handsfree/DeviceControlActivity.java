@@ -11,7 +11,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -70,7 +69,7 @@ import by.citech.handsfree.gui.helper.ViewManager;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.gui.IUiToCallListener;
+import by.citech.handsfree.logic.ICallUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.param.Colors;
 import by.citech.handsfree.settings.enumeration.OpMode;
@@ -87,7 +86,7 @@ public class DeviceControlActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
         IContactEditor, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter,
-        IThreadManager, IUiToCallListener, IMsgToUi {
+        IThreadManager, ICallUi, IMsgToUi {
 
     private static final String STAG = Tags.ACT_DEVICECTRL;
     private static final boolean debug = Settings.debug;
@@ -206,7 +205,7 @@ public class DeviceControlActivity
                 .setiService(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
-                .setiList(deviceListAdapter);
+                .setiBtList(deviceListAdapter);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
 

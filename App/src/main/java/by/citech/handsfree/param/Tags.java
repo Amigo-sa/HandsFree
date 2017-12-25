@@ -77,4 +77,5 @@ public class Tags {
     public static final String RESOURCE_MANAGER    = "WSD_RESOURCE_MANAGER";
     public static final String CONTACT_HELPER      = "WSD_CONTACT_HELPER";
     public static final String VIEW_KEEPER         = "WSD_VIEW_KEEPER";
+    public static final String HANDLER_EXTENDED    = "WSD_HANDLER_EXTENDED";
 }

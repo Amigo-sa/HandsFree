@@ -12,7 +12,7 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.debug.IDebugCtrl;
-import by.citech.handsfree.gui.ICallToUiListener;
+import by.citech.handsfree.logic.ICallToUiListener;
 import by.citech.handsfree.gui.IGetView;
 import by.citech.handsfree.gui.IGetViewGetter;
 import by.citech.handsfree.common.IBase;

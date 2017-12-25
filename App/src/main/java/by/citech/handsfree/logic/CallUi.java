@@ -6,16 +6,13 @@ import java.util.ArrayList;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.debug.IDebugCtrl;
-import by.citech.handsfree.gui.ICallToUiExchangeListener;
-import by.citech.handsfree.gui.ICallToUiListener;
-import by.citech.handsfree.gui.IUiToCallListener;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class CallUi
-        implements IUiToCallListener, IBase, ISettingsCtrl, IPrepareObject, ICaller {
+        implements ICallUi, IBase, ISettingsCtrl, IPrepareObject, ICaller {
 
     private static final String STAG = Tags.CALL_UI;
     private static final boolean debug = Settings.debug;
@@ -110,7 +107,6 @@ public class CallUi
 
     @Override
     public boolean baseStop() {
-        IBase.super.baseStop();
         if (debug) Log.i(TAG, "baseStop");
         if (iToUis != null) {
             iToUis.clear();
@@ -122,6 +118,7 @@ public class CallUi
             iDebugs.clear();
         }
         opMode = null;
+        IBase.super.baseStop();
         return true;
     }
 
@@ -137,8 +134,7 @@ public class CallUi
 
     @Override
     public void onClickBtnGreen() {
-        if (debug) Log.i(TAG, "onClickBtnGreen");
-        if (!prepareObject()) {Log.e(TAG, "onClickBtnGreen not initiated");return;}
+        if (!prepareObject()) {Log.e(TAG, "onClickBtnGreen not initiated"); return;}
         if (debug) Log.w(TAG, "onClickBtnGreen opMode is " + opMode.getSettingName());
         CallerState callerState = getCallerState();
         if (debug) Log.i(TAG, "onClickBtnGreen callerState is " + callerState.getName());
@@ -170,7 +166,6 @@ public class CallUi
                 }
                 break;
             case Normal:
-            default:
                 switch (callerState) {
                     case Idle:
                         if (setCallerState(CallerState.Idle, CallerState.OutcomingStarted)) {for (ICallToUiListener l : iToUis) l.callOutcomingStarted(); return;}
@@ -182,6 +177,8 @@ public class CallUi
                         onBtnGreenWrongState(callerState); return;
                 }
                 break;
+            default:
+                Log.e(TAG, "onClickBtnGreen opMode default"); return;
         }
         if (debug) Log.w(TAG, "onClickBtnGreen recursive call");
         onClickBtnGreen();
@@ -189,7 +186,6 @@ public class CallUi
 
     @Override
     public void onClickBtnRed() {
-        if (debug) Log.i(TAG, "onClickBtnRed");
         if (!prepareObject()) {Log.e(TAG, "onClickBtnRed not prepared, return"); return;}
         if (debug) Log.i(TAG, "onClickBtnRed opMode is " + opMode.getSettingName());
         CallerState callerState = getCallerState();
@@ -221,7 +217,6 @@ public class CallUi
                 }
                 break;
             case Normal:
-            default:
                 switch (callerState) {
                     case Call:
                         if (setCallerState(CallerState.Call, CallerState.Idle)) {for (ICallToUiExchangeListener l : iToUiExs) l.callEndedInternally(); return;}
@@ -239,6 +234,8 @@ public class CallUi
                         onBtnRedWrongState(callerState); return;
                 }
                 break;
+            default:
+                Log.e(TAG, "onClickBtnRed opMode default"); return;
         }
         if (debug) Log.w(TAG, "onClickBtnRed recursive call");
         onClickBtnRed();

@@ -3,8 +3,12 @@ package by.citech.handsfree.network.server;
 import android.os.Handler;
 import android.util.Log;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import by.citech.handsfree.common.EConnection;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
@@ -31,14 +35,19 @@ public class ServerCtrlNanoWebSocket
     private static int objCount;
     private final String TAG;
     static {objCount = 0;}
-    {objCount++;TAG = STAG + " " + objCount;}
 
     private WebSocket webSocket;
     private Handler handler;
     private IReceiver listener;
-    private String status = "";
+    private EConnection state;
 
-    public ServerCtrlNanoWebSocket(int port, Handler handler) {
+    {
+        objCount++;
+        TAG = STAG + " " + objCount;
+        state = EConnection.Null;
+    }
+
+    ServerCtrlNanoWebSocket(int port, Handler handler) {
         super(port);
         this.handler = handler;
     }
@@ -49,23 +58,42 @@ public class ServerCtrlNanoWebSocket
         return webSocket;
     }
 
+    //--------------------- state
+
+    private void procState(EConnection state) {
+        if (debug) Log.i(TAG, String.format(
+                "procState from %s to %s",
+                this.state.name(), state.name()));
+        this.state = state;
+    }
+
     //--------------------- ITransmitter
 
     @Override
-    public void sendMessage(String message) {
-        if (debug) Log.i(TAG, "sendMessage");
+    public void sendData(byte[] data) {
+        if (data == null || webSocket == null) {
+            if (debug) Log.i(TAG, "sendData data or websocket is null");
+            return;
+        }
+        if (debug) Log.i(TAG, String.format(
+                "sendData: %d bytes, toString: %s",
+                data.length, Arrays.toString(data)));
         try {
-            webSocket.send(message);
+            webSocket.send(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void sendData(byte[] bytes) {
-        if (debug) Log.i(TAG, "sendData");
+    public void sendMessage(String message) {
+        if (message == null || webSocket == null) {
+            if (debug) Log.i(TAG, "sendMessage message or websocket is null");
+            return;
+        }
         try {
-            webSocket.send(bytes);
+            webSocket.send(message);
+            if (debug) Log.i(TAG, "sendMessage sended: " + message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,15 +123,10 @@ public class ServerCtrlNanoWebSocket
     }
 
     @Override
-    public String getStatus () {
-        if (debug) Log.i(TAG, "getStatus");
-        return this.status;
-    }
-
-    @Override
     public boolean isAliveServer() {
-        if (debug) Log.i(TAG, "isAliveServer");
-        return isAlive();
+        boolean isAliveServer = isAlive();
+        if (debug) Log.i(TAG, "isAliveServer is alive: " + isAliveServer);
+        return isAliveServer;
     }
 
     @Override
@@ -140,12 +163,7 @@ public class ServerCtrlNanoWebSocket
 
     @Override
     public boolean isAliveConnection() {
-        if (debug) Log.i(TAG, "isAliveConnection");
-        if (webSocket != null) {
-            return webSocket.isOpen();
-        }
-        if (debug) Log.e(TAG, "isAliveConnection webSocket is null");
-        return false;
+        return webSocket != null && webSocket.isOpen();
     }
 
     //--------------------- IReceiverReg
@@ -166,10 +184,11 @@ public class ServerCtrlNanoWebSocket
         @Override
         protected void onOpen() {
             if (debug) Log.i(TAG, "onOpen");
-            status = StatusMessages.WEBSOCKET_OPENED;
+            procState(EConnection.Opened);
             handler.sendEmptyMessage(StatusMessages.SRV_ONOPEN);
             try {
                 send(Messages.SRV2CLT_ONOPEN);
+                if (debug) Log.i(TAG, "onOpen message sended: " + Messages.SRV2CLT_ONOPEN);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -182,25 +201,27 @@ public class ServerCtrlNanoWebSocket
                     "Initiated by " + (initiatedByRemote ? "remote. " : "self. ") +
                     "Close code is <" + code + ">. " +
                     "Reason is <" + reason + ">.");
-            status = StatusMessages.WEBSOCKET_CLOSED;
+            procState(EConnection.Closed);
             handler.sendEmptyMessage(StatusMessages.SRV_ONCLOSE);
         }
 
         @Override
         protected void onMessage(WebSocketFrame message) {
-            if (debug) Log.i(TAG, "onMessage");
+            byte[] receivedData = message.getBinaryPayload();
+            if (debug) Log.i(TAG, String.format(Locale.US,
+                    "onMessage received bytes: %d bytes, toString: %s",
+                    receivedData.length, Arrays.toString(receivedData)));
             if (listener != null) {
                 if (debug) Log.i(TAG, "onMessage redirecting");
-                listener.onReceiveData(message.getBinaryPayload());
+                listener.onReceiveData(receivedData);
             } else {
                 if (debug) Log.i(TAG, "onMessage not redirecting");
-                handler.obtainMessage(StatusMessages.SRV_ONMESSAGE, message).sendToTarget();
+                handler.sendEmptyMessage(StatusMessages.SRV_ONMESSAGE);
             }
         }
 
         @Override
         protected void onPong(WebSocketFrame pong) {
-            if (debug) Log.i(TAG, "onPong");
             if (debug) Log.i(TAG, "onPong " + pong);
             handler.sendEmptyMessage(StatusMessages.SRV_ONPONG);
         }
@@ -209,23 +230,19 @@ public class ServerCtrlNanoWebSocket
         protected void onException(IOException exception) {
             if (debug) Log.i(TAG, "onException " + exception.getMessage());
             if (debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
-            status = StatusMessages.WEBSOCKET_FAILURE;
+            procState(EConnection.Failure);
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
         }
 
         @Override
         protected void debugFrameReceived(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameReceived");
-            if (debug) Log.i(TAG, "debugFrameReceived " + bytesToHexMark1(frame.getBinaryPayload()));
-//          if (debug) Log.i(TAG, "debugFrameReceived " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }
 
         @Override
         protected void debugFrameSent(WebSocketFrame frame) {
             if (debug) Log.i(TAG, "debugFrameSent");
-            if (debug) Log.i(TAG, "debugFrameSent " + bytesToHexMark1(frame.getBinaryPayload()));
-//          if (debug) Log.i(TAG, "debugFrameSent " + frame);
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMETX);
         }
 

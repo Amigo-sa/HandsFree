@@ -6,5 +6,4 @@ import by.citech.handsfree.network.control.IConnCtrl;
 public interface IClientCtrl
         extends IExchangeCtrl, IConnCtrl {
     IClientCtrl startClient();
-    String getStatus();
 }

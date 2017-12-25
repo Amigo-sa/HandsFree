@@ -8,6 +8,14 @@ import by.citech.handsfree.param.Tags;
 public class Disc
         extends AsyncTask<IConnCtrl, Void, Void> {
 
+    private static final String STAG = Tags.NET_DISC;
+    private static final boolean debug = Settings.debug;
+
+    private static int objCount;
+    private final String TAG;
+    static {objCount = 0;}
+    {objCount++; TAG = STAG + " " + objCount;}
+
     private static final int TIMEOUT_PERIOD = 500;
     private static final int TIMEOUT_CYCLES = 10;
     private IDisc iDisc;
@@ -18,7 +26,7 @@ public class Disc
 
     @Override
     protected Void doInBackground(IConnCtrl... iConnCtrl) {
-        if (Settings.debug) Log.i(Tags.NET_DISC, "doInBackground");
+        if (debug) Log.i(TAG, "doInBackground");
         if (iConnCtrl[0].isAliveConnection()) {
             iConnCtrl[0].closeConnection();
             try {
@@ -37,19 +45,19 @@ public class Disc
                 }
             }
             if (!iConnCtrl[0].isAliveConnection()) {
-                if (Settings.debug) Log.i(Tags.NET_DISC, "doInBackground connection closed");
+                if (debug) Log.i(TAG, "doInBackground connection closed");
                 return null;
             }
             iConnCtrl[0].closeConnectionForce();
-            if (Settings.debug) Log.e(Tags.NET_DISC, "doInBackground connection closed force");
+            if (debug) Log.w(TAG, "doInBackground connection force close");
         }
-        if (Settings.debug) Log.i(Tags.NET_DISC, "doInBackground connection already closed");
+        if (debug) Log.i(TAG, "doInBackground connection already closed");
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        Log.i(Tags.NET_DISC, "onPostExecute");
+        Log.i(TAG, "onPostExecute");
         iDisc.disconnected();
     }
 

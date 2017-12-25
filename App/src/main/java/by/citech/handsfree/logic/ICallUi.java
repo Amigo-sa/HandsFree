@@ -1,8 +1,6 @@
-package by.citech.handsfree.gui;
+package by.citech.handsfree.logic;
 
-import by.citech.handsfree.logic.CallUi;
-
-public interface IUiToCallListener {
+public interface ICallUi {
 
     default void onClickBtnRed() {
         CallUi.getInstance().onClickBtnRed();

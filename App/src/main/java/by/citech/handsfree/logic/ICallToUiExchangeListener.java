@@ -1,4 +1,4 @@
-package by.citech.handsfree.gui;
+package by.citech.handsfree.logic;
 
 public interface ICallToUiExchangeListener {
     void callEndedInternally(); // TODO: выключение BT
