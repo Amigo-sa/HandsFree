@@ -154,6 +154,7 @@ public class Settings {
     public static int bt2NetSendSizeUncut = bt2btPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
     public static int btMtuSize = 80;  // запрашиваемый размер BT2BT-пакета
 
+    public static String deviceAddressPrefix = "54:6C:0E";
     //---------------- AudioCommon
 
     private class AudioCommon {

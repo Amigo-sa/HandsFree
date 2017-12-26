@@ -4,10 +4,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import by.citech.handsfree.gui.IBtToUiListener;
@@ -59,9 +62,23 @@ public class LeScanner implements IBtToUiListener {
         scanLeDevice(false);
     }
 
+
+
+
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
         final BluetoothLeScanner leScanner = getBluetoothAdapter().getBluetoothLeScanner();
+
+        //scan specified devices only with ScanFilter  // С использованием фильтрации
+
+//        ScanFilter scanFilter = new ScanFilter.Builder()
+//                        .setManufacturerData()
+//                        .setDeviceAddress("")
+//                        .build();
+//        List<ScanFilter> scanFilters = new ArrayList<ScanFilter>();
+//        scanFilters.add(scanFilter);
+//        ScanSettings scanSettings = new ScanSettings.Builder().build();
+
         if (enable) {
             if (Settings.debug) Log.i(TAG, "start scanLeDevice()");
             // Stops scanning after a pre-defined scan period.
@@ -75,6 +92,7 @@ public class LeScanner implements IBtToUiListener {
             }, SCAN_PERIOD);
 
             mScanning = true;
+            //leScanner.startScan(scanFilters, scanSettings, mScanCallback);        // С использованием фильтрации
             leScanner.startScan(mScanCallback);
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
@@ -89,7 +107,7 @@ public class LeScanner implements IBtToUiListener {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             //if (Settings.debug) Log.i(TAG, "onScanResult() ");
-            iScannListener.scanCallback(result.getDevice(), result.getRssi());
+                iScannListener.scanCallback(result.getDevice(), result.getRssi());
         }
 
         @Override

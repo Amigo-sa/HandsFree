@@ -123,7 +123,7 @@ public class LeDeviceListAdapter extends BaseAdapter implements IBtList {
 
         if (deviceAddr != null && deviceName != null) {
             viewHolder.deviceName.setText(deviceName);
-            if (deviceAddr.substring(0, 8).equals("54:6C:0E")) {
+            if (deviceAddr.substring(0, 8).equals(Settings.deviceAddressPrefix)) {
                 viewHolder.deviceIcon.setVisibility(View.GONE);
                 viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
             } else {
