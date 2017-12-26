@@ -2,6 +2,7 @@ package by.citech.handsfree.bluetoothlegatt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.os.Handler;
@@ -60,23 +61,25 @@ public class LeScanner implements IBtToUiListener {
 
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
+        final BluetoothLeScanner leScanner = getBluetoothAdapter().getBluetoothLeScanner();
         if (enable) {
             if (Settings.debug) Log.i(TAG, "start scanLeDevice()");
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(() -> {
                 if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
                 mScanning = false;
-                getBluetoothAdapter().getBluetoothLeScanner().stopScan(mScanCallback);
+                leScanner.stopScan(mScanCallback);
+
                 mIBluetoothListener.changeOptionMenu();
 
             }, SCAN_PERIOD);
 
             mScanning = true;
-            getBluetoothAdapter().getBluetoothLeScanner().startScan(mScanCallback); 
+            leScanner.startScan(mScanCallback);
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
-            getBluetoothAdapter().getBluetoothLeScanner().stopScan(mScanCallback);
+            leScanner.stopScan(mScanCallback);
         }
         mIBluetoothListener.changeOptionMenu();
     }

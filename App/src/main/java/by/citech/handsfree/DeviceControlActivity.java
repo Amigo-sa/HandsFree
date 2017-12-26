@@ -227,6 +227,19 @@ public class DeviceControlActivity
 
     //-------------------------- base
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (debug) Log.w(TAG,"onSaveInstanceState");
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) { //может быть и не вызван, ефективен при повороте экрана
+        super.onRestoreInstanceState(savedInstanceState);
+        if (debug) Log.w(TAG,"onRestoreInstanceState");
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
