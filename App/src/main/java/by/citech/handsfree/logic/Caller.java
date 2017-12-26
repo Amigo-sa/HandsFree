@@ -18,7 +18,6 @@ import by.citech.handsfree.debug.AudIn2AudOutLooper;
 import by.citech.handsfree.debug.AudIn2BtLooper;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.network.INetInfoGetter;
-import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.Settings;
@@ -27,7 +26,7 @@ import by.citech.handsfree.param.Tags;
 public class Caller
         implements IBase, ISettingsCtrl, IPrepareObject {
 
-    private static final String STAG = Tags.CALLER;
+    private static final String STAG = Tags.Caller;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

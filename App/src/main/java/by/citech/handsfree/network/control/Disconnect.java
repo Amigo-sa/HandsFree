@@ -5,10 +5,10 @@ import android.util.Log;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
-public class Disc
+public class Disconnect
         extends AsyncTask<IConnCtrl, Void, Void> {
 
-    private static final String STAG = Tags.NET_DISC;
+    private static final String STAG = Tags.Disconnect;
     private static final boolean debug = Settings.debug;
 
     private static int objCount;
@@ -20,7 +20,7 @@ public class Disc
     private static final int TIMEOUT_CYCLES = 10;
     private IDisc iDisc;
 
-    public Disc(IDisc iDisc) {
+    public Disconnect(IDisc iDisc) {
         this.iDisc = iDisc;
     }
 

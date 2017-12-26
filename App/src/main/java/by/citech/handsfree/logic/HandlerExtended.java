@@ -12,7 +12,7 @@ import by.citech.handsfree.param.Tags;
 class HandlerExtended
         extends Handler {
 
-    private static final String STAG = Tags.HANDLER_EXTENDED;
+    private static final String STAG = Tags.HandlerExtended;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

@@ -11,7 +11,7 @@ import by.citech.handsfree.settings.Settings;
 public class ThreadManager
         implements ISettingsCtrl, IBase, IPrepareObject {
 
-    private static final String STAG = Tags.NET_CONNECTOR;
+    private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

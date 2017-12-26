@@ -8,29 +8,41 @@ public enum CallerState {
 
     Null {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Idle, GeneralFailure, DebugLoopBack, DebugRecord));
+            return new HashSet<> (Arrays.asList(Idle, GeneralFailure, DebugLoopBack, DebugRecord, PreparationPhase1));//TODO: убрать Idle
+        }
+    },
+
+    PreparationPhase1 {
+        public HashSet<CallerState> availableStates() {
+            return new HashSet<> (Arrays.asList(Null, GeneralFailure, PreparationPhase2));
+        }
+    },
+
+    PreparationPhase2 {
+        public HashSet<CallerState> availableStates() {
+            return new HashSet<> (Arrays.asList(Null, GeneralFailure, Idle));
         }
     },
 
     Idle {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, OutcomingStarted, IncomingDetected));
+            return new HashSet<> (Arrays.asList(Error, OutStarted, InDetected));
         }
     },
 
-    OutcomingStarted {
+    OutStarted {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, Idle, OutcomingConnected));
+            return new HashSet<> (Arrays.asList(Error, Idle, OutConnected));
         }
     },
 
-    OutcomingConnected {
+    OutConnected {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, Idle, Call));
         }
     },
 
-    IncomingDetected {
+    InDetected {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Error, Idle, Call));
         }

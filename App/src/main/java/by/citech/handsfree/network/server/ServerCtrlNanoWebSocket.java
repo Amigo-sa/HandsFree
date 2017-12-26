@@ -22,15 +22,13 @@ import by.citech.handsfree.param.Messages;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 
-import static by.citech.handsfree.util.Decode.bytesToHexMark1;
-
 public class ServerCtrlNanoWebSocket
         extends NanoWSD
         implements IServerCtrl, IReceiverReg, ITransmitter {
 
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
 
-    private static final String STAG = Tags.SRV_WSOCKETCTRL;
+    private static final String STAG = Tags.ServerCtrlNanoWebSocket;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

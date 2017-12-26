@@ -14,7 +14,7 @@ import by.citech.handsfree.param.Tags;
 public class CallUi
         implements ICallUi, IBase, ISettingsCtrl, IPrepareObject, ICaller {
 
-    private static final String STAG = Tags.CALL_UI;
+    private static final String STAG = Tags.CallUi;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
@@ -147,7 +147,7 @@ public class CallUi
             case Bt2Bt:
                 switch (callerState) {
                     case Null:
-                        if (setCallerState(CallerState.Null, CallerState.DebugLoopBack)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
+                        if (setCallerState(callerState, CallerState.DebugLoopBack)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
                         else break;
                     default:
                         onBtnGreenWrongState(callerState); return;
@@ -156,10 +156,10 @@ public class CallUi
             case Record:
                 switch (callerState) {
                     case DebugRecorded:
-                        if (setCallerState(CallerState.DebugRecorded, CallerState.DebugPlay)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
+                        if (setCallerState(callerState, CallerState.DebugPlay)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
                         else break;
                     case Null:
-                        if (setCallerState(CallerState.Null, CallerState.DebugRecord)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
+                        if (setCallerState(callerState, CallerState.DebugRecord)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
                         else break;
                     default:
                         onBtnGreenWrongState(callerState); return;
@@ -168,10 +168,10 @@ public class CallUi
             case Normal:
                 switch (callerState) {
                     case Idle:
-                        if (setCallerState(CallerState.Idle, CallerState.OutcomingStarted)) {for (ICallToUiListener l : iToUis) l.callOutcomingStarted(); return;}
+                        if (setCallerState(callerState, CallerState.OutStarted)) {for (ICallToUiListener l : iToUis) l.callOutcomingStarted(); return;}
                         else break;
-                    case IncomingDetected:
-                        if (setCallerState(CallerState.IncomingDetected, CallerState.Call)) {for (ICallToUiExchangeListener l : iToUiExs) l.callIncomingAccepted(); return;}
+                    case InDetected:
+                        if (setCallerState(callerState, CallerState.Call)) {for (ICallToUiExchangeListener l : iToUiExs) l.callIncomingAccepted(); return;}
                         else break;
                     default:
                         onBtnGreenWrongState(callerState); return;
@@ -198,7 +198,7 @@ public class CallUi
             case Bt2Bt:
                 switch (callerState) {
                     case DebugLoopBack:
-                        if (setCallerState(CallerState.DebugLoopBack, CallerState.Null)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
+                        if (setCallerState(callerState, CallerState.Null)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
                         else break;
                     default:
                         onBtnRedWrongState(callerState); return;
@@ -207,10 +207,10 @@ public class CallUi
             case Record:
                 switch (callerState) {
                     case DebugPlay:
-                        if (setCallerState(CallerState.DebugPlay, CallerState.DebugRecorded)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
+                        if (setCallerState(callerState, CallerState.DebugRecorded)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
                         else break;
                     case DebugRecord:
-                        if (setCallerState(CallerState.DebugRecord, CallerState.DebugRecorded)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
+                        if (setCallerState(callerState, CallerState.DebugRecorded)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
                         else break;
                     default:
                         onBtnRedWrongState(callerState); return;
@@ -219,16 +219,16 @@ public class CallUi
             case Normal:
                 switch (callerState) {
                     case Call:
-                        if (setCallerState(CallerState.Call, CallerState.Idle)) {for (ICallToUiExchangeListener l : iToUiExs) l.callEndedInternally(); return;}
+                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiExchangeListener l : iToUiExs) l.callEndedInternally(); return;}
                         else break;
-                    case OutcomingStarted:
-                        if (setCallerState(CallerState.OutcomingStarted, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callOutcomingCanceled(); return;}
+                    case OutStarted:
+                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callOutcomingCanceled(); return;}
                         else break;
-                    case OutcomingConnected:
-                        if (setCallerState(CallerState.OutcomingConnected, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callOutcomingCanceled(); return;}
+                    case OutConnected:
+                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callOutcomingCanceled(); return;}
                         else break;
-                    case IncomingDetected:
-                        if (setCallerState(CallerState.IncomingDetected, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callIncomingRejected(); return;}
+                    case InDetected:
+                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callIncomingRejected(); return;}
                         else break;
                     default:
                         onBtnRedWrongState(callerState); return;

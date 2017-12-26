@@ -2,32 +2,38 @@ package by.citech.handsfree.logic;
 
 public enum ECallReport {
 
+    UnconditionalTransition,
+
     //ICallToUiListener extends ICallToUiExchangeListener
-    OutcomingCanceledByLocalUser, //callOutcomingCanceled
-    OutcomingConnectionStartedByLocalUser, //callOutcomingStarted
-    IncomingRejectedByLocalUser, //callIncomingRejected
+    OutCallCanceledByLocalUser, //callOutcomingCanceled
+    OutConnectionCanceledByLocalUser, //callOutcomingCanceled
+    OutConnectionStartedByLocalUser, //callOutcomingStarted
+    InCallRejectedByLocalUser, //callIncomingRejected
 
     //ICallToUiExchangeListener
-    EndedByLocalUser, //callEndedInternally TODO: выключение BT
-    IncomingAcceptedByUser, //callIncomingAccepted TODO: включение BT
+    CallEndedByLocalUser, //callEndedInternally TODO: выключение BT
+    InCallAcceptedByLocalUser, //callIncomingAccepted TODO: включение BT
 
     //ICallNetListener extends ICallNetExchangeListener
-    OutcomingConnected, //callOutcomingConnected
-    OutcomingRejectedByRemoteUser, //callOutcomingRejected
-    OutcomingConnectFailed, //callOutcomingFailed
-    OutcomingInvalid, //callOutcomingInvalid
-    IncomingDetected, //callIncomingDetected
-    IncomingCanceled, //callIncomingCanceled
-    IncomingFailed, //callIncomingFailed
-    InternalConnectorFail, // TODO: bluetooth failed
-    InternalConnectorReady, // TODO: bluetooth ready
+    OutConnectionConnected, //callOutcomingConnected
+    OutCallRejectedByRemoteUser, //callOutcomingRejected
+    OutConnectionFailed, //callOutcomingFailed
+    OutCallInvalidCoordinates, //callOutcomingInvalid
+    InCallDetected, //callIncomingDetected
+    InCallCanceledByRemoteUser, //callIncomingCanceled
+    InCallFailed, //callIncomingFailed
+    InternalConnectorFail, //TODO: bluetooth failed
+    InternalConnectorReady, //TODO: bluetooth ready
     ExternalConnectorFail, //connectorFailure  TODO: network failed
     ExternalConnectorReady, //connectorReady TODO: network ready
 
     //ICallNetExchangeListener
-    OutcomingAccepted,//callOutcomingAccepted TODO: включение BT
-    FailExternal, //callFailed TODO: выключение BT
-    FailInternal, //callFailed TODO: выключение BT
-    EndedByRemoteUser, //callEndedExternally TODO: выключение BT
+    OutCallAcceptedByRemoteUser, //callOutcomingAccepted TODO: включение BT
+    CallFailedExternal, //callFailed TODO: выключение BT
+    CallFailedInternal, //callFailed TODO: выключение BT
+    CallEndedByRemoteUser, //callEndedExternally TODO: выключение BT
 
+    //IDebugCtrl
+    StartDebug, //startDebug
+    StopDebug, //stopDebug
 }
