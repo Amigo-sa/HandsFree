@@ -2,8 +2,12 @@ package by.citech.handsfree.bluetoothlegatt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.os.Handler;
 import android.util.Log;
+
+import java.util.List;
 
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.logic.IBluetoothListener;
@@ -46,10 +50,6 @@ public class LeScanner implements IBtToUiListener {
         return bluetoothAdapter;
     }
 
-    public boolean isScanning() {
-        return mScanning;
-    }
-
     public void startScanBluetoothDevice() {
         scanLeDevice(true);
     }
@@ -66,52 +66,41 @@ public class LeScanner implements IBtToUiListener {
             mHandler.postDelayed(() -> {
                 if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
                 mScanning = false;
-                getBluetoothAdapter().stopLeScan(mLeScanCallback);
+                getBluetoothAdapter().getBluetoothLeScanner().stopScan(mScanCallback);
                 mIBluetoothListener.changeOptionMenu();
 
             }, SCAN_PERIOD);
 
             mScanning = true;
-            getBluetoothAdapter().startLeScan(mLeScanCallback);
-            //mBluetoothAdapter.getBluetoothLeScanner().startScan(mScanCallback); TODO: заменить deprecated  сканирование
+            getBluetoothAdapter().getBluetoothLeScanner().startScan(mScanCallback); 
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
-            getBluetoothAdapter().stopLeScan(mLeScanCallback);
+            getBluetoothAdapter().getBluetoothLeScanner().stopScan(mScanCallback);
         }
         mIBluetoothListener.changeOptionMenu();
     }
 
-// TODO: заменить deprecated  сканирование
-//    private ScanCallback mScanCallback = new ScanCallback() {
-//        @Override
-//        public void onScanResult(int callbackType, ScanResult result) {
-//            super.onScanResult(callbackType, result);
-//            if (Settings.debug) Log.i(TAG, "onScanResult()");
-//        }
-//
-//        @Override
-//        public void onBatchScanResults(List<ScanResult> results) {
-//            super.onBatchScanResults(results);
-//            if (Settings.debug) Log.i(TAG, "onBatchScanResults()");
-//        }
-//
-//        @Override
-//        public void onScanFailed(int errorCode) {
-//            super.onScanFailed(errorCode);
-//            if (Settings.debug) Log.i(TAG, "onScanFailed()");
-//        }
-//    };
+    private ScanCallback mScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            //if (Settings.debug) Log.i(TAG, "onScanResult() ");
+            iScannListener.scanCallback(result.getDevice(), result.getRssi());
+        }
 
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
-                    //if (Settings.debug) Log.i(TAG, "onLeScan()");
-                    iScannListener.scanCallback(device, rssi);
-                }
-            };
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            super.onBatchScanResults(results);
+            if (Settings.debug) Log.i(TAG, "onBatchScanResults() ");
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            super.onScanFailed(errorCode);
+            if (Settings.debug) Log.i(TAG, "onScanFailed() " + errorCode);
+        }
+    };
 
     @Override
     public boolean menuChangeCondition() {
