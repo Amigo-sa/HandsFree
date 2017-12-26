@@ -295,7 +295,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
     }
 
     private void writeThreadStart() {
-        new Thread(() -> {
+        addRunnable(() -> {
             byte[][] arrayData;
             int numBtPkt = 0;
             isRunning = true;
@@ -335,7 +335,7 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                 }
                 numBtPkt = 0;
             }
-        }).start();
+        });
     }
     // Прослушка  калбэка onWriteCharacteristic
     @Override

@@ -424,9 +424,8 @@ private volatile BluetoothLeState BLEState;
                     .setCommand(clearList)
                     .setCommand(scanOn)
                     .execute();
-
-           setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
+        setBLEState(BLEState, BluetoothLeState.DISCONECTED);
     }
 
      public void processState() {
