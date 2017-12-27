@@ -1,23 +1,33 @@
 package by.citech.handsfree.logic;
 
 import android.util.Log;
-import java.util.ArrayList;
+import java.util.Locale;
 
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
+import static by.citech.handsfree.logic.ECallReport.CallEndedByLocalUser;
+import static by.citech.handsfree.logic.ECallReport.InCallAcceptedByLocalUser;
+import static by.citech.handsfree.logic.ECallReport.InCallRejectedByLocalUser;
+import static by.citech.handsfree.logic.ECallReport.OutCallCanceledByLocalUser;
+import static by.citech.handsfree.logic.ECallReport.OutConnectionCanceledByLocalUser;
+import static by.citech.handsfree.logic.ECallReport.OutConnectionStartedByLocalUser;
+import static by.citech.handsfree.logic.ECallReport.StartDebug;
+import static by.citech.handsfree.logic.ECallReport.StopDebug;
+
 public class CallUi
-        implements ICallUi, IBase, ISettingsCtrl, IPrepareObject, ICaller {
+        implements IBase, ISettingsCtrl, IPrepareObject, ICallerFsm {
 
     private static final String STAG = Tags.CallUi;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
+    private final static String onClickBtnGreen = "onClickBtnGreen";
+    private final static String onClickBtnRed = "onClickBtnRed";
 
     static {
         objCount = 0;
@@ -26,9 +36,6 @@ public class CallUi
     //--------------------- preparation
 
     private OpMode opMode;
-    private ArrayList<ICallToUiListener> iToUis;
-    private ArrayList<ICallToUiExchangeListener> iToUiExs;
-    private ArrayList<IDebugCtrl> iDebugs;
 
     {
         objCount++;
@@ -40,19 +47,17 @@ public class CallUi
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
         takeSettings();
-        iToUis = new ArrayList<>();
-        iToUiExs = new ArrayList<>();
-        iDebugs = new ArrayList<>();
         return isObjectPrepared();
     }
 
     @Override
     public boolean isObjectPrepared() {
-        return iToUis != null && iToUiExs != null && iDebugs != null && opMode != null;
+        return opMode != null;
     }
 
     @Override
     public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         opMode = Settings.getInstance().getCommon().getOpMode();
         return true;
     }
@@ -77,24 +82,6 @@ public class CallUi
         return instance;
     }
 
-    //--------------------- getters and setters
-
-    public CallUi addiDebugListener(IDebugCtrl iDebugCtrl) {
-        iDebugs.add(iDebugCtrl);
-        return this;
-    }
-
-    public CallUi addiCallUiListener(ICallToUiListener iCallToUiListener) {
-        iToUis.add(iCallToUiListener);
-        iToUiExs.add(iCallToUiListener);
-        return this;
-    }
-
-    public CallUi addiCallUiExchangeListener(ICallToUiExchangeListener iCallToUiExchangeListener) {
-        iToUiExs.add(iCallToUiExchangeListener);
-        return this;
-    }
-
     //--------------------- base
 
     @Override
@@ -108,15 +95,6 @@ public class CallUi
     @Override
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
-        if (iToUis != null) {
-            iToUis.clear();
-        }
-        if (iToUiExs != null) {
-            iToUiExs.clear();
-        }
-        if (iDebugs != null) {
-            iDebugs.clear();
-        }
         opMode = null;
         IBase.super.baseStop();
         return true;
@@ -124,118 +102,97 @@ public class CallUi
 
     //--------------------- main
 
-    private void onBtnRedWrongState(CallerState callerState) {
-        Log.e(TAG, "onClickBtnRed " + callerState.getName());
+    private void onMethodWrongState(String methodName, CallerState callerState) {
+        Log.e(TAG, methodName + " " + callerState);
     }
 
-    private void onBtnGreenWrongState(CallerState callerState) {
-        Log.e(TAG, "onClickBtnGreen " + callerState.getName());
-    }
-
-    @Override
-    public void onClickBtnGreen() {
-        if (!prepareObject()) {Log.e(TAG, "onClickBtnGreen not initiated"); return;}
-        if (debug) Log.w(TAG, "onClickBtnGreen opMode is " + opMode.getSettingName());
-        CallerState callerState = getCallerState();
-        if (debug) Log.i(TAG, "onClickBtnGreen callerState is " + callerState.getName());
+    void onClickBtnGreen() {
+        CallerState callerState = getCallerFsmState();
+        if (debug) Log.w(TAG, String.format(Locale.US,
+                "onClickBtnGreen opMode is %s, callerState is %s",
+                opMode, callerState));
         switch (opMode) {
-            case Net2Net:
-                Log.e(TAG, "onClickBtnGreen opMode Net2Net not implemented yet"); break;
             case AudIn2Bt:
             case Bt2AudOut:
             case AudIn2AudOut:
             case Bt2Bt:
                 switch (callerState) {
-                    case Null:
-                        if (setCallerState(callerState, CallerState.DebugLoopBack)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
-                        else break;
+                    case PhaseZero:
+                        if (reportToCallerFsm(callerState, StartDebug, TAG)) return; else break;
                     default:
-                        onBtnGreenWrongState(callerState); return;
+                        onMethodWrongState(onClickBtnGreen, callerState); return;
                 }
                 break;
             case Record:
                 switch (callerState) {
                     case DebugRecorded:
-                        if (setCallerState(callerState, CallerState.DebugPlay)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
-                        else break;
-                    case Null:
-                        if (setCallerState(callerState, CallerState.DebugRecord)) {for (IDebugCtrl l : iDebugs) l.startDebug(); return;}
-                        else break;
+                    case PhaseZero:
+                        if (reportToCallerFsm(callerState, StartDebug, TAG)) return; else break;
                     default:
-                        onBtnGreenWrongState(callerState); return;
+                        onMethodWrongState(onClickBtnGreen, callerState); return;
                 }
                 break;
             case Normal:
                 switch (callerState) {
                     case Idle:
-                        if (setCallerState(callerState, CallerState.OutStarted)) {for (ICallToUiListener l : iToUis) l.callOutcomingStarted(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, OutConnectionStartedByLocalUser, TAG)) return; else break;
                     case InDetected:
-                        if (setCallerState(callerState, CallerState.Call)) {for (ICallToUiExchangeListener l : iToUiExs) l.callIncomingAccepted(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, InCallAcceptedByLocalUser, TAG)) return; else break;
                     default:
-                        onBtnGreenWrongState(callerState); return;
+                        onMethodWrongState(onClickBtnGreen, callerState); return;
                 }
                 break;
+            case Net2Net:
             default:
-                Log.e(TAG, "onClickBtnGreen opMode default"); return;
+                Log.e(TAG, "onClickBtnGreen illegal opMode: " + opMode); return;
         }
         if (debug) Log.w(TAG, "onClickBtnGreen recursive call");
         onClickBtnGreen();
     }
 
-    @Override
-    public void onClickBtnRed() {
-        if (!prepareObject()) {Log.e(TAG, "onClickBtnRed not prepared, return"); return;}
-        if (debug) Log.i(TAG, "onClickBtnRed opMode is " + opMode.getSettingName());
-        CallerState callerState = getCallerState();
-        if (debug) Log.i(TAG, "onClickBtnRed callerState is " + callerState.getName());
+    void onClickBtnRed() {
+        CallerState callerState = getCallerFsmState();
+        if (debug) Log.w(TAG, String.format(Locale.US,
+                "onClickBtnRed opMode is %s, callerState is %s",
+                opMode, callerState));
         switch (opMode) {
-            case Net2Net: Log.e(TAG, "onClickBtnRed opMode Net2Net not implemented yet"); return;
             case AudIn2Bt:
             case Bt2AudOut:
             case AudIn2AudOut:
             case Bt2Bt:
                 switch (callerState) {
-                    case DebugLoopBack:
-                        if (setCallerState(callerState, CallerState.Null)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
-                        else break;
+                    case DebugLoop:
+                        if (reportToCallerFsm(callerState, StopDebug, TAG)) return; else break;
                     default:
-                        onBtnRedWrongState(callerState); return;
+                        onMethodWrongState(onClickBtnRed, callerState); return;
                 }
                 break;
             case Record:
                 switch (callerState) {
                     case DebugPlay:
-                        if (setCallerState(callerState, CallerState.DebugRecorded)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
-                        else break;
                     case DebugRecord:
-                        if (setCallerState(callerState, CallerState.DebugRecorded)) {for (IDebugCtrl l : iDebugs) l.stopDebug(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, StopDebug, TAG)) return; else break;
                     default:
-                        onBtnRedWrongState(callerState); return;
+                        onMethodWrongState(onClickBtnRed, callerState); return;
                 }
                 break;
             case Normal:
                 switch (callerState) {
                     case Call:
-                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiExchangeListener l : iToUiExs) l.callEndedInternally(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, CallEndedByLocalUser, TAG)) return; else break;
                     case OutStarted:
-                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callOutcomingCanceled(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, OutConnectionCanceledByLocalUser, TAG)) return; else break;
                     case OutConnected:
-                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callOutcomingCanceled(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, OutCallCanceledByLocalUser, TAG)) return; else break;
                     case InDetected:
-                        if (setCallerState(callerState, CallerState.Idle)) {for (ICallToUiListener l : iToUis) l.callIncomingRejected(); return;}
-                        else break;
+                        if (reportToCallerFsm(callerState, InCallRejectedByLocalUser, TAG)) return; else break;
                     default:
-                        onBtnRedWrongState(callerState); return;
+                        onMethodWrongState(onClickBtnRed, callerState); return;
                 }
                 break;
+            case Net2Net:
             default:
-                Log.e(TAG, "onClickBtnRed opMode default"); return;
+                Log.e(TAG, "onClickBtnRed illegal opMode: " + opMode); return;
         }
         if (debug) Log.w(TAG, "onClickBtnRed recursive call");
         onClickBtnRed();

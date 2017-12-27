@@ -49,6 +49,7 @@ import by.citech.handsfree.gui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.gui.helper.IContactEditor;
+import by.citech.handsfree.gui.helper.ViewManager;
 import by.citech.handsfree.gui.helper.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
@@ -62,10 +63,8 @@ import by.citech.handsfree.gui.helper.ActiveContactHelper;
 import by.citech.handsfree.gui.helper.ChosenContactHelper;
 import by.citech.handsfree.gui.helper.ContactEditorHelper;
 import by.citech.handsfree.gui.IGetView;
-import by.citech.handsfree.gui.IGetViewGetter;
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
-import by.citech.handsfree.gui.helper.ViewManager;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
@@ -84,11 +83,10 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class DeviceControlActivity
         extends AppCompatActivity
-        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IContactEditor, IBroadcastReceiver, IService, IBtToUiCtrl, IGetViewGetter,
-        IThreadManager, ICallUi, IMsgToUi {
+        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView, IThreadManager,
+        IContactEditor, IBroadcastReceiver, IService, IBtToUiCtrl, ICallUi, IMsgToUi {
 
-    private static final String STAG = Tags.ACT_DEVICECTRL;
+    private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
@@ -104,6 +102,7 @@ public class DeviceControlActivity
     private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
     private ViewManager viewManager;
+//    private ViewManager viewManager;
     private ActionBar actionBar;
 
     // список найденных устройств
@@ -140,7 +139,8 @@ public class DeviceControlActivity
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
         viewManager = new ViewManager();
-        viewManager.setiGetGetter(this);
+//        viewManager = new ViewManager();
+        viewManager.setiGetter(this);
         viewManager.setDefaultView();
         viewManager.baseCreate();
         ThreadManager.getInstance().baseCreate();
@@ -195,10 +195,8 @@ public class DeviceControlActivity
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
 
+//        Caller.getInstance()
         Caller.getInstance()
-                .setiCallToUiListener(viewManager)
-                .setiDebugCtrl(viewManager)
-                .setiCallNetListener(viewManager)
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiBroadcastReceiver(this)
@@ -226,7 +224,6 @@ public class DeviceControlActivity
     }
 
     //-------------------------- base
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -714,25 +711,17 @@ public class DeviceControlActivity
         });
     }
 
-    //--------------------- IGetViewGetter, IGetView
-
-    @Override
-    public IGetView getViewGetter() {
-        if (debug) Log.i(TAG, "getViewGetter");
-        return this;
-    }
+    //--------------------- IGetView
 
     @Nullable
     @Override
     public <T extends View> T getView(int id) {
-        if (debug) Log.i(TAG, "getView");
         return findViewById(id);
     }
 
     @Nullable
     @Override
     public Animation getAnimation(int id) {
-        if (debug) Log.i(TAG, "getAnimation");
         return AnimationUtils.loadAnimation(this, id);
     }
 

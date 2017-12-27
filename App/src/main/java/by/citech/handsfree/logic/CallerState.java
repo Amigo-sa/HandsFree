@@ -6,51 +6,51 @@ import java.util.HashSet;
 
 public enum CallerState {
 
-    Null {
+    PhaseZero {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Idle, GeneralFailure, DebugLoopBack, DebugRecord, PreparationPhase1));//TODO: убрать Idle
+            return new HashSet<> (Arrays.asList(Failure, DebugLoop, DebugRecord, PhaseReadyExt, PhaseReadyInt));
         }
     },
 
-    PreparationPhase1 {
+    PhaseReadyExt {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Null, GeneralFailure, PreparationPhase2));
+            return new HashSet<> (Arrays.asList(Failure, PhaseZero, PhaseReadyInt, Idle));
         }
     },
 
-    PreparationPhase2 {
+    PhaseReadyInt {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Null, GeneralFailure, Idle));
+            return new HashSet<> (Arrays.asList(Failure, PhaseZero, PhaseReadyExt, Idle));
         }
     },
 
     Idle {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, OutStarted, InDetected));
+            return new HashSet<> (Arrays.asList(Failure, OutStarted, InDetected));
         }
     },
 
     OutStarted {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, Idle, OutConnected));
+            return new HashSet<> (Arrays.asList(Failure, Error, Idle, OutConnected));
         }
     },
 
     OutConnected {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, Idle, Call));
+            return new HashSet<> (Arrays.asList(Failure, Error, Idle, Call));
         }
     },
 
     InDetected {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, Idle, Call));
+            return new HashSet<> (Arrays.asList(Failure, Error, Idle, Call));
         }
     },
 
     Call {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Error, Idle));
+            return new HashSet<> (Arrays.asList(Failure, Error, Idle));
         }
     },
 
@@ -60,9 +60,9 @@ public enum CallerState {
         }
     },
 
-    GeneralFailure {
+    Failure {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<>();
+            return new HashSet<>(Collections.singletonList(PhaseZero));
         }
     },
 
@@ -86,9 +86,9 @@ public enum CallerState {
         }
     },
 
-    DebugLoopBack {
+    DebugLoop {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Collections.singletonList(Null));
+            return new HashSet<> (Collections.singletonList(PhaseZero));
         }
     };
 

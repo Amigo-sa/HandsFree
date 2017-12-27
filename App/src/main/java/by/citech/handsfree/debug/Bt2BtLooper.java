@@ -5,13 +5,18 @@ import android.util.Log;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.logic.ECallReport;
+import by.citech.handsfree.logic.ICallerFsm;
+import by.citech.handsfree.logic.ICallerFsmListener;
+import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
 
 public class Bt2BtLooper
-        implements IDebugCtrl, IBase, ISettingsCtrl, IPrepareObject {
+        implements IBase, ISettingsCtrl, IPrepareObject, ICallerFsm, ICallerFsmRegister, ICallerFsmListener {
 
     private static final String STAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
@@ -53,6 +58,7 @@ public class Bt2BtLooper
 
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
+        ISettingsCtrl.super.applySettings(severityLevel);
         dataBuff = new byte[btFactor][bt2btPacketSize];
         return true;
     }
@@ -73,6 +79,8 @@ public class Bt2BtLooper
         isRunning = false;
         isActive = false;
     }
+
+    //--------------------- IBase
 
     @Override
     public boolean baseStart() {
@@ -99,6 +107,49 @@ public class Bt2BtLooper
         return true;
     }
 
+    @Override
+    public boolean baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        stopDebug();
+        isActive = false;
+        dataBuff = null;
+        IBase.super.baseStop();
+        return true;
+    }
+
+    //--------------------- ICallerFsmListener
+
+    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        switch (why) {
+            case StartDebug:
+                startDebug();
+                break;
+            case StopDebug:
+                stopDebug();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void startDebug() {
+        if (debug) Log.i(TAG, "startDebug");
+        storageBtToNet.setWriteLocked(false);
+        storageNetToBt.setWriteLocked(false);
+        isRunning = true;
+    }
+
+    private void stopDebug() {
+        if (debug) Log.i(TAG, "stopDebug");
+        isRunning = false;
+        storageBtToNet.setWriteLocked(true);
+        storageNetToBt.setWriteLocked(true);
+        storageBtToNet.clear();
+        storageNetToBt.clear();
+    }
+
+    //--------------------- main
+
     private void looping() {
         if (debug) Log.i(TAG, "looping");
         int btCount = 0;
@@ -120,34 +171,6 @@ public class Bt2BtLooper
                 storageNetToBt.putData(dataBuff);
             }
         }
-    }
-
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        stopDebug();
-        isActive = false;
-        dataBuff = null;
-        IBase.super.baseStop();
-        return true;
-    }
-
-    @Override
-    public void startDebug() {
-        if (debug) Log.i(TAG, "startDebug");
-        storageBtToNet.setWriteLocked(false);
-        storageNetToBt.setWriteLocked(false);
-        isRunning = true;
-    }
-
-    @Override
-    public void stopDebug() {
-        if (debug) Log.i(TAG, "stopDebug");
-        isRunning = false;
-        storageBtToNet.setWriteLocked(true);
-        storageNetToBt.setWriteLocked(true);
-        storageBtToNet.clear();
-        storageNetToBt.clear();
     }
 
 }

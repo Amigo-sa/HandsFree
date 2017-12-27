@@ -8,8 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.ArrayList;
-
 import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.common.IService;
@@ -53,15 +51,18 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.bluetoothlegatt.StorageListener;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.debug.IDebugCtrl;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
+import static by.citech.handsfree.logic.ECallReport.CallFailedInternal;
+import static by.citech.handsfree.logic.ECallReport.InternalConnectorReady;
+
 public class ConnectorBluetooth
-        implements ICallNetExchangeListener, ICallToUiExchangeListener, IDebugCtrl, StorageListener, ConnectAction, IBase, ICaller {
+        implements StorageListener, ConnectAction, IBase,
+        ICallerFsmListener, ICallerFsm, ICallerFsmRegister {
 
     private final static String STAG = "WSD_ConnectorBluetooth";
 
@@ -96,9 +97,7 @@ public class ConnectorBluetooth
     //для дебага
     private boolean isDebugRunning;
 
-    private ArrayList<ICallNetExchangeListener> iCallExs;
-
-private volatile BluetoothLeState BLEState;
+    private volatile BluetoothLeState BLEState;
 
     private IBroadcastReceiver iBroadcastReceiver;
     private IService iService;
@@ -150,7 +149,6 @@ private volatile BluetoothLeState BLEState;
     private static volatile ConnectorBluetooth instance = null;
 
     private ConnectorBluetooth() {
-        iCallExs = new ArrayList<>();
         BLEState = BluetoothLeState.DISCONECTED;
         leBroadcastReceiver = new LeBroadcastReceiver(this);
         controlAdapter = new ControlAdapter(this);
@@ -210,16 +208,16 @@ private volatile BluetoothLeState BLEState;
         return instance;
     }
 
-    private void build(){
-        if (Settings.debug) Log.i(TAG,"build()");
+    private void build() {
+        if (Settings.debug) Log.i(TAG, "build");
 
-         leScanner.setHandler(mHandler);
-         leScanner.setIBluetoothListener(mIBluetoothListener);
-         characteristics.setIBluetoothListener(mIBluetoothListener);
-         leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
-         leDataTransmitter.addIRxDataListener(iTransmitter);
+        leScanner.setHandler(mHandler);
+        leScanner.setIBluetoothListener(mIBluetoothListener);
+        characteristics.setIBluetoothListener(mIBluetoothListener);
+        leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
+        leDataTransmitter.addIRxDataListener(iTransmitter);
 
-         //-----------------set data for command -------------
+        //-----------------set data for command -------------
         closeService.setBluetoothLeService(mBluetoothLeService);
         bindService.setiService(iService);
         bindService.setServiceConnection(mServiceConnection);
@@ -244,6 +242,53 @@ private volatile BluetoothLeState BLEState;
                      .execute();
     }
 
+    //--------------------- IBase
+
+    @Override
+    public boolean baseStart() {
+        IBase.super.baseStart();
+        if (Settings.debug) Log.i(TAG, "baseStart");
+        registerCallerFsmListener(this);
+        reportToCallerFsm(getCallerFsmState(), InternalConnectorReady, TAG); //TODO настоящая проверка готовности
+        build();
+        return true;
+    }
+
+    @Override
+    public boolean baseStop(){
+        if (Settings.debug) Log.i(TAG, "baseStop");
+
+        if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
+            bleController.setCommand(exchangeDataOff).execute();
+
+        bleController.setCommand(unregisterReceiver)
+                .setCommand(unbindService)
+                .setCommand(closeService)
+                .execute();
+
+        iBtList = null;
+        mBTDevice = null;
+        mBTDeviceConn = null;
+        initList.setDevice(null);
+        addToList.setDevice(null);
+        IBase.super.baseStop();
+        return true;
+    }
+
+    @Override
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (Settings.debug) Log.i(TAG, "baseCreate");
+        return true;
+    }
+
+    @Override
+    public boolean baseDestroy(){
+        if (Settings.debug) Log.i(TAG, "baseDestroy");
+        IBase.super.baseDestroy();
+        return true;
+    }
+
     //--------------------- getters and setters
 
      ConnectorBluetooth setmHandler(Handler mHandler) {
@@ -251,24 +296,9 @@ private volatile BluetoothLeState BLEState;
         return this;
     }
 
-    //TODO: добавить
-    public IDebugCtrl getiDebugBtToNetListener() {
-        return null;
-    }
-
-    //TODO: добавить
-    public IDebugCtrl getiDebugNetToBtListener() {
-        return null;
-    }
-
      ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
        return this;
-    }
-
-    public ConnectorBluetooth addiCallNetExchangeListener(ICallNetExchangeListener iCallNetExchangeListener) {
-        iCallExs.add(iCallNetExchangeListener);
-        return this;
     }
 
     private void setmBTDevice(BluetoothDevice mBTDevice) {
@@ -333,7 +363,7 @@ private volatile BluetoothLeState BLEState;
 
     //------------------------ init command when device is chosen -------
 
-    private void initCommandForDevice(BluetoothDevice device){
+    private void initCommandForDevice(BluetoothDevice device) {
         // инициализация комманд работающих с устройством
         //----------- установка устройства для команд --------------
         if (Settings.debug) Log.i(TAG, "initCommandForDevice mBTDevice = " + device);
@@ -356,13 +386,13 @@ private volatile BluetoothLeState BLEState;
 
     //------------------ inittialization List-------------------------
 
-     void initListBTDevice() {
+    void initListBTDevice() {
         bleController.setCommand(initList).execute();
     }
 
     //------------------ inittialization List-------------------------
 
-     void clickItemList(int position){
+    void clickItemList(int position) {
         final BluetoothDevice device = ((LeDeviceListAdapter) iBtList).getDevice(position);
         if (device == null) return;
         setmBTDevice(device);
@@ -377,8 +407,8 @@ private volatile BluetoothLeState BLEState;
             bleController.setCommand(reconnDiaologOn).execute();
         } else {
             bleController.setCommand(connDialogOn)
-                         .setCommand(connectDevice)
-                         .execute();
+                    .setCommand(connectDevice)
+                    .execute();
         }
     }
 
@@ -396,8 +426,8 @@ private volatile BluetoothLeState BLEState;
         bleController.setCommand(connDialogInfoOn).undo();
 
         bleController.setCommand(buttonViewColorChangeOn)
-                     .setCommand(addConnDeviceToAdapter)
-                     .execute();
+                .setCommand(addConnDeviceToAdapter)
+                .execute();
 
         setStorages();
     }
@@ -425,25 +455,22 @@ private volatile BluetoothLeState BLEState;
                     .setCommand(scanOn)
                     .execute();
 
-           setBLEState(BLEState, BluetoothLeState.DISCONECTED);
+            setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
     }
 
-     public void processState() {
-//       switch (getCallerState()) {
-//           case Call:
-//               if (Settings.debug) Log.i(TAG, "processState Call");
-//               if (setCallerState(CallerState.Call, CallerState.Error)) {
-//                   for (ICallNetExchangeListener listener : iCallExs) listener.callFailed();
-//                   return;
-//               }
-//               break;
-//           default:
-//               if (Settings.debug) Log.e(TAG, "processState " + getCallerStateName());
-//               return;
-//       }
-//       Log.w(TAG, "processState recursive call");
-//       processState();
+    private void processState() {
+        CallerState callerState = getCallerFsmState();
+        switch (callerState) {
+            case Call:
+                if (reportToCallerFsm(callerState, CallFailedInternal, TAG)) return;
+                else break;
+            default:
+                if (Settings.debug) Log.e(TAG, "processState " + callerState);
+                return;
+        }
+        Log.w(TAG, "processState recursive call");
+        processState();
     }
 
     @Override
@@ -451,7 +478,8 @@ private volatile BluetoothLeState BLEState;
         setBLEState(getBLEState(), BluetoothLeState.SERVICES_DISCOVERED);
         bleController.setCommand(characteristicDisplayOn).execute();
     }
-  //----------------------- Scanning ---------------------------
+
+    //----------------------- Scanning ---------------------------
 
      void startScanBTDevices(){
          bleController.setCommand(scanOn).execute();
@@ -469,6 +497,7 @@ private volatile BluetoothLeState BLEState;
     }
 
     //----------------- Connection/Disconnection ----------------
+
     public void disconnect() {
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff)
@@ -478,6 +507,7 @@ private volatile BluetoothLeState BLEState;
             bleController.setCommand(disconnectDevice)
                          .execute();
     }
+
     public void connecting() {
         bleController.setCommand(connectDevice).execute();
     }
@@ -507,54 +537,6 @@ private volatile BluetoothLeState BLEState;
             mBluetoothLeService = null;
         }
     };
-
-    @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (Settings.debug) Log.i(TAG, "baseStart");
-        build();
-        return true;
-    }
-
-    @Override
-    public boolean baseStop(){
-        if (Settings.debug) Log.i(TAG, "baseStop");
-
-        if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
-            bleController.setCommand(exchangeDataOff).execute();
-
-        bleController.setCommand(unregisterReceiver)
-                     .setCommand(unbindService)
-                     .setCommand(closeService)
-                     .execute();
-
-        iBtList = null;
-        mBTDevice = null;
-        mBTDeviceConn = null;
-        initList.setDevice(null);
-        addToList.setDevice(null);
-
-        if (iCallExs != null) {
-            iCallExs.clear();
-        }
-
-        IBase.super.baseStop();
-        return true;
-    }
-
-    @Override
-    public boolean baseCreate() {
-        IBase.super.baseCreate();
-        if (Settings.debug) Log.i(TAG, "baseCreate");
-        return true;
-    }
-
-    @Override
-    public boolean baseDestroy(){
-        if (Settings.debug) Log.i(TAG, "baseDestroy");
-        IBase.super.baseDestroy();
-        return true;
-    }
 
     //---------------------------- blecontroller states ------------------------------
 
@@ -609,72 +591,54 @@ private volatile BluetoothLeState BLEState;
         setBLEState(BluetoothLeState.TRANSMIT_DATA, BluetoothLeState.SERVICES_DISCOVERED);
     }
 
-    @Override
-    public void callEndedInternally() {
-        disableTransmitData();
-    }
+    //--------------------- ICallerFsmListener
 
     @Override
-    public void callIncomingAccepted() {
-        enableTransmitData();
-    }
-
-    @Override
-    public void callOutcomingAccepted() {
-        enableTransmitData();
-    }
-
-    @Override
-    public void callFailed() {
-        disableTransmitData();
-    }
-
-    @Override
-    public void callEndedExternally() {
-        disableTransmitData();
-    }
-
-    //--------------------- debug
-
-    @Override
-    public void startDebug() {
-        if (Settings.debug) Log.i(TAG, "startDebug");
-        CallerState currentState = getCallerState();
-        if (Settings.debug) Log.i(TAG, currentState.getName());
-        switch (Settings.opMode) {
-            case AudIn2Bt:
-                if (!isDebugRunning) {
-                    isDebugRunning = true;
-                    enableTransmitData();
-                }
-            case Bt2Bt:
-                if (getBLEState() == BluetoothLeState.SERVICES_DISCOVERED) {
-                    enableTransmitData();
-                }
-            case Record:
-                if (currentState == CallerState.DebugRecord) {
-                    enableTransmitData();
-                }
+    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        switch (why) {
+            case InCallAcceptedByLocalUser:
+            case OutCallAcceptedByRemoteUser:
+                enableTransmitData();
                 break;
-            case Bt2AudOut:
-                if (!isDebugRunning) {
-                    isDebugRunning = true;
-                    onlyReceiveData();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void stopDebug() {
-        if (Settings.debug) Log.i(TAG, "stopDebug");
-        switch (Settings.opMode) {
-            case Record:
+            case CallEndedByLocalUser:
+            case CallFailedExternal:
+            case CallEndedByRemoteUser:
                 disableTransmitData();
                 break;
-            default:
+            case StartDebug:
+                switch (Settings.opMode) {
+                    case AudIn2Bt:
+                        if (!isDebugRunning) {
+                            isDebugRunning = true;
+                            enableTransmitData();
+                        }
+                    case Bt2Bt:
+                        if (getBLEState() == BluetoothLeState.SERVICES_DISCOVERED) {
+                            enableTransmitData();
+                        }
+                    case Record:
+                        if (getCallerFsmState() == CallerState.DebugRecord) {
+                            enableTransmitData();
+                        }
+                        break;
+                    case Bt2AudOut:
+                        if (!isDebugRunning) {
+                            isDebugRunning = true;
+                            onlyReceiveData();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case StopDebug:
+                switch (Settings.opMode) {
+                    case Record:
+                        disableTransmitData();
+                        break;
+                    default:
+                        break;
+                }
                 break;
         }
     }

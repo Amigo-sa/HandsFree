@@ -5,14 +5,18 @@ import android.util.Log;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.common.IBase;
-import by.citech.handsfree.logic.ICaller;
+import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.logic.ECallReport;
+import by.citech.handsfree.logic.ICallerFsm;
+import by.citech.handsfree.logic.ICallerFsmListener;
+import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
 
 public class Bt2BtRecorder
-        implements IDebugCtrl, IBase, ICaller, ISettingsCtrl, IPrepareObject {
+        implements IBase, ISettingsCtrl, IPrepareObject, ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.BT2BT_RECORDER;
     private static final boolean debug = Settings.debug;
@@ -30,6 +34,12 @@ public class Bt2BtRecorder
     private int bt2btPacketSize;
     private byte[][] dataBuff;
     private byte[][][] dataSaved;
+    private int dataSavedCount;
+    private StorageData<byte[]> storageFromBt;
+    private StorageData<byte[][]> storageToBt;
+    private boolean isPlaying;
+    private boolean isRecording;
+    private boolean isActive;
 
     {
         objCount++;
@@ -52,6 +62,7 @@ public class Bt2BtRecorder
 
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
+        ISettingsCtrl.super.applySettings(severityLevel);
         dataBuff = new byte[btFactor][bt2btPacketSize];
         dataSaved = new byte[recordSize][btFactor][bt2btPacketSize];
         return true;
@@ -66,14 +77,7 @@ public class Bt2BtRecorder
         return true;
     }
 
-    //--------------------- non-settings
-
-    private int dataSavedCount;
-    private StorageData<byte[]> storageFromBt;
-    private StorageData<byte[][]> storageToBt;
-    private boolean isPlaying;
-    private boolean isRecording;
-    private boolean isActive;
+    //--------------------- constructor
 
     public Bt2BtRecorder(StorageData<byte[]> storageFromBt, StorageData<byte[][]> storageToBt) {
         this.storageFromBt = storageFromBt;
@@ -87,6 +91,7 @@ public class Bt2BtRecorder
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         prepareObject();
+        registerCallerFsmListener(this);
         isActive = true;
         new Thread(() -> {
             while (isActive) {
@@ -158,12 +163,25 @@ public class Bt2BtRecorder
         isPlaying = false;
     }
 
-    //--------------------- IDebugCtrl
+    //--------------------- ICallerFsmListener
 
     @Override
-    public void startDebug() {
+    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        switch (why) {
+            case StartDebug:
+                startDebug();
+                break;
+            case StopDebug:
+                stopDebug();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        switch (getCallerState()) {
+        switch (getCallerFsmState()) {
             case DebugPlay:
                 isPlaying = true;
                 break;
@@ -175,8 +193,7 @@ public class Bt2BtRecorder
         }
     }
 
-    @Override
-    public void stopDebug() {
+    private void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
         isPlaying = false;
         isRecording = false;

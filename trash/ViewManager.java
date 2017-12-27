@@ -12,15 +12,12 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.debug.IDebugCtrl;
-import by.citech.handsfree.logic.CallerState;
-import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallToUiListener;
 import by.citech.handsfree.gui.IGetView;
 import by.citech.handsfree.gui.IGetViewGetter;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.logic.ICallNetListener;
 import by.citech.handsfree.logic.ICaller;
-import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.param.Colors;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.OpMode;
@@ -39,8 +36,9 @@ import static by.citech.handsfree.gui.helper.ViewHelper.setVisibility;
 import static by.citech.handsfree.gui.helper.ContactHelper.setContactInfo;
 import static by.citech.handsfree.gui.helper.ViewHelper.startAnimation;
 
-public class ViewManagerOpt
-        implements IBase, ISettingsCtrl, ICaller, IPrepareObject, IViewKeeper, ICallerFsmListener {
+public class ViewManager
+        implements ICallToUiListener, ICallNetListener, IDebugCtrl,
+        IBase, ISettingsCtrl, ICaller, IPrepareObject, IViewKeeper {
 
     private static final String STAG = Tags.VIEW_MANAGER;
     private static final boolean debug = Settings.debug;
@@ -108,7 +106,7 @@ public class ViewManagerOpt
 
     //--------------------- getters and setters
 
-    public ViewManagerOpt setiGetGetter(IGetViewGetter iGetGetter) {
+    public ViewManager setiGetGetter(IGetViewGetter iGetGetter) {
         this.iGetGetter = iGetGetter;
         return this;
     }
@@ -311,136 +309,135 @@ public class ViewManagerOpt
     //--------------------- ICallNetListener
 
     @Override
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
-        switch (why) {
-            case CallFailedExternal:
-            case CallFailedInternal:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "FAIL");
-                break;
-            case CallEndedByRemoteUser:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "ENDED");
-                break;
-            case OutConnectionConnected:
-                enableBtnCall(getBtnGreen(), "CALLING...");
-                enableBtnCall(getBtnRed(), "CANCEL");
-                break;
-            case OutCallAcceptedByRemoteUser:
-                disableGray(getBtnGreen(), "ON CALL");
-                enableBtnCall(getBtnRed(), "END CALL");
-                stopCallAnim();
-                break;
-            case OutCallRejectedByRemoteUser:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "BUSY");
-                stopCallAnim();
-                break;
-            case OutConnectionFailed:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "OFFLINE");
-                stopCallAnim();
-                break;
-            case OutCallInvalidCoordinates:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "INVALID");
-                stopCallAnim();
-                break;
-            case InCallDetected:
-                enableBtnCall(getBtnGreen(), "INCOMING...");
-                enableBtnCall(getBtnRed(), "REJECT");
-                startCallAnim();
-                break;
-            case InCallCanceledByRemoteUser:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "CANCELED");
-                stopCallAnim();
-                break;
-            case InCallFailed:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "INCOME FAIL");
-                stopCallAnim();
-                break;
-            case ExternalConnectorFail:
-                disableGray(getBtnGreen(), "NET ERROR");
-                disableGray(getBtnRed(), "NET ERROR");
-                break;
-            case ExternalConnectorReady:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "IDLE");
-                break;
-            case OutConnectionStartedByLocalUser:
-                disableGray(getBtnGreen(), "CALLING...");
-                enableBtnCall(getBtnRed(), "CANCEL");
-                startCallAnim();
-                break;
-            case CallEndedByLocalUser:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "ENDED");
-                break;
-            case OutConnectionCanceledByLocalUser:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "CANCELED");
-                stopCallAnim();
-                break;
-            case InCallRejectedByLocalUser:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "REJECTED");
-                stopCallAnim();
-                break;
-            case InCallAcceptedByLocalUser:
-                disableGray(getBtnGreen(), "ON CALL");
-                enableBtnCall(getBtnRed(), "END CALL");
-                stopCallAnim();
-                break;
-            case StartDebug:
-                switch (opMode) {
-                    case Bt2AudOut:
-                    case AudIn2Bt:
-                    case AudIn2AudOut:
-                    case Bt2Bt:
-                        disableGray(getBtnGreen());
-                        enableBtnCall(getBtnRed());
-                        break;
-                    case Record:
-                        switch (to) {
-                            case DebugPlay:
-                                disableGray(getBtnGreen(), "PLAYING");
-                                enableBtnCall(getBtnRed(), "STOP");
-                                break;
-                            case DebugRecord:
-                                disableGray(getBtnGreen(), "RECORDING");
-                                enableBtnCall(getBtnRed(), "STOP");
-                                break;
-                            default:
-                                if (debug) Log.e(TAG, "startDebug " + to.getName());
-                                break;
-                        }
-                        break;
-                    case Net2Net:
-                    case Normal:
-                    default:
-                        break;
-                }
-            case StopDebug:
-                switch (opMode) {
-                    case Bt2AudOut:
-                    case AudIn2Bt:
-                    case AudIn2AudOut:
-                    case Bt2Bt:
-                        enableGreen(getBtnGreen());
-                        disableGray(getBtnRed());
-                        break;
-                    case Record:
-                        enableBtnCall(getBtnGreen(), "PLAY");
-                        disableGray(getBtnRed(), "RECORDED");
-                        break;
-                    case Net2Net:
-                    case Normal:
-                    default:
-                        break;
-                }
-        }
+    public void callFailed() {
+        if (debug) Log.i(TAG, "callFailed");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "FAIL");
+    }
+
+    @Override
+    public void callEndedExternally() {
+        if (debug) Log.i(TAG, "callEndedExternally");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "ENDED");
+    }
+
+    @Override
+    public void callOutcomingConnected() {
+        if (debug) Log.i(TAG, "callOutcomingConnected");
+        enableBtnCall(getBtnGreen(), "CALLING...");
+        enableBtnCall(getBtnRed(), "CANCEL");
+    }
+
+    @Override
+    public void callOutcomingAccepted() {
+        if (debug) Log.i(TAG, "callOutcomingAccepted");
+        disableGray(getBtnGreen(), "ON CALL");
+        enableBtnCall(getBtnRed(), "END CALL");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callOutcomingRejected() {
+        if (debug) Log.i(TAG, "callOutcomingRejected");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "BUSY");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callOutcomingFailed() {
+        if (debug) Log.i(TAG, "callOutcomingFailed");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "OFFLINE");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callOutcomingInvalid() {
+        if (debug) Log.i(TAG, "callOutcomingInvalid");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "INVALID");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callIncomingDetected() {
+        if (debug) Log.i(TAG, "callIncomingDetected");
+        enableBtnCall(getBtnGreen(), "INCOMING...");
+        enableBtnCall(getBtnRed(), "REJECT");
+        startCallAnim();
+    }
+
+    @Override
+    public void callIncomingCanceled() {
+        if (debug) Log.i(TAG, "callIncomingCanceled");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "CANCELED");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callIncomingFailed() {
+        if (debug) Log.i(TAG, "callIncomingFailed");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "INCOME FAIL");
+        stopCallAnim();
+    }
+
+    @Override
+    public void connectorFailure() {
+        if (debug) Log.e(TAG, "connectorFailure");
+        disableGray(getBtnGreen(), "ERROR");
+        disableGray(getBtnRed(), "ERROR");
+    }
+
+    @Override
+    public void connectorReady() {
+        if (debug) Log.i(TAG, "connectorReady");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "IDLE");
+    }
+
+    //--------------------- ICallToUiListener
+
+    @Override
+    public void callOutcomingStarted() {
+        if (debug) Log.i(TAG, "callOutcomingStarted");
+        disableGray(getBtnGreen(), "CALLING...");
+        enableBtnCall(getBtnRed(), "CANCEL");
+        startCallAnim();
+    }
+
+    @Override
+    public void callEndedInternally() {
+        if (debug) Log.i(TAG, "callEndedInternally");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "ENDED");
+    }
+
+    @Override
+    public void callOutcomingCanceled() {
+        if (debug) Log.i(TAG, "callOutcomingCanceled");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "CANCELED");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callIncomingRejected() {
+        if (debug) Log.i(TAG, "callIncomingRejected");
+        enableBtnCall(getBtnGreen(), "CALL");
+        disableGray(getBtnRed(), "REJECTED");
+        stopCallAnim();
+    }
+
+    @Override
+    public void callIncomingAccepted() {
+        if (debug) Log.i(TAG, "callIncomingAccepted");
+        disableGray(getBtnGreen(), "ON CALL");
+        enableBtnCall(getBtnRed(), "END CALL");
+        stopCallAnim();
     }
 
     //--------------------- call buttons
@@ -474,6 +471,61 @@ public class ViewManagerOpt
         if (debug) Log.i(TAG, "stopCallAnim");
         clearAnimation(getBtnGreen());
         isCallAnim = false;
+    }
+
+    //--------------------- IDebugCtrl
+
+    @Override
+    public void startDebug() {
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
+                disableGray(getBtnGreen());
+                enableBtnCall(getBtnRed());
+                break;
+            case Record:
+                switch (getCallerState()) {
+                    case DebugPlay:
+                        disableGray(getBtnGreen(), "PLAYING");
+                        enableBtnCall(getBtnRed(), "STOP");
+                        break;
+                    case DebugRecord:
+                        disableGray(getBtnGreen(), "RECORDING");
+                        enableBtnCall(getBtnRed(), "STOP");
+                        break;
+                    default:
+                        if (debug) Log.e(TAG, "startDebug " + getCallerStateName());
+                        break;
+                }
+                break;
+            case Normal:
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void stopDebug() {
+        switch (opMode) {
+            case Bt2AudOut:
+            case AudIn2Bt:
+            case AudIn2AudOut:
+            case Bt2Bt:
+            case Net2Net:
+                enableGreen(getBtnGreen());
+                disableGray(getBtnRed());
+                break;
+            case Record:
+                enableBtnCall(getBtnGreen(), "PLAY");
+                disableGray(getBtnRed(), "RECORDED");
+                break;
+            case Normal:
+            default:
+                break;
+        }
     }
 
     //--------------------- getters help

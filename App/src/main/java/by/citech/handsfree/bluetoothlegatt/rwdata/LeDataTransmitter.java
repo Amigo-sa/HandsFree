@@ -10,7 +10,6 @@ import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.logic.ICaller;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreadManager;
 
@@ -18,7 +17,7 @@ import by.citech.handsfree.threading.IThreadManager;
  * Created by tretyak on 22.11.2017.
  */
 
-public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThreadManager {
+public class LeDataTransmitter implements CallbackWriteListener, IThreadManager {
 
     private final static String TAG = "WSD_LeDataTransmitter";
     private static final long WAIT_PERIOD = 5;//
@@ -169,8 +168,10 @@ public class LeDataTransmitter implements CallbackWriteListener, ICaller, IThrea
                 if (time == WAIT_PERIOD) {
                     isNotyfyStartRunning = false;
                     if (Settings.debug) Log.e(TAG, "Device not started notify ");
-                    if(mBluetoothLeService != null)
+                    if(mBluetoothLeService != null) {
+                        //ConnectorBluetooth.getInstance().processState();
                         mBluetoothLeService.disconnect();
+                    }
                 }
             }
         });
