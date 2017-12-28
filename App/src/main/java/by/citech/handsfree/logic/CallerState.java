@@ -14,17 +14,17 @@ public enum CallerState {
 
     PhaseReadyExt {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Failure, PhaseZero, PhaseReadyInt, Idle));
+            return new HashSet<> (Arrays.asList(Failure, PhaseZero, PhaseReadyInt, ReadyToWork));
         }
     },
 
     PhaseReadyInt {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Failure, PhaseZero, PhaseReadyExt, Idle));
+            return new HashSet<> (Arrays.asList(Failure, PhaseZero, PhaseReadyExt, ReadyToWork));
         }
     },
 
-    Idle {
+    ReadyToWork {
         public HashSet<CallerState> availableStates() {
             return new HashSet<> (Arrays.asList(Failure, OutStarted, InDetected));
         }
@@ -32,31 +32,31 @@ public enum CallerState {
 
     OutStarted {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Failure, Error, Idle, OutConnected));
+            return new HashSet<> (Arrays.asList(Failure, Error, ReadyToWork, OutConnected));
         }
     },
 
     OutConnected {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Failure, Error, Idle, Call));
+            return new HashSet<> (Arrays.asList(Failure, Error, ReadyToWork, Call));
         }
     },
 
     InDetected {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Failure, Error, Idle, Call));
+            return new HashSet<> (Arrays.asList(Failure, Error, ReadyToWork, Call));
         }
     },
 
     Call {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<> (Arrays.asList(Failure, Error, Idle));
+            return new HashSet<> (Arrays.asList(Failure, Error, ReadyToWork));
         }
     },
 
     Error {
         public HashSet<CallerState> availableStates() {
-            return new HashSet<>(Collections.singletonList(Idle));
+            return new HashSet<>(Collections.singletonList(ReadyToWork));
         }
     },
 

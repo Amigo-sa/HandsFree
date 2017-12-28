@@ -34,7 +34,7 @@ import static by.citech.handsfree.gui.helper.ViewHelper.setText;
 import static by.citech.handsfree.gui.helper.ViewHelper.setVisibility;
 import static by.citech.handsfree.gui.helper.ContactHelper.setContactInfo;
 import static by.citech.handsfree.gui.helper.ViewHelper.startAnimation;
-import static by.citech.handsfree.logic.CallerState.Idle;
+import static by.citech.handsfree.logic.CallerState.ReadyToWork;
 
 public class ViewManager
         implements IBase, ISettingsCtrl, IPrepareObject,
@@ -316,7 +316,7 @@ public class ViewManager
                 break;
             case ExternalConnectorReady:
             case InternalConnectorReady:
-                if (to == Idle) {
+                if (to == ReadyToWork) {
                     enableBtnCall(getBtnGreen(), "CALL");
                     disableGray(getBtnRed(), "IDLE");
                 }

@@ -224,7 +224,7 @@ public class ConnectorNet
         CallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnOpen callerState is " + callerState);
         switch (callerState) {
-            case Idle:
+            case ReadyToWork:
                 if (reportToCallerFsm(callerState, InCallDetected, TAG)) return; else break;
             default:
                 if (debug) Log.w(TAG, "srvOnOpen " + callerState);

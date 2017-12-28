@@ -134,7 +134,7 @@ public class CallUi
                 break;
             case Normal:
                 switch (callerState) {
-                    case Idle:
+                    case ReadyToWork:
                         if (reportToCallerFsm(callerState, OutConnectionStartedByLocalUser, TAG)) return; else break;
                     case InDetected:
                         if (reportToCallerFsm(callerState, InCallAcceptedByLocalUser, TAG)) return; else break;

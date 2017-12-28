@@ -162,14 +162,14 @@ public class CallerFsm
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyInt, report));
                     case PhaseReadyExt:
-                        return (processStateChange(from, Idle, report));
+                        return (processStateChange(from, ReadyToWork, report));
                 }
             case ExternalConnectorReady://connectorReady TODO: network ready
                 switch (from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyExt, report));
                     case PhaseReadyInt:
-                        return (processStateChange(from, Idle, report));
+                        return (processStateChange(from, ReadyToWork, report));
                 }
             case CallFailedExternal://callFailed TODO: выключение BT
             case CallFailedInternal://callFailed TODO: выключение BT
@@ -188,7 +188,7 @@ public class CallerFsm
             case InCallRejectedByLocalUser://callIncomingRejected
             case OutConnectionCanceledByLocalUser://callOutcomingCanceled
             case OutCallCanceledByLocalUser://callOutcomingCanceled
-                return (processStateChange(from, Idle, report));
+                return (processStateChange(from, ReadyToWork, report));
             case OutCallAcceptedByRemoteUser://callOutcomingAccepted TODO: включение BT
             case InCallAcceptedByLocalUser://callIncomingAccepted TODO: включение BT
                 return (processStateChange(from, Call, report));
@@ -238,8 +238,8 @@ public class CallerFsm
                 onStateChange(from, to, why);
                 switch (state) {
                     case Error:
-                        state = Idle;
-                        onStateChange(Error, Idle, UnconditionalTransition);
+                        state = ReadyToWork;
+                        onStateChange(Error, ReadyToWork, UnconditionalTransition);
                         break;
                     case Failure:
                         state = PhaseZero;

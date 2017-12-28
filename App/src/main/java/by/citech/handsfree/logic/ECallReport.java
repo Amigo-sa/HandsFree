@@ -23,7 +23,12 @@ public enum ECallReport {
     InCallCanceledByRemoteUser, //callIncomingCanceled
     InCallFailed, //callIncomingFailed
     InternalConnectorFail, //TODO: bluetooth failed
+    InternalConnectorDisconnected, //TODO: bluetooth disconnected
+    InternalConnectorConnected, //TODO: bluetooth connected
+    InternalConnectorConnectedCompatible,
+    InternalConnectorConnectedIncompatible,
     InternalConnectorReady, //TODO: bluetooth ready
+    InternalConnectorError, //TODO: bluetooth error
     ExternalConnectorFail, //connectorFailure  TODO: network failed
     ExternalConnectorReady, //connectorReady TODO: network ready
 

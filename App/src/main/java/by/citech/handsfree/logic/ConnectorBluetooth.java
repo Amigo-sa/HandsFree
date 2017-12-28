@@ -58,6 +58,10 @@ import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.logic.ECallReport.CallFailedInternal;
+import static by.citech.handsfree.logic.ECallReport.InternalConnectorConnected;
+import static by.citech.handsfree.logic.ECallReport.InternalConnectorConnectedCompatible;
+import static by.citech.handsfree.logic.ECallReport.InternalConnectorConnectedIncompatible;
+import static by.citech.handsfree.logic.ECallReport.InternalConnectorDisconnected;
 import static by.citech.handsfree.logic.ECallReport.InternalConnectorReady;
 
 public class ConnectorBluetooth
@@ -249,7 +253,6 @@ public class ConnectorBluetooth
         IBase.super.baseStart();
         if (Settings.debug) Log.i(TAG, "baseStart");
         registerCallerFsmListener(this);
-        reportToCallerFsm(getCallerFsmState(), InternalConnectorReady, TAG); //TODO настоящая проверка готовности
         build();
         return true;
     }
@@ -430,6 +433,7 @@ public class ConnectorBluetooth
                 .execute();
 
         setStorages();
+        reportToCallerFsm(getCallerFsmState(), InternalConnectorConnected, TAG);
     }
 
     @Override
@@ -457,6 +461,7 @@ public class ConnectorBluetooth
 
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
+        reportToCallerFsm(getCallerFsmState(), InternalConnectorDisconnected, TAG);
     }
 
     private void processState() {
@@ -477,6 +482,11 @@ public class ConnectorBluetooth
     public void actionServiceDiscovered() {
         setBLEState(getBLEState(), BluetoothLeState.SERVICES_DISCOVERED);
         bleController.setCommand(characteristicDisplayOn).execute();
+        if (characteristics.getNotifyCharacteristic() != null && characteristics.getWriteCharacteristic() != null) {
+            reportToCallerFsm(getCallerFsmState(), InternalConnectorConnectedCompatible, TAG);
+        }
+        else
+            reportToCallerFsm(getCallerFsmState(), InternalConnectorConnectedIncompatible, TAG);
     }
 
     //----------------------- Scanning ---------------------------
@@ -521,6 +531,7 @@ public class ConnectorBluetooth
                 if (Settings.debug) Log.e(TAG, "Unable to initialize Bluetooth");
                 mIBluetoothListener.finishConnection();
             }
+            reportToCallerFsm(getCallerFsmState(), InternalConnectorReady, TAG);
 //          Automatically connects to the device upon successful start-up initialization.
 //            if (mBluetoothLeService != null && leBroadcastReceiver != null) {
 //                if (mBTDevice != null) {
