@@ -18,6 +18,12 @@ public class ToNet
     private static final String STAG = Tags.TO_NET;
     private final String TAG;
     private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final int objNumber;
+
+    static {
+        objCount = 0;
+    }
 
     //--------------------- preparation
 
@@ -27,13 +33,6 @@ public class ToNet
     private int netChunkSize;
     private int netFactor;
     private byte[] netChunk;
-
-    private static int objCount;
-    private final int objNumber;
-
-    static {
-        objCount = 0;
-    }
 
     {
         objCount++;
@@ -68,6 +67,7 @@ public class ToNet
 
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
+        ISettingsCtrl.super.applySettings(severityLevel);
         netChunk = new byte[netChunkSize];
         return true;
     }

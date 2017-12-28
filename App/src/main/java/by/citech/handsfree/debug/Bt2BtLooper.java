@@ -14,9 +14,10 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
+import by.citech.handsfree.threading.IThreadManager;
 
 public class Bt2BtLooper
-        implements IBase, ISettingsCtrl, IPrepareObject,
+        implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
         ICallerFsm, ICallerFsmRegister, ICallerFsmListener {
 
     private static final String STAG = Tags.BT2BT_LOOPER;
@@ -37,6 +38,25 @@ public class Bt2BtLooper
     private StorageData<byte[][]> storageNetToBt;
     private boolean isRunning;
     private boolean isActive;
+
+    private Runnable main = new Runnable() {
+        @Override
+        public void run() {
+            while (isActive) {
+                while (!isRunning) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                looping();
+            }
+            dataBuff = null;
+            storageBtToNet = null;
+            storageNetToBt = null;
+        }
+    };
 
     {
         objCount++;
@@ -87,24 +107,11 @@ public class Bt2BtLooper
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        registerCallerFsmListener(this, TAG);
         prepareObject();
         isRunning = false;
         isActive = true;
-        new Thread(() -> {
-            while (isActive) {
-                while (!isRunning) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                looping();
-            }
-            dataBuff = null;
-            storageBtToNet = null;
-            storageNetToBt = null;
-        }).start();
+        addRunnable(main);
         return true;
     }
 
@@ -121,6 +128,7 @@ public class Bt2BtLooper
     //--------------------- ICallerFsmListener
 
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:
                 startDebug();

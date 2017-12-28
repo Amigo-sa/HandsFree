@@ -2,7 +2,7 @@ package by.citech.handsfree.settings;
 
 import android.util.Log;
 
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.enumeration.OpMode;
 
@@ -27,8 +27,8 @@ public class Presetter {
                     break;
                 case Bt2AudOut:
                     Settings.opMode = OpMode.Bt2AudOut;
-                    Settings.btSinglePacket = true;
-                    Settings.audioSingleFrame = true;
+                    Settings.audioSingleFrame = false;
+                    Settings.audioBuffSizeBytes = 24000;
                     Settings.audioBuffIsShorts = true;
                     break;
                 case AudIn2AudOut:

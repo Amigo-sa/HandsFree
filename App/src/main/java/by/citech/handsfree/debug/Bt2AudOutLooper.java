@@ -2,6 +2,10 @@ package by.citech.handsfree.debug;
 
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.Locale;
+
 import by.citech.handsfree.codec.audio.AudioCodec;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
@@ -10,9 +14,10 @@ import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
+import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.SeverityLevel;
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.IReceiverReg;
@@ -41,6 +46,7 @@ public class Bt2AudOutLooper
     private ICodec codec;
     private IReceiver iReceiver;
     private IReceiverCtrl iReceiverCtrl;
+    private boolean isSession;
 
     {
         objCount++;
@@ -87,6 +93,7 @@ public class Bt2AudOutLooper
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        registerCallerFsmListener(this, TAG);
         prepareObject();
         return true;
     }
@@ -105,6 +112,7 @@ public class Bt2AudOutLooper
     //--------------------- ICallerFsmListener
 
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:
                 startDebug();
@@ -131,6 +139,7 @@ public class Bt2AudOutLooper
         if (debug) Log.i(TAG, "stopDebug");
         iReceiver = null;
         iReceiverCtrl.redirectOff();
+        isSession = false;
     }
 
     //--------------------- main
@@ -143,9 +152,25 @@ public class Bt2AudOutLooper
 
     @Override
     public void sendData(byte[] data) {
-        if (debug) Log.i(TAG, "sendData byte[]");
+        if (data == null || data.length != codecType.getEncodedBytesSize()) {
+            if (debug) Log.w(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
+        short[] dataDecoded = codec.getDecodedData(data);
+//        if (debug) Log.w(TAG, String.format(Locale.US,
+//                "sendData byte[] data received length is %d, toString is %s",
+//                data.length,
+//                Arrays.toString(data)));
+//        if (debug) Log.w(TAG, String.format(Locale.US,
+//                "sendData byte[] data decoded length is %d, toString is %s",
+//                dataDecoded.length,
+//                Arrays.toString(dataDecoded)));
         if (iReceiver != null) {
-            iReceiver.onReceiveData(codec.getDecodedData(data));
+            if (!isSession) {
+                if (debug) Log.i(TAG, "sendData byte[], first sendData on session");
+                isSession = true;
+            }
+            iReceiver.onReceiveData(dataDecoded);
         }
     }
 

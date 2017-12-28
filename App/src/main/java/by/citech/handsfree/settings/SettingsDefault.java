@@ -6,7 +6,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.settings.enumeration.OpMode;
 

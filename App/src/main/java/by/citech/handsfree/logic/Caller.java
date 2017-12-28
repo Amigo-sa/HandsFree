@@ -134,6 +134,8 @@ public class Caller
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         prepareObject();
+        CallerFsm.getInstance().baseStart();
+        CallUi.getInstance().baseStart();
         switch (opMode) {
             case Bt2Bt:
                 buildDebugBt2Bt();
@@ -203,9 +205,6 @@ public class Caller
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        CallUi callUi = CallUi.getInstance();
-
-        callUi.baseStart();
         connectorBluetooth.baseStart();
         audIn2BtLooper.baseStart();
     }
@@ -236,9 +235,6 @@ public class Caller
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        CallUi callUi = CallUi.getInstance();
-
-        callUi.baseStart();
         connectorBluetooth.baseStart();
         bt2AudOutLooper.baseStart();
     }
@@ -250,9 +246,6 @@ public class Caller
 
         AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper();
 
-        CallUi callUi = CallUi.getInstance();
-
-        callUi.baseStart();
         audIn2AudOutLooper.baseStart();
     }
 
@@ -286,10 +279,6 @@ public class Caller
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        CallUi callUi = CallUi.getInstance();
-
-        CallerFsm.getInstance().baseStart();
-        callUi.baseStart();
         connectorBluetooth.baseStart();
         bt2BtLooper.baseStart();
     }
@@ -324,10 +313,6 @@ public class Caller
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        CallUi callUi = CallUi.getInstance();
-
-        CallerFsm.getInstance().baseStart();
-        callUi.baseStart();
         connectorBluetooth.baseStart();
         bt2BtRecorder.baseStart();
     }
@@ -374,10 +359,6 @@ public class Caller
                 .setiNetInfoGetter(iNetInfoGetter)
                 .setHandler(handlerExtended);
 
-        CallUi callUi = CallUi.getInstance();
-
-        CallerFsm.getInstance().baseStart();
-        callUi.baseStart();
         connectorBluetooth.baseStart();
         connectorNet.baseStart();
     }

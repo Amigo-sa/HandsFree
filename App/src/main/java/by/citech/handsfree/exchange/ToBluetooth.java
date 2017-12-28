@@ -107,7 +107,10 @@ public class ToBluetooth
 
     @Override
     public void onReceiveData(byte[] data) {
-        if (debug) Log.i(TAG, "onReceiveData byte[]");
+        if (data == null) {
+            if (debug) Log.i(TAG, "onReceiveData byte[]" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
         if (isRedirecting) {
             if (btSinglePacket) {
                 dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);

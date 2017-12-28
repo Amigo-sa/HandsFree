@@ -102,7 +102,7 @@ public class CallUi
 
     //--------------------- main
 
-    private void onMethodWrongState(String methodName, CallerState callerState) {
+    private void onMethodWrongState(CallerState callerState, String methodName) {
         Log.e(TAG, methodName + " " + callerState);
     }
 
@@ -120,7 +120,7 @@ public class CallUi
                     case PhaseZero:
                         if (reportToCallerFsm(callerState, StartDebug, TAG)) return; else break;
                     default:
-                        onMethodWrongState(onClickBtnGreen, callerState); return;
+                        onMethodWrongState(callerState, onClickBtnGreen); return;
                 }
                 break;
             case Record:
@@ -129,7 +129,7 @@ public class CallUi
                     case PhaseZero:
                         if (reportToCallerFsm(callerState, StartDebug, TAG)) return; else break;
                     default:
-                        onMethodWrongState(onClickBtnGreen, callerState); return;
+                        onMethodWrongState(callerState, onClickBtnGreen); return;
                 }
                 break;
             case Normal:
@@ -139,7 +139,7 @@ public class CallUi
                     case InDetected:
                         if (reportToCallerFsm(callerState, InCallAcceptedByLocalUser, TAG)) return; else break;
                     default:
-                        onMethodWrongState(onClickBtnGreen, callerState); return;
+                        onMethodWrongState(callerState, onClickBtnGreen); return;
                 }
                 break;
             case Net2Net:
@@ -164,7 +164,7 @@ public class CallUi
                     case DebugLoop:
                         if (reportToCallerFsm(callerState, StopDebug, TAG)) return; else break;
                     default:
-                        onMethodWrongState(onClickBtnRed, callerState); return;
+                        onMethodWrongState(callerState, onClickBtnRed); return;
                 }
                 break;
             case Record:
@@ -173,7 +173,7 @@ public class CallUi
                     case DebugRecord:
                         if (reportToCallerFsm(callerState, StopDebug, TAG)) return; else break;
                     default:
-                        onMethodWrongState(onClickBtnRed, callerState); return;
+                        onMethodWrongState(callerState, onClickBtnRed); return;
                 }
                 break;
             case Normal:
@@ -187,7 +187,7 @@ public class CallUi
                     case InDetected:
                         if (reportToCallerFsm(callerState, InCallRejectedByLocalUser, TAG)) return; else break;
                     default:
-                        onMethodWrongState(onClickBtnRed, callerState); return;
+                        onMethodWrongState(callerState, onClickBtnRed); return;
                 }
                 break;
             case Net2Net:

@@ -14,9 +14,11 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
+import by.citech.handsfree.threading.IThreadManager;
 
 public class Bt2BtRecorder
-        implements IBase, ISettingsCtrl, IPrepareObject, ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
+        implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
+        ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.BT2BT_RECORDER;
     private static final boolean debug = Settings.debug;
@@ -40,6 +42,32 @@ public class Bt2BtRecorder
     private boolean isPlaying;
     private boolean isRecording;
     private boolean isActive;
+
+    private Runnable main = new Runnable() {
+        @Override
+        public void run() {
+            while (isActive) {
+                while (!isPlaying && !isRecording) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (isPlaying) {
+                    play();
+                }
+                if (isRecording) {
+                    record();
+                    storageFromBt.setWriteLocked(true);
+                }
+            }
+            storageFromBt = null;
+            storageToBt = null;
+            dataBuff = null;
+            dataSaved = null;
+        }
+    };
 
     {
         objCount++;
@@ -91,30 +119,9 @@ public class Bt2BtRecorder
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         prepareObject();
-        registerCallerFsmListener(this);
+        registerCallerFsmListener(this, TAG);
         isActive = true;
-        new Thread(() -> {
-            while (isActive) {
-                while (!isPlaying && !isRecording) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (isPlaying) {
-                    play();
-                }
-                if (isRecording) {
-                    record();
-                    storageFromBt.setWriteLocked(true);
-                }
-            }
-            storageFromBt = null;
-            storageToBt = null;
-            dataBuff = null;
-            dataSaved = null;
-        }).start();
+        addRunnable(main);
         return true;
     }
 
@@ -167,6 +174,7 @@ public class Bt2BtRecorder
 
     @Override
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:
                 startDebug();

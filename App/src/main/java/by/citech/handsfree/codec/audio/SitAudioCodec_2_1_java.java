@@ -1,7 +1,6 @@
 package by.citech.handsfree.codec.audio;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
 
 public class SitAudioCodec_2_1_java
         implements ICodec {
@@ -11,10 +10,8 @@ public class SitAudioCodec_2_1_java
     private static final boolean debug = Settings.debug;
     private static final AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
     private static final String TAG = audioCodecType.getSettingName();
-    private static final int decodedShortsSize = audioCodecType.getDecodedShortsSize();
-    private static final int encodedBytesSize = audioCodecType.getEncodedBytesSize();
-    private static final short[] decodedData = new short[decodedShortsSize];
-    private static final byte[] encodedData = new byte[encodedBytesSize];
+    private static final short[] decodedData = new short[audioCodecType.getDecodedShortsSize()];
+    private static final byte[] encodedData = new byte[audioCodecType.getEncodedBytesSize()];
 
     private CodecState decoderState;
     private CodecState encoderState;

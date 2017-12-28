@@ -35,6 +35,7 @@ import static by.citech.handsfree.gui.helper.ViewHelper.setVisibility;
 import static by.citech.handsfree.gui.helper.ContactHelper.setContactInfo;
 import static by.citech.handsfree.gui.helper.ViewHelper.startAnimation;
 import static by.citech.handsfree.logic.CallerState.ReadyToWork;
+import static by.citech.handsfree.settings.enumeration.OpMode.Normal;
 
 public class ViewManager
         implements IBase, ISettingsCtrl, IPrepareObject,
@@ -116,7 +117,7 @@ public class ViewManager
     public boolean baseCreate() {
         IBase.super.baseCreate();
         if (debug) Log.i(TAG, "baseCreate");
-        registerCallerFsmListener(this);
+        registerCallerFsmListener(this, TAG);
         return true;
     }
 
@@ -306,16 +307,21 @@ public class ViewManager
 
     //--------------------- ICallNetListener
 
-    @Override
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    private void processNormal(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "processNormal");
         switch (why) {
             case ExternalConnectorFail:
             case InternalConnectorFail:
+            case InternalConnectorDisconnected:
+            case InternalConnectorConnectedIncompatible:
+            case InternalConnectorError:
                 disableGray(getBtnGreen(), "ERROR");
                 disableGray(getBtnRed(), "ERROR");
                 break;
             case ExternalConnectorReady:
             case InternalConnectorReady:
+            case InternalConnectorConnected:
+            case InternalConnectorConnectedCompatible:
                 if (to == ReadyToWork) {
                     enableBtnCall(getBtnGreen(), "CALL");
                     disableGray(getBtnRed(), "IDLE");
@@ -394,6 +400,14 @@ public class ViewManager
                 enableBtnCall(getBtnRed(), "END CALL");
                 stopCallAnim();
                 break;
+            default:
+                break;
+        }
+    }
+
+    private void processAbnormal(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "processAbnormal");
+        switch (why) {
             case StartDebug:
                 switch (opMode) {
                     case Bt2AudOut:
@@ -418,9 +432,11 @@ public class ViewManager
                                 break;
                         }
                         break;
+                    case Net2Net:
                     default:
                         break;
                 }
+                break;
             case StopDebug:
                 switch (opMode) {
                     case Bt2AudOut:
@@ -434,9 +450,23 @@ public class ViewManager
                         enableBtnCall(getBtnGreen(), "PLAY");
                         disableGray(getBtnRed(), "RECORDED");
                         break;
+                    case Net2Net:
                     default:
                         break;
                 }
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
+        if (opMode == Normal) {
+            processNormal(from, to, why);
+        } else {
+            processAbnormal(from, to, why);
         }
     }
 

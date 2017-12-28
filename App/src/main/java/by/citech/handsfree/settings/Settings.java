@@ -7,7 +7,7 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.settings.enumeration.ISettingCategory;
@@ -153,8 +153,8 @@ public class Settings {
     public static int btAudioMsPerNetSendSize = btAudioMsPerPacket * bt2NetFactor;  // миллисекунд звука в одном BT2NET-пакете
     public static int bt2NetSendSizeUncut = bt2btPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
     public static int btMtuSize = 80;  // запрашиваемый размер BT2BT-пакета
-
     public static String deviceAddressPrefix = "54:6C:0E";
+
     //---------------- AudioCommon
 
     private class AudioCommon {
@@ -188,12 +188,13 @@ public class Settings {
 //  public static int audioOutBuffersize = AudioRecord.getMinBufferSize(audioRate, AUDIO_CHANNEL, audioEncoding) * 12;
     public static int audioOutBuffersize = 10000;
     public static int audioMode = AudioTrack.MODE_STREAM;
-    public static int audioStreamType = AudioManager.STREAM_VOICE_CALL;
+//  public static int audioStreamType = AudioManager.STREAM_VOICE_CALL;
+    public static int audioStreamType = AudioManager.STREAM_MUSIC;
     public static int audioContentType = AudioAttributes.CONTENT_TYPE_SPEECH;
 //  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
 //  public static int audioTarget = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
-    public static int audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION;  // разговорный динамик
-//  public static int audioUsage = AudioAttributes.USAGE_MEDIA;  // громкая связь
+//  public static int audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION;  // разговорный динамик
+    public static int audioUsage = AudioAttributes.USAGE_MEDIA;  // громкая связь
 
     //---------------- Network
 

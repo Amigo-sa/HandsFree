@@ -21,7 +21,7 @@ import android.view.ViewGroup;
 
 import java.util.Locale;
 
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.param.Colors;
 import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.Settings;

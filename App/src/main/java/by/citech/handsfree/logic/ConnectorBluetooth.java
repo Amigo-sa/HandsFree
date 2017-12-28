@@ -252,7 +252,7 @@ public class ConnectorBluetooth
     public boolean baseStart() {
         IBase.super.baseStart();
         if (Settings.debug) Log.i(TAG, "baseStart");
-        registerCallerFsmListener(this);
+        registerCallerFsmListener(this, TAG);
         build();
         return true;
     }
@@ -606,6 +606,7 @@ public class ConnectorBluetooth
 
     @Override
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (Settings.debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case InCallAcceptedByLocalUser:
             case OutCallAcceptedByRemoteUser:
@@ -619,24 +620,20 @@ public class ConnectorBluetooth
             case StartDebug:
                 switch (Settings.opMode) {
                     case AudIn2Bt:
-                        if (!isDebugRunning) {
-                            isDebugRunning = true;
-                            enableTransmitData();
-                        }
+                        enableTransmitData();
+                        break;
                     case Bt2Bt:
                         if (getBLEState() == BluetoothLeState.SERVICES_DISCOVERED) {
                             enableTransmitData();
                         }
+                        break;
                     case Record:
                         if (getCallerFsmState() == CallerState.DebugRecord) {
                             enableTransmitData();
                         }
                         break;
                     case Bt2AudOut:
-                        if (!isDebugRunning) {
-                            isDebugRunning = true;
-                            onlyReceiveData();
-                        }
+                        onlyReceiveData();
                         break;
                     default:
                         break;
@@ -644,10 +641,8 @@ public class ConnectorBluetooth
                 break;
             case StopDebug:
                 switch (Settings.opMode) {
-                    case Record:
-                        disableTransmitData();
-                        break;
                     default:
+                        disableTransmitData();
                         break;
                 }
                 break;

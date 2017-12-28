@@ -50,7 +50,7 @@ public class Tags {
     public static final String TO_BT_STORE         = "WSD_2BT_STORE";
     public static final String FROM_BT_STORE       = "WSD_4BT_STORE";
 
-    public static final String AUDCODEC            = "WSD_AUDIOCODEC";
+    public static final String AudioCodec = "WSD_AUDIOCODEC";
     public static final String CONTACT             = "WSD_CONTACT";
     public static final String CONTACTOR           = "WSD_CONTACTOR";
     public static final String CONTACTS_DB_CTRL    = "WSD_CONTACTS_DB_CTRL";
@@ -77,6 +77,7 @@ public class Tags {
     public static final String RESOURCE_MANAGER    = "WSD_RESOURCE_MANAGER";
     public static final String CONTACT_HELPER      = "WSD_CONTACT_HELPER";
     public static final String VIEW_KEEPER         = "WSD_VIEW_KEEPER";
-    public static final String HandlerExtended = "WSD_HANDLER_EXTENDED";
+    public static final String HandlerExtended     = "WSD_HANDLER_EXTENDED";
     public static final String CallerFsm           = "WSD_CallerFsm";
+    public static final String DataGenerator       = "WSD_DataGenerator";
 }

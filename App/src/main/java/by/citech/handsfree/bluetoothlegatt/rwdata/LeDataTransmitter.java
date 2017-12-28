@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.data.StorageData;

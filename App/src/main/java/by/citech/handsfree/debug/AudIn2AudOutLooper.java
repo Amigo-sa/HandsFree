@@ -13,7 +13,8 @@ import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.settings.SeverityLevel;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.exchange.FromAudioIn;
 import by.citech.handsfree.exchange.IReceiver;
 import by.citech.handsfree.exchange.IReceiverCtrl;
@@ -24,9 +25,10 @@ import by.citech.handsfree.exchange.ToAudioOut;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.threading.IThreadManager;
 
 public class AudIn2AudOutLooper
-        implements IReceiverReg, ITransmitter, IBase, IPrepareObject,
+        implements IReceiverReg, ITransmitter, IBase, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.AUDIN2AUDOUT_LOOPER;
@@ -62,7 +64,7 @@ public class AudIn2AudOutLooper
     public boolean prepareObject() {
         if (isObjectPrepared()) return true;
         takeSettings();
-        applySettings();
+        applySettings(null);
         return isObjectPrepared();
     }
 
@@ -83,7 +85,9 @@ public class AudIn2AudOutLooper
         return true;
     }
 
-    public boolean applySettings() {
+    @Override
+    public boolean applySettings(SeverityLevel severityLevel) {
+        ISettingsCtrl.super.applySettings(severityLevel);
         dataBuff = new short[audioBuffSizeShorts];
         codec = AudioCodec.getAudioCodec(codecType);
         return true;
@@ -102,7 +106,7 @@ public class AudIn2AudOutLooper
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        registerCallerFsmListener(this);
+        registerCallerFsmListener(this, TAG);
         prepareObject();
         return true;
     }
@@ -124,6 +128,7 @@ public class AudIn2AudOutLooper
 
     @Override
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:
                 startDebug();
@@ -144,7 +149,7 @@ public class AudIn2AudOutLooper
             iReceiverCtrl.prepareRedirect();
             iTransmitterCtrl.prepareStream();
             iReceiverCtrl.redirectOn();
-            new Thread(() -> iTransmitterCtrl.streamOn()).start();
+            addRunnable(() -> iTransmitterCtrl.streamOn());
         }
     }
 

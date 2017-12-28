@@ -144,7 +144,7 @@ public class ConnectorNet
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        registerCallerFsmListener(this);
+        registerCallerFsmListener(this, TAG);
         new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
         return true;
     }
@@ -192,6 +192,7 @@ public class ConnectorNet
 
     @Override
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case CallEndedByLocalUser:
                 exchangeStop();

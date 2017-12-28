@@ -1,7 +1,5 @@
 package by.citech.handsfree.codec.audio;
 
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
-
 public class SitAudioCodec_2_1_native implements ICodec {
 
 //    static {

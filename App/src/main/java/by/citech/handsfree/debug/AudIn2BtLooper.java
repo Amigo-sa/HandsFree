@@ -10,9 +10,10 @@ import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
+import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.SeverityLevel;
-import by.citech.handsfree.settings.enumeration.AudioCodecType;
+import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.FromAudioIn;
 import by.citech.handsfree.exchange.IReceiver;
@@ -24,9 +25,10 @@ import by.citech.handsfree.exchange.ToBluetooth;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.threading.IThreadManager;
 
 public class AudIn2BtLooper
-        implements IBase, ITransmitter, IReceiverReg, IPrepareObject,
+        implements IBase, ITransmitter, IReceiverReg, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
 
     private static final String STAG = Tags.AUDIN2BT_LOOPER;
@@ -45,6 +47,7 @@ public class AudIn2BtLooper
     private IReceiverCtrl iReceiverCtrl;
     private ITransmitterCtrl iTransmitterCtrl;
     private IReceiver iReceiver;
+    private boolean isSession;
 
     {
         objCount++;
@@ -91,6 +94,7 @@ public class AudIn2BtLooper
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        registerCallerFsmListener(this, TAG);
         prepareObject();
         return false;
     }
@@ -110,6 +114,7 @@ public class AudIn2BtLooper
     //--------------------- ICallerFsmListener
 
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+        if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:
                 startDebug();
@@ -130,7 +135,7 @@ public class AudIn2BtLooper
             iReceiverCtrl.prepareRedirect();
             iReceiverCtrl.redirectOn();
             iTransmitterCtrl.prepareStream();
-            new Thread(() -> iTransmitterCtrl.streamOn()).start();
+            addRunnable(() -> iTransmitterCtrl.streamOn());
         }
     }
 
@@ -139,14 +144,22 @@ public class AudIn2BtLooper
         iReceiver = null;
         iReceiverCtrl.redirectOff();
         iTransmitterCtrl.streamOff();
+        isSession = false;
     }
 
     //--------------------- main
 
     @Override
     public void sendData(short[] data) {
-        if (debug) Log.i(TAG, "sendData short[]");
+        if (data == null || data.length != codecType.getDecodedShortsSize()) {
+            if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
         if (iReceiver != null) {
+            if (!isSession) {
+                if (debug) Log.i(TAG, "sendData short[], first sendData on session");
+                isSession = true;
+            }
             iReceiver.onReceiveData(codec.getEncodedData(data));
         }
     }

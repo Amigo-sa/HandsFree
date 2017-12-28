@@ -1,4 +1,4 @@
-package by.citech.handsfree.settings.enumeration;
+package by.citech.handsfree.codec.audio;
 
 import by.citech.handsfree.settings.ISettingEnum;
 import by.citech.handsfree.settings.SettingsDefault;

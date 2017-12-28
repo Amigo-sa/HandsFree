@@ -4,9 +4,11 @@ import android.media.AudioRecord;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.util.DataGenerator;
 
 public class FromAudioIn
         implements ITransmitterCtrl {
@@ -64,7 +66,7 @@ public class FromAudioIn
 
     @Override
     public void prepareStream() {
-        if (debug) Log.i(TAG, String.format("prepareStream audioOutBuffersize is %d", audioBuffSizeBytes));
+        if (debug) Log.i(TAG, "prepareStream");
         streamOff();
         recorder = new AudioRecord(
                 audioSource,
@@ -81,8 +83,18 @@ public class FromAudioIn
             Log.e(TAG, "streamOn already streaming or recorder is null");
             return;
         }
+        Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
+                        " audioBuffIsShorts is %b," +
+                        " audioRate is %d," +
+                        " audioBuffSizeBytes is %d," +
+                        " audioBuffSizeShorts is %d",
+                audioBuffIsShorts,
+                audioRate,
+                audioBuffSizeBytes,
+                audioBuffSizeShorts
+        ));
         isStreaming = true;
-        recorder.startRecording();
+//      recorder.startRecording();
         while (isStreaming) {
             if (audioBuffIsShorts) {
                 streamShorts();
@@ -93,15 +105,27 @@ public class FromAudioIn
         if (debug) Log.w(TAG, "streamOn done");
     }
 
+    private int chunkNumber;
+
     private void streamShorts() {
-        fillBuffer(shortsBuffer, audioBuffSizeShorts);
-        if (debug) Log.i(TAG, String.format("run sendData: %s", Arrays.toString(shortsBuffer)));
+//      fillBuffer(shortsBuffer, audioBuffSizeShorts);
+//      if (debug) Log.i(TAG, String.format("run sendData: %s", Arrays.toString(shortsBuffer)));
+//      if (debug) Log.i(TAG, String.format("streamShorts size: %s", shortsBuffer.length));
+//      iTransmitter.sendData(shortsBuffer);
+        shortsBuffer = DataGenerator.getSinusChunk(chunkNumber);
+        if (debug) Log.i(TAG, String.format(
+                "streamShorts chunkNumber is %d, data is %s",
+                chunkNumber, Arrays.toString(shortsBuffer))
+        );
         iTransmitter.sendData(shortsBuffer);
+        if (chunkNumber == 3) chunkNumber = 0;
+        else                  chunkNumber++;
     }
 
     private void streamBytes() {
         fillBuffer(bytesBuffer, audioBuffSizeBytes);
-        if (debug) Log.i(TAG, String.format("run sendData: %s", Arrays.toString(bytesBuffer)));
+//      if (debug) Log.i(TAG, String.format("run sendData: %s", Arrays.toString(bytesBuffer)));
+//      if (debug) Log.i(TAG, String.format("streamBytes size: %s", shortsBuffer.length));
         iTransmitter.sendData(bytesBuffer);
     }
 
@@ -119,7 +143,7 @@ public class FromAudioIn
     }
 
     private void fillBuffer(byte[] buffer, int readLeft) {
-        if (debug) Log.i(TAG, "fillBuffer");
+//      if (debug) Log.i(TAG, "fillBuffer");
         int readCount;
         int readOffset = 0;
         while (isStreaming && (readLeft != 0)) {
@@ -127,23 +151,23 @@ public class FromAudioIn
             readLeft -= readCount;
             readOffset += readCount;
         }
-        if (debug) Log.i(TAG, "fillBuffer done");
+//      if (debug) Log.i(TAG, "fillBuffer done");
     }
 
     private void fillBuffer(short[] buffer, int readLeft) {
-        if (debug) Log.i(TAG, "fillBuffer");
+//      if (debug) Log.i(TAG, "fillBuffer");
         int readCount;
         int readOffset = 0;
         while (isStreaming && (readLeft != 0)) {
-            if (debug) Log.i(TAG, "fillBuffer readLeft is " + readLeft);
+//          if (debug) Log.i(TAG, "fillBuffer readLeft is " + readLeft);
             readCount = recorder.read(buffer, readOffset, readLeft);
-            if (debug) Log.i(TAG, "fillBuffer readCount is " + readCount);
+//          if (debug) Log.i(TAG, "fillBuffer readCount is " + readCount);
             readLeft -= readCount;
-            if (debug) Log.i(TAG, "fillBuffer readCount is " + readCount);
+//          if (debug) Log.i(TAG, "fillBuffer readCount is " + readCount);
             readOffset += readCount;
-            if (debug) Log.i(TAG, "fillBuffer readOffset is " + readOffset);
+//          if (debug) Log.i(TAG, "fillBuffer readOffset is " + readOffset);
         }
-        if (debug) Log.i(TAG, "fillBuffer done");
+//      if (debug) Log.i(TAG, "fillBuffer done");
     }
 
 }

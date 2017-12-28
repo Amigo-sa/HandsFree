@@ -16,6 +16,7 @@ import by.citech.handsfree.settings.enumeration.OpMode;
 
 import static by.citech.handsfree.logic.CallerState.*;
 import static by.citech.handsfree.logic.ECallReport.*;
+import static by.citech.handsfree.settings.enumeration.OpMode.Normal;
 
 public class CallerFsm
         implements ISettingsCtrl, IPrepareObject, IBase {
@@ -32,7 +33,7 @@ public class CallerFsm
     //--------------------- preparation
 
     private OpMode opMode;
-    private Collection<ICallerFsmListener> listeners;
+    private volatile Collection<ICallerFsmListener> listeners;
     private volatile CallerState state;
 
     {
@@ -52,7 +53,7 @@ public class CallerFsm
 
     @Override
     public boolean isObjectPrepared() {
-        return state != null || listeners != null;
+        return state != null && listeners != null;
     }
 
     @Override
@@ -102,21 +103,25 @@ public class CallerFsm
 
     //--------------------- base
 
-    synchronized boolean addListener(ICallerFsmListener listener) {
+    synchronized boolean addListener(ICallerFsmListener listener, String who) {
         if (!isObjectPrepared()) {
             if (debug) Log.w(TAG, "addListener object not prepared");
             return false;
         }
         boolean isAdded;
          if (listeners.contains(listener)) {
-             if (debug) Log.w(TAG, "addListener already contains this listener");
+             if (debug) Log.w(TAG, "addListener already contains listener " + who);
              isAdded = true;
          } else {
              isAdded = listeners.add(listener);
              if (isAdded) {
-                 if (debug) Log.w(TAG, "addListener listener added, listener's number: " + listeners.size());
+                 if (debug) Log.w(TAG, String.format(Locale.US,
+                         "addListener added listener %s, listeners count is %d",
+                         who, listeners.size()));
              } else {
-                 if (debug) Log.e(TAG, "addListener failed to add listener, listener's number: " + listeners.size());
+                 if (debug) Log.e(TAG, String.format(Locale.US,
+                         "addListener failed to add listener %s, listeners count still %d",
+                         who, listeners.size()));
              }
          }
          return isAdded;
@@ -130,84 +135,110 @@ public class CallerFsm
         return state;
     }
 
-    synchronized boolean processReport(ECallReport report, CallerState from, String who) {
+    synchronized boolean processReport(ECallReport report, CallerState from, String msg) {
         if (!isObjectPrepared()) {
             if (debug) Log.w(TAG, "processReport object not prepared");
             return false;
         }
         if (debug) Log.w(TAG, String.format(Locale.US,
-                "processReport: report <%s>, from state <%s>, reporter is <%s>",
-                report, from, who));
-        if (report == null || from == null || who == null) {
+                "processReport: report <%s>, from state <%s>, message is <%s>",
+                report, from, msg));
+        if (report == null || from == null || msg == null) {
             if (debug) Log.e(TAG, "processReport" + StatusMessages.ERR_PARAMETERS);
             return false;
         }
+        if (opMode == Normal) {
+            return processReportNormal(report, from);
+        } else {
+            return processReportAbnormal(report, from);
+        }
+    }
+
+    //--------------------- main
+
+    private boolean processReportNormal(ECallReport report, CallerState from) {
+        if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
-            case InternalConnectorFail://TODO: bluetooth failed
+            case InternalConnectorFail: //TODO: bluetooth failed
                 switch (from) {
                     case PhaseReadyInt:
                         return (processStateChange(from, PhaseZero, report));
                     default:
                         return (processStateChange(from, PhaseReadyExt, report));
                 }
-            case ExternalConnectorFail://connectorFailure TODO: network failed
+            case ExternalConnectorFail: //TODO: network failed
                 switch (from) {
                     case PhaseReadyExt:
                         return (processStateChange(from, PhaseZero, report));
                     default:
                         return (processStateChange(from, PhaseReadyInt, report));
                 }
-            case InternalConnectorReady://TODO: bluetooth ready
+            case InternalConnectorReady: //TODO: bluetooth ready
                 switch(from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyInt, report));
                     case PhaseReadyExt:
                         return (processStateChange(from, ReadyToWork, report));
                 }
-            case ExternalConnectorReady://connectorReady TODO: network ready
+            case ExternalConnectorReady: //TODO: network ready
                 switch (from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyExt, report));
                     case PhaseReadyInt:
                         return (processStateChange(from, ReadyToWork, report));
                 }
-            case CallFailedExternal://callFailed TODO: выключение BT
-            case CallFailedInternal://callFailed TODO: выключение BT
-            case InCallFailed://callIncomingFailed
-            case OutConnectionFailed://callOutcomingFailed
+            case CallFailedExternal: //TODO: выключение BT
+            case CallFailedInternal://TODO: выключение BT
+            case InCallFailed:
+            case OutConnectionFailed:
                 return (processStateChange(from, Error, report));
-            case InCallDetected://callIncomingDetected
+            case InCallDetected:
                 return (processStateChange(from, InDetected, report));
-            case OutConnectionConnected://callOutcomingConnected
+            case OutConnectionConnected:
                 return (processStateChange(from, OutConnected, report));
-            case InCallCanceledByRemoteUser://callIncomingCanceled
-            case OutCallInvalidCoordinates://callOutcomingInvalid
-            case CallEndedByRemoteUser://callEndedExternally TODO: выключение BT
-            case OutCallRejectedByRemoteUser://callOutcomingRejected
-            case CallEndedByLocalUser://callEndedInternally TODO: выключение BT
-            case InCallRejectedByLocalUser://callIncomingRejected
-            case OutConnectionCanceledByLocalUser://callOutcomingCanceled
-            case OutCallCanceledByLocalUser://callOutcomingCanceled
+            case InCallCanceledByRemoteUser:
+            case OutCallInvalidCoordinates:
+            case CallEndedByRemoteUser: //TODO: выключение BT
+            case OutCallRejectedByRemoteUser:
+            case CallEndedByLocalUser: //TODO: выключение BT
+            case InCallRejectedByLocalUser:
+            case OutConnectionCanceledByLocalUser:
+            case OutCallCanceledByLocalUser:
                 return (processStateChange(from, ReadyToWork, report));
-            case OutCallAcceptedByRemoteUser://callOutcomingAccepted TODO: включение BT
-            case InCallAcceptedByLocalUser://callIncomingAccepted TODO: включение BT
+            case OutCallAcceptedByRemoteUser: //TODO: включение BT
+            case InCallAcceptedByLocalUser: //TODO: включение BT
                 return (processStateChange(from, Call, report));
-            case OutConnectionStartedByLocalUser://callOutcomingStarted
+            case OutConnectionStartedByLocalUser:
                 return (processStateChange(from, OutStarted, report));
-            case StopDebug://stopDebug
+            case UnconditionalTransition:
+            default:
+                return false;
+        }
+    }
+
+    private boolean processReportAbnormal(ECallReport report, CallerState from) {
+        if (debug) Log.i(TAG, "processReportAbnormal");
+        switch (report) {
+            case StopDebug:
                 switch (opMode) {
-                    case Record:
-                        return (processStateChange(from, DebugRecorded, report));
                     case AudIn2AudOut:
                     case Bt2AudOut:
                     case AudIn2Bt:
                     case Bt2Bt:
                         return (processStateChange(from, PhaseZero, report));
+                    case Record:
+                        return (processStateChange(from, DebugRecorded, report));
+                    case Net2Net:
                     default:
                         return false;
                 }
-            case StartDebug://startDebug
+            case StartDebug:
                 switch (opMode) {
+                    case AudIn2AudOut:
+                    case Bt2AudOut:
+                    case AudIn2Bt:
+                    case Bt2Bt:
+                        return (processStateChange(from, DebugLoop, report));
                     case Record:
                         switch (from) {
                             case DebugRecorded:
@@ -217,11 +248,7 @@ public class CallerFsm
                             default:
                                 return false;
                         }
-                    case AudIn2AudOut:
-                    case Bt2AudOut:
-                    case AudIn2Bt:
-                    case Bt2Bt:
-                        return (processStateChange(from, DebugLoop, report));
+                    case Net2Net:
                     default:
                         return false;
                 }
@@ -231,7 +258,7 @@ public class CallerFsm
         }
     }
 
-    private synchronized boolean processStateChange(CallerState from, CallerState to, ECallReport why) {
+    private boolean processStateChange(CallerState from, CallerState to, ECallReport why) {
         if (state == from) {
             if (from.availableStates().contains(to)) {
                 state = to;
