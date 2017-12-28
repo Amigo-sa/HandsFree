@@ -26,7 +26,8 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class AudIn2BtLooper
-        implements IBase, ITransmitter, IReceiverReg, IPrepareObject, ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
+        implements IBase, ITransmitter, IReceiverReg, IPrepareObject,
+        ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
 
     private static final String STAG = Tags.AUDIN2BT_LOOPER;
     private static final boolean debug = Settings.debug;

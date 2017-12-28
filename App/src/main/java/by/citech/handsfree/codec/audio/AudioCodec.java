@@ -13,7 +13,12 @@ public class AudioCodec {
 
     public static ICodec getAudioCodec(AudioCodecType audioCodecType) {
         switch (audioCodecType) {
+            case Sit_3_0_java:
+            case Sit_3_0_native:
+                Log.i(TAG, "AudioCodec audioCodecType Sit_3_0_java");
+                return new SitAudioCodec_2_1_java();
             case Sit_2_1_java:
+            case Sit_2_1_native:
             default:
                 Log.i(TAG, "AudioCodec audioCodecType default Sit_2_1_java");
                 return new SitAudioCodec_2_1_java();

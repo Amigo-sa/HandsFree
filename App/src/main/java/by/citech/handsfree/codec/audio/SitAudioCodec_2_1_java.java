@@ -1,7 +1,5 @@
 package by.citech.handsfree.codec.audio;
 
-import android.util.Log;
-
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.enumeration.AudioCodecType;
 
@@ -104,44 +102,44 @@ public class SitAudioCodec_2_1_java
     private static final int[] qtab_723_16 = {261};
     private static final int[] power2 = {1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000};
 
-    private static void encode(short[] u, byte[] y, CodecState state_ptr) {
+    private static void encode(short[] toEncode, byte[] encoded, CodecState state_ptr) {
         int i;
         byte smp;
 
         for (i = 0; i < 80; i += 8) {
             //C++ TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-            //ORIGINAL LINE: smp = (unsigned char)gsit_16_encoder((int)u[i], state_ptr);
-            smp = (byte) gsit_16_encoder((int) u[i], state_ptr);
-            smp |= (((byte) gsit_16_encoder((int) u[i + 2], state_ptr)) << 2);
-            smp |= (((byte) gsit_16_encoder((int) u[i + 4], state_ptr)) << 4);
-            smp |= (((byte) gsit_16_encoder((int) u[i + 6], state_ptr)) << 6);
-            y[i >> 3] = smp;
+            //ORIGINAL LINE: smp = (unsigned char)gsit_16_encoder((int)toEncode[i], state_ptr);
+            smp = (byte) gsit_16_encoder((int) toEncode[i], state_ptr);
+            smp |= (((byte) gsit_16_encoder((int) toEncode[i + 2], state_ptr)) << 2);
+            smp |= (((byte) gsit_16_encoder((int) toEncode[i + 4], state_ptr)) << 4);
+            smp |= (((byte) gsit_16_encoder((int) toEncode[i + 6], state_ptr)) << 6);
+            encoded[i >> 3] = smp;
         }
     }
 
-    private static void decode(byte[] u, short[] y, CodecState state_ptr) {
+    private static void decode(byte[] toDecode, short[] decoded, CodecState state_ptr) {
         int i;
         int smp;
 
         for (i = 0; i < 10; i++) {
-            smp = (int) (u[i] & 0x03);
-            y[(i << 3)] = (short) gsit_16_decoder(smp, state_ptr);
+            smp = (int) (toDecode[i] & 0x03);
+            decoded[(i << 3)] = (short) gsit_16_decoder(smp, state_ptr);
 
-            smp = (int) ((u[i] >> 2) & 0x03);
-            y[(i << 3) + 2] = (short) gsit_16_decoder(smp, state_ptr);
+            smp = (int) ((toDecode[i] >> 2) & 0x03);
+            decoded[(i << 3) + 2] = (short) gsit_16_decoder(smp, state_ptr);
 
-            smp = (int) ((u[i] >> 4) & 0x03);
-            y[(i << 3) + 4] = (short) gsit_16_decoder(smp, state_ptr);
+            smp = (int) ((toDecode[i] >> 4) & 0x03);
+            decoded[(i << 3) + 4] = (short) gsit_16_decoder(smp, state_ptr);
 
-            smp = (int) ((u[i] >> 6) & 0x03);
-            y[(i << 3) + 6] = (short) gsit_16_decoder(smp, state_ptr);
+            smp = (int) ((toDecode[i] >> 6) & 0x03);
+            decoded[(i << 3) + 6] = (short) gsit_16_decoder(smp, state_ptr);
         }
 
         for (i = 1; i < 79; i += 2) {
-            y[i] = (short) (((int) ((int) y[i - 1] + (int) y[i + 1])) >> 1);
+            decoded[i] = (short) (((int) ((int) decoded[i - 1] + (int) decoded[i + 1])) >> 1);
         }
 
-        y[79] = y[78];
+        decoded[79] = decoded[78];
     }
 
     private static int quan(int val, int[] table, int size) {

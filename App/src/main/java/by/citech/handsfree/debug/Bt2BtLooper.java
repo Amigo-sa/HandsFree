@@ -16,7 +16,8 @@ import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
 
 public class Bt2BtLooper
-        implements IBase, ISettingsCtrl, IPrepareObject, ICallerFsm, ICallerFsmRegister, ICallerFsmListener {
+        implements IBase, ISettingsCtrl, IPrepareObject,
+        ICallerFsm, ICallerFsmRegister, ICallerFsmListener {
 
     private static final String STAG = Tags.BT2BT_LOOPER;
     private static final boolean debug = Settings.debug;
