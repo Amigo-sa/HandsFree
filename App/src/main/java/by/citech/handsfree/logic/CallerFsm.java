@@ -84,47 +84,63 @@ public class CallerFsm
     //--------------------- IBase
 
     @Override
-    public boolean baseStart() {
-        if (debug) Log.w(TAG, "baseStart");
-        IBase.super.baseStart();
+    public boolean baseCreate() {
+        if (debug) Log.w(TAG, "baseCreate");
+        IBase.super.baseCreate();
         prepareObject();
         return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.w(TAG, "baseStop");
+    public boolean baseDestroy() {
+        if (debug) Log.w(TAG, "baseDestroy");
         state = null;
         opMode = null;
         listeners.clear();
-        IBase.super.baseStop();
+        IBase.super.baseDestroy();
         return true;
     }
 
     //--------------------- base
 
-    synchronized boolean addListener(ICallerFsmListener listener, String who) {
-        if (!isObjectPrepared()) {
-            if (debug) Log.w(TAG, "addListener object not prepared");
-            return false;
-        }
+    synchronized boolean registerListener(ICallerFsmListener listener, String who) {
         boolean isAdded;
-         if (listeners.contains(listener)) {
-             if (debug) Log.w(TAG, "addListener already contains listener " + who);
-             isAdded = true;
-         } else {
-             isAdded = listeners.add(listener);
-             if (isAdded) {
-                 if (debug) Log.w(TAG, String.format(Locale.US,
-                         "addListener added listener %s, listeners count is %d",
-                         who, listeners.size()));
-             } else {
-                 if (debug) Log.e(TAG, String.format(Locale.US,
-                         "addListener failed to add listener %s, listeners count still %d",
-                         who, listeners.size()));
-             }
-         }
-         return isAdded;
+        if (listeners.contains(listener)) {
+            if (debug) Log.w(TAG, "registerListener already contains listener " + who);
+            isAdded = true;
+        } else {
+            isAdded = listeners.add(listener);
+            if (isAdded) {
+                if (debug) Log.w(TAG, String.format(Locale.US,
+                        "registerListener added listener %s, listeners count is %d",
+                        who, listeners.size()));
+            } else {
+                if (debug) Log.e(TAG, String.format(Locale.US,
+                        "registerListener failed to add listener %s, listeners count still %d",
+                        who, listeners.size()));
+            }
+        }
+        return isAdded;
+    }
+
+    synchronized boolean unregisterListener(ICallerFsmListener listener, String who) {
+        boolean isRemoved;
+        if (!listeners.contains(listener)) {
+            if (debug) Log.w(TAG, "unregisterListener not contains listener " + who);
+            isRemoved = true;
+        } else {
+            isRemoved = listeners.remove(listener);
+            if (isRemoved) {
+                if (debug) Log.w(TAG, String.format(Locale.US,
+                        "unregisterListener removed listener %s, listeners count is %d",
+                        who, listeners.size()));
+            } else {
+                if (debug) Log.e(TAG, String.format(Locale.US,
+                        "unregisterListener failed to remove listener %s, listeners count still %d",
+                        who, listeners.size()));
+            }
+        }
+        return isRemoved;
     }
 
     synchronized CallerState getState() {

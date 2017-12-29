@@ -14,13 +14,17 @@ import by.citech.handsfree.debug.Bt2AudOutLooper;
 import by.citech.handsfree.debug.Bt2BtLooper;
 import by.citech.handsfree.debug.Bt2BtRecorder;
 import by.citech.handsfree.debug.AudIn2AudOutLooper;
-import by.citech.handsfree.debug.AudIn2BtLooper;
+import by.citech.handsfree.debug.ToBtLooper;
 import by.citech.handsfree.exchange.IMsgToUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.settings.ISettingsCtrl;
+import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.settings.enumeration.OpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+
+import static by.citech.handsfree.settings.enumeration.DataSource.DATAGENERATOR;
+import static by.citech.handsfree.settings.enumeration.DataSource.MICROPHONE;
 
 public class Caller
         implements IBase, ISettingsCtrl, IPrepareObject {
@@ -146,14 +150,17 @@ public class Caller
             case Record:
                 buildDebugRecord();
                 break;
-            case AudIn2Bt:
-                buildDebugAudIn2Bt();
-                break;
             case Bt2AudOut:
                 buildBt2AudOut();
                 break;
             case AudIn2AudOut:
                 buildDebugAudIn2AudOut();
+                break;
+            case AudIn2Bt:
+                buildDebug2Bt(MICROPHONE);
+                break;
+            case DataGen2Bt:
+                buildDebug2Bt(DATAGENERATOR);
                 break;
             case Normal:
             default:
@@ -178,26 +185,33 @@ public class Caller
         return true;
     }
 
-    //--------------------- data from microphone redirects to bluetooth
+    //--------------------- data from data source redirects to bluetooth
 
-    private void buildDebugAudIn2Bt() {
-        if (debug) Log.i(TAG, "buildDebugAudIn2Bt");
+    private void buildDebug2Bt(DataSource dataSource) {
+        if (debug) Log.i(TAG, "buildDebug2Bt");
         if (iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iBtList == null) {
-            if (debug) Log.e(TAG, "buildDebugAudIn2Bt illegal parameters");
+                || iBtList == null
+                || dataSource == null) {
+            if (debug) Log.e(TAG, "buildDebug2Bt illegal parameters");
             return;
         }
 
-        StorageData<byte[][]> audIn2BtStorage = new StorageData<>(Tags.AUDIN2BT_STORE);
+        StorageData<byte[][]> toBtStorage = new StorageData<>(Tags.TOBT_STORE);
 
-        AudIn2BtLooper audIn2BtLooper = new AudIn2BtLooper(audIn2BtStorage);
+        ToBtLooper toBtLooper = null;
+
+        try {
+            toBtLooper = new ToBtLooper(toBtStorage, dataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
-                .setStorageToBt(audIn2BtStorage)
+                .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
                 .setiService(iService)
                 .setiBroadcastReceiver(iBroadcastReceiver)
@@ -206,7 +220,10 @@ public class Caller
                 .setiBtList(iBtList);
 
         connectorBluetooth.baseStart();
-        audIn2BtLooper.baseStart();
+
+        if (toBtLooper != null) {
+            toBtLooper.baseStart();
+        }
     }
 
     //--------------------- data from bluetooth redirects to dynamic
@@ -223,7 +240,13 @@ public class Caller
             return;
         }
 
-        Bt2AudOutLooper bt2AudOutLooper = new Bt2AudOutLooper();
+        Bt2AudOutLooper bt2AudOutLooper = null;
+
+        try {
+            bt2AudOutLooper = new Bt2AudOutLooper();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -236,7 +259,10 @@ public class Caller
                 .setiBtList(iBtList);
 
         connectorBluetooth.baseStart();
-        bt2AudOutLooper.baseStart();
+
+        if (bt2AudOutLooper != null) {
+            bt2AudOutLooper.baseStart();
+        }
     }
 
     //--------------------- data from microphone redirects to dynamic
@@ -244,9 +270,17 @@ public class Caller
     private void buildDebugAudIn2AudOut() {
         if (debug) Log.i(TAG, "buildDebugAudIn2AudOut");
 
-        AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper();
+        AudIn2AudOutLooper audIn2AudOutLooper = null;
 
-        audIn2AudOutLooper.baseStart();
+        try {
+            audIn2AudOutLooper = new AudIn2AudOutLooper();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (audIn2AudOutLooper != null) {
+            audIn2AudOutLooper.baseStart();
+        }
     }
 
     //--------------------- data from bluetooth loops back to bluetooth

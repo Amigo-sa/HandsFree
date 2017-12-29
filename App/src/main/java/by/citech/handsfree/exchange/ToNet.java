@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
+import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
@@ -33,6 +34,9 @@ public class ToNet
     private int netChunkSize;
     private int netFactor;
     private byte[] netChunk;
+    private ITransmitter iTransmitter;
+    private boolean isStreaming;
+    private StorageData<byte[]> source;
 
     {
         objCount++;
@@ -72,44 +76,45 @@ public class ToNet
         return true;
     }
 
-    //--------------------- non-settings
+    //--------------------- constructor
 
-    private ITransmitter iTransmitter;
-    private boolean isStreaming;
-    private StorageData<byte[]> source;
-
-    public ToNet(ITransmitter iTransmitter, StorageData<byte[]> source) {
+    public ToNet(ITransmitter iTransmitter, StorageData<byte[]> source) throws Exception {
+        if (iTransmitter == null || source == null) {
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
+        }
         this.iTransmitter = iTransmitter;
         this.source = source;
     }
 
+    //--------------------- ITransmitterCtrl
+
     public void prepareStream() {
         if (debug) Log.i(TAG, "prepareStream");
-        prepareObject();
-    }
-
-    @Override
-    public void streamOn() {
-        if (debug) Log.i(TAG, "run");
-        if (source == null) {
-            Log.e(TAG, "streamOn source is null, return");
-            return;
-        }
-        isStreaming = true;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int netChunkCount = 0;
         Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
-                " netSignificantAll is %b," +
-                " netChunkSignificantBytes is %d," +
-                " netChunkSize is %d," +
-                " netFactor is %d," +
-                " netSendSize is %d",
+                        " netSignificantAll is %b," +
+                        " netChunkSignificantBytes is %d," +
+                        " netChunkSize is %d," +
+                        " netFactor is %d," +
+                        " netSendSize is %d",
                 netSignificantAll,
                 netChunkSignificantBytes,
                 netChunkSize,
                 netFactor,
                 netSendSize
         ));
+    }
+
+    @Override
+    public void streamOn() {
+        if (debug) Log.i(TAG, "streamOn");
+        if (source == null) {
+            Log.e(TAG, "streamOn source is null, return");
+            return;
+        }
+        isStreaming = true;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int netChunkSizeActual = 0;
+        int netChunkCount = 0;
         while (isStreaming) {
             while (source.isEmpty()) {
                 try {
@@ -120,15 +125,16 @@ public class ToNet
                 if (!isStreaming) return;
             }
             netChunk = source.getData();
-            if (netChunk != null && netChunk.length != 0) {
-                if (netChunk.length != netChunkSize) {
-                    Log.e(TAG, String.format(Locale.US, "streamOn readed chunk of length %d, expected %d", netChunk.length, netChunkSize));
+            if (netChunk != null) {
+                netChunkSizeActual = netChunk.length;
+                if (netChunkSizeActual != 0 && netChunkSizeActual != netChunkSize) {
+                    Log.e(TAG, String.format(Locale.US, "streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize));
                 } else {
                     baos.write(netChunk, 0, netChunkSize);
                     netChunkCount++;
                 }
             } else {
-                Log.e(TAG, "streamOn readed invalid data from storage, netChunk is null or zero length");
+                Log.e(TAG, "streamOn readed null data from storage");
             }
             if (!isStreaming) return;
             if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
@@ -153,5 +159,6 @@ public class ToNet
         iTransmitter = null;
         source = null;
     }
+
 
 }

@@ -261,6 +261,8 @@ public class ConnectorBluetooth
     public boolean baseStop(){
         if (Settings.debug) Log.i(TAG, "baseStop");
 
+        unregisterCallerFsmListener(this, TAG);
+
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff).execute();
 

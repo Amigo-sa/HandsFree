@@ -124,6 +124,7 @@ public class ViewManager
     @Override
     public boolean baseDestroy() {
         if (debug) Log.i(TAG, "baseDestroy");
+        unregisterCallerFsmListener(this, TAG);
         scanView = null;
         mainView = null;
         viewContactEditor = null;

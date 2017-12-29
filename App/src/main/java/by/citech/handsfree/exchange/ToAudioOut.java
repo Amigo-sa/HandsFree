@@ -37,6 +37,9 @@ public class ToAudioOut
     private byte[] buffBytes;
     private short[] buffShorts;
     private int buffCnt;
+    private IReceiverReg iReceiverReg;
+    private AudioTrack audioTrack;
+    private boolean isRedirecting;
 
     {
         prepareObject();
@@ -78,15 +81,16 @@ public class ToAudioOut
         return true;
     }
 
-    //--------------------- non-settings
+    //--------------------- constructor
 
-    private IReceiverReg iReceiverReg;
-    private AudioTrack audioTrack;
-    private boolean isRedirecting;
-
-    public ToAudioOut(IReceiverReg iReceiverReg) {
+    public ToAudioOut(IReceiverReg iReceiverReg) throws Exception {
+        if (iReceiverReg == null) {
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
+        }
         this.iReceiverReg = iReceiverReg;
     }
+
+    //--------------------- ITransmitterCtrl
 
     @Override
     public void prepareRedirect() {
@@ -117,7 +121,29 @@ public class ToAudioOut
                     audioMode
             );
         }
+        Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
+                        " audioBuffIsShorts is %b," +
+                        " audioRate is %d," +
+                        " audioBuffSizeBytes is %d," +
+                        " audioBuffSizeShorts is %d",
+                audioBuffIsShorts,
+                audioRate,
+                audioBuffSizeBytes,
+                audioBuffSizeShorts
+        ));
         if (debug) Log.i(TAG, "prepareRedirect done");
+    }
+
+    @Override
+    public void redirectOn() {
+        if (isRedirecting || (audioTrack == null)) {
+            Log.e(TAG, "redirectOn already redirecting or audioTrack is null");
+            return;
+        }
+        isRedirecting = true;
+        audioTrack.play();
+        iReceiverReg.registerReceiver(this);
+        if (debug) Log.i(TAG, "redirectOn done");
     }
 
     @Override
@@ -136,27 +162,7 @@ public class ToAudioOut
         if (debug) Log.i(TAG, "redirectOff done");
     }
 
-    @Override
-    public void redirectOn() {
-        if (isRedirecting || (audioTrack == null)) {
-            Log.e(TAG, "redirectOn already redirecting or audioTrack is null");
-            return;
-        }
-        Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
-                        " audioBuffIsShorts is %b," +
-                        " audioRate is %d," +
-                        " audioBuffSizeBytes is %d," +
-                        " audioBuffSizeShorts is %d",
-                audioBuffIsShorts,
-                audioRate,
-                audioBuffSizeBytes,
-                audioBuffSizeShorts
-        ));
-        isRedirecting = true;
-        audioTrack.play();
-        iReceiverReg.registerReceiver(this);
-        if (debug) Log.i(TAG, "redirectOn done");
-    }
+    //--------------------- IReceiver
 
     @Override
     public void onReceiveData(byte[] data) {

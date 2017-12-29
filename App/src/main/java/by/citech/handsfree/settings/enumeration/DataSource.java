@@ -4,5 +4,6 @@ public enum DataSource {
     MICROPHONE,
     FILE,
     BLUETOOTH,
-    OBJECT
+    OBJECT,
+    DATAGENERATOR
 }

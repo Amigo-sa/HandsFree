@@ -95,7 +95,7 @@ public class AudIn2AudOutLooper
 
     //--------------------- constructor
 
-    public AudIn2AudOutLooper() {
+    public AudIn2AudOutLooper() throws Exception {
         iReceiverCtrl = new ToAudioOut(this);
         iTransmitterCtrl = new FromAudioIn(this);
     }
@@ -114,6 +114,7 @@ public class AudIn2AudOutLooper
     @Override
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
+        unregisterCallerFsmListener(this, TAG);
         stopDebug();
         iTransmitterCtrl = null;
         iReceiverCtrl = null;

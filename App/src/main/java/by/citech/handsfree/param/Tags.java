@@ -46,11 +46,11 @@ public class Tags {
     public static final String AUDIN2AUDOUT_STORE  = "WSD_AUDIN2AUDOUT_STORE";
     public static final String AUDIN_STORE         = "WSD_AUDIN_STORE";
     public static final String AUDOUT_SOURCE       = "WSD_AUDOUT_SOURCE";
-    public static final String AUDIN2BT_STORE      = "WSD_MIC2BT_STORE";
+    public static final String TOBT_STORE = "WSD_MIC2BT_STORE";
     public static final String TO_BT_STORE         = "WSD_2BT_STORE";
     public static final String FROM_BT_STORE       = "WSD_4BT_STORE";
 
-    public static final String AudioCodec = "WSD_AUDIOCODEC";
+    public static final String AudioCodec          = "WSD_AUDIOCODEC";
     public static final String CONTACT             = "WSD_CONTACT";
     public static final String CONTACTOR           = "WSD_CONTACTOR";
     public static final String CONTACTS_DB_CTRL    = "WSD_CONTACTS_DB_CTRL";
@@ -80,4 +80,5 @@ public class Tags {
     public static final String HandlerExtended     = "WSD_HANDLER_EXTENDED";
     public static final String CallerFsm           = "WSD_CallerFsm";
     public static final String DataGenerator       = "WSD_DataGenerator";
+    public static final String FromDataGenerator   = "WSD_FromDataGenerator";
 }

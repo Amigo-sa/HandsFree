@@ -83,7 +83,7 @@ public class Bt2AudOutLooper
 
     //--------------------- constructor
 
-    public Bt2AudOutLooper() {
+    public Bt2AudOutLooper() throws Exception {
         iReceiverCtrl = new ToAudioOut(this);
     }
 
@@ -101,6 +101,7 @@ public class Bt2AudOutLooper
     @Override
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
+        unregisterCallerFsmListener(this, TAG);
         stopDebug();
         codecType = null;
         codec = null;

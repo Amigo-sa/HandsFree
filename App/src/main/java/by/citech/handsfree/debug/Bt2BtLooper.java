@@ -118,6 +118,7 @@ public class Bt2BtLooper
     @Override
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
+        unregisterCallerFsmListener(this, TAG);
         stopDebug();
         isActive = false;
         dataBuff = null;

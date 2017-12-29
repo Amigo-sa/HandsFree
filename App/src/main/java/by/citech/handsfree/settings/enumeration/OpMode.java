@@ -11,6 +11,7 @@ public enum OpMode implements ISettingEnum<OpMode> {
     Record {},
     Bt2AudOut {},
     AudIn2Bt {},
+    DataGen2Bt {},
     AudIn2AudOut {};
 
     @Override public String getSettingName() {

@@ -5,6 +5,7 @@ import android.util.Log;
 import by.citech.handsfree.codec.audio.AudioCodec;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.exchange.FromDataGenerator;
 import by.citech.handsfree.logic.CallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
@@ -25,9 +26,10 @@ import by.citech.handsfree.exchange.ToBluetooth;
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.threading.IThreadManager;
 
-public class AudIn2BtLooper
+public class ToBtLooper
         implements IBase, ITransmitter, IReceiverReg, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
 
@@ -83,8 +85,16 @@ public class AudIn2BtLooper
 
     //--------------------- constructor
 
-    public AudIn2BtLooper(StorageData<byte[][]> micToBtStorage) {
-        iTransmitterCtrl = new FromAudioIn(this);
+    public ToBtLooper(StorageData<byte[][]> micToBtStorage, DataSource dataSource) throws Exception {
+        if (dataSource == null) {
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
+        }
+        switch (dataSource) {
+            case MICROPHONE:
+                iTransmitterCtrl = new FromAudioIn(this);
+            case BLUETOOTH:
+                iTransmitterCtrl = new FromDataGenerator(this, codecType.getDecodedShortsSize(), 10, true);
+        }
         iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
     }
 
@@ -102,6 +112,7 @@ public class AudIn2BtLooper
     @Override
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
+        unregisterCallerFsmListener(this, TAG);
         stopDebug();
         iReceiverCtrl = null;
         iTransmitterCtrl = null;

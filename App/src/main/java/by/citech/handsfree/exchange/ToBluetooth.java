@@ -5,14 +5,17 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.Locale;
 
+import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.ITrafficUpdate;
+import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.settings.SeverityLevel;
 
 public class ToBluetooth
-        implements IReceiverCtrl, IReceiver, ITrafficUpdate {
+        implements IReceiverCtrl, IReceiver, ITrafficUpdate, IPrepareObject, ISettingsCtrl {
 
     private static final String TAG = Tags.TO_BLUETOOTH;
     private static final boolean debug = Settings.debug;
@@ -26,40 +29,46 @@ public class ToBluetooth
     private boolean btSinglePacket;
     private boolean btSignificantAll;
     private byte[][] dataAssembled;
+    private IReceiverReg iReceiverReg;
+    //  private TrafficInfo trafficInfo;
+    private boolean isRedirecting = false;
+    private StorageData<byte[][]> storage;
 
     {
-        initiate();
+        prepareObject();
     }
 
-    private void initiate() {
+    @Override
+    public boolean prepareObject() {
         takeSettings();
-        applySettings();
+        applySettings(null);
+        return true;
     }
 
-    private void takeSettings() {
+    @Override
+    public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         btSignificantAll = Settings.btSignificantAll;
         btSinglePacket = Settings.btSinglePacket;
         btFactor = Settings.btFactor;
         btToBtSendSize = Settings.bt2btPacketSize;
         btSignificantBytes = btSignificantAll ? btToBtSendSize : Settings.btSignificantBytes;
         btSendSize = Settings.btSendSize;
+        return true;
     }
 
-    private void applySettings() {
+    @Override
+    public boolean applySettings(SeverityLevel severityLevel) {
+        ISettingsCtrl.super.applySettings(severityLevel);
         dataAssembled = new byte[btFactor][btToBtSendSize];
+        return true;
     }
 
-    //--------------------- non-settings
+    //--------------------- constructor
 
-    private IReceiverReg iReceiverReg;
-//  private TrafficInfo trafficInfo;
-    private boolean isRedirecting = false;
-    private StorageData<byte[][]> storage;
-
-    public ToBluetooth(IReceiverReg iReceiverReg, StorageData<byte[][]> storage) {
+    public ToBluetooth(IReceiverReg iReceiverReg, StorageData<byte[][]> storage) throws Exception {
         if (iReceiverReg == null || storage == null) {
-            Log.e(TAG, "ToBluetooth" + StatusMessages.ERR_PARAMETERS);
-            return;
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }
         this.iReceiverReg = iReceiverReg;
         this.storage = storage;
@@ -71,13 +80,6 @@ public class ToBluetooth
     @Override
     public void prepareRedirect() {
         if (debug) Log.i(TAG, "prepareRedirect");
-    }
-
-    @Override
-    public void redirectOn() {
-        if (debug) Log.i(TAG, "redirectOn");
-        isRedirecting = true;
-        iReceiverReg.registerReceiver(this);
         Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
                         " btSignificantAll is %b," +
                         " btSinglePacket is %b," +
@@ -92,6 +94,13 @@ public class ToBluetooth
                 btSignificantBytes,
                 btSendSize
         ));
+    }
+
+    @Override
+    public void redirectOn() {
+        if (debug) Log.i(TAG, "redirectOn");
+        isRedirecting = true;
+        iReceiverReg.registerReceiver(this);
         if (Settings.debug) Log.i(TAG, "redirectOn done");
     }
 

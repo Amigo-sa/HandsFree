@@ -152,6 +152,7 @@ public class ConnectorNet
     @Override
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
+        unregisterCallerFsmListener(this, TAG);
         isBaseStop = true;
         addRunnable(netStop);
         IBase.super.baseStop();
