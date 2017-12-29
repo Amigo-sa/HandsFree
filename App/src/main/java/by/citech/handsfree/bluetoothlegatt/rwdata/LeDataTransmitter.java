@@ -109,7 +109,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
     public void enableTransmitData() {
         if (Settings.debug) Log.i(TAG, "enableTransmitData()");
 
-        setMTU();
+        //setMTU();
         if (!characteristics.isEmpty()) {
             notifyThreadStart();
 //            characteristic_write = characteristics.getWriteCharacteristic();
@@ -119,7 +119,6 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
             mIBluetoothListener.disconnectToast();
         }
     }
-
 
 
 //    //отключаем поток записи и нотификации

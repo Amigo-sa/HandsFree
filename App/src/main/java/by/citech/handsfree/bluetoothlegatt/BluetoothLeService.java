@@ -343,6 +343,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             if (Settings.debug) Log.i(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
         if (Settings.debug) Log.i(TAG, "setCharacteristicNotification " + enabled);
         if (READ_BYTES.equals(characteristic.getUuid())) {
