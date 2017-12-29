@@ -8,8 +8,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import by.citech.handsfree.common.EConnection;
-import by.citech.handsfree.exchange.IReceiver;
-import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
@@ -22,11 +20,9 @@ import okio.ByteString;
 import by.citech.handsfree.param.Messages;
 import by.citech.handsfree.param.StatusMessages;
 
-import static by.citech.handsfree.util.Decode.bytesToHexMark1;
-
 public class ClientCtrlOkWebSocket
         extends WebSocketListener
-        implements IClientCtrl, ITransmitter, IReceiverReg {
+        implements IClientCtrl, ITransmitter {
 
     private static final String STAG = Tags.CLT_WSOCKETCTRL;
     private static final boolean debug = Settings.debug;
@@ -38,7 +34,7 @@ public class ClientCtrlOkWebSocket
     private WebSocket webSocket;
     private String url;
     private Handler handler;
-    private IReceiver listener;
+    private ITransmitter receiver;
     private EConnection state;
 
     {
@@ -53,13 +49,25 @@ public class ClientCtrlOkWebSocket
         this.handler = handler;
     }
 
-    //--------------------- state
+    //--------------------- IClientCtrl
 
-    private void procState(EConnection state) {
-        if (debug) Log.i(TAG, String.format(
-                "procState from %s to %s, connections count is %d",
-                this.state.name(), state.name(), client.connectionPool().connectionCount()));
-        this.state = state;
+    @Override
+    public IClientCtrl startClient() {
+        if (debug) Log.i(TAG, "startClient");
+        client = new OkHttpClient.Builder()
+                .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
+                .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(Settings.reconnectOnFail)
+                .build();
+        Request request = new Request.Builder()
+//              .url("ws://echo.network.org")
+                .url(url)
+                .build();
+        client.newWebSocket(request, this);
+        procState(EConnection.Opening);
+        // Trigger shutdown of the dispatcher's executor so this process can exit cleanly.
+        client.dispatcher().executorService().shutdown();
+        return this;
     }
 
     //--------------------- IConnCtrl
@@ -87,26 +95,7 @@ public class ClientCtrlOkWebSocket
         return state == EConnection.Opened || state == EConnection.Opening;
     }
 
-    //--------------------- IClientCtrl
-
-    @Override
-    public IClientCtrl startClient() {
-        if (debug) Log.i(TAG, "startClient");
-        client = new OkHttpClient.Builder()
-                .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
-                .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
-                .retryOnConnectionFailure(Settings.reconnectOnFail)
-                .build();
-        Request request = new Request.Builder()
-//              .url("ws://echo.network.org")
-                .url(url)
-                .build();
-        client.newWebSocket(request, this);
-        procState(EConnection.Opening);
-        // Trigger shutdown of the dispatcher's executor so this process can exit cleanly.
-        client.dispatcher().executorService().shutdown();
-        return this;
-    }
+    //--------------------- IExchangeCtrl
 
     @Override
     public ITransmitter getTransmitter() {
@@ -115,17 +104,9 @@ public class ClientCtrlOkWebSocket
     }
 
     @Override
-    public IReceiverReg getReceiverReg() {
-        if (debug) Log.i(TAG, "getReceiverReg");
-        return this;
-    }
-
-    //--------------------- IReceiverReg
-
-    @Override
-    public void registerReceiver(IReceiver listener) {
-        if (debug) Log.i(TAG, "registerReceiver");
-        this.listener = listener;
+    public void setReceiver(ITransmitter iTransmitter) {
+        if (debug) Log.i(TAG, "setReceiver");
+        this.receiver = iTransmitter;
     }
 
     //--------------------- ITransmitter
@@ -154,6 +135,13 @@ public class ClientCtrlOkWebSocket
 
     //--------------------- main
 
+    private void procState(EConnection state) {
+        if (debug) Log.i(TAG, String.format(
+                "procState from %s to %s, connections count is %d",
+                this.state.name(), state.name(), client.connectionPool().connectionCount()));
+        this.state = state;
+    }
+
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
         if (debug) Log.i(TAG, "onOpen");
@@ -169,9 +157,9 @@ public class ClientCtrlOkWebSocket
         if (debug) Log.i(TAG, String.format(Locale.US,
                 "onMessage received bytes: %d bytes, to hex: %s",
                 bytes.size(), bytes.hex()));
-        if (listener != null) {
+        if (receiver != null) {
             if (debug) Log.i(TAG, "onMessage redirecting");
-            listener.onReceiveData(bytes.toByteArray());
+            receiver.sendData(bytes.toByteArray());
         } else {
             if (debug) Log.i(TAG, "onMessage not redirecting");
             handler.sendEmptyMessage(StatusMessages.CLT_ONMESSAGE_BYTES);

@@ -621,6 +621,7 @@ public class ConnectorBluetooth
                 break;
             case StartDebug:
                 switch (Settings.opMode) {
+                    case DataGen2Bt:
                     case AudIn2Bt:
                         enableTransmitData();
                         break;

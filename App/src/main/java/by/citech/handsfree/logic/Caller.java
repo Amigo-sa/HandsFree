@@ -137,30 +137,28 @@ public class Caller
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
-        prepareObject();
-        CallerFsm.getInstance().baseStart();
         CallUi.getInstance().baseStart();
         switch (opMode) {
             case Bt2Bt:
-                buildDebugBt2Bt();
+                buildBt2Bt();
                 break;
             case Net2Net:
-                buildDebugNet2Net();
+                buildNet2Net();
                 break;
             case Record:
-                buildDebugRecord();
+                buildRecord();
                 break;
             case Bt2AudOut:
                 buildBt2AudOut();
                 break;
             case AudIn2AudOut:
-                buildDebugAudIn2AudOut();
+                buildAudIn2AudOut();
                 break;
             case AudIn2Bt:
-                buildDebug2Bt(MICROPHONE);
+                build2Bt(MICROPHONE);
                 break;
             case DataGen2Bt:
-                buildDebug2Bt(DATAGENERATOR);
+                build2Bt(DATAGENERATOR);
                 break;
             case Normal:
             default:
@@ -185,17 +183,57 @@ public class Caller
         return true;
     }
 
+    //--------------------- data from bluetooth redirects to network and vice versa
+
+    private void buildNormal() {
+        if (debug) Log.i(TAG, "buildNormal");
+        if (iNetInfoGetter == null
+                || iBluetoothListener == null
+                || iService == null
+                || iBroadcastReceiver == null
+                || iBtToUiCtrl == null
+                || iMsgToUi == null
+                || iBtList == null) {
+            Log.e(TAG, "buildNormal illegal parameters");
+            return;
+        }
+
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
+        HandlerExtended handlerExtended = new HandlerExtended(ConnectorNet.getInstance());
+
+        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(handlerExtended)
+                .setStorageFromBt(storageBtToNet)
+                .setStorageToBt(storageNetToBt)
+                .setiService(iService)
+                .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiBtToUiCtrl(iBtToUiCtrl)
+                .setiMsgToUi(iMsgToUi)
+                .setiBtList(iBtList);
+
+        ConnectorNet connectorNet = ConnectorNet.getInstance()
+                .setStorageToNet(storageBtToNet)
+                .setStorageFromNet(storageNetToBt)
+                .setiNetInfoGetter(iNetInfoGetter)
+                .setHandler(handlerExtended);
+
+        connectorBluetooth.baseStart();
+        connectorNet.baseStart();
+    }
+
     //--------------------- data from data source redirects to bluetooth
 
-    private void buildDebug2Bt(DataSource dataSource) {
-        if (debug) Log.i(TAG, "buildDebug2Bt");
+    private void build2Bt(DataSource dataSource) {
+        if (debug) Log.i(TAG, "build2Bt");
         if (iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null
                 || dataSource == null) {
-            if (debug) Log.e(TAG, "buildDebug2Bt illegal parameters");
+            if (debug) Log.e(TAG, "build2Bt illegal parameters");
             return;
         }
 
@@ -240,13 +278,7 @@ public class Caller
             return;
         }
 
-        Bt2AudOutLooper bt2AudOutLooper = null;
-
-        try {
-            bt2AudOutLooper = new Bt2AudOutLooper();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Bt2AudOutLooper bt2AudOutLooper = new Bt2AudOutLooper();
 
         ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
@@ -259,41 +291,29 @@ public class Caller
                 .setiBtList(iBtList);
 
         connectorBluetooth.baseStart();
-
-        if (bt2AudOutLooper != null) {
-            bt2AudOutLooper.baseStart();
-        }
+        bt2AudOutLooper.baseStart();
     }
 
     //--------------------- data from microphone redirects to dynamic
 
-    private void buildDebugAudIn2AudOut() {
-        if (debug) Log.i(TAG, "buildDebugAudIn2AudOut");
+    private void buildAudIn2AudOut() {
+        if (debug) Log.i(TAG, "buildAudIn2AudOut");
 
-        AudIn2AudOutLooper audIn2AudOutLooper = null;
-
-        try {
-            audIn2AudOutLooper = new AudIn2AudOutLooper();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (audIn2AudOutLooper != null) {
-            audIn2AudOutLooper.baseStart();
-        }
+        AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper(true);
+        audIn2AudOutLooper.baseStart();
     }
 
     //--------------------- data from bluetooth loops back to bluetooth
 
-    private void buildDebugBt2Bt() {
-        if (debug) Log.i(TAG, "buildDebugBt2Bt");
+    private void buildBt2Bt() {
+        if (debug) Log.i(TAG, "buildBt2Bt");
         if (iBluetoothListener == null
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
-            if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
+            if (debug) Log.e(TAG, "buildBt2Bt illegal parameters");
             return;
         }
 
@@ -319,15 +339,15 @@ public class Caller
 
     //--------------------- data from bluetooth recorded and looped back to bluetooth
 
-    private void buildDebugRecord() {
-        if (debug) Log.i(TAG, "buildDebugRecord");
+    private void buildRecord() {
+        if (debug) Log.i(TAG, "buildRecord");
         if (iBluetoothListener == null
                 || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
-            if (debug) Log.e(TAG, "buildDebugBt2Bt illegal parameters");
+            if (debug) Log.e(TAG, "buildBt2Bt illegal parameters");
             return;
         }
 
@@ -353,48 +373,8 @@ public class Caller
 
     //--------------------- data from network looped back to network
 
-    private void buildDebugNet2Net() {
-        if (debug) Log.i(TAG, "buildDebugNet2Net");
-    }
-
-    //--------------------- data from bluetooth redirects to network and vice versa
-
-    private void buildNormal() {
-        if (debug) Log.i(TAG, "buildNormal");
-        if (iNetInfoGetter == null
-                || iBluetoothListener == null
-                || iService == null
-                || iBroadcastReceiver == null
-                || iBtToUiCtrl == null
-                || iMsgToUi == null
-                || iBtList == null) {
-            Log.e(TAG, "buildNormal illegal parameters");
-            return;
-        }
-
-        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
-        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
-        HandlerExtended handlerExtended = new HandlerExtended(ConnectorNet.getInstance());
-
-        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
-                .setiBluetoothListener(iBluetoothListener)
-                .setmHandler(handlerExtended)
-                .setStorageFromBt(storageBtToNet)
-                .setStorageToBt(storageNetToBt)
-                .setiService(iService)
-                .setiBroadcastReceiver(iBroadcastReceiver)
-                .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi)
-                .setiBtList(iBtList);
-
-        ConnectorNet connectorNet = ConnectorNet.getInstance()
-                .setStorageToNet(storageBtToNet)
-                .setStorageFromNet(storageNetToBt)
-                .setiNetInfoGetter(iNetInfoGetter)
-                .setHandler(handlerExtended);
-
-        connectorBluetooth.baseStart();
-        connectorNet.baseStart();
+    private void buildNet2Net() {
+        if (debug) Log.i(TAG, "buildNet2Net");
     }
 
 }

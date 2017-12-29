@@ -27,11 +27,10 @@ public class FromDataGenerator
 
     //--------------------- constructor
 
-    public FromDataGenerator(ITransmitter iTransmitter, int buffSize, int buffPeriod, boolean isShorts) throws Exception {
-        if (iTransmitter == null || buffSize < 1 || buffPeriod < 1) {
+    public FromDataGenerator(int buffSize, int buffPeriod, boolean isShorts) throws Exception {
+        if (buffSize < 1 || buffPeriod < 1) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }
-        this.iTransmitter = iTransmitter;
         this.buffSize = buffSize;
         this.buffPeriod = buffPeriod;
         this.isShorts = isShorts;
@@ -45,14 +44,28 @@ public class FromDataGenerator
     //--------------------- ITransmitterCtrl
 
     @Override
-    public void prepareStream() {
-        if (debug) Log.i(TAG, "prepareStream");
+    public void prepareStream(ITransmitter iTransmitter) throws Exception {
+        if (iTransmitter == null) {
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
+        } else {
+            if (debug) Log.i(TAG, "prepareStream");
+            this.iTransmitter = iTransmitter;
+        }
         if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
                         " buffSize is %d," +
                         " isShorts is %b",
                 buffSize,
                 isShorts
         ));
+    }
+
+    @Override
+    public void finishStream() {
+        if (debug) Log.i(TAG, "finishStream");
+        streamOff();
+        iTransmitter = null;
+        shortsBuffer = null;
+        bytesBuffer = null;
     }
 
     @Override
@@ -77,6 +90,7 @@ public class FromDataGenerator
     public void streamOff() {
         if (debug) Log.i(TAG, "streamOff");
         isStreaming = false;
+        chunkNumber = 0;
     }
 
     //--------------------- main

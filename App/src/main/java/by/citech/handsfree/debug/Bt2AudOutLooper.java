@@ -2,13 +2,10 @@ package by.citech.handsfree.debug;
 
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.Locale;
-
 import by.citech.handsfree.codec.audio.AudioCodec;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.logic.CallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
@@ -18,9 +15,6 @@ import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.SeverityLevel;
 import by.citech.handsfree.codec.audio.AudioCodecType;
-import by.citech.handsfree.exchange.IReceiver;
-import by.citech.handsfree.exchange.IReceiverCtrl;
-import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ToAudioOut;
 import by.citech.handsfree.common.IBase;
@@ -28,7 +22,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
 public class Bt2AudOutLooper
-        implements IBase, ITransmitter, IReceiverReg, IPrepareObject,
+        implements IBase, ITransmitter, IPrepareObject,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
 
     private static final String STAG = Tags.BT2AUDOUT_LOOPER;
@@ -44,8 +38,8 @@ public class Bt2AudOutLooper
 
     private AudioCodecType codecType;
     private ICodec codec;
-    private IReceiver iReceiver;
-    private IReceiverCtrl iReceiverCtrl;
+    private ITransmitter iTransmitter;
+    private ITransmitterCtrl iTransmitterCtrl;
     private boolean isSession;
 
     {
@@ -83,8 +77,10 @@ public class Bt2AudOutLooper
 
     //--------------------- constructor
 
-    public Bt2AudOutLooper() throws Exception {
-        iReceiverCtrl = new ToAudioOut(this);
+    public Bt2AudOutLooper() {
+        ToAudioOut toAudioOut = new ToAudioOut();
+        iTransmitterCtrl = toAudioOut;
+        iTransmitter = toAudioOut;
     }
 
     //--------------------- IBase
@@ -94,7 +90,11 @@ public class Bt2AudOutLooper
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         registerCallerFsmListener(this, TAG);
-        prepareObject();
+        try {
+            iTransmitterCtrl.prepareStream(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -103,9 +103,11 @@ public class Bt2AudOutLooper
         if (debug) Log.i(TAG, "baseStop");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
+        iTransmitterCtrl.finishStream();
+        iTransmitterCtrl = null;
+        iTransmitter = null;
         codecType = null;
         codec = null;
-        iReceiverCtrl = null;
         IBase.super.baseStop();
         return true;
     }
@@ -128,28 +130,18 @@ public class Bt2AudOutLooper
 
     private void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        if (iReceiver == null) {
-            iReceiverCtrl.prepareRedirect();
-            iReceiverCtrl.redirectOn();
-            codec.initiateEncoder();
-            codec.initiateDecoder();
-        }
+        iTransmitterCtrl.streamOn();
+        codec.initiateEncoder();
+        codec.initiateDecoder();
     }
 
     private void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
-        iReceiver = null;
-        iReceiverCtrl.redirectOff();
+        iTransmitterCtrl.streamOff();
         isSession = false;
     }
 
     //--------------------- main
-
-    @Override
-    public void registerReceiver(IReceiver iReceiver) {
-        if (debug) Log.i(TAG, "registerReceiver");
-        this.iReceiver = iReceiver;
-    }
 
     @Override
     public void sendData(byte[] data) {
@@ -158,21 +150,19 @@ public class Bt2AudOutLooper
             return;
         }
         short[] dataDecoded = codec.getDecodedData(data);
-//        if (debug) Log.w(TAG, String.format(Locale.US,
-//                "sendData byte[] data received length is %d, toString is %s",
-//                data.length,
-//                Arrays.toString(data)));
-//        if (debug) Log.w(TAG, String.format(Locale.US,
-//                "sendData byte[] data decoded length is %d, toString is %s",
-//                dataDecoded.length,
-//                Arrays.toString(dataDecoded)));
-        if (iReceiver != null) {
-            if (!isSession) {
-                if (debug) Log.i(TAG, "sendData byte[], first sendData on session");
-                isSession = true;
-            }
-            iReceiver.onReceiveData(dataDecoded);
+//      if (debug) Log.w(TAG, String.format(Locale.US,
+//              "sendData byte[] data received length is %d, toString is %s",
+//              data.length,
+//              Arrays.toString(data)));
+//      if (debug) Log.w(TAG, String.format(Locale.US,
+//              "sendData byte[] data decoded length is %d, toString is %s",
+//              dataDecoded.length,
+//              Arrays.toString(dataDecoded)));
+        if (!isSession) {
+            if (debug) Log.i(TAG, "sendData byte[], first sendData on session");
+            isSession = true;
         }
+        iTransmitter.sendData(dataDecoded);
     }
 
 }

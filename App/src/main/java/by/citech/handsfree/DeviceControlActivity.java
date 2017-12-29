@@ -66,6 +66,7 @@ import by.citech.handsfree.gui.IGetView;
 import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.logic.Caller;
+import by.citech.handsfree.logic.CallerFsm;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.logic.ICallUi;
@@ -102,7 +103,6 @@ public class DeviceControlActivity
     private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
     private ViewManager viewManager;
-//    private ViewManager viewManager;
     private ActionBar actionBar;
 
     // список найденных устройств
@@ -138,8 +138,8 @@ public class DeviceControlActivity
         opMode = Settings.opMode;
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
+        CallerFsm.getInstance().baseCreate();
         viewManager = new ViewManager();
-//        viewManager = new ViewManager();
         viewManager.setiGetter(this);
         viewManager.setDefaultView();
         viewManager.baseCreate();
@@ -195,7 +195,6 @@ public class DeviceControlActivity
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
 
-//        Caller.getInstance()
         Caller.getInstance()
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
@@ -273,8 +272,8 @@ public class DeviceControlActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        addRunnable(() -> ResourceManager.getInstance().destroy());
         if (debug) Log.w(TAG, "onDestroy");
+        addRunnable(() -> ResourceManager.getInstance().destroy());
     }
 
     //-------------------------- menu

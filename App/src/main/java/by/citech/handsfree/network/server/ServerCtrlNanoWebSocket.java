@@ -9,8 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import by.citech.handsfree.common.EConnection;
-import by.citech.handsfree.exchange.IReceiver;
-import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.network.server.connection.protocols.http.IHTTPSession;
@@ -24,7 +22,7 @@ import by.citech.handsfree.param.Tags;
 
 public class ServerCtrlNanoWebSocket
         extends NanoWSD
-        implements IServerCtrl, IReceiverReg, ITransmitter {
+        implements IServerCtrl, ITransmitter {
 
     private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
 
@@ -36,7 +34,7 @@ public class ServerCtrlNanoWebSocket
 
     private WebSocket webSocket;
     private Handler handler;
-    private IReceiver listener;
+    private ITransmitter receiver;
     private EConnection state;
 
     {
@@ -56,13 +54,26 @@ public class ServerCtrlNanoWebSocket
         return webSocket;
     }
 
-    //--------------------- state
+    //--------------------- IServerCtrl
 
-    private void procState(EConnection state) {
-        if (debug) Log.i(TAG, String.format(
-                "procState from %s to %s",
-                this.state.name(), state.name()));
-        this.state = state;
+    @Override
+    public IServerCtrl startServer(int serverTimeout) throws IOException {
+        if (debug) Log.i(TAG, "startServer");
+        start(serverTimeout);
+        return this;
+    }
+
+    @Override
+    public boolean isAliveServer() {
+        boolean isAliveServer = isAlive();
+        if (debug) Log.i(TAG, "isAliveServer is alive: " + isAliveServer);
+        return isAliveServer;
+    }
+
+    @Override
+    public void stopServer() {
+        if (debug) Log.i(TAG, "stopServer");
+        stop();
     }
 
     //--------------------- ITransmitter
@@ -106,31 +117,9 @@ public class ServerCtrlNanoWebSocket
     }
 
     @Override
-    public IReceiverReg getReceiverReg() {
-        if (debug) Log.i(TAG, "getReceiverReg");
-        return this;
-    }
-
-    //--------------------- IServerCtrl
-
-    @Override
-    public IServerCtrl startServer(int serverTimeout) throws IOException {
-        if (debug) Log.i(TAG, "startServer");
-        start(serverTimeout);
-        return this;
-    }
-
-    @Override
-    public boolean isAliveServer() {
-        boolean isAliveServer = isAlive();
-        if (debug) Log.i(TAG, "isAliveServer is alive: " + isAliveServer);
-        return isAliveServer;
-    }
-
-    @Override
-    public void stopServer() {
-        if (debug) Log.i(TAG, "stopServer");
-        stop();
+    public void setReceiver(ITransmitter iTransmitter) {
+        if (debug) Log.i(TAG, "setReceiver");
+        this.receiver = iTransmitter;
     }
 
     //--------------------- IConnCtrl
@@ -164,15 +153,16 @@ public class ServerCtrlNanoWebSocket
         return webSocket != null && webSocket.isOpen();
     }
 
-    //--------------------- IReceiverReg
+    //--------------------- main
 
-    @Override
-    public void registerReceiver(IReceiver listener) {
-        if (debug) Log.i(TAG, "registerReceiver");
-        this.listener = listener;
+    private void procState(EConnection state) {
+        if (debug) Log.i(TAG, String.format(
+                "procState from %s to %s",
+                this.state.name(), state.name()));
+        this.state = state;
     }
 
-//  private static class DebugWebSocket extends WebSocket {
+    //  private static class DebugWebSocket extends WebSocket {
     private class DebugWebSocket extends WebSocket {
 
         private DebugWebSocket(IHTTPSession handshakeRequest) {
@@ -209,9 +199,9 @@ public class ServerCtrlNanoWebSocket
             if (debug) Log.i(TAG, String.format(Locale.US,
                     "onMessage received bytes: %d bytes, toString: %s",
                     receivedData.length, Arrays.toString(receivedData)));
-            if (listener != null) {
+            if (receiver != null) {
                 if (debug) Log.i(TAG, "onMessage redirecting");
-                listener.onReceiveData(receivedData);
+                receiver.sendData(receivedData);
             } else {
                 if (debug) Log.i(TAG, "onMessage not redirecting");
                 handler.sendEmptyMessage(StatusMessages.SRV_ONMESSAGE);

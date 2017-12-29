@@ -19,6 +19,12 @@ public class Presetter {
                     Settings.btSinglePacket = false;
                     Settings.btFactor = Settings.bt2NetFactor;
                     break;
+                case DataGen2Bt:
+                    Settings.opMode = OpMode.DataGen2Bt;
+                    Settings.btSinglePacket = true;
+                    Settings.audioSingleFrame = true;
+                    Settings.audioBuffIsShorts = true;
+                    break;
                 case AudIn2Bt:
                     Settings.opMode = OpMode.AudIn2Bt;
                     Settings.btSinglePacket = true;

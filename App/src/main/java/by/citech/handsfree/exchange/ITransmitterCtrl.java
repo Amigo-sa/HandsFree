@@ -1,7 +1,8 @@
 package by.citech.handsfree.exchange;
 
 public interface ITransmitterCtrl {
-    void prepareStream();
-    void streamOff();
+    void prepareStream(ITransmitter iTransmitter) throws Exception;
     void streamOn();
+    void streamOff();
+    void finishStream();
 }

@@ -161,6 +161,7 @@ public class ViewManager
                 disableGray(getBtnRed(), "STOP");
                 getBtnChangeDevice().setVisibility(View.VISIBLE);
                 break;
+            case DataGen2Bt:
             case AudIn2Bt:
                 enableBtnCall(getBtnGreen(), "TRANSMITTING");
                 disableGray(getBtnRed(), "STOP");
@@ -411,6 +412,7 @@ public class ViewManager
         switch (why) {
             case StartDebug:
                 switch (opMode) {
+                    case DataGen2Bt:
                     case Bt2AudOut:
                     case AudIn2Bt:
                     case AudIn2AudOut:
@@ -440,6 +442,7 @@ public class ViewManager
                 break;
             case StopDebug:
                 switch (opMode) {
+                    case DataGen2Bt:
                     case Bt2AudOut:
                     case AudIn2Bt:
                     case AudIn2AudOut:

@@ -17,9 +17,6 @@ import by.citech.handsfree.settings.SeverityLevel;
 import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.FromAudioIn;
-import by.citech.handsfree.exchange.IReceiver;
-import by.citech.handsfree.exchange.IReceiverCtrl;
-import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.exchange.ToBluetooth;
@@ -30,7 +27,7 @@ import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class ToBtLooper
-        implements IBase, ITransmitter, IReceiverReg, IPrepareObject, IThreadManager,
+        implements IBase, ITransmitter, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
 
     private static final String STAG = Tags.AUDIN2BT_LOOPER;
@@ -46,9 +43,8 @@ public class ToBtLooper
 
     private AudioCodecType codecType;
     private ICodec codec;
-    private IReceiverCtrl iReceiverCtrl;
-    private ITransmitterCtrl iTransmitterCtrl;
-    private IReceiver iReceiver;
+    private ITransmitterCtrl fromCtrl, toCtrl;
+    private ITransmitter iTransmitter;
     private boolean isSession;
 
     {
@@ -86,16 +82,20 @@ public class ToBtLooper
     //--------------------- constructor
 
     public ToBtLooper(StorageData<byte[][]> micToBtStorage, DataSource dataSource) throws Exception {
-        if (dataSource == null) {
+        if (dataSource == null || micToBtStorage == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }
         switch (dataSource) {
             case MICROPHONE:
-                iTransmitterCtrl = new FromAudioIn(this);
-            case BLUETOOTH:
-                iTransmitterCtrl = new FromDataGenerator(this, codecType.getDecodedShortsSize(), 10, true);
+                fromCtrl = new FromAudioIn();
+                break;
+            case DATAGENERATOR:
+                fromCtrl = new FromDataGenerator(codecType.getDecodedShortsSize(), 10, true);
+                break;
         }
-        iReceiverCtrl = new ToBluetooth(this, micToBtStorage);
+        ToBluetooth toBluetooth = new ToBluetooth(micToBtStorage);
+        iTransmitter = toBluetooth;
+        toCtrl = toBluetooth;
     }
 
     //--------------------- IBase
@@ -105,8 +105,13 @@ public class ToBtLooper
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         registerCallerFsmListener(this, TAG);
-        prepareObject();
-        return false;
+        try {
+            fromCtrl.prepareStream(this);
+            toCtrl.prepareStream(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override
@@ -114,8 +119,10 @@ public class ToBtLooper
         if (debug) Log.i(TAG, "baseStop");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
-        iReceiverCtrl = null;
-        iTransmitterCtrl = null;
+        toCtrl.finishStream();
+        fromCtrl.finishStream();
+        toCtrl = null;
+        fromCtrl = null;
         codecType = null;
         codec = null;
         IBase.super.baseStop();
@@ -140,21 +147,16 @@ public class ToBtLooper
 
     private void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        if (iReceiver == null) {
-            codec.initiateEncoder();
-            codec.initiateDecoder();
-            iReceiverCtrl.prepareRedirect();
-            iReceiverCtrl.redirectOn();
-            iTransmitterCtrl.prepareStream();
-            addRunnable(() -> iTransmitterCtrl.streamOn());
-        }
+        codec.initiateEncoder();
+        codec.initiateDecoder();
+        toCtrl.streamOn();
+        addRunnable(() -> fromCtrl.streamOn());
     }
 
     private void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
-        iReceiver = null;
-        iReceiverCtrl.redirectOff();
-        iTransmitterCtrl.streamOff();
+        toCtrl.streamOff();
+        fromCtrl.streamOff();
         isSession = false;
     }
 
@@ -166,18 +168,13 @@ public class ToBtLooper
             if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
             return;
         }
-        if (iReceiver != null) {
+        if (iTransmitter != null) {
             if (!isSession) {
                 if (debug) Log.i(TAG, "sendData short[], first sendData on session");
                 isSession = true;
             }
-            iReceiver.onReceiveData(codec.getEncodedData(data));
+            iTransmitter.sendData(codec.getEncodedData(data));
         }
-    }
-
-    @Override
-    public void registerReceiver(IReceiver iReceiver) {
-        this.iReceiver = iReceiver;
     }
 
 }

@@ -257,6 +257,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
                 }
                 break;
             case AudIn2Bt:
+            case DataGen2Bt:
             default:
                 break;
         }

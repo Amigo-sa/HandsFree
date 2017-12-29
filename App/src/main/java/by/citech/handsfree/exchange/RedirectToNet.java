@@ -6,9 +6,12 @@ import android.util.Log;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.ThreadManager;
 
 public class RedirectToNet
-        extends AsyncTask<String, ITransmitterCtrl, Void> {
+        extends AsyncTask<Void, ITransmitterCtrl, Void>
+        implements IThreadManager {
 
     private static final String TAG = Tags.REDIR2NET;
     private static final boolean debug = Settings.debug;
@@ -24,27 +27,33 @@ public class RedirectToNet
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected Void doInBackground(Void... voids) {
         if (debug) Log.i(TAG, "doInBackground");
         ITransmitterCtrl iTransmitterCtrl;
         switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
-                iTransmitterCtrl = new FromAudioIn(iTransmitter);
-                iTransmitterCtrl.prepareStream();
+                iTransmitterCtrl = new FromAudioIn();
+                try {
+                    iTransmitterCtrl.prepareStream(iTransmitter);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                }
                 publishProgress(iTransmitterCtrl);
-                new Thread(iTransmitterCtrl::streamOn).start();
+                addRunnable(iTransmitterCtrl::streamOn);
                 break;
             case BLUETOOTH:
                 if (debug) Log.i(TAG, "doInBackground bluetooth");
-                if (storageToNet == null) {
-                    if (debug) Log.e(TAG, "doInBackground bluetooth storage is null");
-                    return null;
+                try {
+                    iTransmitterCtrl = new ToNet(storageToNet);
+                    iTransmitterCtrl.prepareStream(iTransmitter);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
                 }
-                iTransmitterCtrl = new ToNet(iTransmitter, storageToNet);
-                iTransmitterCtrl.prepareStream();
                 publishProgress(iTransmitterCtrl);
-                new Thread(iTransmitterCtrl::streamOn).start();
+                addRunnable(iTransmitterCtrl::streamOn);
                 break;
         }
         return null;
@@ -54,8 +63,6 @@ public class RedirectToNet
     protected void onProgressUpdate(ITransmitterCtrl... iTransmitterCtrl) {
         if (debug) Log.i(TAG, "onProgressUpdate");
         iTransmitterCtrlReg.registerTransmitterCtrl(iTransmitterCtrl[0]);
-        iTransmitterCtrlReg = null;
-        iTransmitter = null;
-        storageToNet = null;
     }
+
 }

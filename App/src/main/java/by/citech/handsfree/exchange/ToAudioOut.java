@@ -6,7 +6,6 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import by.citech.handsfree.common.IPrepareObject;
@@ -17,7 +16,7 @@ import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
 
 public class ToAudioOut
-        implements IReceiverCtrl, IReceiver, ISettingsCtrl, IPrepareObject {
+        implements ITransmitterCtrl, ITransmitter, ISettingsCtrl, IPrepareObject {
 
     private static final String TAG = Tags.TO_AUDOUT;
     private static final boolean debug = Settings.debug;
@@ -37,9 +36,8 @@ public class ToAudioOut
     private byte[] buffBytes;
     private short[] buffShorts;
     private int buffCnt;
-    private IReceiverReg iReceiverReg;
     private AudioTrack audioTrack;
-    private boolean isRedirecting;
+    private boolean isStreaming;
 
     {
         prepareObject();
@@ -81,19 +79,10 @@ public class ToAudioOut
         return true;
     }
 
-    //--------------------- constructor
-
-    public ToAudioOut(IReceiverReg iReceiverReg) throws Exception {
-        if (iReceiverReg == null) {
-            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
-        }
-        this.iReceiverReg = iReceiverReg;
-    }
-
     //--------------------- ITransmitterCtrl
 
     @Override
-    public void prepareRedirect() {
+    public void prepareStream(ITransmitter iTransmitter) throws Exception {
         if (debug) Log.i(TAG, "prepareRedirect");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (debug) Log.i(TAG, "prepareRedirect version HIGH");
@@ -135,46 +124,53 @@ public class ToAudioOut
     }
 
     @Override
-    public void redirectOn() {
-        if (isRedirecting || (audioTrack == null)) {
-            Log.e(TAG, "redirectOn already redirecting or audioTrack is null");
-            return;
+    public void finishStream() {
+        if (debug) Log.i(TAG, "finishStream");
+        streamOff();
+        if (audioTrack != null) {
+            audioTrack.release();
+            audioTrack = null;
         }
-        isRedirecting = true;
-        audioTrack.play();
-        iReceiverReg.registerReceiver(this);
-        if (debug) Log.i(TAG, "redirectOn done");
+        if (debug) Log.i(TAG, "finishStream done");
     }
 
     @Override
-    public void redirectOff() {
-        if (debug) Log.i(TAG, "redirectOff");
+    public void streamOn() {
+        if (isStreaming || (audioTrack == null)) {
+            Log.e(TAG, "streamOn already redirecting or audioTrack is null");
+            return;
+        }
+        isStreaming = true;
+        audioTrack.play();
+        if (debug) Log.i(TAG, "streamOn done");
+    }
+
+    @Override
+    public void streamOff() {
+        if (debug) Log.i(TAG, "streamOff");
         buffCnt = 0;
-        isRedirecting = false;
-        iReceiverReg.registerReceiver(null);
+        isStreaming = false;
         if (audioTrack != null) {
             if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
                 audioTrack.stop();
             }
-            audioTrack.release();
-            audioTrack = null;
         }
-        if (debug) Log.i(TAG, "redirectOff done");
+        if (debug) Log.i(TAG, "streamOff done");
     }
 
     //--------------------- IReceiver
 
     @Override
-    public void onReceiveData(byte[] data) {
-        if (debug) Log.i(TAG, "onReceiveData byte[]");
+    public void sendData(byte[] data) {
+        if (debug) Log.i(TAG, "sendData byte[]");
         int dataLength;
         if (data == null) {
-            if (debug) Log.w(TAG, "onReceiveData byte[] data is null, return");
+            if (debug) Log.w(TAG, "sendData byte[] data is null, return");
             return;
         } else {
             dataLength = data.length;
-            if (!isRedirecting || audioBuffIsShorts || dataLength == 0) {
-                if (debug) Log.w(TAG, "onReceiveData byte[]" + StatusMessages.ERR_PARAMETERS);
+            if (!isStreaming || audioBuffIsShorts || dataLength == 0) {
+                if (debug) Log.w(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
                 return;
             }
         }
@@ -182,31 +178,31 @@ public class ToAudioOut
             System.arraycopy(data, 0, buffBytes, buffCnt, dataLength);
         } catch (Exception e) {
             if (debug) Log.w(TAG, String.format(Locale.US,
-                    "onReceiveData byte[] buffCnt is %d, dataLength is %d, buffBytes is null: %b",
+                    "sendData byte[] buffCnt is %d, dataLength is %d, buffBytes is null: %b",
                     buffCnt, dataLength, buffBytes == null));
             e.printStackTrace();
         }
         buffCnt = buffCnt + dataLength;
         if (buffCnt >= audioBuffSizeBytes) {
-            if (debug) Log.i(TAG, "onReceiveData byte[] buffered bytes to play: " + buffCnt);
+            if (debug) Log.i(TAG, "sendData byte[] buffered bytes to play: " + buffCnt);
             audioTrack.write(buffBytes, 0, audioBuffSizeBytes);
             buffCnt = 0;
         }
     }
 
     @Override
-    public void onReceiveData(short[] data) {
+    public void sendData(short[] data) {
         if (buffCnt == 0) {
-            if (debug) Log.i(TAG, "onReceiveData short[] buffCnt = 0, first receive");
+            if (debug) Log.i(TAG, "sendData short[] buffCnt = 0, first receive");
         }
         int dataLength;
         if (data == null) {
-            if (debug) Log.w(TAG, "onReceiveData short[] data is null, return");
+            if (debug) Log.w(TAG, "sendData short[] data is null, return");
             return;
         } else {
             dataLength = data.length;
-            if (!isRedirecting || !audioBuffIsShorts || dataLength == 0) {
-                if (debug) Log.w(TAG, "onReceiveData short[]" + StatusMessages.ERR_PARAMETERS);
+            if (!isStreaming || !audioBuffIsShorts || dataLength == 0) {
+                if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
                 return;
             }
         }
@@ -214,17 +210,17 @@ public class ToAudioOut
             System.arraycopy(data, 0, buffShorts, buffCnt, dataLength);
         } catch (Exception e) {
             if (debug) Log.w(TAG, String.format(Locale.US,
-                    "onReceiveData short[] buffCnt is %d, dataLength is %d, buffShorts is null: %b",
+                    "sendData short[] buffCnt is %d, dataLength is %d, buffShorts is null: %b",
                     buffCnt, dataLength, buffShorts == null));
             e.printStackTrace();
         }
         buffCnt = buffCnt + dataLength;
         if (buffCnt >= audioBuffSizeShorts) {
-            if (debug) Log.i(TAG, "onReceiveData short[] buffered bytes to play: " + buffCnt);
+            if (debug) Log.i(TAG, "sendData short[] buffered bytes to play: " + buffCnt);
             audioTrack.write(buffShorts, 0, audioBuffSizeShorts);
             buffCnt = 0;
         } else {
-            if (debug) Log.i(TAG, "onReceiveData short[] buffered bytes: " + buffCnt);
+            if (debug) Log.i(TAG, "sendData short[] buffered bytes: " + buffCnt);
         }
     }
 

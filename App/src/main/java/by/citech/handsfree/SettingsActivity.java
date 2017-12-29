@@ -103,6 +103,7 @@ public class SettingsActivity
             CharSequence[] entries = {
                     OpMode.Normal.getSettingName(),
                     OpMode.Bt2Bt.getSettingName(),
+                    OpMode.DataGen2Bt.getSettingName(),
                     OpMode.AudIn2Bt.getSettingName(),
                     OpMode.Bt2AudOut.getSettingName(),
                     OpMode.AudIn2AudOut.getSettingName(),
@@ -111,6 +112,7 @@ public class SettingsActivity
             CharSequence[] entryValues = {
                     OpMode.Normal.getSettingNumber(),
                     OpMode.Bt2Bt.getSettingNumber(),
+                    OpMode.DataGen2Bt.getSettingNumber(),
                     OpMode.AudIn2Bt.getSettingNumber(),
                     OpMode.Bt2AudOut.getSettingNumber(),
                     OpMode.AudIn2AudOut.getSettingNumber(),

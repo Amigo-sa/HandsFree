@@ -24,7 +24,7 @@ public class Tags {
     public static final String Caller = "WSD_CALLER";
     public static final String CallUi = "WSD_CALL_UI";
     public static final String REDIR2NET           = "WSD_REDIR2NET";
-    public static final String REDIR4NET           = "WSD_REDIR4NET";
+    public static final String RedirectFromNet = "WSD_REDIR4NET";
 
     public static final String TO_AUDOUT           = "WSD_2AUDOUT";
     public static final String TO_BLUETOOTH        = "WSD_2BLUETOOTH";

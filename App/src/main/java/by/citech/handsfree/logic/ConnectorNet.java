@@ -3,11 +3,12 @@ package by.citech.handsfree.logic;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.Collection;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.common.IBase;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.exchange.IReceiverCtrl;
 import by.citech.handsfree.exchange.RedirectFromNet;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.network.INetInfoGetter;
@@ -20,7 +21,6 @@ import by.citech.handsfree.network.control.IDisc;
 import by.citech.handsfree.exchange.IMessage;
 import by.citech.handsfree.network.control.Disconnect;
 import by.citech.handsfree.exchange.SendMessage;
-import by.citech.handsfree.exchange.IReceiverCtrlReg;
 import by.citech.handsfree.exchange.ITransmitterCtrlReg;
 import by.citech.handsfree.exchange.RedirectToNet;
 import by.citech.handsfree.network.server.ServerOff;
@@ -49,7 +49,7 @@ import static by.citech.handsfree.logic.ECallReport.OutConnectionFailed;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
-        implements IServerCtrlReg, IReceiverCtrlReg, ITransmitterCtrlReg, IClientCtrlReg, ICallerFsmListener,
+        implements IServerCtrlReg, ITransmitterCtrlReg, IClientCtrlReg, ICallerFsmListener,
         IMessage, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreadManager, ICallerFsmRegister {
 
     private static final String STAG = Tags.ConnectorNet;
@@ -58,12 +58,15 @@ public class ConnectorNet
     private static int objCount;
     private final String TAG;
     static {objCount = 0;}
-    {objCount++; TAG = STAG + " " + objCount;}
+    {
+        objCount++;
+        TAG = STAG + " " + objCount;
+        transmitterCtrls = new ConcurrentLinkedQueue<>();
+    }
 
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
-    private IReceiverCtrl iReceiverCtrl;
-    private ITransmitterCtrl iTransmitterCtrl;
+    private Collection<ITransmitterCtrl> transmitterCtrls;
     private IConnCtrl iConnCtrl;
     private Handler handler;
     private INetInfoGetter iNetInfoGetter;
@@ -78,7 +81,6 @@ public class ConnectorNet
         public void run() {
             if (debug) Log.i(TAG, "exchangeStop run");
             streamOff();
-            redirectOff();
         }
     };
 
@@ -87,9 +89,7 @@ public class ConnectorNet
         public void run() {
             if (debug) Log.i(TAG, "netStop run");
             streamOff();
-            redirectOff();
-            disconnect(iClientCtrl);
-            disconnect(iServerCtrl);
+            disconnect(iConnCtrl);
             serverOff();
         }
     };
@@ -167,8 +167,7 @@ public class ConnectorNet
         storageFromNet = null;
         iServerCtrl = null;
         iClientCtrl = null;
-        iReceiverCtrl = null;
-        iTransmitterCtrl = null;
+        transmitterCtrls.clear();
         iConnCtrl = null;
         isBaseStop = false;
     }
@@ -394,7 +393,8 @@ public class ConnectorNet
 
     private void connect() {
         if (debug) Log.i(TAG, "connect");
-        new ClientConn(this, handler).execute(String.format("ws://%s:%s",
+        new ClientConn(this, handler).execute(String.format(
+                "ws://%s:%s",
                 iNetInfoGetter.getRemAddr(),
                 iNetInfoGetter.getRemPort()));
     }
@@ -413,7 +413,7 @@ public class ConnectorNet
         if (debug) Log.i(TAG, "exchangeStart");
         printConnectControl();
         new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute();
-        new RedirectFromNet(this, iConnCtrl.getReceiverReg(), storageFromNet).execute();
+        new RedirectFromNet(this, iConnCtrl, storageFromNet).execute();
     }
 
     private void exchangeStop() {
@@ -446,19 +446,13 @@ public class ConnectorNet
         }
     }
 
-    private void redirectOff() {
-        if (debug) Log.i(TAG, "redirectOff");
-        if (iReceiverCtrl != null) {
-            iReceiverCtrl.redirectOff();
-            iReceiverCtrl = null;
-        }
-    }
-
     private void streamOff() {
         if (debug) Log.i(TAG, "streamOff");
-        if (iTransmitterCtrl != null) {
-            iTransmitterCtrl.streamOff();
-            iTransmitterCtrl = null;
+        for (ITransmitterCtrl transmitterCtrl : transmitterCtrls) {
+            if (transmitterCtrl != null) {
+                transmitterCtrl.finishStream();
+            }
+            transmitterCtrls.remove(transmitterCtrl);
         }
         if (debug) Log.i(TAG, "streamOff done");
     }
@@ -470,22 +464,12 @@ public class ConnectorNet
     }
 
     @Override
-    public void registerReceiverCtrl(IReceiverCtrl iReceiverCtrl) {
-        if (debug) Log.i(TAG, "registerReceiverCtrl");
-        if (iReceiverCtrl == null) {
-            if (debug) Log.e(TAG, "registerReceiverCtrl iReceiverCtrl is null");
-        } else {
-            this.iReceiverCtrl = iReceiverCtrl;
-        }
-    }
-
-    @Override
     public void registerTransmitterCtrl(ITransmitterCtrl iTransmitterCtrl) {
         if (debug) Log.i(TAG, "registerTransmitterCtrl");
         if (iTransmitterCtrl == null) {
-            if (debug) Log.e(TAG, "registerTransmitterCtrl iTransmitterCtrl is null");
+            if (debug) Log.e(TAG, "registerTransmitterCtrl fromCtrl is null");
         } else {
-            this.iTransmitterCtrl = iTransmitterCtrl;
+            transmitterCtrls.add(iTransmitterCtrl);
         }
     }
 

@@ -112,6 +112,7 @@ public class CallUi
                 "onClickBtnGreen opMode is %s, callerState is %s",
                 opMode, callerState));
         switch (opMode) {
+            case DataGen2Bt:
             case AudIn2Bt:
             case Bt2AudOut:
             case AudIn2AudOut:
@@ -157,6 +158,7 @@ public class CallUi
                 opMode, callerState));
         switch (opMode) {
             case AudIn2Bt:
+            case DataGen2Bt:
             case Bt2AudOut:
             case AudIn2AudOut:
             case Bt2Bt:

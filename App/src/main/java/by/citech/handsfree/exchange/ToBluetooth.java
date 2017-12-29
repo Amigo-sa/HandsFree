@@ -15,7 +15,8 @@ import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
 
 public class ToBluetooth
-        implements IReceiverCtrl, IReceiver, ITrafficUpdate, IPrepareObject, ISettingsCtrl {
+        implements ITransmitterCtrl, ITransmitter,
+        ITrafficUpdate, IPrepareObject, ISettingsCtrl {
 
     private static final String TAG = Tags.TO_BLUETOOTH;
     private static final boolean debug = Settings.debug;
@@ -29,7 +30,6 @@ public class ToBluetooth
     private boolean btSinglePacket;
     private boolean btSignificantAll;
     private byte[][] dataAssembled;
-    private IReceiverReg iReceiverReg;
     //  private TrafficInfo trafficInfo;
     private boolean isRedirecting = false;
     private StorageData<byte[][]> storage;
@@ -66,21 +66,22 @@ public class ToBluetooth
 
     //--------------------- constructor
 
-    public ToBluetooth(IReceiverReg iReceiverReg, StorageData<byte[][]> storage) throws Exception {
-        if (iReceiverReg == null || storage == null) {
+    public ToBluetooth(StorageData<byte[][]> storage) throws Exception {
+        if (storage == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }
-        this.iReceiverReg = iReceiverReg;
         this.storage = storage;
         //TODO: доработать анализатор траффика
 //      trafficInfo = new TrafficInfo(TrafficNodes.NetIn, this);
 //      TrafficAnalyzer.getInstance().addTrafficInfo(trafficInfo);
     }
 
+    //--------------------- IReceiverCtrl
+
     @Override
-    public void prepareRedirect() {
-        if (debug) Log.i(TAG, "prepareRedirect");
-        Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
+    public void prepareStream(ITransmitter iTransmitter) throws Exception {
+        if (debug) Log.i(TAG, "prepareStream");
+        Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
                         " btSignificantAll is %b," +
                         " btSinglePacket is %b," +
                         " btFactor is %d," +
@@ -97,27 +98,32 @@ public class ToBluetooth
     }
 
     @Override
-    public void redirectOn() {
-        if (debug) Log.i(TAG, "redirectOn");
-        isRedirecting = true;
-        iReceiverReg.registerReceiver(this);
-        if (Settings.debug) Log.i(TAG, "redirectOn done");
+    public void finishStream() {
+        if (debug) Log.i(TAG, "finishStream");
+        streamOff();
+        storage = null;
+        dataAssembled = null;
     }
 
     @Override
-    public void redirectOff() {
-        if (debug) Log.i(TAG, "redirectOff");
+    public void streamOn() {
+        if (debug) Log.i(TAG, "streamOn");
+        isRedirecting = true;
+    }
+
+    @Override
+    public void streamOff() {
+        if (debug) Log.i(TAG, "streamOff");
         isRedirecting = false;
         storage.clear();
-        storage = null;
-        iReceiverReg.registerReceiver(null);
-        iReceiverReg = null;
     }
 
+    //--------------------- IReceiver
+
     @Override
-    public void onReceiveData(byte[] data) {
+    public void sendData(byte[] data) {
         if (data == null) {
-            if (debug) Log.i(TAG, "onReceiveData byte[]" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Log.i(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
             return;
         }
         if (isRedirecting) {
@@ -126,22 +132,19 @@ public class ToBluetooth
             } else {
                 int receivedDataSize = data.length;
                 if (receivedDataSize != btSendSize) {
-                    Log.e(TAG, String.format("onReceiveData received wrong amount of data: %d bytes", receivedDataSize));
+                    Log.e(TAG, String.format("sendData received wrong amount of data: %d bytes", receivedDataSize));
                     return;
                 } else {
-                    if (debug) Log.w(TAG, String.format("onReceiveData received correct amount of data: %d bytes", receivedDataSize));
+                    if (debug) Log.w(TAG, String.format("sendData received correct amount of data: %d bytes", receivedDataSize));
                 }
                 for (int i = 0; i < btFactor; i++) {
-//                  if (debug) Log.w(TAG, String.format("onReceiveData dataAssembled[%d] assign to range of data[] from positions %d to %d, btFactor is %d",
-//                          i, i * btSignificantBytes, (i + 1) * btSignificantBytes, btFactor
-//                  ));
                     if (btSignificantAll) {
                         dataAssembled[i] = Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes);
                     } else {
                         dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
                     }
                 }
-                if (debug) Log.w(TAG, "onReceiveData data assembled, put");
+                if (debug) Log.w(TAG, "sendData data assembled, put");
             }
             storage.putData(dataAssembled);
         }

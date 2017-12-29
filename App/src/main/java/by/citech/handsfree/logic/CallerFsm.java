@@ -237,6 +237,7 @@ public class CallerFsm
         switch (report) {
             case StopDebug:
                 switch (opMode) {
+                    case DataGen2Bt:
                     case AudIn2AudOut:
                     case Bt2AudOut:
                     case AudIn2Bt:
@@ -250,6 +251,7 @@ public class CallerFsm
                 }
             case StartDebug:
                 switch (opMode) {
+                    case DataGen2Bt:
                     case AudIn2AudOut:
                     case Bt2AudOut:
                     case AudIn2Bt:

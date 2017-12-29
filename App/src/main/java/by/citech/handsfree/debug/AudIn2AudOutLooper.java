@@ -16,9 +16,6 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.SeverityLevel;
 import by.citech.handsfree.codec.audio.AudioCodecType;
 import by.citech.handsfree.exchange.FromAudioIn;
-import by.citech.handsfree.exchange.IReceiver;
-import by.citech.handsfree.exchange.IReceiverCtrl;
-import by.citech.handsfree.exchange.IReceiverReg;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.exchange.ToAudioOut;
@@ -28,7 +25,7 @@ import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class AudIn2AudOutLooper
-        implements IReceiverReg, ITransmitter, IBase, IPrepareObject, IThreadManager,
+        implements ITransmitter, IBase, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.AUDIN2AUDOUT_LOOPER;
@@ -50,9 +47,9 @@ public class AudIn2AudOutLooper
     private int buff2CodecFactor;
     private boolean audioSingleFrame;
     private short[] dataBuff;
-    private IReceiver iReceiver;
-    private ITransmitterCtrl iTransmitterCtrl;
-    private IReceiverCtrl iReceiverCtrl;
+    private ITransmitter iTransmitter;
+    private ITransmitterCtrl fromCtrl, toCtrl;
+    private boolean isUsingCodec;
 
     {
         objCount++;
@@ -95,9 +92,12 @@ public class AudIn2AudOutLooper
 
     //--------------------- constructor
 
-    public AudIn2AudOutLooper() throws Exception {
-        iReceiverCtrl = new ToAudioOut(this);
-        iTransmitterCtrl = new FromAudioIn(this);
+    public AudIn2AudOutLooper(boolean isUsingCodec) {
+        this.isUsingCodec = isUsingCodec;
+        ToAudioOut toAudioOut = new ToAudioOut();
+        iTransmitter = toAudioOut;
+        toCtrl = toAudioOut;
+        fromCtrl = new FromAudioIn();
     }
 
     //--------------------- IBase
@@ -107,7 +107,12 @@ public class AudIn2AudOutLooper
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         registerCallerFsmListener(this, TAG);
-        prepareObject();
+        try {
+            toCtrl.prepareStream(null);
+            fromCtrl.prepareStream(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -116,8 +121,11 @@ public class AudIn2AudOutLooper
         if (debug) Log.i(TAG, "baseStop");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
-        iTransmitterCtrl = null;
-        iReceiverCtrl = null;
+        fromCtrl.finishStream();
+        toCtrl.finishStream();
+        iTransmitter = null;
+        fromCtrl = null;
+        toCtrl = null;
         codecType = null;
         codec = null;
         dataBuff = null;
@@ -144,57 +152,53 @@ public class AudIn2AudOutLooper
 
     private void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        if (iReceiver == null) {
-            codec.initiateEncoder();
-            codec.initiateDecoder();
-            iReceiverCtrl.prepareRedirect();
-            iTransmitterCtrl.prepareStream();
-            iReceiverCtrl.redirectOn();
-            addRunnable(() -> iTransmitterCtrl.streamOn());
-        }
+        codec.initiateEncoder();
+        codec.initiateDecoder();
+        toCtrl.streamOn();
+        addRunnable(() -> fromCtrl.streamOn());
     }
 
     private void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
-        iReceiver = null;
-        iTransmitterCtrl.streamOff();
-        iReceiverCtrl.redirectOff();
+        fromCtrl.streamOff();
+        toCtrl.streamOff();
     }
 
     //--------------------- main
 
     @Override
-    public void registerReceiver(IReceiver iReceiver) {
-        if (debug) Log.i(TAG, "registerReceiver");
-        this.iReceiver = iReceiver;
-    }
-
-    @Override
     public void sendData(byte[] data) {
         if (debug) Log.i(TAG, "sendData byte[]");
-        if (iReceiver != null) {
+        if (iTransmitter != null) {
             if (debug) Log.i(TAG, "sendData data sended");
-            iReceiver.onReceiveData(data);
+            iTransmitter.sendData(data);
         }
     }
 
     @Override
     public void sendData(short[] data) {
         if (debug) Log.i(TAG, "sendData short[]");
-        if (iReceiver != null) {
+        if (iTransmitter != null) {
             if (audioSingleFrame) {
-//              iReceiver.onReceiveData(data);
-                iReceiver.onReceiveData(codec.getDecodedData(codec.getEncodedData(data)));
+                iTransmitter.sendData(getPreparedData(data));
             } else {
                 dataBuff = data;
                 int from;
                 for (int i = 0; i < buff2CodecFactor; i++) {
                     from = i * codecFactor;
                     if (debug) Log.i(TAG, "sendData from is " + from);
-                    System.arraycopy(codec.getDecodedData(codec.getEncodedData(Arrays.copyOfRange(dataBuff, from, from + codecFactor))), 0, dataBuff, from, codecFactor);
+                    System.arraycopy(getPreparedData(Arrays.copyOfRange(dataBuff, from, from + codecFactor)), 0, dataBuff, from, codecFactor);
                 }
-                iReceiver.onReceiveData(dataBuff);
+                iTransmitter.sendData(dataBuff);
             }
+        }
+    }
+
+    private short[] getPreparedData(short[] data) {
+        if (isUsingCodec) {
+            return data;
+        } else {
+            return codec.getDecodedData(codec.getEncodedData(data));
         }
     }
 

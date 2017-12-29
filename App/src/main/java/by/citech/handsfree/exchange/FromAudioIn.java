@@ -68,21 +68,16 @@ public class FromAudioIn
         return true;
     }
 
-    //--------------------- constructor
-
-    public FromAudioIn(ITransmitter iTransmitter) throws Exception {
-        if (iTransmitter == null) {
-            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
-        }
-        this.iTransmitter = iTransmitter;
-    }
-
     //--------------------- ITransmitterCtrl
 
     @Override
-    public void prepareStream() {
-        if (debug) Log.i(TAG, "prepareStream");
-        streamOff();
+    public void prepareStream(ITransmitter iTransmitter) throws Exception {
+        if (iTransmitter == null) {
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
+        } else {
+            if (debug) Log.i(TAG, "prepareStream");
+            this.iTransmitter = iTransmitter;
+        }
         recorder = new AudioRecord(
                 audioSource,
                 audioRate,
@@ -102,6 +97,19 @@ public class FromAudioIn
     }
 
     @Override
+    public void finishStream() {
+        if (debug) Log.i(TAG, "finishStream");
+        streamOff();
+        if (recorder != null) {
+            recorder.release();
+            recorder = null;
+        }
+        iTransmitter = null;
+        shortsBuffer = null;
+        bytesBuffer = null;
+    }
+
+    @Override
     public void streamOn() {
         if (debug) Log.i(TAG, "streamOn");
         if (isStreaming || (recorder == null)) {
@@ -114,7 +122,7 @@ public class FromAudioIn
             if (audioBuffIsShorts) streamShorts();
             else                   streamBytes();
         }
-        if (debug) Log.w(TAG, "streamOn done");
+        if (debug) Log.i(TAG, "streamOn done");
     }
 
     @Override
@@ -125,8 +133,6 @@ public class FromAudioIn
             if (recorder.getState() == AudioRecord.STATE_INITIALIZED) {
                 recorder.stop();
             }
-            recorder.release();
-            recorder = null;
         }
     }
 
@@ -143,7 +149,7 @@ public class FromAudioIn
     }
 
     private void fillBuffer(byte[] buffer, int readLeft) {
-//      if (debug) Log.i(TAG, "fillBuffer byte[]");
+        if (debug) Log.d(TAG, "fillBuffer byte[]");
         int readCount;
         int readOffset = 0;
         while (isStreaming && (readLeft != 0)) {
@@ -151,23 +157,19 @@ public class FromAudioIn
             readLeft -= readCount;
             readOffset += readCount;
         }
-//      if (debug) Log.i(TAG, "fillBuffer byte[] done");
+        if (debug) Log.d(TAG, "fillBuffer byte[] done");
     }
 
     private void fillBuffer(short[] buffer, int readLeft) {
-//      if (debug) Log.i(TAG, "fillBuffer short[]");
+        if (debug) Log.d(TAG, "fillBuffer short[]");
         int readCount;
         int readOffset = 0;
         while (isStreaming && (readLeft != 0)) {
-//          if (debug) Log.i(TAG, "fillBuffer readLeft is " + readLeft);
             readCount = recorder.read(buffer, readOffset, readLeft);
-//          if (debug) Log.i(TAG, "fillBuffer short[] readCount is " + readCount);
             readLeft -= readCount;
-//          if (debug) Log.i(TAG, "fillBuffer short[] readCount is " + readCount);
             readOffset += readCount;
-//          if (debug) Log.i(TAG, "fillBuffer short[] readOffset is " + readOffset);
         }
-//      if (debug) Log.i(TAG, "fillBuffer short[] done");
+        if (debug) Log.d(TAG, "fillBuffer short[] done");
     }
 
 }

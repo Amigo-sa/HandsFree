@@ -78,18 +78,23 @@ public class ToNet
 
     //--------------------- constructor
 
-    public ToNet(ITransmitter iTransmitter, StorageData<byte[]> source) throws Exception {
-        if (iTransmitter == null || source == null) {
+    ToNet(StorageData<byte[]> source) throws Exception {
+        if (source == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }
-        this.iTransmitter = iTransmitter;
         this.source = source;
     }
 
     //--------------------- ITransmitterCtrl
 
-    public void prepareStream() {
-        if (debug) Log.i(TAG, "prepareStream");
+    @Override
+    public void prepareStream(ITransmitter iTransmitter) throws Exception {
+        if (iTransmitter == null) {
+            throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
+        } else {
+            if (debug) Log.i(TAG, "prepareStream");
+            this.iTransmitter = iTransmitter;
+        }
         Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
                         " netSignificantAll is %b," +
                         " netChunkSignificantBytes is %d," +
@@ -105,12 +110,16 @@ public class ToNet
     }
 
     @Override
+    public void finishStream() {
+        if (debug) Log.i(TAG, "finishStream");
+        streamOff();
+        iTransmitter = null;
+        source = null;
+    }
+
+    @Override
     public void streamOn() {
         if (debug) Log.i(TAG, "streamOn");
-        if (source == null) {
-            Log.e(TAG, "streamOn source is null, return");
-            return;
-        }
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int netChunkSizeActual = 0;
@@ -156,9 +165,6 @@ public class ToNet
     public void streamOff() {
         if (debug) Log.i(TAG, "streamOff");
         isStreaming = false;
-        iTransmitter = null;
-        source = null;
     }
-
 
 }
