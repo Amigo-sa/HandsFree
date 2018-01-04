@@ -84,8 +84,8 @@ public class ConnectorBluetooth
     // сканер имеющихся по близости BLE устройств
     private LeScanner leScanner;
     // хранилища данных
-    private StorageData<byte[]> storageFromBt;
-    private StorageData<byte[][]> storageToBt;
+    private volatile StorageData<byte[]> storageFromBt;
+    private volatile StorageData<byte[][]> storageToBt;
     // адаптер найденных устройств и управление для него
     private ControlAdapter controlAdapter;
     // список сервисов и характеристик устройства
@@ -621,7 +621,7 @@ public class ConnectorBluetooth
                 break;
             case StartDebug:
                 switch (Settings.opMode) {
-                    case DataGen2Bt:
+ case DataGen2Bt:
                     case AudIn2Bt:
                         enableTransmitData();
                         break;
