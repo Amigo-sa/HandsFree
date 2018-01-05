@@ -3,6 +3,12 @@ package by.citech.handsfree.bluetoothlegatt.rwdata;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -20,7 +26,21 @@ import by.citech.handsfree.threading.IThreadManager;
 
 public class LeDataTransmitter implements CallbackWriteListener, IThreadManager {
 
-    private final static String TAG = "WSD_LeDataTransmitter";
+    private final static String STAG = "WSD_LeDataTransmitter";
+    private static final boolean debug = Settings.debug;
+    private static int objCount;
+    private final String TAG;
+
+    static {
+        objCount = 0;
+    }
+
+
+    {
+        objCount++;
+        TAG = STAG + " " + objCount;
+    }
+
     private static final long WAIT_PERIOD = 5;//
     private static final long NOTIFY_SET_PERIOD = 200;//ms
     private static final int WRITE_TYPE = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
@@ -197,6 +217,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
 
     @Override
     public void rcvBtPktIsDone(byte[] data) {
+        //if (Settings.debug) Log.w(TAG, "notify: " + Arrays.toString(data));
         //if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone()");
         switch (Settings.opMode) {
             case Bt2AudOut:
@@ -230,6 +251,15 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
     }
 
     private void writeThreadStart() {
+        Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
+                        " btSinglePacket is %b," +
+                        " btFactor is %d," +
+                        " btLatencyMs is %d,",
+                Settings.btSinglePacket,
+                Settings.btFactor,
+                Settings.btLatencyMs
+
+        ));
         addRunnable(() -> {
             byte[][] arrayData;
             int numBtPkt = 0;
@@ -250,7 +280,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
                     if (Callback) {
                         //if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
                         writeByteArrayData(arrayData[numBtPkt]);
-                        //if (Settings.debug) Log.e(TAG, "numBtPkt = " + numBtPkt);
+                        //if (Settings.debug) Log.w(TAG, numBtPkt + " write: " + Arrays.toString(arrayData[numBtPkt]));
                         Callback = false;
                     }
                     // выдерживаем коннект интервал
@@ -265,8 +295,8 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
 
                     if (!Callback && (WRITE_TYPE == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE) ) {
                         Callback = true;
-                        if (Settings.debug)
-                            Log.e(TAG, "num write package without callback " + lostWritePkt++);
+//                        if (Settings.debug)
+//                            Log.e(TAG, "num write package without callback " + lostWritePkt++);
                     }
 
 
@@ -292,9 +322,9 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
      * WRITE_TYPE_DEFAULT -
      * WRITE_TYPE_SIGNED -
      * */
-    private void writeByteArrayData(byte[] data){
-        if (Settings.debug) Log.w(TAG, Arrays.toString(data));
 
+    private void writeByteArrayData(byte[] data){
+        //if (Settings.debug) Log.w(TAG, "write: " + Arrays.toString(data));
         writeInCharacteristicByteArray(data, WRITE_TYPE);
     }
 
@@ -303,7 +333,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
         characteristic_write.setWriteType(writeType);
 
         if (mBluetoothLeService.oneCharacteristicWrite(characteristic_write))
-            if (Settings.debug) Log.w(TAG, "Write is success");
+           if (Settings.debug) Log.w(TAG, "Write is success");
         else
             if (Settings.debug) Log.w(TAG, "Write is wrong");
     }

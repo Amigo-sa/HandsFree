@@ -164,6 +164,9 @@ public class Bt2BtLooper
         if (debug) Log.i(TAG, "looping");
         int btCount = 0;
         while (isRunning) {
+            if (dataBuff == null) {
+                dataBuff = new byte[btFactor][bt2btPacketSize];
+            }
             while (storageBtToNet.isEmpty()) {
                 try {
                     Thread.sleep(5);
@@ -179,6 +182,7 @@ public class Bt2BtLooper
                 if (debug) Log.i(TAG, "looping network output buffer contains enough data, sending");
                 btCount = 0;
                 storageNetToBt.putData(dataBuff);
+                dataBuff = null;
             }
         }
     }

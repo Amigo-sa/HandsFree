@@ -45,10 +45,10 @@ public class LeBroadcastReceiver {
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 connectAction.actionServiceDiscovered();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
+                //if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
-                if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");
+                //if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");
                 // displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));
             }
         }
