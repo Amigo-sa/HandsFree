@@ -61,7 +61,7 @@ public class Contact
 
     public static boolean checkForValid(Contact contact) {
         if (debug) Log.i(TAG, "checkForValid");
-        boolean isIpValid = InetAddress.checkForValidityIpAddress(contact.getIp());
+        boolean isIpValid = InetAddress.checkForValidityIpAddr(contact.getIp());
         boolean isNameValid = Name.checkForValidityContactName(contact.getName());
         if (debug) Log.i(TAG, String.format("checkForValid ip is %s, name is %s",
                 isIpValid ? VALID : INVALID,

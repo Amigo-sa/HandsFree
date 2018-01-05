@@ -36,6 +36,7 @@ public class ToNet
     private byte[] netChunk;
     private ITransmitter iTransmitter;
     private boolean isStreaming;
+    private boolean isFinished;
     private StorageData<byte[]> source;
 
     {
@@ -89,13 +90,17 @@ public class ToNet
 
     @Override
     public void prepareStream(ITransmitter iTransmitter) throws Exception {
+        if (isFinished) {
+            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            return;
+        }
         if (iTransmitter == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
             if (debug) Log.i(TAG, "prepareStream");
             this.iTransmitter = iTransmitter;
         }
-        Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
+        if (debug) Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
                         " netSignificantAll is %b," +
                         " netChunkSignificantBytes is %d," +
                         " netChunkSize is %d," +
@@ -113,19 +118,30 @@ public class ToNet
     public void finishStream() {
         if (debug) Log.i(TAG, "finishStream");
         streamOff();
+        isFinished = true;
         iTransmitter = null;
         source = null;
     }
 
     @Override
+    public void streamOff() {
+        if (debug) Log.i(TAG, "streamOff");
+        isStreaming = false;
+    }
+
+    @Override
     public void streamOn() {
         if (debug) Log.i(TAG, "streamOn");
+        if (isFinished) {
+            if (debug) Log.w(TAG, "streamOn stream is finished, return");
+            return;
+        }
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int netChunkSizeActual = 0;
         int netChunkCount = 0;
         while (isStreaming) {
-            while (source.isEmpty()) {
+            while (source != null && source.isEmpty()) {
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
@@ -133,38 +149,43 @@ public class ToNet
                 }
                 if (!isStreaming) return;
             }
-            netChunk = source.getData();
+            if (source != null) {
+                netChunk = source.getData();
+            } else {
+                if (debug) Log.i(TAG, "streamOn done");
+                return;
+            }
             if (netChunk != null) {
                 netChunkSizeActual = netChunk.length;
-                if (netChunkSizeActual != 0 && netChunkSizeActual != netChunkSize) {
-                    Log.e(TAG, String.format(Locale.US, "streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize));
+                if (netChunkSizeActual != netChunkSize) {
+                    if (debug) Log.e(TAG, String.format(Locale.US, "streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize));
                 } else {
                     baos.write(netChunk, 0, netChunkSize);
                     netChunkCount++;
                 }
             } else {
-                Log.e(TAG, "streamOn readed null data from storage");
+                if (debug) Log.e(TAG, "streamOn readed null data from storage");
+                return;
             }
             if (!isStreaming) return;
             if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
             if (netChunkCount == netFactor) {
                 if (debug) Log.w(TAG, String.format("streamOn net out buff contains enough data of %d bytes, sending", baos.size()));
-                iTransmitter.sendData(baos.toByteArray());
+                if (iTransmitter != null) {
+                    iTransmitter.sendData(baos.toByteArray());
+                } else {
+                    if (debug) Log.i(TAG, "streamOn done");
+                    return;
+                }
                 netChunkCount = 0;
                 baos.reset();
             } else if (netChunkCount > netFactor) {
-                Log.e(TAG, "streamOn too much data in net out buff");
+                if (debug) Log.e(TAG, "streamOn too much data in net out buff");
                 netChunkCount = 0;
                 baos.reset();
             }
         }
         if (debug) Log.i(TAG, "streamOn done");
-    }
-
-    @Override
-    public void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
-        isStreaming = false;
     }
 
 }

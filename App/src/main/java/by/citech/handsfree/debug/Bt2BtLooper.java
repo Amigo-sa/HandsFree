@@ -80,7 +80,6 @@ public class Bt2BtLooper
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
-        dataBuff = new byte[btFactor][bt2btPacketSize];
         return true;
     }
 

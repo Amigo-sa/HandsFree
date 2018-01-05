@@ -31,6 +31,7 @@ import by.citech.handsfree.network.server.IServerOff;
 import by.citech.handsfree.param.Messages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.util.InetAddress;
 
@@ -54,6 +55,7 @@ public class ConnectorNet
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
+    private static final DataSource dataSource = Settings.dataSource;
 
     private static int objCount;
     private final String TAG;
@@ -64,6 +66,8 @@ public class ConnectorNet
         transmitterCtrls = new ConcurrentLinkedQueue<>();
     }
 
+    private String remAddr;
+    private String remPort;
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
     private Collection<ITransmitterCtrl> transmitterCtrls;
@@ -194,6 +198,9 @@ public class ConnectorNet
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
+            case SysIntFail:
+            case SysIntError:
+            case SysIntDisconnected:
             case CallEndedByLocalUser:
                 exchangeStop();
                 disconnect(iConnCtrl);
@@ -210,7 +217,7 @@ public class ConnectorNet
                 disconnect(iServerCtrl);
                 break;
             case OutConnectionStartedByLocalUser:
-                if (!isValidIp()) reportToCallerFsm(to, OutCallInvalidCoordinates, TAG);
+                if (!isValidCoordinates()) reportToCallerFsm(to, OutCallInvalidCoordinates, TAG);
                 else connect();
                 break;
             default:
@@ -242,10 +249,8 @@ public class ConnectorNet
         if (debug) Log.i(TAG, "srvOnFailure callerState is " + callerState);
         switch (callerState) {
             case InDetected:
-                if (debug) Log.i(TAG, "srvOnFailure InDetected");
                 if (reportToCallerFsm(callerState, InCallFailed, TAG)) return; else break;
             case Call:
-                if (debug) Log.i(TAG, "srvOnFailure Call");
                 if (reportToCallerFsm(callerState, CallFailedExternal, TAG)) {
                     exchangeStop();
                     return;
@@ -286,7 +291,7 @@ public class ConnectorNet
             case OutStarted:
                 if (reportToCallerFsm(callerState, OutConnectionConnected, TAG)) return; else break;
             default:
-                if (debug) Log.w(TAG, "cltOnOpen " + callerState.getName());
+                if (debug) Log.w(TAG, "cltOnOpen " + callerState);
                 disconnect(iClientCtrl); // TODO: обрываем, если не звонили?
                 return;
         }
@@ -304,14 +309,13 @@ public class ConnectorNet
             case OutStarted:
                 if (reportToCallerFsm(callerState, OutConnectionFailed, TAG)) return; else break;
             case Call:
-                if (debug) Log.i(TAG, "cltOnFailure Call");
                 if (reportToCallerFsm(callerState, CallFailedExternal, TAG)) {
                     exchangeStop();
                     return;
                 }
                 else break;
             default:
-                Log.e(TAG, "cltOnFailure " + callerState); return;
+                if (debug) Log.w(TAG, "cltOnFailure " + callerState); return;
         }
         if (debug) Log.w(TAG, "cltOnFailure recursive call");
         cltOnFailure();
@@ -369,12 +373,10 @@ public class ConnectorNet
             case PhaseReadyInt:
             case PhaseZero:
                 if (iServerCtrl == null) {
-                    if (reportToCallerFsm(callerState, SysExtFail, TAG)) return; else break;
-                } else {
-                    if (reportToCallerFsm(callerState, SysExtReady, TAG)) {
-                        this.iServerCtrl = iServerCtrl;
-                        return;
-                    }
+                    if (reportToCallerFsm(callerState, SysExtFail, TAG)) return;
+                } else if (reportToCallerFsm(callerState, SysExtReady, TAG)) {
+                    this.iServerCtrl = iServerCtrl;
+                    return;
                 }
                 break;
             default:
@@ -394,9 +396,7 @@ public class ConnectorNet
     private void connect() {
         if (debug) Log.i(TAG, "connect");
         new ClientConn(this, handler).execute(String.format(
-                "ws://%s:%s",
-                iNetInfoGetter.getRemAddr(),
-                iNetInfoGetter.getRemPort()));
+                "ws://%s:%s", remAddr, remPort));
     }
 
     private void disconnect(IConnCtrl iConnCtrl) {
@@ -405,15 +405,15 @@ public class ConnectorNet
         if (iConnCtrl != null) {
             new Disconnect(this).execute(iConnCtrl);
         } else {
-            Log.e(TAG, "disconnect iConnCtrl is null");
+            if (debug) Log.e(TAG, "disconnect iConnCtrl is null");
         }
     }
 
     private void exchangeStart() {
         if (debug) Log.i(TAG, "exchangeStart");
         printConnectControl();
-        new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute();
-        new RedirectFromNet(this, iConnCtrl, storageFromNet).execute();
+        new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute(dataSource);
+        new RedirectFromNet(this, iConnCtrl, storageFromNet).execute(dataSource);
     }
 
     private void exchangeStop() {
@@ -421,12 +421,13 @@ public class ConnectorNet
         addRunnable(exchangeStop);
     }
 
-    private boolean isValidIp() {
-        if (debug) Log.i(TAG, "isValidIp");
-        String remAddr = iNetInfoGetter.getRemAddr();
+    private boolean isValidCoordinates() {
+        if (debug) Log.i(TAG, "isValidCoordinates");
+        remAddr = iNetInfoGetter.getRemAddr();
+        remPort = iNetInfoGetter.getRemPort();
         return !(remAddr.matches(getIpAddr(Settings.isIpv4Used))
                 || remAddr.matches("127.0.0.1")
-                || !InetAddress.checkForValidityIpAddress(remAddr));
+                || !InetAddress.checkForValidityIpAddr(remAddr));
     }
 
     private void printConnectControl() {
@@ -477,7 +478,7 @@ public class ConnectorNet
     public void registerClientCtrl(IClientCtrl iClientCtrl) {
         if (debug) Log.i(TAG, "registerClientCtrl");
         if (iClientCtrl == null) {
-            if (debug) Log.i(TAG, "registerClientCtrl iClientCtrl is null");
+            if (debug) Log.e(TAG, "registerClientCtrl iClientCtrl is null");
         } else {
             this.iClientCtrl = iClientCtrl;
         }

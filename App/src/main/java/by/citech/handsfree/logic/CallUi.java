@@ -103,7 +103,7 @@ public class CallUi
     //--------------------- main
 
     private void onMethodWrongState(CallerState callerState, String methodName) {
-        Log.e(TAG, methodName + " " + callerState);
+        if (debug) Log.e(TAG, methodName + " " + callerState);
     }
 
     void onClickBtnGreen() {
@@ -145,7 +145,7 @@ public class CallUi
                 break;
             case Net2Net:
             default:
-                Log.e(TAG, "onClickBtnGreen illegal opMode: " + opMode); return;
+                if (debug) Log.e(TAG, "onClickBtnGreen illegal opMode: " + opMode); return;
         }
         if (debug) Log.w(TAG, "onClickBtnGreen recursive call");
         onClickBtnGreen();
@@ -194,7 +194,7 @@ public class CallUi
                 break;
             case Net2Net:
             default:
-                Log.e(TAG, "onClickBtnRed illegal opMode: " + opMode); return;
+                if (debug) Log.e(TAG, "onClickBtnRed illegal opMode: " + opMode); return;
         }
         if (debug) Log.w(TAG, "onClickBtnRed recursive call");
         onClickBtnRed();

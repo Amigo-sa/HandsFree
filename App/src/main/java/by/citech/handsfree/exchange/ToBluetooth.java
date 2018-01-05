@@ -31,7 +31,7 @@ public class ToBluetooth
     private boolean btSignificantAll;
     private byte[][] dataAssembled;
     //  private TrafficInfo trafficInfo;
-    private boolean isRedirecting = false;
+    private boolean isRedirecting;
     private StorageData<byte[][]> storage;
 
     {
@@ -60,7 +60,6 @@ public class ToBluetooth
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
-        dataAssembled = new byte[btFactor][btToBtSendSize];
         return true;
     }
 
@@ -81,7 +80,7 @@ public class ToBluetooth
     @Override
     public void prepareStream(ITransmitter iTransmitter) throws Exception {
         if (debug) Log.i(TAG, "prepareStream");
-        Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
+        if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
                         " btSignificantAll is %b," +
                         " btSinglePacket is %b," +
                         " btFactor is %d," +
@@ -102,7 +101,6 @@ public class ToBluetooth
         if (debug) Log.i(TAG, "finishStream");
         streamOff();
         storage = null;
-        dataAssembled = null;
     }
 
     @Override
@@ -127,15 +125,18 @@ public class ToBluetooth
             return;
         }
         if (isRedirecting) {
+            if (dataAssembled == null) {
+                dataAssembled = new byte[btFactor][btToBtSendSize];
+            }
             if (btSinglePacket) {
                 dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
             } else {
                 int receivedDataSize = data.length;
                 if (receivedDataSize != btSendSize) {
-                    Log.e(TAG, String.format("sendData received wrong amount of data: %d bytes", receivedDataSize));
+                    if (debug) Log.e(TAG, String.format("sendData received wrong amount of data: %d bytes", receivedDataSize));
                     return;
                 } else {
-                    if (debug) Log.w(TAG, String.format("sendData received correct amount of data: %d bytes", receivedDataSize));
+                    if (debug) Log.i(TAG, String.format("sendData received correct amount of data: %d bytes", receivedDataSize));
                 }
                 for (int i = 0; i < btFactor; i++) {
                     if (btSignificantAll) {
@@ -144,9 +145,14 @@ public class ToBluetooth
                         dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
                     }
                 }
-                if (debug) Log.w(TAG, "sendData data assembled, put");
+                if (debug) Log.i(TAG, "sendData data assembled");
             }
-            storage.putData(dataAssembled);
+            if (!isRedirecting && storage != null) {
+                storage.clear();
+            } else if (storage != null) {
+                storage.putData(dataAssembled);
+            }
+            dataAssembled = null;
         }
     }
 

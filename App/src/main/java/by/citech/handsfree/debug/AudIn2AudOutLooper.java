@@ -46,7 +46,6 @@ public class AudIn2AudOutLooper
     private int audioBuffSizeShorts;
     private int buff2CodecFactor;
     private boolean audioSingleFrame;
-    private short[] dataBuff;
     private ITransmitter iTransmitter;
     private ITransmitterCtrl fromCtrl, toCtrl;
     private boolean isUsingCodec;
@@ -67,7 +66,7 @@ public class AudIn2AudOutLooper
 
     @Override
     public boolean isObjectPrepared() {
-        return codecType != null && dataBuff != null && codec != null;
+        return codecType != null && codec != null;
     }
 
     @Override
@@ -85,7 +84,6 @@ public class AudIn2AudOutLooper
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
-        dataBuff = new short[audioBuffSizeShorts];
         codec = AudioCodec.getAudioCodec(codecType);
         return true;
     }
@@ -128,7 +126,6 @@ public class AudIn2AudOutLooper
         toCtrl = null;
         codecType = null;
         codec = null;
-        dataBuff = null;
         IBase.super.baseStop();
         return true;
     }
@@ -182,14 +179,13 @@ public class AudIn2AudOutLooper
             if (audioSingleFrame) {
                 iTransmitter.sendData(getPreparedData(data));
             } else {
-                dataBuff = data;
                 int from;
                 for (int i = 0; i < buff2CodecFactor; i++) {
                     from = i * codecFactor;
                     if (debug) Log.i(TAG, "sendData from is " + from);
-                    System.arraycopy(getPreparedData(Arrays.copyOfRange(dataBuff, from, from + codecFactor)), 0, dataBuff, from, codecFactor);
+                    System.arraycopy(getPreparedData(Arrays.copyOfRange(data, from, from + codecFactor)), 0, data, from, codecFactor);
                 }
-                iTransmitter.sendData(dataBuff);
+                iTransmitter.sendData(data);
             }
         }
     }

@@ -175,54 +175,60 @@ public class CallerFsm
     private boolean processReportNormal(ECallReport report, CallerState from) {
         if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
-            case SysIntFail: //TODO: bluetooth failed
+            case SysIntError:
+            case SysIntConnected:
+            case SysIntDisconnected:
+            case SysIntConnectedCompatible:
+            case SysIntConnectedIncompatible:
+
+            case SysIntFail:
                 switch (from) {
                     case PhaseReadyInt:
                         return (processStateChange(from, PhaseZero, report));
                     default:
                         return (processStateChange(from, PhaseReadyExt, report));
                 }
-            case SysExtFail: //TODO: network failed
+            case SysExtFail:
                 switch (from) {
                     case PhaseReadyExt:
                         return (processStateChange(from, PhaseZero, report));
                     default:
                         return (processStateChange(from, PhaseReadyInt, report));
                 }
-            case SysIntReady: //TODO: bluetooth ready
-                switch(from) {
+            case SysIntReady:
+                switch (from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyInt, report));
                     case PhaseReadyExt:
                         return (processStateChange(from, ReadyToWork, report));
                 }
-            case SysExtReady: //TODO: network ready
+            case SysExtReady:
                 switch (from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyExt, report));
                     case PhaseReadyInt:
                         return (processStateChange(from, ReadyToWork, report));
                 }
-            case CallFailedExternal: //TODO: выключение BT
-            case CallFailedInternal://TODO: выключение BT
-            case InCallFailed:
             case OutConnectionFailed:
+            case InCallFailed:
+            case CallFailedExternal:
+            case CallFailedInternal:
                 return (processStateChange(from, Error, report));
             case InCallDetected:
                 return (processStateChange(from, InDetected, report));
             case OutConnectionConnected:
                 return (processStateChange(from, OutConnected, report));
-            case InCallCanceledByRemoteUser:
-            case OutCallInvalidCoordinates:
-            case CallEndedByRemoteUser: //TODO: выключение BT
-            case OutCallRejectedByRemoteUser:
-            case CallEndedByLocalUser: //TODO: выключение BT
-            case InCallRejectedByLocalUser:
             case OutConnectionCanceledByLocalUser:
+            case InCallCanceledByRemoteUser:
+            case InCallRejectedByLocalUser:
             case OutCallCanceledByLocalUser:
+            case OutCallRejectedByRemoteUser:
+            case OutCallInvalidCoordinates:
+            case CallEndedByRemoteUser:
+            case CallEndedByLocalUser:
                 return (processStateChange(from, ReadyToWork, report));
-            case OutCallAcceptedByRemoteUser: //TODO: включение BT
-            case InCallAcceptedByLocalUser: //TODO: включение BT
+            case OutCallAcceptedByRemoteUser:
+            case InCallAcceptedByLocalUser:
                 return (processStateChange(from, Call, report));
             case OutConnectionStartedByLocalUser:
                 return (processStateChange(from, OutStarted, report));
