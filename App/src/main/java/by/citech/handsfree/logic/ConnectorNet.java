@@ -36,8 +36,8 @@ import by.citech.handsfree.util.InetAddress;
 
 import static by.citech.handsfree.logic.ECallReport.CallEndedByRemoteUser;
 import static by.citech.handsfree.logic.ECallReport.CallFailedExternal;
-import static by.citech.handsfree.logic.ECallReport.ExternalConnectorFail;
-import static by.citech.handsfree.logic.ECallReport.ExternalConnectorReady;
+import static by.citech.handsfree.logic.ECallReport.SysExtFail;
+import static by.citech.handsfree.logic.ECallReport.SysExtReady;
 import static by.citech.handsfree.logic.ECallReport.InCallCanceledByRemoteUser;
 import static by.citech.handsfree.logic.ECallReport.InCallDetected;
 import static by.citech.handsfree.logic.ECallReport.InCallFailed;
@@ -369,9 +369,9 @@ public class ConnectorNet
             case PhaseReadyInt:
             case PhaseZero:
                 if (iServerCtrl == null) {
-                    if (reportToCallerFsm(callerState, ExternalConnectorFail, TAG)) return; else break;
+                    if (reportToCallerFsm(callerState, SysExtFail, TAG)) return; else break;
                 } else {
-                    if (reportToCallerFsm(callerState, ExternalConnectorReady, TAG)) {
+                    if (reportToCallerFsm(callerState, SysExtReady, TAG)) {
                         this.iServerCtrl = iServerCtrl;
                         return;
                     }
