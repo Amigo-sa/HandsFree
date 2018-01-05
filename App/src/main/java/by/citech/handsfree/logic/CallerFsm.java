@@ -175,28 +175,28 @@ public class CallerFsm
     private boolean processReportNormal(ECallReport report, CallerState from) {
         if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
-            case InternalConnectorFail: //TODO: bluetooth failed
+            case SysIntFail: //TODO: bluetooth failed
                 switch (from) {
                     case PhaseReadyInt:
                         return (processStateChange(from, PhaseZero, report));
                     default:
                         return (processStateChange(from, PhaseReadyExt, report));
                 }
-            case ExternalConnectorFail: //TODO: network failed
+            case SysExtFail: //TODO: network failed
                 switch (from) {
                     case PhaseReadyExt:
                         return (processStateChange(from, PhaseZero, report));
                     default:
                         return (processStateChange(from, PhaseReadyInt, report));
                 }
-            case InternalConnectorReady: //TODO: bluetooth ready
+            case SysIntReady: //TODO: bluetooth ready
                 switch(from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyInt, report));
                     case PhaseReadyExt:
                         return (processStateChange(from, ReadyToWork, report));
                 }
-            case ExternalConnectorReady: //TODO: network ready
+            case SysExtReady: //TODO: network ready
                 switch (from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyExt, report));

@@ -325,13 +325,13 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
      * @param characteristic The characteristic write to.
      */
 
-    public boolean  oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
+    public void  oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
         //if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
-            return false;
+            return;
         }
-        return mBluetoothGatt.writeCharacteristic(characteristic);
+        mBluetoothGatt.writeCharacteristic(characteristic);
     }
     /**
      * Enables or disables notification on a give characteristic.
