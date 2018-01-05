@@ -96,7 +96,11 @@ public class FromDataGenerator
     //--------------------- main
 
     private void streamShorts() {
-        shortsBuffer = DataGenerator.Sine.getSineChunk(chunkNumber);
+        try {
+            shortsBuffer = DataGenerator.Sine.TrueSine.getQuarter(chunkNumber, 32000, 80);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (debug) Log.i(TAG, String.format(
                 "streamShorts chunkNumber is %d, data is %s",
                 chunkNumber, Arrays.toString(shortsBuffer))

@@ -312,18 +312,18 @@ public class ViewManager
     private void processNormal(CallerState from, CallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "processNormal");
         switch (why) {
-            case SysExtFail:
-            case SysIntFail:
-            case SysIntDisconnected:
-            case SysIntConnectedIncompatible:
-            case SysIntError:
+            case ExternalConnectorFail:
+            case InternalConnectorFail:
+            case InternalConnectorDisconnected:
+            case InternalConnectorConnectedIncompatible:
+            case InternalConnectorError:
                 disableGray(getBtnGreen(), "ERROR");
                 disableGray(getBtnRed(), "ERROR");
                 break;
-            case SysExtReady:
-            case SysIntReady:
-            case SysIntConnected:
-            case SysIntConnectedCompatible:
+            case ExternalConnectorReady:
+            case InternalConnectorReady:
+            case InternalConnectorConnected:
+            case InternalConnectorConnectedCompatible:
                 if (to == ReadyToWork) {
                     enableBtnCall(getBtnGreen(), "CALL");
                     disableGray(getBtnRed(), "IDLE");

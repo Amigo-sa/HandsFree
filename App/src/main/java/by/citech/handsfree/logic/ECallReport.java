@@ -2,40 +2,44 @@ package by.citech.handsfree.logic;
 
 public enum ECallReport {
 
-    UnconditionalTransition,  // безусловный переход
+    UnconditionalTransition,
 
-    SysIntFail,  // BT failed
-    SysIntDisconnected,  // BT disconnected
-    SysIntConnected,  // BT connected
-    SysIntConnectedCompatible,  // compatible BT device connected
-    SysIntConnectedIncompatible, // incompatible BT device connected
-    SysIntReady,  // BT ready
-    SysIntError,  // BT error
-    SysExtFail,  // net failed
-    SysExtReady,  // net ready
+    //ICallToUiListener extends ICallToUiExchangeListener
+    OutCallCanceledByLocalUser, //callOutcomingCanceled
+    OutConnectionCanceledByLocalUser, //callOutcomingCanceled
+    OutConnectionStartedByLocalUser, //callOutcomingStarted
+    InCallRejectedByLocalUser, //callIncomingRejected
 
-    OutCallCanceledByLocalUser,  //
-    OutConnectionCanceledByLocalUser,  //
-    OutConnectionStartedByLocalUser,  //
-    InCallRejectedByLocalUser,  //
+    //ICallToUiExchangeListener
+    CallEndedByLocalUser, //callEndedInternally TODO: выключение BT
+    InCallAcceptedByLocalUser, //callIncomingAccepted TODO: включение BT
 
-    CallEndedByLocalUser,   // turn off BT data exchange
-    InCallAcceptedByLocalUser,  // turn on BT data exchange
+    //ICallNetListener extends ICallNetExchangeListener
+    OutConnectionConnected, //callOutcomingConnected
+    OutCallRejectedByRemoteUser, //callOutcomingRejected
+    OutConnectionFailed, //callOutcomingFailed
+    OutCallInvalidCoordinates, //callOutcomingInvalid
+    InCallDetected, //callIncomingDetected
+    InCallCanceledByRemoteUser, //callIncomingCanceled
+    InCallFailed, //callIncomingFailed
+    InternalConnectorFail, //TODO: bluetooth failed
+    InternalConnectorDisconnected, //TODO: bluetooth disconnected
+    InternalConnectorConnected, //TODO: bluetooth connected
+    InternalConnectorConnectedCompatible,
+    InternalConnectorConnectedIncompatible,
+    InternalConnectorReady, //TODO: bluetooth ready
+    InternalConnectorError, //TODO: bluetooth error
+    ExternalConnectorFail, //connectorFailure  TODO: network failed
+    ExternalConnectorReady, //connectorReady TODO: network ready
 
-    OutConnectionConnected,
-    OutCallRejectedByRemoteUser,
-    OutConnectionFailed,
-    OutCallInvalidCoordinates,
-    InCallDetected,
-    InCallCanceledByRemoteUser,
-    InCallFailed,
+    //ICallNetExchangeListener
+    OutCallAcceptedByRemoteUser, //callOutcomingAccepted TODO: включение BT
+    CallFailedExternal, //callFailed TODO: выключение BT
+    CallFailedInternal, //callFailed TODO: выключение BT
+    CallEndedByRemoteUser, //callEndedExternally TODO: выключение BT
 
-    OutCallAcceptedByRemoteUser,  // turn on BT data exchange
-    CallFailedExternal,  // turn off BT data exchange
-    CallFailedInternal,  // turn off BT data exchange
-    CallEndedByRemoteUser,  // turn off BT data exchange
-
-    StartDebug, //
-    StopDebug, //
+    //IDebugCtrl
+    StartDebug, //startDebug
+    StopDebug, //stopDebug
 
 }

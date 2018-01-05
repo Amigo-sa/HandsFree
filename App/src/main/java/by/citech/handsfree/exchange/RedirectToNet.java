@@ -6,12 +6,11 @@ import android.util.Log;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.threading.ThreadManager;
 
 public class RedirectToNet
-        extends AsyncTask<DataSource, ITransmitterCtrl, Void>
+        extends AsyncTask<Void, ITransmitterCtrl, Void>
         implements IThreadManager {
 
     private static final String TAG = Tags.REDIR2NET;
@@ -28,10 +27,10 @@ public class RedirectToNet
     }
 
     @Override
-    protected Void doInBackground(DataSource... params) {
+    protected Void doInBackground(Void... voids) {
         if (debug) Log.i(TAG, "doInBackground");
         ITransmitterCtrl iTransmitterCtrl;
-        switch (params[0]) {
+        switch (Settings.dataSource) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
                 iTransmitterCtrl = new FromAudioIn();
@@ -55,9 +54,6 @@ public class RedirectToNet
                 }
                 publishProgress(iTransmitterCtrl);
                 addRunnable(iTransmitterCtrl::streamOn);
-                break;
-            default:
-                if (debug) Log.e(TAG, "doInBackground default dataSource");
                 break;
         }
         return null;

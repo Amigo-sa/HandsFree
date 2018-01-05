@@ -31,14 +31,13 @@ import by.citech.handsfree.network.server.IServerOff;
 import by.citech.handsfree.param.Messages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.util.InetAddress;
 
 import static by.citech.handsfree.logic.ECallReport.CallEndedByRemoteUser;
 import static by.citech.handsfree.logic.ECallReport.CallFailedExternal;
-import static by.citech.handsfree.logic.ECallReport.SysExtFail;
-import static by.citech.handsfree.logic.ECallReport.SysExtReady;
+import static by.citech.handsfree.logic.ECallReport.ExternalConnectorFail;
+import static by.citech.handsfree.logic.ECallReport.ExternalConnectorReady;
 import static by.citech.handsfree.logic.ECallReport.InCallCanceledByRemoteUser;
 import static by.citech.handsfree.logic.ECallReport.InCallDetected;
 import static by.citech.handsfree.logic.ECallReport.InCallFailed;
@@ -55,7 +54,6 @@ public class ConnectorNet
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
-    private static final DataSource dataSource = Settings.dataSource;
 
     private static int objCount;
     private final String TAG;
@@ -371,10 +369,12 @@ public class ConnectorNet
             case PhaseReadyInt:
             case PhaseZero:
                 if (iServerCtrl == null) {
-                    if (reportToCallerFsm(callerState, SysExtFail, TAG)) return;
-                } else if (reportToCallerFsm(callerState, SysExtReady, TAG)) {
-                    this.iServerCtrl = iServerCtrl;
-                    return;
+                    if (reportToCallerFsm(callerState, ExternalConnectorFail, TAG)) return; else break;
+                } else {
+                    if (reportToCallerFsm(callerState, ExternalConnectorReady, TAG)) {
+                        this.iServerCtrl = iServerCtrl;
+                        return;
+                    }
                 }
                 break;
             default:
@@ -412,8 +412,8 @@ public class ConnectorNet
     private void exchangeStart() {
         if (debug) Log.i(TAG, "exchangeStart");
         printConnectControl();
-        new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute(dataSource);
-        new RedirectFromNet(this, iConnCtrl, storageFromNet).execute(dataSource);
+        new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute();
+        new RedirectFromNet(this, iConnCtrl, storageFromNet).execute();
     }
 
     private void exchangeStop() {
