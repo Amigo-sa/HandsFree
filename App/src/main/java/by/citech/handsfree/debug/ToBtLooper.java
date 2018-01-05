@@ -5,7 +5,8 @@ import android.util.Log;
 import by.citech.handsfree.codec.audio.AudioCodec;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.exchange.FromDataGenerator;
+import by.citech.handsfree.exchange.FromGenerator;
+import by.citech.handsfree.generator.DataType;
 import by.citech.handsfree.logic.CallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
@@ -90,7 +91,7 @@ public class ToBtLooper
                 fromCtrl = new FromAudioIn();
                 break;
             case DATAGENERATOR:
-                fromCtrl = new FromDataGenerator(codecType.getDecodedShortsSize(), 10, true);
+                fromCtrl = new FromGenerator(codecType.getDecodedShortsSize(), 10, true, DataType.Sine);
                 break;
         }
         ToBluetooth toBluetooth = new ToBluetooth(micToBtStorage);
@@ -166,9 +167,7 @@ public class ToBtLooper
     public void sendData(short[] data) {
         if (data == null || data.length != codecType.getDecodedShortsSize()) {
             if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        if (iTransmitter != null) {
+        } else if (iTransmitter != null) {
             if (!isSession) {
                 if (debug) Log.i(TAG, "sendData short[], first sendData on session");
                 isSession = true;

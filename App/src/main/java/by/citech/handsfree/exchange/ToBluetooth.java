@@ -31,7 +31,9 @@ public class ToBluetooth
     private boolean btSignificantAll;
     private byte[][] dataAssembled;
     //  private TrafficInfo trafficInfo;
-    private boolean isRedirecting;
+    private boolean isStreaming;
+    private boolean isPrepared;
+    private boolean isFinished;
     private StorageData<byte[][]> storage;
 
     {
@@ -79,7 +81,12 @@ public class ToBluetooth
 
     @Override
     public void prepareStream(ITransmitter iTransmitter) throws Exception {
-        if (debug) Log.i(TAG, "prepareStream");
+        if (isFinished) {
+            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            return;
+        } else {
+            if (debug) Log.i(TAG, "prepareStream");
+        }
         if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
                         " btSignificantAll is %b," +
                         " btSinglePacket is %b," +
@@ -94,26 +101,56 @@ public class ToBluetooth
                 btSignificantBytes,
                 btSendSize
         ));
+        isPrepared = true;
     }
 
     @Override
     public void finishStream() {
         if (debug) Log.i(TAG, "finishStream");
+        isFinished = true;
         streamOff();
         storage = null;
     }
 
     @Override
     public void streamOn() {
-        if (debug) Log.i(TAG, "streamOn");
-        isRedirecting = true;
+        if (isFinished) {
+            if (debug) Log.w(TAG, "streamOn stream is finished, return");
+            return;
+        } else {
+            if (debug) Log.i(TAG, "streamOn");
+        }
+        isStreaming = true;
     }
 
     @Override
     public void streamOff() {
         if (debug) Log.i(TAG, "streamOff");
-        isRedirecting = false;
+        isStreaming = false;
         storage.clear();
+    }
+
+    @Override
+    public boolean isStreaming() {
+        if (isStreaming) {
+            if (debug) Log.w(TAG, "isStreaming already streaming");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isReadyToStream() {
+        if (isFinished) {
+            if (debug) Log.w(TAG, "isReadyToStream finished");
+            return false;
+        } else if (!isPrepared) {
+            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            return false;
+        } else {
+            return true;
+        }
     }
 
     //--------------------- IReceiver
@@ -124,36 +161,35 @@ public class ToBluetooth
             if (debug) Log.i(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
             return;
         }
-        if (isRedirecting) {
-            if (dataAssembled == null) {
-                dataAssembled = new byte[btFactor][btToBtSendSize];
-            }
-            if (btSinglePacket) {
-                dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
-            } else {
-                int receivedDataSize = data.length;
-                if (receivedDataSize != btSendSize) {
-                    if (debug) Log.e(TAG, String.format("sendData received wrong amount of data: %d bytes", receivedDataSize));
-                    return;
-                } else {
-                    if (debug) Log.i(TAG, String.format("sendData received correct amount of data: %d bytes", receivedDataSize));
-                }
-                for (int i = 0; i < btFactor; i++) {
-                    if (btSignificantAll) {
-                        dataAssembled[i] = Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes);
-                    } else {
-                        dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
-                    }
-                }
-                if (debug) Log.i(TAG, "sendData data assembled");
-            }
-            if (!isRedirecting && storage != null) {
-                storage.clear();
-            } else if (storage != null) {
-                storage.putData(dataAssembled);
-            }
-            dataAssembled = null;
+        if (!isStreaming() || !isReadyToStream()) return;
+        if (dataAssembled == null) {
+            dataAssembled = new byte[btFactor][btToBtSendSize];
         }
+        if (btSinglePacket) {
+            dataAssembled[0] = Arrays.copyOf(data, btToBtSendSize);
+        } else {
+            int receivedDataSize = data.length;
+            if (receivedDataSize != btSendSize) {
+                if (debug)
+                    Log.e(TAG, String.format("sendData received wrong amount of data: %d bytes", receivedDataSize));
+                return;
+            } else {
+                if (debug)
+                    Log.i(TAG, String.format("sendData received correct amount of data: %d bytes", receivedDataSize));
+            }
+            for (int i = 0; i < btFactor; i++) {
+                if (btSignificantAll) {
+                    dataAssembled[i] = Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes);
+                } else {
+                    dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
+                }
+            }
+            if (debug) Log.i(TAG, "sendData data assembled");
+        }
+        if (isStreaming() && isReadyToStream()) {
+            storage.putData(dataAssembled);
+        }
+        dataAssembled = null;
     }
 
 }

@@ -3,7 +3,6 @@ package by.citech.handsfree.exchange;
 import android.media.AudioRecord;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import by.citech.handsfree.common.IPrepareObject;
@@ -12,7 +11,6 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.SeverityLevel;
-import by.citech.handsfree.util.DataGenerator;
 
 public class FromAudioIn
         implements ITransmitterCtrl, IPrepareObject, ISettingsCtrl {
@@ -33,6 +31,8 @@ public class FromAudioIn
     private short[] shortsBuffer;
     private AudioRecord recorder;
     private boolean isStreaming;
+    private boolean isFinished;
+    private boolean isPrepared;
     private ITransmitter iTransmitter;
 
     {
@@ -63,8 +63,6 @@ public class FromAudioIn
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
-        bytesBuffer = new byte[audioBuffSizeBytes];
-        shortsBuffer = new short[audioBuffSizeShorts];
         return true;
     }
 
@@ -72,7 +70,10 @@ public class FromAudioIn
 
     @Override
     public void prepareStream(ITransmitter iTransmitter) throws Exception {
-        if (iTransmitter == null) {
+        if (isFinished) {
+            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            return;
+        } else if (iTransmitter == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
             if (debug) Log.i(TAG, "prepareStream");
@@ -94,11 +95,15 @@ public class FromAudioIn
                 audioBuffSizeBytes,
                 audioBuffSizeShorts
         ));
+        if (recorder != null) {
+            isPrepared = true;
+        }
     }
 
     @Override
     public void finishStream() {
         if (debug) Log.i(TAG, "finishStream");
+        isFinished = true;
         streamOff();
         if (recorder != null) {
             recorder.release();
@@ -107,22 +112,6 @@ public class FromAudioIn
         iTransmitter = null;
         shortsBuffer = null;
         bytesBuffer = null;
-    }
-
-    @Override
-    public void streamOn() {
-        if (debug) Log.i(TAG, "streamOn");
-        if (isStreaming || (recorder == null)) {
-            if (debug) Log.w(TAG, "streamOn already streaming or recorder is null");
-            return;
-        }
-        isStreaming = true;
-        recorder.startRecording();
-        while (isStreaming) {
-            if (audioBuffIsShorts) streamShorts();
-            else                   streamBytes();
-        }
-        if (debug) Log.i(TAG, "streamOn done");
     }
 
     @Override
@@ -136,40 +125,81 @@ public class FromAudioIn
         }
     }
 
+    @Override
+    public boolean isStreaming() {
+        if (isStreaming) {
+            if (debug) Log.w(TAG, "isStreaming already streaming");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isReadyToStream() {
+        if (isFinished) {
+            if (debug) Log.w(TAG, "isReadyToStream finished");
+            return false;
+        } else if (!isPrepared) {
+            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public void streamOn() {
+        if (isStreaming() || !isReadyToStream()) {
+            return;
+        } else {
+            if (debug) Log.i(TAG, "streamOn");
+        }
+        isStreaming = true;
+        recorder.startRecording();
+        while (isStreaming() && isReadyToStream()) {
+            if (audioBuffIsShorts) streamShorts();
+            else                   streamBytes();
+        }
+        if (debug) Log.i(TAG, "streamOn done");
+    }
+
     //--------------------- main
 
     private void streamShorts() {
-        fillBuffer(shortsBuffer, audioBuffSizeShorts);
-        iTransmitter.sendData(shortsBuffer);
+        iTransmitter.sendData(fillShortsBuff(audioBuffSizeShorts));
     }
 
     private void streamBytes() {
-        fillBuffer(bytesBuffer, audioBuffSizeBytes);
-        iTransmitter.sendData(bytesBuffer);
+        iTransmitter.sendData(fillBytesBuff(audioBuffSizeBytes));
     }
 
-    private void fillBuffer(byte[] buffer, int readLeft) {
-        if (debug) Log.d(TAG, "fillBuffer byte[]");
-        int readCount;
+    private byte[] fillBytesBuff(int readLeft) {
+        if (debug) Log.d(TAG, "fillBytesBuff");
+        byte[] buffer = new byte[audioBuffSizeBytes];
+        int readCount = 0;
         int readOffset = 0;
-        while (isStreaming && (readLeft != 0)) {
+        while (isStreaming() && isReadyToStream() && (readLeft != 0)) {
             readCount = recorder.read(buffer, readOffset, readLeft);
             readLeft -= readCount;
             readOffset += readCount;
         }
-        if (debug) Log.d(TAG, "fillBuffer byte[] done");
+        if (debug) Log.d(TAG, "fillBytesBuff done");
+        return buffer;
     }
 
-    private void fillBuffer(short[] buffer, int readLeft) {
-        if (debug) Log.d(TAG, "fillBuffer short[]");
-        int readCount;
+    private short[] fillShortsBuff(int readLeft) {
+        if (debug) Log.d(TAG, "fillShortsBuff");
+        short[] buffer = new short[audioBuffSizeShorts];
+        int readCount = 0;
         int readOffset = 0;
-        while (isStreaming && (readLeft != 0)) {
+        while (isStreaming() && isReadyToStream() && (readLeft != 0)) {
             readCount = recorder.read(buffer, readOffset, readLeft);
             readLeft -= readCount;
             readOffset += readCount;
         }
-        if (debug) Log.d(TAG, "fillBuffer short[] done");
+        if (debug) Log.d(TAG, "fillShortsBuff done");
+        return buffer;
     }
 
 }

@@ -329,8 +329,8 @@ public class ViewManager
                     disableGray(getBtnRed(), "IDLE");
                 }
                 break;
-            case CallFailedExternal:
-            case CallFailedInternal:
+            case CallFailedExt:
+            case CallFailedInt:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "FAILED");
                 break;

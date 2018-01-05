@@ -36,7 +36,7 @@ import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.util.InetAddress;
 
 import static by.citech.handsfree.logic.ECallReport.CallEndedByRemoteUser;
-import static by.citech.handsfree.logic.ECallReport.CallFailedExternal;
+import static by.citech.handsfree.logic.ECallReport.CallFailedExt;
 import static by.citech.handsfree.logic.ECallReport.SysExtFail;
 import static by.citech.handsfree.logic.ECallReport.SysExtReady;
 import static by.citech.handsfree.logic.ECallReport.InCallCanceledByRemoteUser;
@@ -251,7 +251,7 @@ public class ConnectorNet
             case InDetected:
                 if (reportToCallerFsm(callerState, InCallFailed, TAG)) return; else break;
             case Call:
-                if (reportToCallerFsm(callerState, CallFailedExternal, TAG)) {
+                if (reportToCallerFsm(callerState, CallFailedExt, TAG)) {
                     exchangeStop();
                     return;
                 }
@@ -309,7 +309,7 @@ public class ConnectorNet
             case OutStarted:
                 if (reportToCallerFsm(callerState, OutConnectionFailed, TAG)) return; else break;
             case Call:
-                if (reportToCallerFsm(callerState, CallFailedExternal, TAG)) {
+                if (reportToCallerFsm(callerState, CallFailedExt, TAG)) {
                     exchangeStop();
                     return;
                 }

@@ -31,8 +31,8 @@ public enum ECallReport {
     InCallFailed,
 
     OutCallAcceptedByRemoteUser,  // turn on BT + net data exchange
-    CallFailedExternal,  // turn off BT + net data exchange
-    CallFailedInternal,  // turn off BT + net data exchange
+    CallFailedExt,  // turn off BT + net data exchange
+    CallFailedInt,  // turn off BT + net data exchange
     CallEndedByRemoteUser,  // turn off BT + net data exchange
 
     StartDebug, //

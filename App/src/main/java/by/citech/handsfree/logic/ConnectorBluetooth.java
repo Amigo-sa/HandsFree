@@ -57,7 +57,7 @@ import by.citech.handsfree.gui.IBtToUiListener;
 import by.citech.handsfree.gui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
-import static by.citech.handsfree.logic.ECallReport.CallFailedInternal;
+import static by.citech.handsfree.logic.ECallReport.CallFailedInt;
 import static by.citech.handsfree.logic.ECallReport.SysIntConnected;
 import static by.citech.handsfree.logic.ECallReport.SysIntConnectedCompatible;
 import static by.citech.handsfree.logic.ECallReport.SysIntConnectedIncompatible;
@@ -72,8 +72,15 @@ public class ConnectorBluetooth
 
     private static int objCount;
     private final String TAG;
-    static {objCount = 0;}
-    {objCount++; TAG = STAG + " " + objCount;}
+
+    static {
+        objCount = 0;
+    }
+
+    {
+        objCount++;
+        TAG = STAG + " " + objCount;
+    }
 
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
     private BluetoothLeService mBluetoothLeService;
@@ -240,10 +247,10 @@ public class ConnectorBluetooth
         connDialogInfoOn.setiMsgToUi(iMsgToUi);
 
         // привязываем сервис и регистрируем BroadcastReceiver
-        if (Settings.debug) Log.i(TAG,"registerReceiver ...");
+        if (Settings.debug) Log.i(TAG, "registerReceiver ...");
         bleController.setCommand(registerReceiver)
-                     .setCommand(bindService)
-                     .execute();
+                .setCommand(bindService)
+                .execute();
     }
 
     //--------------------- IBase
@@ -258,7 +265,7 @@ public class ConnectorBluetooth
     }
 
     @Override
-    public boolean baseStop(){
+    public boolean baseStop() {
         if (Settings.debug) Log.i(TAG, "baseStop");
 
         unregisterCallerFsmListener(this, TAG);
@@ -288,7 +295,7 @@ public class ConnectorBluetooth
     }
 
     @Override
-    public boolean baseDestroy(){
+    public boolean baseDestroy() {
         if (Settings.debug) Log.i(TAG, "baseDestroy");
         IBase.super.baseDestroy();
         return true;
@@ -296,21 +303,21 @@ public class ConnectorBluetooth
 
     //--------------------- getters and setters
 
-     ConnectorBluetooth setmHandler(Handler mHandler) {
+    ConnectorBluetooth setmHandler(Handler mHandler) {
         this.mHandler = mHandler;
         return this;
     }
 
-     ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
+    ConnectorBluetooth addIRxDataListener(ITransmitter iTransmitter) {
         this.iTransmitter = iTransmitter;
-       return this;
+        return this;
     }
 
     private void setmBTDevice(BluetoothDevice mBTDevice) {
         this.mBTDevice = mBTDevice;
     }
 
-    public BroadcastReceiver getBroadcastReceiver(){
+    public BroadcastReceiver getBroadcastReceiver() {
         return leBroadcastReceiver.getGattUpdateReceiver();
     }
 
@@ -318,46 +325,46 @@ public class ConnectorBluetooth
         return BluetoothUi.getInstance();
     }
 
-    public IBtToUiListener getIbtToUiListener(){
+    public IBtToUiListener getIbtToUiListener() {
         return leScanner;
     }
 
-     ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
+    ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
         return this;
     }
 
-     ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt){
+    ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt) {
         this.storageFromBt = storageFromBt;
         return this;
     }
 
-     ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt){
+    ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt) {
         this.storageToBt = storageToBt;
         return this;
     }
 
-     ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
+    ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
         this.iBroadcastReceiver = iBroadcastReceiver;
         return this;
     }
 
-     ConnectorBluetooth setiService(IService iService) {
+    ConnectorBluetooth setiService(IService iService) {
         this.iService = iService;
         return this;
     }
 
-     ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
+    ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
         this.iBtToUiCtrl = iBtToUiCtrl;
         return this;
     }
 
-     ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
+    ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
         return this;
     }
 
-     ConnectorBluetooth setiBtList(IBtList iBtList) {
+    ConnectorBluetooth setiBtList(IBtList iBtList) {
         this.iBtList = iBtList;
         return this;
     }
@@ -470,7 +477,7 @@ public class ConnectorBluetooth
         CallerState callerState = getCallerFsmState();
         switch (callerState) {
             case Call:
-                if (reportToCallerFsm(callerState, CallFailedInternal, TAG)) return;
+                if (reportToCallerFsm(callerState, CallFailedInt, TAG)) return;
                 else break;
             default:
                 if (Settings.debug) Log.e(TAG, "processState " + callerState);
@@ -486,26 +493,25 @@ public class ConnectorBluetooth
         bleController.setCommand(characteristicDisplayOn).execute();
         if (characteristics.getNotifyCharacteristic() != null && characteristics.getWriteCharacteristic() != null) {
             reportToCallerFsm(getCallerFsmState(), SysIntConnectedCompatible, TAG);
-        }
-        else
+        } else
             reportToCallerFsm(getCallerFsmState(), SysIntConnectedIncompatible, TAG);
     }
 
     //----------------------- Scanning ---------------------------
 
-     void startScanBTDevices(){
-         bleController.setCommand(scanOn).execute();
+    void startScanBTDevices() {
+        bleController.setCommand(scanOn).execute();
     }
 
-     void stopScanBTDevice(){
-         bleController.setCommand(scanOff).execute();
+    void stopScanBTDevice() {
+        bleController.setCommand(scanOff).execute();
     }
 
-     void scanWork() {
+    void scanWork() {
         bleController.setCommand(clearList)
-                     .setCommand(addToList)
-                     .setCommand(scanOn)
-                     .execute();
+                .setCommand(addToList)
+                .setCommand(scanOn)
+                .execute();
     }
 
     //----------------- Connection/Disconnection ----------------
@@ -513,11 +519,11 @@ public class ConnectorBluetooth
     public void disconnect() {
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff)
-                         .setCommand(disconnectDevice)
-                         .execute();
+                    .setCommand(disconnectDevice)
+                    .execute();
         else
             bleController.setCommand(disconnectDevice)
-                         .execute();
+                    .execute();
     }
 
     public void connecting() {
@@ -559,7 +565,8 @@ public class ConnectorBluetooth
     }
 
     private synchronized boolean setBLEState(BluetoothLeState fromBLEState, BluetoothLeState toBLEState) {
-        if (Settings.debug) Log.w(TAG, String.format("setState from %s to %s", fromBLEState.getName(), toBLEState.getName()));
+        if (Settings.debug)
+            Log.w(TAG, String.format("setState from %s to %s", fromBLEState.getName(), toBLEState.getName()));
         if (BLEState == fromBLEState) {
             if (fromBLEState.availableStates().contains(toBLEState)) {
                 BLEState = toBLEState;
@@ -568,10 +575,12 @@ public class ConnectorBluetooth
                 }
                 return true;
             } else {
-                if (Settings.debug) Log.e(TAG, String.format("setState: %s is not available from %s", toBLEState.getName(), fromBLEState.getName()));
+                if (Settings.debug)
+                    Log.e(TAG, String.format("setState: %s is not available from %s", toBLEState.getName(), fromBLEState.getName()));
             }
         } else {
-            if (Settings.debug) Log.e(TAG, String.format("setState: current is not %s", fromBLEState.getName()));
+            if (Settings.debug)
+                Log.e(TAG, String.format("setState: current is not %s", fromBLEState.getName()));
         }
         return false;
     }
@@ -580,7 +589,7 @@ public class ConnectorBluetooth
     //------------ устанавливаем хранилища для данных ---------------
 
     @Override
-    public void setStorages(){
+    public void setStorages() {
         if (Settings.debug) Log.i(TAG, "setStorages()");
         leDataTransmitter.setStorageFromBt((storageFromBt));
         leDataTransmitter.setStorageToBt(storageToBt);
@@ -615,13 +624,13 @@ public class ConnectorBluetooth
                 enableTransmitData();
                 break;
             case CallEndedByLocalUser:
-            case CallFailedExternal:
+            case CallFailedExt:
             case CallEndedByRemoteUser:
                 disableTransmitData();
                 break;
             case StartDebug:
                 switch (Settings.opMode) {
- case DataGen2Bt:
+                    case DataGen2Bt:
                     case AudIn2Bt:
                         enableTransmitData();
                         break;

@@ -39,7 +39,7 @@ public class Bt2BtLooper
     private boolean isRunning;
     private boolean isActive;
 
-    private Runnable main = new Runnable() {
+    private Runnable looping = new Runnable() {
         @Override
         public void run() {
             while (isActive) {
@@ -110,7 +110,7 @@ public class Bt2BtLooper
         prepareObject();
         isRunning = false;
         isActive = true;
-        addRunnable(main);
+        addRunnable(looping);
         return true;
     }
 
@@ -157,7 +157,7 @@ public class Bt2BtLooper
         storageNetToBt.clear();
     }
 
-    //--------------------- main
+    //--------------------- looping
 
     private void looping() {
         if (debug) Log.i(TAG, "looping");

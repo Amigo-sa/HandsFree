@@ -5,4 +5,6 @@ public interface ITransmitterCtrl {
     void streamOn();
     void streamOff();
     void finishStream();
+    boolean isStreaming();
+    boolean isReadyToStream();
 }

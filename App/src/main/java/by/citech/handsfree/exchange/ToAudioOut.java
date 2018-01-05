@@ -38,6 +38,8 @@ public class ToAudioOut
     private int buffCnt;
     private AudioTrack audioTrack;
     private boolean isStreaming;
+    private boolean isPrepared;
+    private boolean isFinished;
 
     {
         prepareObject();
@@ -53,11 +55,6 @@ public class ToAudioOut
     @Override
     public boolean applySettings(SeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
-        if (audioBuffIsShorts) {
-            buffShorts = new short[audioBuffSizeShorts];
-        } else {
-            buffBytes = new byte[audioBuffSizeBytes];
-        }
         return true;
     }
 
@@ -83,9 +80,11 @@ public class ToAudioOut
 
     @Override
     public void prepareStream(ITransmitter iTransmitter) throws Exception {
-        if (debug) Log.i(TAG, "prepareRedirect");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (debug) Log.i(TAG, "prepareRedirect version HIGH");
+        if (isFinished) {
+            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            return;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (debug) Log.i(TAG, "prepareStream version HIGH");
             audioTrack = new AudioTrack.Builder()
                     .setAudioAttributes(new AudioAttributes.Builder()
                             .setUsage(audioUsage)
@@ -100,7 +99,7 @@ public class ToAudioOut
                     .setTransferMode(audioMode)
                     .build();
         } else {
-            if (debug) Log.i(TAG, "prepareRedirect version LOW");
+            if (debug) Log.i(TAG, "prepareStream version LOW");
             audioTrack = new AudioTrack(
                     audioStreamType,
                     audioRate,
@@ -110,7 +109,7 @@ public class ToAudioOut
                     audioMode
             );
         }
-        Log.w(TAG, String.format(Locale.US, "redirectOn parameters is:" +
+        if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
                         " audioBuffIsShorts is %b," +
                         " audioRate is %d," +
                         " audioBuffSizeBytes is %d," +
@@ -120,12 +119,15 @@ public class ToAudioOut
                 audioBuffSizeBytes,
                 audioBuffSizeShorts
         ));
-        if (debug) Log.i(TAG, "prepareRedirect done");
+        if (audioTrack != null) {
+            isPrepared = true;
+        }
     }
 
     @Override
     public void finishStream() {
         if (debug) Log.i(TAG, "finishStream");
+        isFinished = true;
         streamOff();
         if (audioTrack != null) {
             audioTrack.release();
@@ -136,9 +138,10 @@ public class ToAudioOut
 
     @Override
     public void streamOn() {
-        if (isStreaming || (audioTrack == null)) {
-            Log.e(TAG, "streamOn already redirecting or audioTrack is null");
+        if (isStreaming() || !isReadyToStream()) {
             return;
+        } else {
+            if (debug) Log.i(TAG, "streamOn");
         }
         isStreaming = true;
         audioTrack.play();
@@ -158,35 +161,73 @@ public class ToAudioOut
         if (debug) Log.i(TAG, "streamOff done");
     }
 
+    @Override
+    public boolean isStreaming() {
+        if (isStreaming) {
+            if (debug) Log.w(TAG, "isStreaming already streaming");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isReadyToStream() {
+        if (isFinished) {
+            if (debug) Log.w(TAG, "isReadyToStream finished");
+            return false;
+        } else if (!isPrepared) {
+            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     //--------------------- IReceiver
 
     @Override
     public void sendData(byte[] data) {
-        if (debug) Log.i(TAG, "sendData byte[]");
+        if (buffCnt == 0) {
+            if (debug) Log.i(TAG, "sendData data[] buffCnt = 0, first receive");
+        }
         int dataLength;
         if (data == null) {
             if (debug) Log.w(TAG, "sendData byte[] data is null, return");
             return;
         } else {
             dataLength = data.length;
-            if (!isStreaming || audioBuffIsShorts || dataLength == 0) {
+            if (audioBuffIsShorts || dataLength == 0) {
                 if (debug) Log.w(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
                 return;
             }
+        }
+        if (!isStreaming() || !isReadyToStream()){
+            return;
+        } else {
+            if (debug) Log.i(TAG, "sendData byte[]");
+        }
+        if (buffBytes == null) {
+            buffBytes = new byte[audioBuffSizeBytes];
         }
         try {
             System.arraycopy(data, 0, buffBytes, buffCnt, dataLength);
         } catch (Exception e) {
             if (debug) Log.w(TAG, String.format(Locale.US,
-                    "sendData byte[] buffCnt is %d, dataLength is %d, buffBytes is null: %b",
-                    buffCnt, dataLength, buffBytes == null));
+                    "sendData byte[] buffCnt is %d, dataLength is %d",
+                    buffCnt, dataLength));
             e.printStackTrace();
         }
         buffCnt = buffCnt + dataLength;
         if (buffCnt >= audioBuffSizeBytes) {
-            if (debug) Log.i(TAG, "sendData byte[] buffered bytes to play: " + buffCnt);
-            audioTrack.write(buffBytes, 0, audioBuffSizeBytes);
-            buffCnt = 0;
+            if (isReadyToStream()) {
+                if (debug) Log.i(TAG, "sendData byte[] buffered bytes to play: " + buffCnt);
+                audioTrack.write(buffBytes, 0, audioBuffSizeBytes);
+                buffBytes = null;
+                buffCnt = 0;
+            }
+        } else {
+            if (debug) Log.i(TAG, "sendData byte[] buffered bytes: " + buffCnt);
         }
     }
 
@@ -201,26 +242,37 @@ public class ToAudioOut
             return;
         } else {
             dataLength = data.length;
-            if (!isStreaming || !audioBuffIsShorts || dataLength == 0) {
+            if (!audioBuffIsShorts || dataLength == 0) {
                 if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
                 return;
             }
+        }
+        if (!isStreaming() || !isReadyToStream()){
+            return;
+        } else {
+            if (debug) Log.i(TAG, "sendData short[]");
+        }
+        if (buffShorts == null) {
+            buffShorts = new short[audioBuffSizeShorts];
         }
         try {
             System.arraycopy(data, 0, buffShorts, buffCnt, dataLength);
         } catch (Exception e) {
             if (debug) Log.w(TAG, String.format(Locale.US,
-                    "sendData short[] buffCnt is %d, dataLength is %d, buffShorts is null: %b",
-                    buffCnt, dataLength, buffShorts == null));
+                    "sendData short[] buffCnt is %d, dataLength is %d",
+                    buffCnt, dataLength));
             e.printStackTrace();
         }
         buffCnt = buffCnt + dataLength;
         if (buffCnt >= audioBuffSizeShorts) {
-            if (debug) Log.i(TAG, "sendData short[] buffered bytes to play: " + buffCnt);
-            audioTrack.write(buffShorts, 0, audioBuffSizeShorts);
-            buffCnt = 0;
+            if (isReadyToStream()) {
+                if (debug) Log.i(TAG, "sendData short[] buffered shorts to play: " + buffCnt);
+                audioTrack.write(buffShorts, 0, audioBuffSizeShorts);
+                buffShorts = null;
+                buffCnt = 0;
+            }
         } else {
-            if (debug) Log.i(TAG, "sendData short[] buffered bytes: " + buffCnt);
+            if (debug) Log.i(TAG, "sendData short[] buffered shorts: " + buffCnt);
         }
     }
 

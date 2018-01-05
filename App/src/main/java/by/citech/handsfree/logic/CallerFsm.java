@@ -175,12 +175,11 @@ public class CallerFsm
     private boolean processReportNormal(ECallReport report, CallerState from) {
         if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
-            case SysIntError:
-            case SysIntConnected:
-            case SysIntDisconnected:
-            case SysIntConnectedCompatible:
-            case SysIntConnectedIncompatible:
-
+//          case SysIntConnectedIncompatible:
+//          case SysIntConnectedCompatible:
+//          case SysIntDisconnected:
+//          case SysIntConnected:
+//          case SysIntError:
             case SysIntFail:
                 switch (from) {
                     case PhaseReadyInt:
@@ -188,19 +187,21 @@ public class CallerFsm
                     default:
                         return (processStateChange(from, PhaseReadyExt, report));
                 }
-            case SysExtFail:
-                switch (from) {
-                    case PhaseReadyExt:
-                        return (processStateChange(from, PhaseZero, report));
-                    default:
-                        return (processStateChange(from, PhaseReadyInt, report));
-                }
             case SysIntReady:
                 switch (from) {
                     case PhaseZero:
                         return (processStateChange(from, PhaseReadyInt, report));
                     case PhaseReadyExt:
                         return (processStateChange(from, ReadyToWork, report));
+                    default:
+                        return true;
+                }
+            case SysExtFail:
+                switch (from) {
+                    case PhaseReadyExt:
+                        return (processStateChange(from, PhaseZero, report));
+                    default:
+                        return (processStateChange(from, PhaseReadyInt, report));
                 }
             case SysExtReady:
                 switch (from) {
@@ -211,8 +212,8 @@ public class CallerFsm
                 }
             case OutConnectionFailed:
             case InCallFailed:
-            case CallFailedExternal:
-            case CallFailedInternal:
+            case CallFailedExt:
+//          case CallFailedInt:
                 return (processStateChange(from, Error, report));
             case InCallDetected:
                 return (processStateChange(from, InDetected, report));

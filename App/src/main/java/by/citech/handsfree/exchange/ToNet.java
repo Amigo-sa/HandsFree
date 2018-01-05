@@ -37,6 +37,7 @@ public class ToNet
     private ITransmitter iTransmitter;
     private boolean isStreaming;
     private boolean isFinished;
+    private boolean isPrepared;
     private StorageData<byte[]> source;
 
     {
@@ -93,8 +94,7 @@ public class ToNet
         if (isFinished) {
             if (debug) Log.w(TAG, "prepareStream stream is finished, return");
             return;
-        }
-        if (iTransmitter == null) {
+        } else if (iTransmitter == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
             if (debug) Log.i(TAG, "prepareStream");
@@ -112,13 +112,14 @@ public class ToNet
                 netFactor,
                 netSendSize
         ));
+        isPrepared = true;
     }
 
     @Override
     public void finishStream() {
         if (debug) Log.i(TAG, "finishStream");
-        streamOff();
         isFinished = true;
+        streamOff();
         iTransmitter = null;
         source = null;
     }
@@ -130,31 +131,48 @@ public class ToNet
     }
 
     @Override
-    public void streamOn() {
-        if (debug) Log.i(TAG, "streamOn");
+    public boolean isStreaming() {
+        if (isStreaming) {
+            if (debug) Log.w(TAG, "isStreaming already streaming");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "streamOn stream is finished, return");
+            if (debug) Log.w(TAG, "isReadyToStream finished");
+            return false;
+        } else if (!isPrepared) {
+            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public void streamOn() {
+        if (isStreaming() || !isReadyToStream()) {
             return;
+        } else {
+            if (debug) Log.i(TAG, "streamOn");
         }
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int netChunkSizeActual = 0;
         int netChunkCount = 0;
-        while (isStreaming) {
-            while (source != null && source.isEmpty()) {
+        while (isStreaming()) {
+            while (isStreaming() && isReadyToStream() && source.isEmpty()) {
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if (!isStreaming) return;
             }
-            if (source != null) {
-                netChunk = source.getData();
-            } else {
-                if (debug) Log.i(TAG, "streamOn done");
-                return;
-            }
+            netChunk = source.getData();
             if (netChunk != null) {
                 netChunkSizeActual = netChunk.length;
                 if (netChunkSizeActual != netChunkSize) {
@@ -167,15 +185,11 @@ public class ToNet
                 if (debug) Log.e(TAG, "streamOn readed null data from storage");
                 return;
             }
-            if (!isStreaming) return;
             if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
             if (netChunkCount == netFactor) {
                 if (debug) Log.w(TAG, String.format("streamOn net out buff contains enough data of %d bytes, sending", baos.size()));
-                if (iTransmitter != null) {
+                if (isStreaming() && isReadyToStream()) {
                     iTransmitter.sendData(baos.toByteArray());
-                } else {
-                    if (debug) Log.i(TAG, "streamOn done");
-                    return;
                 }
                 netChunkCount = 0;
                 baos.reset();
