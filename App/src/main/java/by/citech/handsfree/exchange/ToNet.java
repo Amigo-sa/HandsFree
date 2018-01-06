@@ -132,12 +132,7 @@ public class ToNet
 
     @Override
     public boolean isStreaming() {
-        if (isStreaming) {
-            if (debug) Log.w(TAG, "isStreaming already streaming");
-            return true;
-        } else {
-            return false;
-        }
+        return isStreaming;
     }
 
     @Override
@@ -172,6 +167,7 @@ public class ToNet
                     e.printStackTrace();
                 }
             }
+            if (!isStreaming() || !isReadyToStream()) return;
             netChunk = source.getData();
             if (netChunk != null) {
                 netChunkSizeActual = netChunk.length;

@@ -132,12 +132,7 @@ public class ToBluetooth
 
     @Override
     public boolean isStreaming() {
-        if (isStreaming) {
-            if (debug) Log.w(TAG, "isStreaming already streaming");
-            return true;
-        } else {
-            return false;
-        }
+        return isStreaming;
     }
 
     @Override
