@@ -126,11 +126,11 @@ public class FromGenerator
     //--------------------- main
 
     private void streamShorts() {
-        iTransmitter.sendData(dataGenerator.getDataShorts());
+        iTransmitter.sendData(dataGenerator.getNextDataShorts());
     }
 
     private void streamBytes() {
-        iTransmitter.sendData(dataGenerator.getDataBytes());
+        iTransmitter.sendData(dataGenerator.getNextDataBytes());
     }
 
 }

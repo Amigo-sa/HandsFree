@@ -2,7 +2,6 @@ package by.citech.handsfree.generator;
 
 import android.util.Log;
 
-import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;
 
@@ -13,16 +12,12 @@ import static by.citech.handsfree.util.MathHelper.revertDoubleArr;
 public class CircleGenerator
         extends DataGeneratorFactory {
 
-    private static final String STAG = Tags.CircleGenerator;
+    private static final String TAG = Tags.CircleGenerator;
+    private static final String STAG = TAG + " ST";
     private static final boolean debug = Settings.debug;
 
-    private static final double MAX_COS = 1.0D;
     private static final double MIN_COS = 0.0D;
-    private static final int QUARTER_1 = 1;
-    private static final int QUARTER_2 = 2;
-    private static final int QUARTER_3 = 3;
-    private static final int QUARTER_4 = 4;
-    private static final int QPP = 4;
+    private static final double MAX_COS = 1.0D;
 
     private final boolean isShorts;
 
@@ -48,9 +43,11 @@ public class CircleGenerator
     //--------------------- IDataGenerator
 
     @Override
-    public short[] getDataShorts() {
-        if (!isShorts) return null;
-        if (chunkNumber == (length+1)) {
+    public short[] getNextDataShorts() {
+        if (!isShorts) {
+            if (debug) Log.e(TAG, "getNextDataShorts while !isShorts");
+            return null;
+        } else if (chunkNumber == (length+1)) {
             chunkNumber = 0;
         } else {
             chunkNumber++;
@@ -59,48 +56,42 @@ public class CircleGenerator
     }
 
     @Override
-    public byte[] getDataBytes() {
-        if (isShorts) return null;
-        return new byte[0];
+    public byte[] getNextDataBytes() {
+        if (isShorts) {
+            if (debug) Log.e(TAG, "getNextDataBytes while isShorts");
+            return null;
+        } else {
+            if (debug) Log.e(STAG, "getNextDataBytes not supported yet");
+            return new byte[0];
+        }
     }
 
     //--------------------- main
 
-    public static short[] getQuarter(int quarterNum, double mult, int div) throws Exception {
-        if (quarterNum < 1 || quarterNum > 4 || mult < 1 || mult > 32768 || div < 1 || div > 32768) {
-            throw new Exception(StatusMessages.ERR_PARAMETERS);
-        }
+    private static short[] getQuarter(int quarterNum, double mult, int div) throws Exception {
+        checkParameters(quarterNum, mult, div);
 
         if (debug) Log.i(STAG, String.format(
                 "getQuarter: quarterNum = %d, mult = %s, div = %d",
                 quarterNum, mult, div)
         );
 
-        double delta = (MAX_COS - MIN_COS) / (double) div;
-        double[] cos = new double[div];
-        double[] sin = new double[div];
-
-        for (int i = 0; i < div; i++) {
-            cos[i] = (double) i * delta;
-            sin[i] = mult * Math.sqrt((1.0D - cos[i]) * ((1.0D + cos[i])));
-        }
-
         double[] quarterD = new double[div];
 
         switch (quarterNum) {
             case QUARTER_1:
-                quarterD = sin;
+                quarterD = getCircleQuarter(mult, div);
                 break;
             case QUARTER_2:
-                quarterD = sin;
+                quarterD = getCircleQuarter(mult, div);
                 quarterD = revertDoubleArr(quarterD);
                 break;
             case QUARTER_3:
-                quarterD = sin;
+                quarterD = getCircleQuarter(mult, div);
                 invertDoubleArr(quarterD);
                 break;
             case QUARTER_4:
-                quarterD = sin;
+                quarterD = getCircleQuarter(mult, div);
                 quarterD = revertDoubleArr(quarterD);
                 invertDoubleArr(quarterD);
                 break;
@@ -113,11 +104,8 @@ public class CircleGenerator
         return quarterS;
     }
 
-
-    public static short[] getPeriod(double mult, int div) throws Exception {
-        if (mult < 1 || mult > 32768 || div < 1 || div > 32768 / QPP) {
-            throw new Exception(StatusMessages.ERR_PARAMETERS);
-        }
+    private static short[] getPeriod(double mult, int div) throws Exception {
+        checkParameters(mult, div);
 
         if (debug) Log.i(STAG, String.format(
                 "getPeriod: mult = %s, div = %d",
@@ -132,12 +120,27 @@ public class CircleGenerator
 
         short[] period = new short[div];
         int quarterNum;
+
         for (int i = 0; i < QPP; i++) {
             quarterNum = QPP - i;
             if (debug) Log.i(STAG, "getPeriod: processing qurter number " + quarterNum);
             System.arraycopy(getQuarter(quarterNum, mult, quarterDiv), 0, period, quarterDiv * i, quarterDiv);
         }
+
         return period;
+    }
+
+    private static double[] getCircleQuarter(double mult, int div) {
+        double delta = (MAX_COS - MIN_COS) / (double) div;
+        double[] cosine = new double[div];
+        double[] sine = new double[div];
+
+        for (int i = 0; i < div; i++) {
+            cosine[i] = (double) i * delta;
+            sine[i] = mult * Math.sqrt((1.0D - cosine[i]) * ((1.0D + cosine[i])));
+        }
+
+        return sine;
     }
 
 }

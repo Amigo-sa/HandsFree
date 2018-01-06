@@ -4,29 +4,46 @@ import android.util.Log;
 
 import java.util.Arrays;
 
-import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.util.MathHelper.arrayDoubleToShort;
-import static by.citech.handsfree.util.MathHelper.invertDoubleArr;
-import static by.citech.handsfree.util.MathHelper.revertDoubleArr;
 import static java.lang.Math.PI;
 
 public class SineGenerator
         extends DataGeneratorFactory {
 
-    private static final String STAG = Tags.SineGenerator;
+    private static final String TAG = Tags.SineGenerator;
+    private static final String STAG = TAG + " ST";
     private static final boolean debug = Settings.debug;
 
-    private static final int DATA_SIZE = 80;
-    private static final int QPP = 4;
+    private static final double RAD_000 = 0.0D*PI;
+    private static final double RAD_360 = 2.0D*PI;
+
+    private static final double MULT = MAX_SHORT;
+    private static final int DIV = 80;
 
     private final boolean isShorts;
 
     private final int length;
     private short[][] generatedDataShorts;
     private int chunkNumber;
+
+    static {
+        short[][] generatedDataShorts = new short[QPP][DIV];
+        for (int i = 0; i < DIV; i++) {
+            generatedDataShorts[0][i] = (short) (Math.sin((2.0D * PI / (double) DIV) * (double) i) * MULT);
+            generatedDataShorts[1][i] = (short) (Math.sin((double) i * PI / 180.0D * 2.82D / 4.0D + PI / 180.0D * 90.0D) * MULT);
+            generatedDataShorts[2][i] = (short) (Math.sin((double) i * PI / 180.0D * 2.82D / 4.0D + PI / 180.0D * 180.0D) * MULT);
+            generatedDataShorts[3][i] = (short) (Math.sin((double) i * PI / 180.0D * 2.82D / 4.0D + PI / 180.0D * 270.0D) * MULT);
+        }
+        for (int i = 0; i < QPP; i++) {
+            if (debug) Log.i(STAG, String.format(
+                    "static value of sine chunk number %d: %s",
+                    i, Arrays.toString(generatedDataShorts[i]))
+            );
+        }
+    }
 
     SineGenerator(int buffSize, boolean isShorts, double mult, boolean isPeriod) throws Exception {
         this.isShorts = isShorts;
@@ -46,9 +63,11 @@ public class SineGenerator
     //--------------------- IDataGenerator
 
     @Override
-    public short[] getDataShorts() {
-        if (!isShorts) return null;
-        if (chunkNumber == (length+1)) {
+    public short[] getNextDataShorts() {
+        if (!isShorts) {
+            if (debug) Log.e(TAG, "getNextDataShorts while !isShorts");
+            return null;
+        } else if (chunkNumber == (length+1)) {
             chunkNumber = 0;
         } else {
             chunkNumber++;
@@ -57,56 +76,56 @@ public class SineGenerator
     }
 
     @Override
-    public byte[] getDataBytes() {
-        return new byte[0];
+    public byte[] getNextDataBytes() {
+        if (isShorts) {
+            if (debug) Log.e(TAG, "getNextDataBytes while isShorts");
+            return null;
+        } else {
+            if (debug) Log.e(STAG, "getNextDataBytes not supported yet");
+            return new byte[0];
+        }
     }
 
     //--------------------- main
 
-    public static short[] getQuarter(int quarterNum, double mult, int div) throws Exception {
-        if (quarterNum < 1 || quarterNum > 4 || mult < 1 || mult > 32768 || div < 1 || div > 32768) {
-            throw new Exception(StatusMessages.ERR_PARAMETERS);
-        }
-//      generatedDataShorts = new short[QPP][DATA_SIZE];
-//      for (int i = 0; i < DATA_SIZE; i++) {
-//          generatedDataShorts[0][i] = (short) (Math.sin((2.0D * PI / (double) DATA_SIZE) * (double) i) * multiplier);
-//          generatedDataShorts[1][i] = (short) (Math.sin((double) i * PI / 180.0D * 2.82D / 4.0D + PI / 180.0D * 90.0D) * multiplier);
-//          generatedDataShorts[2][i] = (short) (Math.sin((double) i * PI / 180.0D * 2.82D / 4.0D + PI / 180.0D * 180.0D) * multiplier);
-//          generatedDataShorts[3][i] = (short) (Math.sin((double) i * PI / 180.0D * 2.82D / 4.0D + PI / 180.0D * 270.0D) * multiplier);
-//      }
-//      for (int i = 0; i < QPP; i++) {
-//          if (debug) Log.i(STAG, String.format(
-//                  "static value of sine chunk number %d: %s",
-//                  i, Arrays.toString(generatedDataShorts[i]))
-//          );
-//      }
-        return null;
+    private static short[] getQuarter(int quarterNum, double mult, int div) throws Exception {
+        checkParameters(quarterNum, mult, div);
+
+        if (debug) Log.i(STAG, String.format(
+                "getQuarter: quarterNum = %d, mult = %s, div = %d",
+                quarterNum, mult, div)
+        );
+
+        short[] quarter = new short[div];
+        short[] period = getPeriod(mult, QPP * div);
+
+        System.arraycopy(period, (quarterNum - 1) * div, quarter, 0, div);
+
+        return quarter;
     }
 
-    public static short[] getPeriod(double mult, int div) throws Exception {
-        if (mult < 1 || mult > 32768 || div < 1 || div > 32768 / QPP) {
-            throw new Exception(StatusMessages.ERR_PARAMETERS);
-        }
+    private static short[] getPeriod(double mult, int div) throws Exception {
+        checkParameters(mult, div);
 
         if (debug) Log.i(STAG, String.format(
                 "getPeriod: mult = %s, div = %d",
                 mult, div)
         );
 
-        int quarterDiv = div / QPP;
-        if (debug) Log.i(STAG, "getPeriod: quarterDiv = " + quarterDiv);
-
-        div = quarterDiv * QPP;
-        if (debug) Log.i(STAG, "getPeriod: div = " + div);
-
         short[] period = new short[div];
-        int quarterNum;
-        for (int i = 0; i < QPP; i++) {
-            quarterNum = QPP - i;
-            if (debug) Log.i(STAG, "getPeriod: processing qurter number " + quarterNum);
-            System.arraycopy(getQuarter(quarterNum, mult, quarterDiv), 0, period, quarterDiv * i, quarterDiv);
-        }
+        arrayDoubleToShort(getSinePeriod(mult, div), period);
         return period;
+    }
+
+    private static double[] getSinePeriod(double mult, int div) {
+        double delta = (RAD_360 - RAD_000) / (double) div;
+        double[] sine = new double[div];
+
+        for (int i = 0; i < div; i++) {
+            sine[i] = mult * Math.sin(delta * i);
+        }
+
+        return sine;
     }
 
 }
