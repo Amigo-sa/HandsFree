@@ -252,6 +252,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             if (Settings.debug) Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
             try {
                 if (mBluetoothGatt.connect()) {
+                    if (Settings.debug) Log.d(TAG, "mBluetoothGatt.connect()");
                     mConnectionState = STATE_CONNECTING;
                     return true;
                 } else {
@@ -269,8 +270,8 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             return false;
         }
         // We want to directly connect to the device, so we are setting the autoConnect
-        // parameter to false.
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        // parameter to false.    , BluetoothDevice.TRANSPORT_LE
+        mBluetoothGatt = device.connectGatt(this, false, mGattCallback );
         mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
 
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
