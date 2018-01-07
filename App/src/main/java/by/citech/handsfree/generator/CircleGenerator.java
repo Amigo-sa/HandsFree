@@ -2,6 +2,8 @@ package by.citech.handsfree.generator;
 
 import android.util.Log;
 
+import java.util.Arrays;
+
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.Settings;
 
@@ -9,7 +11,7 @@ import static by.citech.handsfree.util.MathHelper.arrayDoubleToShort;
 import static by.citech.handsfree.util.MathHelper.invertDoubleArr;
 import static by.citech.handsfree.util.MathHelper.revertDoubleArr;
 
-public class CircleGenerator
+class CircleGenerator
         extends DataGeneratorFactory {
 
     private static final String TAG = Tags.CircleGenerator;
@@ -22,21 +24,26 @@ public class CircleGenerator
     private final boolean isShorts;
 
     private final int length;
-    private short[][] generatedDataShorts;
+    private short[][] circleShorts;
     private int chunkNumber;
 
     CircleGenerator(int buffSize, boolean isShorts, double mult, boolean isPeriod) throws Exception {
         this.isShorts = isShorts;
         if (isPeriod) {
-            generatedDataShorts = new short[0][buffSize];
-            length = 0;
-            generatedDataShorts[0] = getPeriod(mult, buffSize);
+            circleShorts = new short[1][buffSize];
+            circleShorts[0] = getPeriod(mult, buffSize);
         } else {
-            generatedDataShorts = new short[QPP][buffSize];
-            length = QPP;
+            circleShorts = new short[QPP][buffSize];
             for (int i = 0; i < QPP; i++) {
-                generatedDataShorts[i] = getQuarter(QPP-1, mult, buffSize);
+                circleShorts[i] = getQuarter(i+1, mult, buffSize);
             }
+        }
+        length = circleShorts.length;
+        for (int i = 0; i < length; i++) {
+            if (debug) Log.i(TAG, String.format(
+                    "constructor value of circle chunk number %d: %s",
+                    i, Arrays.toString(circleShorts[i]))
+            );
         }
     }
 
@@ -47,12 +54,12 @@ public class CircleGenerator
         if (!isShorts) {
             if (debug) Log.e(TAG, "getNextDataShorts while !isShorts");
             return null;
-        } else if (chunkNumber == (length+1)) {
+        } else if (chunkNumber == (length - 1)) {
             chunkNumber = 0;
         } else {
             chunkNumber++;
         }
-        return generatedDataShorts[chunkNumber];
+        return circleShorts[chunkNumber];
     }
 
     @Override

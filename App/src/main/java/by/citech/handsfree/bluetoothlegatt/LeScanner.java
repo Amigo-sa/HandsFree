@@ -1,19 +1,15 @@
 package by.citech.handsfree.bluetoothlegatt;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
-import android.bluetooth.le.ScanSettings;
 import android.os.Handler;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import by.citech.handsfree.gui.IBtToUiListener;
+import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 

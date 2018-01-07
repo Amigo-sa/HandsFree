@@ -3,7 +3,7 @@ package by.citech.handsfree.logic;
 import android.util.Log;
 import java.util.Locale;
 
-import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.enumeration.OpMode;

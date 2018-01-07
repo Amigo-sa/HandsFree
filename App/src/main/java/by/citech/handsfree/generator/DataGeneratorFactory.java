@@ -20,9 +20,9 @@ public abstract class DataGeneratorFactory
         }
         switch (dataType) {
             case Sine:
-                return new SineGenerator(buffSize, isShorts, 32767.0D, false);
+                return new SineGenerator(buffSize, isShorts, 300, true);
             case Circle:
-                return new CircleGenerator(buffSize, isShorts, 32767.0D, false);
+                return new CircleGenerator(buffSize, isShorts, MAX_SHORT, false);
             default:
                 throw new Exception(STAG + " " + StatusMessages.ERR_PARAMETERS + " " + dataType);
         }

@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;

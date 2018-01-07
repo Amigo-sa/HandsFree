@@ -3,7 +3,7 @@ package by.citech.handsfree.codec.audio;
 import by.citech.handsfree.settings.Settings;
 
 public class SitAudioCodec_2_1_java
-        implements ICodec {
+        extends AudioCodecFactory {
 
     //------------------- AHTUNG ГОВНОКОД НАЧАЛО
 

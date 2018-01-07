@@ -24,7 +24,7 @@ public class Tags {
     public static final String Caller              = "WSD_Caller";
     public static final String CallUi              = "WSD_CallUi";
     public static final String REDIR2NET           = "WSD_REDIR2NET";
-    public static final String RedirectFromNet      = "WSD_RedirectFromNet";
+    public static final String RedirectFromNet     = "WSD_RedirectFromNet";
 
     public static final String TO_AUDOUT           = "WSD_2AUDOUT";
     public static final String TO_BLUETOOTH        = "WSD_2BLUETOOTH";
@@ -83,4 +83,5 @@ public class Tags {
     public static final String FromDataGenerator   = "WSD_FromDataGenerator";
     public static final String CircleGenerator     = "WSD_CircleGenerator";
     public static final String SineGenerator       = "WSD_SineGenerator";
+    public static final String StaticSineGenerator = "WSD_StaticSineGen";
 }

@@ -10,11 +10,11 @@ import by.citech.handsfree.param.Tags;
 public class SendMessage
         extends AsyncTask<String, String, Void> {
 
-    private IMessage iMessage;
+    private IMessageResult iMessageResult;
     private ITransmitter iTransmitter;
 
-    public SendMessage(IMessage iMessage, ITransmitter iTransmitter) {
-        this.iMessage = iMessage;
+    public SendMessage(IMessageResult iMessageResult, ITransmitter iTransmitter) {
+        this.iMessageResult = iMessageResult;
         this.iTransmitter = iTransmitter;
     }
 
@@ -37,9 +37,9 @@ public class SendMessage
         if (Settings.debug) Log.i(Tags.NET_SEND, "onProgressUpdate");
         switch (status[0]) {
             case StatusMessages.CLT_MESSAGE_CANT:
-                iMessage.messageCantSend();
+                iMessageResult.messageCantSend();
             case StatusMessages.CLT_MESSAGE_SENDED:
-                iMessage.messageSended();
+                iMessageResult.messageSended();
         }
     }
 

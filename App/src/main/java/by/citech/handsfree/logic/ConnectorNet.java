@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.RedirectFromNet;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
@@ -18,7 +18,7 @@ import by.citech.handsfree.network.client.IClientCtrl;
 import by.citech.handsfree.network.client.IClientCtrlReg;
 import by.citech.handsfree.network.control.IConnCtrl;
 import by.citech.handsfree.network.control.IDisc;
-import by.citech.handsfree.exchange.IMessage;
+import by.citech.handsfree.exchange.IMessageResult;
 import by.citech.handsfree.network.control.Disconnect;
 import by.citech.handsfree.exchange.SendMessage;
 import by.citech.handsfree.exchange.ITransmitterCtrlReg;
@@ -51,7 +51,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, ITransmitterCtrlReg, IClientCtrlReg, ICallerFsmListener,
-        IMessage, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreadManager, ICallerFsmRegister {
+        IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreadManager, ICallerFsmRegister {
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;

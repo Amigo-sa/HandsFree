@@ -4,11 +4,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.handsfree.data.StorageData;
+import by.citech.handsfree.exchange.consumers.ToNet;
+import by.citech.handsfree.exchange.producers.FromAudioIn;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.enumeration.DataSource;
 import by.citech.handsfree.threading.IThreadManager;
-import by.citech.handsfree.threading.ThreadManager;
 
 public class RedirectToNet
         extends AsyncTask<DataSource, ITransmitterCtrl, Void>

@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import by.citech.handsfree.gui.IBtToUiCtrl;
+import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 import by.citech.handsfree.dialog.DialogState;
 import by.citech.handsfree.dialog.DialogType;
-import by.citech.handsfree.exchange.IMsgToUi;
+import by.citech.handsfree.ui.IMsgToUi;
 
 /**
  * Created by tretyak on 08.12.2017.

@@ -7,5 +7,6 @@ public enum EConnection {
     Closed,
     Closing,
     Cancel,
-    Opening, Null
+    Opening,
+    Null
 }

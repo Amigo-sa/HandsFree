@@ -1,6 +1,7 @@
 package by.citech.handsfree.codec.audio;
 
-public class SitAudioCodec_3_0_native implements ICodec {
+public class SitAudioCodec_3_0_native
+        extends AudioCodecFactory {
 
     @Override
     public void initiateDecoder() {

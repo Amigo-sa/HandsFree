@@ -1,6 +1,6 @@
 package by.citech.handsfree.logic;
 
-import by.citech.handsfree.gui.IUiToBtListener;
+import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 public class BluetoothUi implements IUiToBtListener {

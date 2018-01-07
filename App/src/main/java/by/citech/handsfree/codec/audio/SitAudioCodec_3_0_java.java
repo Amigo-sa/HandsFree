@@ -3,7 +3,7 @@ package by.citech.handsfree.codec.audio;
 import by.citech.handsfree.settings.Settings;
 
 public class SitAudioCodec_3_0_java
-        implements ICodec {
+        extends AudioCodecFactory {
 
     //------------------- AHTUNG ГОВНОКОД НАЧАЛО
 
@@ -83,26 +83,26 @@ public class SitAudioCodec_3_0_java
             15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
     };
 
-    private static void encode(short[] toEncode, byte[] encoded, CodecState state_ptr) {
+    private static void encode(short[] toEncode, byte[] encoded, CodecState state) {
         int i;
         byte smp;
 
         for (i = 0; i < 80; i += 4) {
-            smp = ADPCMEncoder(toEncode[i], state_ptr);
-            smp |= ADPCMEncoder(toEncode[i + 2], state_ptr) << 4;
+            smp = ADPCMEncoder(toEncode[i], state);
+            smp |= ADPCMEncoder(toEncode[i + 2], state) << 4;
             encoded[i >> 2] = smp;
         }
     }
 
-    private static void decode(byte[] toDecode, short[] decoded, CodecState state_ptr) {
+    private static void decode(byte[] toDecode, short[] decoded, CodecState state) {
         int i;
         byte smp;
 
         for (i = 0; i < 20; i++) {
             smp = (byte) (toDecode[i] & 0x0F);
-            decoded[(i << 2)] = (short) ADPCMDecoder(smp, state_ptr);
+            decoded[(i << 2)] = (short) ADPCMDecoder(smp, state);
             smp = (byte) ((toDecode[i] >> 4) & 0x0F);
-            decoded[(i << 2) + 2] = (short) ADPCMDecoder(smp, state_ptr);
+            decoded[(i << 2) + 2] = (short) ADPCMDecoder(smp, state);
         }
 
         for (i = 1; i < 79; i += 2) {

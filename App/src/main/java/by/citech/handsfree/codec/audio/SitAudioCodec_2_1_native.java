@@ -1,6 +1,7 @@
 package by.citech.handsfree.codec.audio;
 
-public class SitAudioCodec_2_1_native implements ICodec {
+public class SitAudioCodec_2_1_native
+        extends AudioCodecFactory {
 
 //    static {
 //        System.loadLibrary("SitCodecWrapper");

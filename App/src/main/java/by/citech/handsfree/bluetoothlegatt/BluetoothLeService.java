@@ -13,7 +13,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -23,7 +22,7 @@ import java.util.UUID;
 import by.citech.handsfree.bluetoothlegatt.rwdata.CallbackWriteListener;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Requestable;
 import by.citech.handsfree.data.SampleGattAttributes;
-import by.citech.handsfree.debug.ITrafficUpdate;
+import by.citech.handsfree.traffic.ITrafficUpdate;
 import by.citech.handsfree.settings.Settings;
 
 /**

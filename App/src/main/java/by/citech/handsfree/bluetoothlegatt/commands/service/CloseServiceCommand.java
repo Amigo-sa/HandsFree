@@ -2,7 +2,6 @@ package by.citech.handsfree.bluetoothlegatt.commands.service;
 
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.common.IBase;
 
 /**
  * Created by tretyak on 06.12.2017.

@@ -9,12 +9,12 @@ import android.os.IBinder;
 import android.util.Log;
 
 import by.citech.handsfree.bluetoothlegatt.IBtList;
-import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeState;
-import by.citech.handsfree.gui.IBtToUiCtrl;
+import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
@@ -51,10 +51,10 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.bluetoothlegatt.StorageListener;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.exchange.IMsgToUi;
+import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.gui.IBtToUiListener;
-import by.citech.handsfree.gui.IUiToBtListener;
+import by.citech.handsfree.ui.IBtToUiListener;
+import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.logic.ECallReport.CallFailedInt;

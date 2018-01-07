@@ -44,27 +44,27 @@ import java.util.Map;
 
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.common.IService;
-import by.citech.handsfree.common.ResourceManager;
-import by.citech.handsfree.gui.IBtToUiCtrl;
+import by.citech.handsfree.management.ResourceManager;
+import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
-import by.citech.handsfree.gui.helper.IContactEditor;
-import by.citech.handsfree.gui.helper.ViewManager;
-import by.citech.handsfree.gui.helper.state.ActiveContactState;
+import by.citech.handsfree.ui.helpers.IContactEditorHelper;
+import by.citech.handsfree.ui.helpers.ViewManager;
+import by.citech.handsfree.ui.helpers.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
 import by.citech.handsfree.contact.ContactsRecyclerAdapter;
-import by.citech.handsfree.gui.helper.state.EditorState;
+import by.citech.handsfree.ui.helpers.state.EditorState;
 import by.citech.handsfree.dialog.DialogProcessor;
 import by.citech.handsfree.dialog.DialogState;
 import by.citech.handsfree.dialog.DialogType;
-import by.citech.handsfree.exchange.IMsgToUi;
-import by.citech.handsfree.gui.helper.ActiveContactHelper;
-import by.citech.handsfree.gui.helper.ChosenContactHelper;
-import by.citech.handsfree.gui.helper.ContactEditorHelper;
-import by.citech.handsfree.gui.IGetView;
-import by.citech.handsfree.gui.IBtToUiListener;
-import by.citech.handsfree.gui.IUiToBtListener;
+import by.citech.handsfree.ui.IMsgToUi;
+import by.citech.handsfree.ui.helpers.ActiveContactHelper;
+import by.citech.handsfree.ui.helpers.ChosenContactHelper;
+import by.citech.handsfree.ui.helpers.ContactEditorHelper;
+import by.citech.handsfree.ui.IGetView;
+import by.citech.handsfree.ui.IBtToUiListener;
+import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.logic.Caller;
 import by.citech.handsfree.logic.CallerFsm;
 import by.citech.handsfree.logic.ConnectorBluetooth;
@@ -85,7 +85,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class DeviceControlActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView, IThreadManager,
-        IContactEditor, IBroadcastReceiver, IService, IBtToUiCtrl, ICallUi, IMsgToUi {
+        IContactEditorHelper, IBroadcastReceiver, IService, IBtToUiCtrl, ICallUi, IMsgToUi {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;

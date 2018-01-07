@@ -2,7 +2,7 @@ package by.citech.handsfree.threading;
 
 import android.util.Log;
 
-import by.citech.handsfree.common.IBase;
+import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.ISettingsCtrl;
@@ -48,6 +48,7 @@ public class ThreadManager
 
     @Override
     public boolean takeSettings() {
+        ISettingsCtrl.super.takeSettings();
         threadNumber = Settings.getInstance().getCommon().getThreadNumber();
         return true;
     }
