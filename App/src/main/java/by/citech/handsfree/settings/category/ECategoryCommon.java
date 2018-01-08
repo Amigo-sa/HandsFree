@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings.category;
 
-public enum CategoryCommon {
+public enum ECategoryCommon {
     threadNumber,
     dataSource,
     opMode,

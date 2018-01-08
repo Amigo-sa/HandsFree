@@ -9,8 +9,8 @@ import java.util.TimerTask;
 
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.dialog.DialogState;
-import by.citech.handsfree.dialog.DialogType;
+import by.citech.handsfree.dialog.EDialogState;
+import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.ui.IMsgToUi;
 
 /**
@@ -40,9 +40,9 @@ public class ConnInfoDialogCommand implements Command {
 
     @Override
     public void execute() {
-        Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Idle, () -> iBtToUiCtrl.setVisibleMain());
-        iMsgToUi.sendToUiDialog(true, DialogType.Connect, map, device.getName());
+        Map<EDialogState, Runnable> map = new HashMap<>();
+        map.put(EDialogState.Idle, () -> iBtToUiCtrl.setVisibleMain());
+        iMsgToUi.sendToUiDialog(true, EDialogType.Connect, map, device.getName());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ConnInfoDialogCommand implements Command {
         final Timer t = new Timer();
         t.schedule(new TimerTask() {
             public void run() {
-                iMsgToUi.recallFromUiDialog(true, DialogType.Connect,null);
+                iMsgToUi.recallFromUiDialog(true, EDialogType.Connect,null);
                 t.cancel();
             }
         }, 2000);

@@ -1,6 +1,6 @@
 package by.citech.handsfree.dialog;
 
-public enum DialogState {
+public enum EDialogState {
     Idle,
     Proceed,
     Cancel

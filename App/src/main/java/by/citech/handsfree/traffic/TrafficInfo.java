@@ -16,11 +16,11 @@ public class TrafficInfo {
     private long customIntervalParamPerSec;
     private long overallMs;
     private long overallBytes;
-    private TrafficNodes node;
+    private ETrafficNodes node;
     private ITrafficUpdate iTrafficUpdate;
     private boolean isInitiated;
 
-    public TrafficInfo(TrafficNodes node, ITrafficUpdate iTrafficUpdate) {
+    public TrafficInfo(ETrafficNodes node, ITrafficUpdate iTrafficUpdate) {
         if (node == null || iTrafficUpdate == null) {
             return;
         }
@@ -50,7 +50,7 @@ public class TrafficInfo {
         return averageParamPerSec;
     }
 
-    public TrafficNodes getNode() {
+    public ETrafficNodes getNode() {
         return node;
     }
 

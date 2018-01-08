@@ -7,7 +7,7 @@ import java.util.Arrays;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
@@ -133,7 +133,7 @@ public class AudIn2AudOutLooper
     //--------------------- ICallerFsmListener
 
     @Override
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:

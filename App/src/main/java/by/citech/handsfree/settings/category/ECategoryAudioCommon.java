@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings.category;
 
-public enum CategoryAudioCommon {
+public enum ECategoryAudioCommon {
     audioSingleFrame,
     audioBuffIsShorts,
     audioCodecType,

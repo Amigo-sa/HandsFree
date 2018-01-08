@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings.category;
 
-public enum CategoryBluetooth {
+public enum ECategoryBluetooth {
     btSignificantAll,
     btSinglePacket,
     btAudioMsPerPacket,

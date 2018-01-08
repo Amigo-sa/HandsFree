@@ -7,7 +7,7 @@ import java.util.Locale;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.generator.DataGeneratorFactory;
-import by.citech.handsfree.generator.DataType;
+import by.citech.handsfree.generator.EDataType;
 import by.citech.handsfree.generator.IDataGenerator;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
@@ -21,7 +21,7 @@ public class FromGenerator
 
     private ITransmitter iTransmitter;
     private IDataGenerator dataGenerator;
-    private DataType dataType;
+    private EDataType dataType;
     private int buffSize;
     private int idleInterval;
     private boolean isStreaming;
@@ -31,7 +31,7 @@ public class FromGenerator
 
     //--------------------- constructor
 
-    public FromGenerator(int buffSize, int idleInterval, boolean isShorts, DataType dataType) throws Exception {
+    public FromGenerator(int buffSize, int idleInterval, boolean isShorts, EDataType dataType) throws Exception {
         if (buffSize < 1 || idleInterval < 1) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }

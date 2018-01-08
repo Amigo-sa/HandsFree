@@ -7,14 +7,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.ui.helpers.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.EContactState;
 import by.citech.handsfree.contact.ContactsRecyclerAdapter;
-import by.citech.handsfree.ui.helpers.state.EditorState;
 import by.citech.handsfree.contact.IContactsListener;
-import by.citech.handsfree.dialog.DialogState;
-import by.citech.handsfree.dialog.DialogType;
+import by.citech.handsfree.dialog.EDialogState;
+import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.management.IBase;
@@ -39,7 +37,7 @@ public class ContactEditorHelper
     private Contact contactToEdit, contactToAdd;
     private int contactToEditPosition, contactToDeletePosition;
     private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
-    private EditorState editorState;
+    private EEditorState editorState;
     private ViewManager viewManager;
     private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
     private ActiveContactHelper activeContactHelper;
@@ -58,7 +56,7 @@ public class ContactEditorHelper
         if (isObjectPrepared()) return true;
         contactToEditPosition = -1;
         contactToDeletePosition = -1;
-        editorState = EditorState.Inactive;
+        editorState = EEditorState.Inactive;
         return isObjectPrepared();
     }
 
@@ -158,7 +156,7 @@ public class ContactEditorHelper
         isSwipedIn = true;
     }
 
-    public EditorState getState() {
+    public EEditorState getState() {
         return editorState;
     }
 
@@ -180,24 +178,24 @@ public class ContactEditorHelper
 
     public void startEditorEdit(Contact contact, int position) {
         if (debug) Log.i(TAG, "startEditorEdit");
-        goToState(EditorState.Edit, contact, position);
+        goToState(EEditorState.Edit, contact, position);
     }
 
     public void startEditorAdd() {
         if (debug) Log.i(TAG, "startEditorAdd");
-        goToState(EditorState.Add);
+        goToState(EEditorState.Add);
     }
 
     //--------------------- states
 
-    public void goToState(EditorState toState) {
-        if (toState != EditorState.Edit)
+    public void goToState(EEditorState toState) {
+        if (toState != EEditorState.Edit)
             goToState(toState, null, -1);
         else
             Log.e(TAG, "goToState editorState illegal");
     }
 
-    public void goToState(EditorState toState, Contact contact, int position) {
+    public void goToState(EEditorState toState, Contact contact, int position) {
         if (debug) Log.i(TAG, "ContactEditorHelper goToState");
         editorState = toState;
         switch (editorState) {
@@ -228,14 +226,14 @@ public class ContactEditorHelper
                 isEditPending = false;
                 isDeleted = false;
                 isEdited = false;
-                activeContactHelper.goToState(ActiveContactState.Default);
+                activeContactHelper.goToState(EActiveContactState.Default);
                 return;
             default:
                 Log.e(TAG, "goToState editorState default");
                 return;
         }
         viewManager.showEditor();
-        activeContactHelper.goToState(ActiveContactState.FromEditor);
+        activeContactHelper.goToState(EActiveContactState.FromEditor);
     }
 
     //--------------------- commands
@@ -249,10 +247,10 @@ public class ContactEditorHelper
         if (debug) Log.i(TAG, "cancelContact");
         switch (editorState) {
             case Edit:
-                goToState(EditorState.Edit, contactToEdit, contactToEditPosition);
+                goToState(EEditorState.Edit, contactToEdit, contactToEditPosition);
                 break;
             case Add:
-                goToState(EditorState.Add);
+                goToState(EEditorState.Add);
                 break;
             case Inactive:
                 Log.e(TAG, "cancelInEditor editorState Inactive");
@@ -268,10 +266,10 @@ public class ContactEditorHelper
         isDeletePending = true;
         freezeState();
         contactToDeletePosition = contactToEditPosition;
-        Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Proceed, () -> addRunnable(() -> iContact.deleteElement(contactToEdit)));
-        map.put(DialogState.Cancel, this::releaseState);
-        iMsgToUi.sendToUiDialog(true, DialogType.Delete, map);
+        Map<EDialogState, Runnable> map = new HashMap<>();
+        map.put(EDialogState.Proceed, () -> addRunnable(() -> iContact.deleteElement(contactToEdit)));
+        map.put(EDialogState.Cancel, this::releaseState);
+        iMsgToUi.sendToUiDialog(true, EDialogType.Delete, map);
     }
 
     public void saveContact() {
@@ -306,14 +304,14 @@ public class ContactEditorHelper
         contactsAdapter.notifyItemRemoved(contactToDeletePosition);
         contactToEdit = null;
         contactToDeletePosition = -1;
-        goToState(EditorState.Add);
+        goToState(EEditorState.Add);
     }
 
     private void onContactAddSucc(int position) {
         if (debug) Log.i(TAG, "onContactAddSucc");
         isAddPending = false;
         contactToEditPosition = position;
-        goToState(EditorState.Edit, contactToAdd, position);
+        goToState(EEditorState.Edit, contactToAdd, position);
         contactToAdd = null;
     }
 
@@ -322,7 +320,7 @@ public class ContactEditorHelper
         isEditPending = false;
         isEdited = true;
         contactToEditPosition = position;
-        goToState(EditorState.Edit, contactToEdit, position);
+        goToState(EEditorState.Edit, contactToEdit, position);
     }
 
     private void onContactDelFail() {
@@ -368,7 +366,7 @@ public class ContactEditorHelper
         if (debug) Log.i(TAG, "onContactsChange");
         if (contacts == null || contacts[0] == null) {
             Log.e(TAG, "onContactsChange returned contact is null");
-            goToState(EditorState.Inactive);
+            goToState(EEditorState.Inactive);
             return;
         }
         Contact contact = contacts[0];

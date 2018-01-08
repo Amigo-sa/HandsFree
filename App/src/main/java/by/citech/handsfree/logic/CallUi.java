@@ -102,12 +102,12 @@ public class CallUi
 
     //--------------------- main
 
-    private void onMethodWrongState(CallerState callerState, String methodName) {
+    private void onMethodWrongState(ECallerState callerState, String methodName) {
         if (debug) Log.e(TAG, methodName + " " + callerState);
     }
 
     void onClickBtnGreen() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.w(TAG, String.format(Locale.US,
                 "onClickBtnGreen opMode is %s, callerState is %s",
                 opMode, callerState));
@@ -152,7 +152,7 @@ public class CallUi
     }
 
     void onClickBtnRed() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.w(TAG, String.format(Locale.US,
                 "onClickBtnRed opMode is %s, callerState is %s",
                 opMode, callerState));

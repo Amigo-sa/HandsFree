@@ -6,7 +6,7 @@ import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
-import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
@@ -114,7 +114,7 @@ public class Bt2AudOutLooper
 
     //--------------------- ICallerFsmListener
 
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:

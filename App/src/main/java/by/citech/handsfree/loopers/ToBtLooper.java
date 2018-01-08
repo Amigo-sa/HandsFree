@@ -8,8 +8,8 @@ import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.exchange.producers.FromGenerator;
-import by.citech.handsfree.generator.DataType;
-import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.generator.EDataType;
+import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
@@ -93,7 +93,7 @@ public class ToBtLooper
                 source = new FromAudioIn();
                 break;
             case DATAGENERATOR:
-                source = new FromGenerator(codecType.getDecodedShortsSize(), 8, true, DataType.Sine);
+                source = new FromGenerator(codecType.getDecodedShortsSize(), 8, true, EDataType.Sine);
                 break;
         }
         ToBluetooth toBluetooth = new ToBluetooth(micToBtStorage);
@@ -134,7 +134,7 @@ public class ToBtLooper
 
     //--------------------- ICallerFsmListener
 
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:

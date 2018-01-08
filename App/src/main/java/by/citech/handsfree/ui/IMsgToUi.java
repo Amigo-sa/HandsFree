@@ -4,8 +4,8 @@ import android.util.Log;
 
 import java.util.Map;
 
-import by.citech.handsfree.dialog.DialogState;
-import by.citech.handsfree.dialog.DialogType;
+import by.citech.handsfree.dialog.EDialogState;
+import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 
@@ -18,11 +18,11 @@ public interface IMsgToUi {
         Log.e(TAG, "sendToUiToast" + MSG);
     }
 
-    default void sendToUiDialog(boolean isFromUiThread, DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
+    default void sendToUiDialog(boolean isFromUiThread, EDialogType toRun, Map<EDialogState, Runnable> toDoMap, String... messages) {
         Log.e(TAG, "sendToUiDialog" + MSG);
     }
 
-    default void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny, DialogState onDeny) {
+    default void recallFromUiDialog(boolean isFromUiThread, EDialogType toDeny, EDialogState onDeny) {
         Log.e(TAG, "recallFromUiDialog" + MSG);
     }
 

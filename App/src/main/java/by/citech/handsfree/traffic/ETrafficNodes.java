@@ -1,6 +1,6 @@
 package by.citech.handsfree.traffic;
 
-public enum TrafficNodes {
+public enum ETrafficNodes {
     BtOut,
     BtIn,
     NetOut,

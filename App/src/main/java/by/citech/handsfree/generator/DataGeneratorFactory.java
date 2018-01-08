@@ -14,7 +14,7 @@ public abstract class DataGeneratorFactory
     static final int QUARTER_4 = 4;
     static final int QPP = 4;
 
-    public static IDataGenerator getDataGenerator(int buffSize, boolean isShorts, DataType dataType) throws Exception {
+    public static IDataGenerator getDataGenerator(int buffSize, boolean isShorts, EDataType dataType) throws Exception {
         if (buffSize < 1 || dataType == null) {
             throw new Exception(STAG + " " + StatusMessages.ERR_PARAMETERS);
         }

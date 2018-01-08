@@ -1,6 +1,6 @@
 package by.citech.handsfree.generator;
 
-public enum DataType {
+public enum EDataType {
     Sine,
     Circle
 }

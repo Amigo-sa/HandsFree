@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings.category;
 
-public enum CategoryAudioIn {
+public enum ECategoryAudioIn {
     audioInChannel,
     audioInBuffersize,
     audioSource

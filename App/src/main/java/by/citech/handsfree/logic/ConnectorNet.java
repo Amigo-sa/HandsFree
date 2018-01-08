@@ -195,7 +195,7 @@ public class ConnectorNet
     //--------------------- ICallerFsmListener
 
     @Override
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
 //          case SysIntFail:
@@ -230,7 +230,7 @@ public class ConnectorNet
 
     @Override
     public void srvOnOpen() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnOpen callerState is " + callerState);
         switch (callerState) {
             case ReadyToWork:
@@ -246,7 +246,7 @@ public class ConnectorNet
 
     @Override
     public void srvOnFailure() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnFailure callerState is " + callerState);
         switch (callerState) {
             case InDetected:
@@ -266,7 +266,7 @@ public class ConnectorNet
 
     @Override
     public void srvOnClose() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnClose callerState is " + callerState);
         switch (callerState) {
             case InDetected:
@@ -286,7 +286,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnOpen() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnOpen callerState is " + callerState);
         switch (callerState) {
             case OutStarted:
@@ -302,7 +302,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnFailure() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnFailure callerState is " + callerState);
         switch (callerState) {
             case OutConnected:
@@ -324,7 +324,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnMessageText(String message) {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnMessageText callerState is " + callerState);
         switch (callerState) {
             case OutConnected:
@@ -352,7 +352,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnClose() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnClose callerState is " + callerState);
         switch (callerState) {
             case OutConnected:
@@ -368,7 +368,7 @@ public class ConnectorNet
 
     @Override
     public void serverStarted(IServerCtrl iServerCtrl) {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "serverStarted callerState is " + callerState);
         switch (callerState) {
             case PhaseReadyInt:

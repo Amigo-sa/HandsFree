@@ -50,14 +50,14 @@ import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.ui.helpers.IContactEditorHelper;
 import by.citech.handsfree.ui.helpers.ViewManager;
-import by.citech.handsfree.ui.helpers.state.ActiveContactState;
+import by.citech.handsfree.ui.helpers.EActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
 import by.citech.handsfree.contact.ContactsRecyclerAdapter;
-import by.citech.handsfree.ui.helpers.state.EditorState;
+import by.citech.handsfree.ui.helpers.EEditorState;
 import by.citech.handsfree.dialog.DialogProcessor;
-import by.citech.handsfree.dialog.DialogState;
-import by.citech.handsfree.dialog.DialogType;
+import by.citech.handsfree.dialog.EDialogState;
+import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.ui.helpers.ActiveContactHelper;
 import by.citech.handsfree.ui.helpers.ChosenContactHelper;
@@ -332,8 +332,8 @@ public class DeviceControlActivity
             if (debug) Log.i(TAG, "onBackPressed showMainView");
             viewManager.showMainView();
             actionBar.setCustomView(null);
-            if (getEditorState() != EditorState.Inactive)
-                goToEditorState(EditorState.Inactive);
+            if (getEditorState() != EEditorState.Inactive)
+                goToEditorState(EEditorState.Inactive);
             IUiToBtListener.stopItemSelectedListener();
             invalidateOptionsMenu();
         } else {
@@ -502,7 +502,7 @@ public class DeviceControlActivity
         if (debug) Log.i(TAG, "clickBtnClearContact");
         if (chosenContactHelper.isChosen()) {
             chosenContactHelper.clear();
-            activeContactHelper.goToState(ActiveContactState.Default);
+            activeContactHelper.goToState(EActiveContactState.Default);
         } else {
             viewManager.clearSearch();
         }
@@ -511,7 +511,7 @@ public class DeviceControlActivity
     private void clickContactItem(Contact contact, int position) {
         if (debug) Log.i(TAG, "clickContactItem");
         chosenContactHelper.choose(contact, position);
-        activeContactHelper.goToState(ActiveContactState.FromChosen);
+        activeContactHelper.goToState(EActiveContactState.FromChosen);
     }
 
     public void clickBtnChangeDevice() {
@@ -733,7 +733,7 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void sendToUiDialog(boolean isFromUiThread, DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
+    public void sendToUiDialog(boolean isFromUiThread, EDialogType toRun, Map<EDialogState, Runnable> toDoMap, String... messages) {
         if (debug) Log.i(TAG, "sendToUiDialog");
         if (!isFinishing()) {
             sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(toRun, toDoMap, messages));
@@ -743,7 +743,7 @@ public class DeviceControlActivity
     }
 
     @Override
-    public void recallFromUiDialog(boolean isFromUiThread, DialogType toDeny, DialogState onDeny) {
+    public void recallFromUiDialog(boolean isFromUiThread, EDialogType toDeny, EDialogState onDeny) {
         if (debug) Log.i(TAG, "recallFromUiDialog");
         sendToUiRunnable(isFromUiThread, () -> dialogProcessor.denyDialog(toDeny, onDeny));
     }

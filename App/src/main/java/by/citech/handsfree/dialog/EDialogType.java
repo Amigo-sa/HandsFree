@@ -1,6 +1,6 @@
 package by.citech.handsfree.dialog;
 
-public enum DialogType {
+public enum EDialogType {
     Delete,
     Save,
     Connect,

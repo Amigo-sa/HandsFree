@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings.category;
 
-public enum CategoryNetwork {
+public enum ECategoryNetwork {
     netSignificantAll,
     netChunkSize,
     netChunkSignificantBytes,

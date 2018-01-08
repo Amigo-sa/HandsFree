@@ -14,7 +14,7 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.EOpMode;
 
-import static by.citech.handsfree.logic.CallerState.*;
+import static by.citech.handsfree.logic.ECallerState.*;
 import static by.citech.handsfree.logic.ECallReport.*;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
@@ -34,7 +34,7 @@ public class CallerFsm
 
     private EOpMode opMode;
     private volatile Collection<ICallerFsmListener> listeners;
-    private volatile CallerState state;
+    private volatile ECallerState state;
 
     {
         objCount++;
@@ -143,7 +143,7 @@ public class CallerFsm
         return isRemoved;
     }
 
-    synchronized CallerState getState() {
+    synchronized ECallerState getState() {
         if (!isObjectPrepared()) {
             if (debug) Log.w(TAG, "getState object not prepared");
             return null;
@@ -151,7 +151,7 @@ public class CallerFsm
         return state;
     }
 
-    synchronized boolean processReport(ECallReport report, CallerState from, String msg) {
+    synchronized boolean processReport(ECallReport report, ECallerState from, String msg) {
         if (!isObjectPrepared()) {
             if (debug) Log.w(TAG, "processReport object not prepared");
             return false;
@@ -172,7 +172,7 @@ public class CallerFsm
 
     //--------------------- main
 
-    private boolean processReportNormal(ECallReport report, CallerState from) {
+    private boolean processReportNormal(ECallReport report, ECallerState from) {
         if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
 //          case SysIntConnectedCompatible:
@@ -239,7 +239,7 @@ public class CallerFsm
         }
     }
 
-    private boolean processReportAbnormal(ECallReport report, CallerState from) {
+    private boolean processReportAbnormal(ECallReport report, ECallerState from) {
         if (debug) Log.i(TAG, "processReportAbnormal");
         switch (report) {
             case StopDebug:
@@ -283,7 +283,7 @@ public class CallerFsm
         }
     }
 
-    private boolean processStateChange(CallerState from, CallerState to, ECallReport why) {
+    private boolean processStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (state == from) {
             if (from.availableStates().contains(to)) {
                 state = to;
@@ -314,7 +314,7 @@ public class CallerFsm
         return false;
     }
 
-    private void onStateChange(CallerState from, CallerState to, ECallReport why) {
+    private void onStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.w(TAG, String.format(Locale.US,
                 "onStateChange from state <%s> to state <%s>, reason is <%s>",
                 from.getName(), to.getName(), why.name()));

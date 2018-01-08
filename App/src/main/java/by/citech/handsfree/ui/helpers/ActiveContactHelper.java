@@ -3,7 +3,6 @@ package by.citech.handsfree.ui.helpers;
 import android.util.Log;
 
 import by.citech.handsfree.management.IBase;
-import by.citech.handsfree.ui.helpers.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
@@ -14,14 +13,14 @@ public class ActiveContactHelper
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.ACTIVE_HELPER;
 
-    private ActiveContactState activeContactState;
+    private EActiveContactState activeContactState;
     private ChosenContactHelper chosenContactHelper;
     private ViewManager viewManager;
 
     public ActiveContactHelper(ChosenContactHelper chosenContactHelper, ViewManager viewManager) {
         this.chosenContactHelper = chosenContactHelper;
         this.viewManager = viewManager;
-        activeContactState = ActiveContactState.IpFromSearch;
+        activeContactState = EActiveContactState.IpFromSearch;
     }
 
     //--------------------- IBase
@@ -65,11 +64,11 @@ public class ActiveContactHelper
         return null;
     }
 
-    public ActiveContactState getState() {
+    public EActiveContactState getState() {
         return activeContactState;
     }
 
-    public void goToState(ActiveContactState toState) {
+    public void goToState(EActiveContactState toState) {
         if (debug) Log.i(TAG, "goToState");
         this.activeContactState = toState;
         switch (activeContactState) {
@@ -79,9 +78,9 @@ public class ActiveContactHelper
                 break;
             case Default:
                 if (chosenContactHelper.isChosen())
-                    activeContactState = ActiveContactState.FromChosen;
+                    activeContactState = EActiveContactState.FromChosen;
                 else
-                    activeContactState = ActiveContactState.IpFromSearch;
+                    activeContactState = EActiveContactState.IpFromSearch;
                 break;
             case IpFromSearch:
                 break;

@@ -1,7 +1,6 @@
 package by.citech.handsfree.ui.helpers;
 
 import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.ui.helpers.state.EditorState;
 
 public interface IContactEditorHelper {
 
@@ -9,11 +8,11 @@ public interface IContactEditorHelper {
         ContactEditorHelper.getInstance().getAllContacts();
     }
 
-    default EditorState getEditorState() {
+    default EEditorState getEditorState() {
         return ContactEditorHelper.getInstance().getState();
     }
 
-    default void goToEditorState(EditorState toState) {
+    default void goToEditorState(EEditorState toState) {
         ContactEditorHelper.getInstance().goToState(toState);
     }
 

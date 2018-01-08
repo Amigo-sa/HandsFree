@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.dialog.DialogState;
-import by.citech.handsfree.dialog.DialogType;
+import by.citech.handsfree.dialog.EDialogState;
+import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 
@@ -34,16 +34,16 @@ public class ReconnectDialogCommand implements Command {
 
     @Override
     public void execute() {
-        Map<DialogState, Runnable> map = new HashMap<>();
-        map.put(DialogState.Proceed, () -> {
+        Map<EDialogState, Runnable> map = new HashMap<>();
+        map.put(EDialogState.Proceed, () -> {
             connectorBluetooth.disconnect();
             connectorBluetooth.connecting();
         });
-        iMsgToUi.sendToUiDialog(true, DialogType.Reconnect, map, device.getName());
+        iMsgToUi.sendToUiDialog(true, EDialogType.Reconnect, map, device.getName());
     }
 
     @Override
     public void undo() {
-        iMsgToUi.recallFromUiDialog(true, DialogType.Reconnect, DialogState.Idle);
+        iMsgToUi.recallFromUiDialog(true, EDialogType.Reconnect, EDialogState.Idle);
     }
 }

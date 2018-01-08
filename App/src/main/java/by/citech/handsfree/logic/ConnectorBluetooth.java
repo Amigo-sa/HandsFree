@@ -484,7 +484,7 @@ public class ConnectorBluetooth
     }
 
     private void processState() {
-        CallerState callerState = getCallerFsmState();
+        ECallerState callerState = getCallerFsmState();
         switch (callerState) {
             case Call:
                 if (reportToCallerFsm(callerState, CallFailedInt, TAG)) return;
@@ -625,7 +625,7 @@ public class ConnectorBluetooth
     //--------------------- ICallerFsmListener
 
     @Override
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (Settings.debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case InCallAcceptedByLocalUser:
@@ -649,7 +649,7 @@ public class ConnectorBluetooth
                         }
                         break;
                     case Record:
-                        if (getCallerFsmState() == CallerState.DebugRecord) {
+                        if (getCallerFsmState() == ECallerState.DebugRecord) {
                             enableTransmitData();
                         }
                         break;

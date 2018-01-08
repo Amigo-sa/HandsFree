@@ -23,18 +23,18 @@ public class DialogProcessor {
     {objCount++;TAG = STAG + " " + objCount;}
 
     private Context context;
-    private DialogState currentState;
-    private DialogType currentType;
+    private EDialogState currentState;
+    private EDialogType currentType;
     private AlertDialog currentDialog;
 
     public DialogProcessor(Context context) {
         this.context = context;
-        currentState = DialogState.Idle;
+        currentState = EDialogState.Idle;
     }
 
     //--------------------- main
 
-    public synchronized void runDialog(DialogType toRun, Map<DialogState, Runnable> toDoMap, String... messages) {
+    public synchronized void runDialog(EDialogType toRun, Map<EDialogState, Runnable> toDoMap, String... messages) {
         if (debug) Log.i(TAG, "runDialog");
         if (toRun == null) {
             Log.e(TAG, "runDialog" + StatusMessages.ERR_PARAMETERS);
@@ -69,7 +69,7 @@ public class DialogProcessor {
         }
     }
 
-    public synchronized void denyDialog(DialogType toDeny, DialogState onDeny) {
+    public synchronized void denyDialog(EDialogType toDeny, EDialogState onDeny) {
         if (debug) Log.i(TAG, "denyDialog");
         if (currentDialog == null) {
             if (debug) Log.i(TAG, "denyDialog currentDialog is null, return");
@@ -97,13 +97,13 @@ public class DialogProcessor {
 
     private void onDialogEnd() {
         if (debug) Log.i(TAG, "onDialogEnd");
-        currentState = DialogState.Idle;
+        currentState = EDialogState.Idle;
         currentType = null;
     }
 
     //--------------------- delayedDialogs
 
-    private void dialogReconnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
+    private void dialogReconnect(Map<EDialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogReconnect");
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
@@ -114,7 +114,7 @@ public class DialogProcessor {
                             break;
                         case Proceed:
                             if (debug) Log.i(TAG, "dialogDelete delete");
-                            toDoMap.get(DialogState.Proceed).run();
+                            toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
                             if (debug) Log.i(TAG, "dialogDelete just dismiss");
@@ -129,11 +129,11 @@ public class DialogProcessor {
                .setMessage(R.string.click_other_device_message)
                .setIcon(android.R.drawable.ic_dialog_info)
                .setPositiveButton(R.string.connect, (dialog, which) -> {
-                   currentState = DialogState.Proceed;
+                   currentState = EDialogState.Proceed;
                    dialog.dismiss();
                })
                .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
-                   currentState = DialogState.Cancel;
+                   currentState = EDialogState.Cancel;
                    dialog.dismiss();
                 });
 
@@ -142,7 +142,7 @@ public class DialogProcessor {
         currentDialog = dialog;
     }
 
-    private void dialogDisconnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
+    private void dialogDisconnecting(Map<EDialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogDisconnecting");
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
@@ -153,7 +153,7 @@ public class DialogProcessor {
                             break;
                         case Proceed:
                             if (debug) Log.i(TAG, "dialogDelete delete");
-                            toDoMap.get(DialogState.Proceed).run();
+                            toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
                             if (debug) Log.i(TAG, "dialogDelete just dismiss");
@@ -169,11 +169,11 @@ public class DialogProcessor {
                 .setMessage(R.string.click_connected_device_message)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setPositiveButton(R.string.disconnect, (dialog, which) -> {
-                    currentState = DialogState.Proceed;
+                    currentState = EDialogState.Proceed;
                     dialog.dismiss();
                 })
                 .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
-                    currentState = DialogState.Cancel;
+                    currentState = EDialogState.Cancel;
                     dialog.dismiss();
                 });
 
@@ -183,13 +183,13 @@ public class DialogProcessor {
     }
 
 
-    private void dialogDisconnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
+    private void dialogDisconnect(Map<EDialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogDisconnect");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnect just dismiss");
-                    toDoMap.get(DialogState.Idle).run();
+                    toDoMap.get(EDialogState.Idle).run();
                     onDialogEnd();
                 });
         builder.setTitle(deviceName)
@@ -203,13 +203,13 @@ public class DialogProcessor {
 
     }
 
-    private void dialogConnect(Map<DialogState, Runnable> toDoMap, String deviceName) {
+    private void dialogConnect(Map<EDialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogConnect");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
                     if (debug) Log.i(TAG, "dialogConnect just dismiss");
-                    toDoMap.get(DialogState.Idle).run();
+                    toDoMap.get(EDialogState.Idle).run();
                     onDialogEnd();
                 });
 
@@ -223,7 +223,7 @@ public class DialogProcessor {
         currentDialog = dialog;
     }
 
-    private void dialogConnecting(Map<DialogState, Runnable> toDoMap, String deviceName) {
+    private void dialogConnecting(Map<EDialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Log.i(TAG, "dialogConnecting");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
@@ -232,7 +232,7 @@ public class DialogProcessor {
                     switch (currentState) {
                         case Cancel:
                             if (debug) Log.i(TAG, "dialogConnecting cancel");
-                            toDoMap.get(DialogState.Cancel).run();
+                            toDoMap.get(EDialogState.Cancel).run();
                             break;
                         case Idle:
                             if (debug) Log.i(TAG, "dialogConnecting just dismiss");
@@ -249,7 +249,7 @@ public class DialogProcessor {
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setCancelable(true)
                 .setNegativeButton(R.string.cancel, (dialog, identifier) -> {
-                    currentState = DialogState.Cancel;
+                    currentState = EDialogState.Cancel;
                     dialog.cancel();
                 });
 
@@ -258,11 +258,11 @@ public class DialogProcessor {
         currentDialog = dialog;
     }
 
-    private void dialogSave(final Map<DialogState, Runnable> toDoMap) {
+    private void dialogSave(final Map<EDialogState, Runnable> toDoMap) {
         if (debug) Log.i(TAG, "dialogSave");
     }
 
-    private void dialogDelete(final Map<DialogState, Runnable> toDoMap) {
+    private void dialogDelete(final Map<EDialogState, Runnable> toDoMap) {
         if (debug) Log.i(TAG, "dialogDelete");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
@@ -271,15 +271,15 @@ public class DialogProcessor {
                     switch (currentState) {
                         case Cancel:
                             if (debug) Log.i(TAG, "dialogDelete cancel");
-                            toDoMap.get(DialogState.Cancel).run();
+                            toDoMap.get(EDialogState.Cancel).run();
                             break;
                         case Proceed:
                             if (debug) Log.i(TAG, "dialogDelete delete");
-                            toDoMap.get(DialogState.Proceed).run();
+                            toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
                             if (debug) Log.i(TAG, "dialogDelete just dismiss");
-                            toDoMap.get(DialogState.Cancel).run();
+                            toDoMap.get(EDialogState.Cancel).run();
                             break;
                         default:
                             Log.e(TAG, "dialogDelete currentState default");
@@ -294,12 +294,12 @@ public class DialogProcessor {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_proceed, null);
 
         dialogView.findViewById(R.id.btnProceed).setOnClickListener((v) -> {
-            currentState = DialogState.Proceed;
+            currentState = EDialogState.Proceed;
             dialog.dismiss();
         });
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener((v) -> {
-            currentState = DialogState.Cancel;
+            currentState = EDialogState.Cancel;
             dialog.dismiss();
         });
 

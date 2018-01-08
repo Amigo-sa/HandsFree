@@ -75,7 +75,7 @@ public class ToBluetooth
         }
         this.storage = storage;
         //TODO: доработать анализатор траффика
-//      trafficInfo = new TrafficInfo(TrafficNodes.NetIn, this);
+//      trafficInfo = new TrafficInfo(ETrafficNodes.NetIn, this);
 //      TrafficAnalyzer.getInstance().addTrafficInfo(trafficInfo);
     }
 

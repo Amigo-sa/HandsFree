@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings.category;
 
-public enum CategoryAudioOut {
+public enum ECategoryAudioOut {
     audioOutChannel,
     audioOutBuffersize,
     audioMode,

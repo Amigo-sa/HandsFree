@@ -11,7 +11,7 @@ import android.widget.TextView;
 import by.citech.handsfree.R;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.logic.CallerState;
+import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.management.IBase;
@@ -34,7 +34,7 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
 import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
 import static by.citech.handsfree.ui.helpers.ContactHelper.setContactInfo;
 import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
-import static by.citech.handsfree.logic.CallerState.ReadyToWork;
+import static by.citech.handsfree.logic.ECallerState.ReadyToWork;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class ViewManager
@@ -309,7 +309,7 @@ public class ViewManager
 
     //--------------------- ICallNetListener
 
-    private void processNormal(CallerState from, CallerState to, ECallReport why) {
+    private void processNormal(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "processNormal");
         switch (why) {
 //          case SysIntFail:
@@ -407,7 +407,7 @@ public class ViewManager
         }
     }
 
-    private void processAbnormal(CallerState from, CallerState to, ECallReport why) {
+    private void processAbnormal(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "processAbnormal");
         switch (why) {
             case StartDebug:
@@ -465,7 +465,7 @@ public class ViewManager
     }
 
     @Override
-    public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         if (opMode == Normal) {
             processNormal(from, to, why);
