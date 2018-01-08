@@ -175,8 +175,8 @@ public class Bt2BtLooper
                 }
             }
             dataBuff[btCount] = storageBtToNet.getData();
-            btCount++;
             if (debug) Log.i(TAG, String.format("looping output buffer got array number %d, which have length of %d", btCount, dataBuff[btCount].length));
+            btCount++;
             if (btCount == btFactor) {
                 if (debug) Log.i(TAG, "looping output buffer contains enough data, putting in storage");
                 btCount = 0;
