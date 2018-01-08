@@ -13,8 +13,8 @@ import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.SeverityLevel;
-import by.citech.handsfree.codec.audio.AudioCodecType;
+import by.citech.handsfree.settings.ESeverityLevel;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
 import by.citech.handsfree.management.IBase;
@@ -36,7 +36,7 @@ public class Bt2AudOutLooper
 
     //--------------------- preparation
 
-    private AudioCodecType codecType;
+    private EAudioCodecType codecType;
     private ICodec codec;
     private ITransmitter iTransmitter;
     private ITransmitterCtrl iTransmitterCtrl;
@@ -62,7 +62,7 @@ public class Bt2AudOutLooper
     }
 
     @Override
-    public boolean applySettings(SeverityLevel severityLevel) {
+    public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
         codec = AudioCodecFactory.getAudioCodec(codecType);
         return true;

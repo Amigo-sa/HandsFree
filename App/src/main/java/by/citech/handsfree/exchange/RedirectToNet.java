@@ -8,11 +8,11 @@ import by.citech.handsfree.exchange.consumers.ToNet;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.enumeration.DataSource;
+import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class RedirectToNet
-        extends AsyncTask<DataSource, ITransmitterCtrl, Void>
+        extends AsyncTask<EDataSource, ITransmitterCtrl, Void>
         implements IThreadManager {
 
     private static final String TAG = Tags.REDIR2NET;
@@ -29,7 +29,7 @@ public class RedirectToNet
     }
 
     @Override
-    protected Void doInBackground(DataSource... params) {
+    protected Void doInBackground(EDataSource... params) {
         if (debug) Log.i(TAG, "doInBackground");
         ITransmitterCtrl iTransmitterCtrl;
         switch (params[0]) {

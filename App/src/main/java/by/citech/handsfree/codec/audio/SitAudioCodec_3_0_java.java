@@ -8,7 +8,7 @@ public class SitAudioCodec_3_0_java
     //------------------- AHTUNG ГОВНОКОД НАЧАЛО
 
     private static final boolean debug = Settings.debug;
-    private static final AudioCodecType audioCodecType = AudioCodecType.Sit_3_0_java;
+    private static final EAudioCodecType audioCodecType = EAudioCodecType.Sit_3_0_java;
     private static final String TAG = audioCodecType.getSettingName();
     private static final short[] decodedData = new short[audioCodecType.getDecodedShortsSize()];
     private static final byte[] encodedData = new byte[audioCodecType.getEncodedBytesSize()];

@@ -27,7 +27,7 @@ public class Contact
     private long id;
     private String name;
     private String ip;
-    private ContactState state;
+    private EContactState state;
 
     //--------------------- common
 
@@ -36,7 +36,7 @@ public class Contact
 
     public Contact(String name, String ip) {
         id = -1;
-        state = ContactState.Null;
+        state = EContactState.Null;
         this.name = name;
         this.ip = ip;
         if (debug) Log.d(TAG, toString() + " contactTrunkCount is: " + (++contactTrunkCount));
@@ -83,7 +83,7 @@ public class Contact
         this.id = id;
     }
 
-    public void setState(ContactState state) {
+    public void setState(EContactState state) {
         this.state = state;
     }
 
@@ -95,7 +95,7 @@ public class Contact
     }
 
     @Override
-    public ContactState getState() {
+    public EContactState getState() {
         return state;
     }
 
@@ -118,7 +118,7 @@ public class Contact
         clone.name = this.name;
         clone.ip = this.ip;
         clone.id = this.id;
-        clone.state = ContactState.valueOf(this.state.name());
+        clone.state = EContactState.valueOf(this.state.name());
         if (debug) Log.w(TAG, "original is " + this.toString() + "\nclone is " + clone.toString());
         return clone;
     }

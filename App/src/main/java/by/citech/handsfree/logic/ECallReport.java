@@ -4,15 +4,16 @@ public enum ECallReport {
 
     UnconditionalTransition, // безусловный переход
 
-    SysIntFail,  // BT failed
-    SysIntDisconnected,  // BT disconnected
-    SysIntConnected,  // BT connected
-    SysIntConnectedCompatible,  // compatible BT device connected
-    SysIntConnectedIncompatible, // incompatible BT device connected
+//  SysIntFail,  // BT failed
+//  SysIntDisconnected,  // BT disconnected
+//  SysIntConnected,  // BT connected
+//  SysIntConnectedCompatible,  // compatible BT device connected
+    SysIntConnectedIncompatible, // incompatible BT device connected (обработки нет, вывод в лог)
     SysIntReady,  // BT ready
     SysIntError,  // BT error
-    SysExtFail,  // net failed
+//  SysExtFail,  // net failed
     SysExtReady,  // net ready
+    SysExtError,  // net error
 
     OutCallCanceledByLocalUser,  //
     OutConnectionCanceledByLocalUser,  //
@@ -32,7 +33,7 @@ public enum ECallReport {
 
     OutCallAcceptedByRemoteUser,  // turn on BT + net data exchange
     CallFailedExt,  // turn off BT + net data exchange
-    CallFailedInt,  // turn off BT + net data exchange
+    CallFailedInt,  // turn off BT + net data exchange (обработки нет, вывод в лог)
     CallEndedByRemoteUser,  // turn off BT + net data exchange
 
     StartDebug, //

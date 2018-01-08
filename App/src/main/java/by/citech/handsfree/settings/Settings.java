@@ -7,11 +7,9 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import by.citech.handsfree.codec.audio.AudioCodecType;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.enumeration.DataSource;
-import by.citech.handsfree.settings.enumeration.ISettingCategory;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.category.ISettingCategory;
 
 public class Settings {
 
@@ -88,8 +86,8 @@ public class Settings {
         }
 
         public void setThreadNumber(Integer threadNumber) {this.threadNumber = threadNumber;}
-        public void setDataSource(DataSource dataSource) {this.dataSource = dataSource;}
-        public void setOpMode(OpMode opMode) {this.opMode = opMode;}
+        public void setDataSource(EDataSource dataSource) {this.dataSource = dataSource;}
+        public void setOpMode(EOpMode opMode) {this.opMode = opMode;}
         public void setShowTraffic(Boolean showTraffic) {this.showTraffic = showTraffic;}
         public void setDebug(Boolean debug) {this.debug = debug;}
         public void setAudioIn2BtFactor(Integer audioIn2BtFactor) {this.audioIn2BtFactor = audioIn2BtFactor;}
@@ -101,8 +99,8 @@ public class Settings {
             return Settings.threadNumber;
 //            return threadNumber;
         }
-        public DataSource getDataSource() {return dataSource;}
-        public OpMode getOpMode() {
+        public EDataSource getDataSource() {return dataSource;}
+        public EOpMode getOpMode() {
             return Settings.opMode;
 //            return opMode;
         }
@@ -114,8 +112,8 @@ public class Settings {
         public Integer getStorageMaxSize() {return storageMaxSize;}
 
         private Integer threadNumber;
-        private DataSource dataSource;
-        private OpMode opMode;
+        private EDataSource dataSource;
+        private EOpMode opMode;
         private Boolean showTraffic;
         private Boolean debug;
         private Integer audioIn2BtFactor;
@@ -126,9 +124,9 @@ public class Settings {
     }
 
     public static int threadNumber = 3;
-    public static DataSource dataSource = DataSource.BLUETOOTH;
-//  public static DataSource dataSource = DataSource.MICROPHONE;
-    public static OpMode opMode = OpMode.Normal;
+    public static EDataSource dataSource = EDataSource.BLUETOOTH;
+//  public static EDataSource dataSource = EDataSource.MICROPHONE;
+    public static EOpMode opMode = EOpMode.Normal;
     public static boolean showTraffic = true;
     public static boolean debug = true;
     public static int bt2NetFactor = 50;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
@@ -162,7 +160,7 @@ public class Settings {
 
     public static boolean audioSingleFrame = true;
     public static boolean audioBuffIsShorts = true;
-    public static AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
+    public static EAudioCodecType audioCodecType = EAudioCodecType.Sit_2_1_java;
     public static int audioRate = 8000;
     public static int audioBuffSizeBytes = 16000;
     public static int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;

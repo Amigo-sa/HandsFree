@@ -16,7 +16,7 @@ public interface ISettingsCtrl {
     }
 
     @CallSuper
-    default boolean applySettings(SeverityLevel severityLevel) {
+    default boolean applySettings(ESeverityLevel severityLevel) {
         return false;
     }
 

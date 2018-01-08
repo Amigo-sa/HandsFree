@@ -7,8 +7,8 @@ public class SitAudioCodec_2_1_native
 //        System.loadLibrary("SitCodecWrapper");
 //    }
 
-    private static final int decodedShortCnt = AudioCodecType.Sit_2_1_java.getDecodedShortsSize();
-    private static final int encodedByteCnt = AudioCodecType.Sit_2_1_java.getEncodedBytesSize();
+    private static final int decodedShortCnt = EAudioCodecType.Sit_2_1_java.getDecodedShortsSize();
+    private static final int encodedByteCnt = EAudioCodecType.Sit_2_1_java.getEncodedBytesSize();
 
     private CodecState decoderState;
     private CodecState encoderState;

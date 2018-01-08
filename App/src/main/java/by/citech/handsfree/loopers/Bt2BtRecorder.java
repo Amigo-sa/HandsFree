@@ -13,7 +13,7 @@ import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.SeverityLevel;
+import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class Bt2BtRecorder
@@ -89,7 +89,7 @@ public class Bt2BtRecorder
     }
 
     @Override
-    public boolean applySettings(SeverityLevel severityLevel) {
+    public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
         dataBuff = new byte[btFactor][bt2btPacketSize];
         dataSaved = new byte[recordSize][btFactor][bt2btPacketSize];

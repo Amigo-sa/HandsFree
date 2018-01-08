@@ -13,8 +13,8 @@ import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.SeverityLevel;
-import by.citech.handsfree.codec.audio.AudioCodecType;
+import by.citech.handsfree.settings.ESeverityLevel;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
@@ -39,7 +39,7 @@ public class AudIn2AudOutLooper
 
     //--------------------- preparation
 
-    private AudioCodecType codecType;
+    private EAudioCodecType codecType;
     private ICodec codec;
     private int codecFactor;
     private int audioBuffSizeBytes;
@@ -82,7 +82,7 @@ public class AudIn2AudOutLooper
     }
 
     @Override
-    public boolean applySettings(SeverityLevel severityLevel) {
+    public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
         codec = AudioCodecFactory.getAudioCodec(codecType);
         return true;

@@ -1,6 +1,6 @@
 package by.citech.handsfree.contact;
 
-public enum ContactState {
+public enum EContactState {
 
     Null {
         public String getMessage() {return "Default state";}

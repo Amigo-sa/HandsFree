@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings;
 
-public enum SeverityLevel {
+public enum ESeverityLevel {
     Recommended,
     Immediately
 }

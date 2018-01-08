@@ -72,7 +72,7 @@ import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.logic.ICallUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.param.Colors;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
@@ -94,7 +94,7 @@ public class DeviceControlActivity
     static {objCount = 0;}
     {objCount++;TAG = STAG + " " + objCount;}
 
-    private OpMode opMode;
+    private EOpMode opMode;
 
     public static final int REQUEST_LOCATION = 99;
     public static final int REQUEST_MICROPHONE = 98;

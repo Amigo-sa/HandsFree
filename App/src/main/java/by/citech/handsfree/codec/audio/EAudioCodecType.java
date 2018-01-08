@@ -3,7 +3,7 @@ package by.citech.handsfree.codec.audio;
 import by.citech.handsfree.settings.ISettingEnum;
 import by.citech.handsfree.settings.SettingsDefault;
 
-public enum AudioCodecType implements ISettingEnum<AudioCodecType> {
+public enum EAudioCodecType implements ISettingEnum<EAudioCodecType> {
 
     Sit_2_1_java {
         @Override public int getDecodedShortsSize() {return 80;}
@@ -46,12 +46,12 @@ public enum AudioCodecType implements ISettingEnum<AudioCodecType> {
     };
 
     @Override
-    public AudioCodecType getDefaultValue() {
+    public EAudioCodecType getDefaultValue() {
         return SettingsDefault.AudioCommon.audioCodecType;
     }
 
     @Override
-    public AudioCodecType[] getValues() {
+    public EAudioCodecType[] getValues() {
         return values();
     }
 

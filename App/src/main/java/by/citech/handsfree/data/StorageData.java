@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.settings.Settings;
 
@@ -17,7 +18,7 @@ public class StorageData<T> {
 
     public StorageData(String TAG) {
         this.TAG = TAG;
-        фифошка = new ArrayDeque<>();
+        фифошка = new ConcurrentLinkedQueue<>();
     }
 
     public void setWriteLocked(boolean writeLocked) {

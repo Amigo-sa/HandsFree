@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import by.citech.handsfree.common.EConnection;
+import by.citech.handsfree.common.EConnectionState;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.network.server.connection.protocols.http.IHTTPSession;
@@ -35,12 +35,12 @@ public class ServerCtrlNanoWebSocket
     private WebSocket webSocket;
     private Handler handler;
     private ITransmitter receiver;
-    private EConnection state;
+    private EConnectionState state;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        state = EConnection.Null;
+        state = EConnectionState.Null;
     }
 
     ServerCtrlNanoWebSocket(int port, Handler handler) {
@@ -155,7 +155,7 @@ public class ServerCtrlNanoWebSocket
 
     //--------------------- main
 
-    private void procState(EConnection state) {
+    private void procState(EConnectionState state) {
         if (debug) Log.i(TAG, String.format(
                 "procState from %s to %s",
                 this.state.name(), state.name()));
@@ -172,7 +172,7 @@ public class ServerCtrlNanoWebSocket
         @Override
         protected void onOpen() {
             if (debug) Log.i(TAG, "onOpen");
-            procState(EConnection.Opened);
+            procState(EConnectionState.Opened);
             handler.sendEmptyMessage(StatusMessages.SRV_ONOPEN);
             try {
                 send(Messages.SRV2CLT_ONOPEN);
@@ -189,7 +189,7 @@ public class ServerCtrlNanoWebSocket
                     "Initiated by " + (initiatedByRemote ? "remote. " : "self. ") +
                     "Close code is <" + code + ">. " +
                     "Reason is <" + reason + ">.");
-            procState(EConnection.Closed);
+            procState(EConnectionState.Closed);
             handler.sendEmptyMessage(StatusMessages.SRV_ONCLOSE);
         }
 
@@ -218,7 +218,7 @@ public class ServerCtrlNanoWebSocket
         protected void onException(IOException exception) {
             if (debug) Log.i(TAG, "onException " + exception.getMessage());
             if (debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
-            procState(EConnection.Failure);
+            procState(EConnectionState.Failure);
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
         }
 

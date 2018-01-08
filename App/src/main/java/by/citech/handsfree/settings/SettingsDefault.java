@@ -6,9 +6,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
-import by.citech.handsfree.codec.audio.AudioCodecType;
-import by.citech.handsfree.settings.enumeration.DataSource;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 
 public class SettingsDefault {
 
@@ -22,8 +20,8 @@ public class SettingsDefault {
 
         public static class Common {
             public static final int threadNumber = 2;
-            public static final DataSource dataSource = DataSource.BLUETOOTH;
-            public static final OpMode opMode = OpMode.Normal;
+            public static final EDataSource dataSource = EDataSource.BLUETOOTH;
+            public static final EOpMode opMode = EOpMode.Normal;
             public static final boolean showTraffic = true;
             public static final boolean debug = true;
             public static final int bt2NetFactor = 50;
@@ -49,7 +47,7 @@ public class SettingsDefault {
         public static class AudioCommon {
             public static final boolean audioSingleFrame = true;
             public static final boolean audioBuffIsShorts = true;
-            public static final AudioCodecType audioCodecType = AudioCodecType.Sit_2_1_java;
+            public static final EAudioCodecType audioCodecType = EAudioCodecType.Sit_2_1_java;
             public static final int audioRate = 8000;
             public static final int audioBuffSizeBytes = 16000;
             public static final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;

@@ -18,13 +18,13 @@ import by.citech.handsfree.loopers.ToBtLooper;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.enumeration.DataSource;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.EDataSource;
+import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
-import static by.citech.handsfree.settings.enumeration.DataSource.DATAGENERATOR;
-import static by.citech.handsfree.settings.enumeration.DataSource.MICROPHONE;
+import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
+import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
 
 public class Caller
         implements IBase, ISettingsCtrl, IPrepareObject {
@@ -47,7 +47,7 @@ public class Caller
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
     private IBtList iBtList;
-    private OpMode opMode;
+    private EOpMode opMode;
 
     {
         objCount++;
@@ -225,7 +225,7 @@ public class Caller
 
     //--------------------- data from data source redirects to bluetooth
 
-    private void build2Bt(DataSource dataSource) {
+    private void build2Bt(EDataSource dataSource) {
         if (debug) Log.i(TAG, "build2Bt");
         if (iService == null
                 || iBroadcastReceiver == null

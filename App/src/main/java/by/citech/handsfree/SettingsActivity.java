@@ -21,9 +21,9 @@ import android.view.ViewGroup;
 
 import java.util.Locale;
 
-import by.citech.handsfree.codec.audio.AudioCodecType;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.param.Colors;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.SettingsDefault;
 import by.citech.handsfree.param.Tags;
@@ -101,22 +101,22 @@ public class SettingsActivity
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.Common.opMode.getSettingName());
             CharSequence[] entries = {
-                    OpMode.Normal.getSettingName(),
-                    OpMode.Bt2Bt.getSettingName(),
-                    OpMode.DataGen2Bt.getSettingName(),
-                    OpMode.AudIn2Bt.getSettingName(),
-                    OpMode.Bt2AudOut.getSettingName(),
-                    OpMode.AudIn2AudOut.getSettingName(),
-                    OpMode.Record.getSettingName()
+                    EOpMode.Normal.getSettingName(),
+                    EOpMode.Bt2Bt.getSettingName(),
+                    EOpMode.DataGen2Bt.getSettingName(),
+                    EOpMode.AudIn2Bt.getSettingName(),
+                    EOpMode.Bt2AudOut.getSettingName(),
+                    EOpMode.AudIn2AudOut.getSettingName(),
+                    EOpMode.Record.getSettingName()
             };
             CharSequence[] entryValues = {
-                    OpMode.Normal.getSettingNumber(),
-                    OpMode.Bt2Bt.getSettingNumber(),
-                    OpMode.DataGen2Bt.getSettingNumber(),
-                    OpMode.AudIn2Bt.getSettingNumber(),
-                    OpMode.Bt2AudOut.getSettingNumber(),
-                    OpMode.AudIn2AudOut.getSettingNumber(),
-                    OpMode.Record.getSettingNumber()
+                    EOpMode.Normal.getSettingNumber(),
+                    EOpMode.Bt2Bt.getSettingNumber(),
+                    EOpMode.DataGen2Bt.getSettingNumber(),
+                    EOpMode.AudIn2Bt.getSettingNumber(),
+                    EOpMode.Bt2AudOut.getSettingNumber(),
+                    EOpMode.AudIn2AudOut.getSettingNumber(),
+                    EOpMode.Record.getSettingNumber()
             };
             pref.setEntries(entries);
             pref.setEntryValues(entryValues);
@@ -134,16 +134,16 @@ public class SettingsActivity
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
             CharSequence[] entries = {
-                    AudioCodecType.Sit_2_1_java.getSettingName(),
-                    AudioCodecType.Sit_2_1_native.getSettingName(),
-                    AudioCodecType.Sit_3_0_java.getSettingName(),
-                    AudioCodecType.Sit_3_0_native.getSettingName()
+                    EAudioCodecType.Sit_2_1_java.getSettingName(),
+                    EAudioCodecType.Sit_2_1_native.getSettingName(),
+                    EAudioCodecType.Sit_3_0_java.getSettingName(),
+                    EAudioCodecType.Sit_3_0_native.getSettingName()
             };
             CharSequence[] entryValues = {
-                    AudioCodecType.Sit_2_1_java.getSettingNumber(),
-                    AudioCodecType.Sit_2_1_native.getSettingNumber(),
-                    AudioCodecType.Sit_3_0_java.getSettingNumber(),
-                    AudioCodecType.Sit_3_0_native.getSettingNumber()
+                    EAudioCodecType.Sit_2_1_java.getSettingNumber(),
+                    EAudioCodecType.Sit_2_1_native.getSettingNumber(),
+                    EAudioCodecType.Sit_3_0_java.getSettingNumber(),
+                    EAudioCodecType.Sit_3_0_native.getSettingNumber()
             };
             pref.setEntries(entries);
             pref.setEntryValues(entryValues);

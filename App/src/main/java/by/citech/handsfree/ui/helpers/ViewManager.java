@@ -19,7 +19,7 @@ import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.param.Colors;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
@@ -35,7 +35,7 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
 import static by.citech.handsfree.ui.helpers.ContactHelper.setContactInfo;
 import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
 import static by.citech.handsfree.logic.CallerState.ReadyToWork;
-import static by.citech.handsfree.settings.enumeration.OpMode.Normal;
+import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class ViewManager
         implements IBase, ISettingsCtrl, IPrepareObject,
@@ -57,7 +57,7 @@ public class ViewManager
 
     //--------------------- preparation
 
-    private OpMode opMode;
+    private EOpMode opMode;
 
     {
         objCount++;
@@ -312,18 +312,18 @@ public class ViewManager
     private void processNormal(CallerState from, CallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "processNormal");
         switch (why) {
-            case SysExtFail:
-            case SysIntFail:
-            case SysIntDisconnected:
-            case SysIntConnectedIncompatible:
+//          case SysIntFail:
+//          case SysIntDisconnected:
+            case SysExtError:
             case SysIntError:
+            case SysIntConnectedIncompatible:
                 disableGray(getBtnGreen(), "ERROR");
                 disableGray(getBtnRed(), "ERROR");
                 break;
+//          case SysIntConnected:
+//          case SysIntConnectedCompatible:
             case SysExtReady:
             case SysIntReady:
-            case SysIntConnected:
-            case SysIntConnectedCompatible:
                 if (to == ReadyToWork) {
                     enableBtnCall(getBtnGreen(), "CALL");
                     disableGray(getBtnRed(), "IDLE");

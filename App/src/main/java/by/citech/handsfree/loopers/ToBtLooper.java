@@ -16,8 +16,8 @@ import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.SeverityLevel;
-import by.citech.handsfree.codec.audio.AudioCodecType;
+import by.citech.handsfree.settings.ESeverityLevel;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
 import by.citech.handsfree.exchange.ITransmitter;
@@ -26,7 +26,7 @@ import by.citech.handsfree.exchange.consumers.ToBluetooth;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.enumeration.DataSource;
+import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class ToBtLooper
@@ -44,7 +44,7 @@ public class ToBtLooper
 
     //--------------------- preparation
 
-    private AudioCodecType codecType;
+    private EAudioCodecType codecType;
     private ICodec codec;
     private ITransmitterCtrl source, destination;
     private ITransmitter iTransmitter;
@@ -76,7 +76,7 @@ public class ToBtLooper
     }
 
     @Override
-    public boolean applySettings(SeverityLevel severityLevel) {
+    public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
         codec = AudioCodecFactory.getAudioCodec(codecType);
         return true;
@@ -84,7 +84,7 @@ public class ToBtLooper
 
     //--------------------- constructor
 
-    public ToBtLooper(StorageData<byte[][]> micToBtStorage, DataSource dataSource) throws Exception {
+    public ToBtLooper(StorageData<byte[][]> micToBtStorage, EDataSource dataSource) throws Exception {
         if (dataSource == null || micToBtStorage == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         }

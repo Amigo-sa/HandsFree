@@ -11,7 +11,7 @@ public abstract class AudioCodecFactory
     private static final String TAG = Tags.AudioCodec;
     private static final boolean debug = Settings.debug;
 
-    public static ICodec getAudioCodec(AudioCodecType audioCodecType) {
+    public static ICodec getAudioCodec(EAudioCodecType audioCodecType) {
         switch (audioCodecType) {
             case Sit_3_0_java:
             case Sit_3_0_native:

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import by.citech.handsfree.common.EConnection;
+import by.citech.handsfree.common.EConnectionState;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
@@ -35,13 +35,13 @@ public class ClientCtrlOkWebSocket
     private String url;
     private Handler handler;
     private ITransmitter receiver;
-    private EConnection state;
+    private EConnectionState state;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
         url = "";
-        state = EConnection.Null;
+        state = EConnectionState.Null;
     }
 
     ClientCtrlOkWebSocket(String url, Handler handler) {
@@ -64,7 +64,7 @@ public class ClientCtrlOkWebSocket
                 .url(url)
                 .build();
         client.newWebSocket(request, this);
-        procState(EConnection.Opening);
+        procState(EConnectionState.Opening);
         // Trigger shutdown of the dispatcher's executor so this process can exit cleanly.
         client.dispatcher().executorService().shutdown();
         return this;
@@ -92,7 +92,7 @@ public class ClientCtrlOkWebSocket
     @Override
     public boolean isAliveConnection() {
         // TODO: достаточна ли такая проверка?
-        return state == EConnection.Opened || state == EConnection.Opening;
+        return state == EConnectionState.Opened || state == EConnectionState.Opening;
     }
 
     //--------------------- IExchangeCtrl
@@ -135,7 +135,7 @@ public class ClientCtrlOkWebSocket
 
     //--------------------- main
 
-    private void procState(EConnection state) {
+    private void procState(EConnectionState state) {
         if (debug) Log.i(TAG, String.format(
                 "procState from %s to %s, connections count is %d",
                 this.state.name(), state.name(), client.connectionPool().connectionCount()));
@@ -146,7 +146,7 @@ public class ClientCtrlOkWebSocket
     public void onOpen(WebSocket webSocket, Response response) {
         if (debug) Log.i(TAG, "onOpen");
         this.webSocket = webSocket;
-        procState(EConnection.Opened);
+        procState(EConnectionState.Opened);
         webSocket.send(Messages.CLT2SRV_ONOPEN);
         if (debug) Log.i(TAG, "onOpen message sended: " + Messages.CLT2SRV_ONOPEN);
         handler.sendEmptyMessage(StatusMessages.CLT_ONOPEN);
@@ -175,21 +175,21 @@ public class ClientCtrlOkWebSocket
     @Override public void onClosing(WebSocket webSocket, int code, String reason) {
         if (debug) Log.i(TAG, "onClosing");
         webSocket.close(1000, Messages.CLT2SRV_ONCLOSE);
-        procState(EConnection.Closing);
+        procState(EConnectionState.Closing);
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSING);
     }
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
         if (debug) Log.i(TAG, "onClosed");
-        procState(EConnection.Closed);
+        procState(EConnectionState.Closed);
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSED);
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
         if (debug) Log.i(TAG, "onFailure");
-        procState(EConnection.Failure);
+        procState(EConnectionState.Failure);
         handler.sendEmptyMessage(StatusMessages.CLT_ONFAILURE);
     }
 

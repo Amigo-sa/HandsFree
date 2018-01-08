@@ -157,7 +157,7 @@ public class Contactor
         memCtrl.sort();
         for (Contact contact : contacts) {
             if (contact != null) {
-                contact.setState(ContactState.SuccessAdd);
+                contact.setState(EContactState.SuccessAdd);
             } else {
                 Log.e(TAG, "getAllContacts one of contacts is null, deleting");
                 contacts.remove(null);
@@ -171,13 +171,13 @@ public class Contactor
         if (debug) Log.i(TAG, "check if copy");
         if (toUpdate != null) {
             if (toCopy == null) {
-                toUpdate.setState(ContactState.FailUpdate);
+                toUpdate.setState(EContactState.FailUpdate);
             } else if (!Contact.checkForValid(toCopy)) {
-                toUpdate.setState(ContactState.FailInvalid);
+                toUpdate.setState(EContactState.FailInvalid);
             } else if (Contact.checkForEqual(toUpdate, toCopy)) {
                 return true;
             } else if (!memCtrl.checkForUniq(toCopy)) {
-                toUpdate.setState(ContactState.FailNotUnique);
+                toUpdate.setState(EContactState.FailNotUnique);
             } else {
                 return true;
             }
@@ -190,9 +190,9 @@ public class Contactor
         if (debug) Log.i(TAG, "check");
         if (contact != null) {
             if (!Contact.checkForValid(contact)) {
-                contact.setState(ContactState.FailInvalid);
+                contact.setState(EContactState.FailInvalid);
             } else if (!memCtrl.checkForUniq(contact)) {
-                contact.setState(ContactState.FailNotUnique);
+                contact.setState(EContactState.FailNotUnique);
             } else {
                 return true;
             }
@@ -223,15 +223,15 @@ public class Contactor
             if (debug) Log.w(TAG, "addElement toAdd is " + toAdd.toString());
             long contactId = dbCtrl.add(toAdd);
             if (contactId == -1) {
-                toAdd.setState(ContactState.FailToAdd);
+                toAdd.setState(EContactState.FailToAdd);
                 Log.e(TAG, "addElement to db fail");
             } else {
                 toAdd.setId(contactId);
                 if (!memCtrl.add(toAdd)) {
-                    toAdd.setState(ContactState.FailToAdd);
+                    toAdd.setState(EContactState.FailToAdd);
                     Log.e(TAG, "addElement to memory fail");
                 } else {
-                    toAdd.setState(ContactState.SuccessAdd);
+                    toAdd.setState(EContactState.SuccessAdd);
                 }
             }
             reportContact(toAdd);
@@ -248,13 +248,13 @@ public class Contactor
         }
         if (toDelete != null) {
             if (!dbCtrl.delete(toDelete)) {
-                toDelete.setState(ContactState.FailDelete);
+                toDelete.setState(EContactState.FailDelete);
                 Log.e(TAG, "deleteElement db fail");
             } else if (!memCtrl.delete(toDelete)) {
-                toDelete.setState(ContactState.FailDelete);
+                toDelete.setState(EContactState.FailDelete);
                 Log.e(TAG, "deleteElement memory fail");
             } else {
-                toDelete.setState(ContactState.SuccessDelete);
+                toDelete.setState(EContactState.SuccessDelete);
             }
         }
         reportContact(toDelete);
@@ -271,13 +271,13 @@ public class Contactor
             if (debug) Log.w(TAG, "updateElement toCopy is " + toCopy.toString());
             if (debug) Log.w(TAG, "updateElement toUpdate is " + toUpdate.toString());
             if (!dbCtrl.update(toUpdate, toCopy)) {
-                toUpdate.setState(ContactState.FailUpdate);
+                toUpdate.setState(EContactState.FailUpdate);
                 Log.e(TAG, "updateElement db fail");
             } else if (!memCtrl.update(toUpdate, toCopy)) {
-                toUpdate.setState(ContactState.FailUpdate);
+                toUpdate.setState(EContactState.FailUpdate);
                 Log.e(TAG, "updateElement memory fail");
             } else {
-                toUpdate.setState(ContactState.SuccessUpdate);
+                toUpdate.setState(EContactState.SuccessUpdate);
             }
             reportContact(toUpdate);
             if (debug) Log.w(TAG, "updateElement updated is " + toUpdate.toString());

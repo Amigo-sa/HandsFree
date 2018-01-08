@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings;
 
-import by.citech.handsfree.settings.enumeration.ISettingCategory;
+import by.citech.handsfree.settings.category.ISettingCategory;
 
 public interface ISettingsReset {
     boolean resetSettings();

@@ -13,7 +13,7 @@ import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.SeverityLevel;
+import by.citech.handsfree.settings.ESeverityLevel;
 
 public class ToNet
         implements ITransmitterCtrl, ISettingsCtrl, IPrepareObject {
@@ -74,7 +74,7 @@ public class ToNet
     }
 
     @Override
-    public boolean applySettings(SeverityLevel severityLevel) {
+    public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
         netChunk = new byte[netChunkSize];
         return true;

@@ -31,13 +31,13 @@ import by.citech.handsfree.network.server.IServerOff;
 import by.citech.handsfree.param.Messages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.enumeration.DataSource;
+import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.util.InetAddress;
 
 import static by.citech.handsfree.logic.ECallReport.CallEndedByRemoteUser;
 import static by.citech.handsfree.logic.ECallReport.CallFailedExt;
-import static by.citech.handsfree.logic.ECallReport.SysExtFail;
+import static by.citech.handsfree.logic.ECallReport.SysExtError;
 import static by.citech.handsfree.logic.ECallReport.SysExtReady;
 import static by.citech.handsfree.logic.ECallReport.InCallCanceledByRemoteUser;
 import static by.citech.handsfree.logic.ECallReport.InCallDetected;
@@ -55,7 +55,7 @@ public class ConnectorNet
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
-    private static final DataSource dataSource = Settings.dataSource;
+    private static final EDataSource dataSource = Settings.dataSource;
 
     private static int objCount;
     private final String TAG;
@@ -198,9 +198,10 @@ public class ConnectorNet
     public void onCallerStateChange(CallerState from, CallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-            case SysIntFail:
+//          case SysIntFail:
+//          case SysIntDisconnected:
             case SysIntError:
-            case SysIntDisconnected:
+            case CallFailedInt:
             case CallEndedByLocalUser:
                 exchangeStop();
                 disconnect(iConnCtrl);
@@ -373,7 +374,7 @@ public class ConnectorNet
             case PhaseReadyInt:
             case PhaseZero:
                 if (iServerCtrl == null) {
-                    if (reportToCallerFsm(callerState, SysExtFail, TAG)) return;
+                    if (reportToCallerFsm(callerState, SysExtError, TAG)) return;
                 } else if (reportToCallerFsm(callerState, SysExtReady, TAG)) {
                     this.iServerCtrl = iServerCtrl;
                     return;

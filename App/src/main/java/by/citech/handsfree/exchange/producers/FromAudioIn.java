@@ -12,7 +12,7 @@ import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
-import by.citech.handsfree.settings.SeverityLevel;
+import by.citech.handsfree.settings.ESeverityLevel;
 
 public class FromAudioIn
         implements ITransmitterCtrl, IPrepareObject, ISettingsCtrl {
@@ -61,7 +61,7 @@ public class FromAudioIn
     }
 
     @Override
-    public boolean applySettings(SeverityLevel severityLevel) {
+    public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
         return true;
     }

@@ -9,7 +9,7 @@ import java.util.Map;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.ui.helpers.state.ActiveContactState;
 import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.contact.ContactState;
+import by.citech.handsfree.contact.EContactState;
 import by.citech.handsfree.contact.ContactsRecyclerAdapter;
 import by.citech.handsfree.ui.helpers.state.EditorState;
 import by.citech.handsfree.contact.IContactsListener;
@@ -372,7 +372,7 @@ public class ContactEditorHelper
             return;
         }
         Contact contact = contacts[0];
-        ContactState state = contact.getState();
+        EContactState state = contact.getState();
         iMsgToUi.sendToUiToast(true, state.getMessage());
         if (contacts.length > 1) {
             contactsAdapter.notifyDataSetChanged();

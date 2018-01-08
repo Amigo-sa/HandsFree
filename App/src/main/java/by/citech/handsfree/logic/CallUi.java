@@ -6,7 +6,7 @@ import java.util.Locale;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.param.Tags;
 
@@ -35,7 +35,7 @@ public class CallUi
 
     //--------------------- preparation
 
-    private OpMode opMode;
+    private EOpMode opMode;
 
     {
         objCount++;

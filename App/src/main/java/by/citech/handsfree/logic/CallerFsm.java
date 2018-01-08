@@ -12,11 +12,11 @@ import by.citech.handsfree.param.StatusMessages;
 import by.citech.handsfree.param.Tags;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.settings.enumeration.OpMode;
+import by.citech.handsfree.settings.EOpMode;
 
 import static by.citech.handsfree.logic.CallerState.*;
 import static by.citech.handsfree.logic.ECallReport.*;
-import static by.citech.handsfree.settings.enumeration.OpMode.Normal;
+import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallerFsm
         implements ISettingsCtrl, IPrepareObject, IBase {
@@ -32,7 +32,7 @@ public class CallerFsm
 
     //--------------------- preparation
 
-    private OpMode opMode;
+    private EOpMode opMode;
     private volatile Collection<ICallerFsmListener> listeners;
     private volatile CallerState state;
 
@@ -175,12 +175,11 @@ public class CallerFsm
     private boolean processReportNormal(ECallReport report, CallerState from) {
         if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
-//          case SysIntConnectedIncompatible:
 //          case SysIntConnectedCompatible:
 //          case SysIntDisconnected:
 //          case SysIntConnected:
-//          case SysIntError:
-            case SysIntFail:
+//          case SysIntFail:
+            case SysIntError:
                 switch (from) {
                     case PhaseReadyInt:
                         return (processStateChange(from, PhaseZero, report));
@@ -196,7 +195,7 @@ public class CallerFsm
                     default:
                         return true;
                 }
-            case SysExtFail:
+            case SysExtError:
                 switch (from) {
                     case PhaseReadyExt:
                         return (processStateChange(from, PhaseZero, report));
@@ -213,7 +212,6 @@ public class CallerFsm
             case OutConnectionFailed:
             case InCallFailed:
             case CallFailedExt:
-//          case CallFailedInt:
                 return (processStateChange(from, Error, report));
             case InCallDetected:
                 return (processStateChange(from, InDetected, report));
@@ -234,8 +232,10 @@ public class CallerFsm
             case OutConnectionStartedByLocalUser:
                 return (processStateChange(from, OutStarted, report));
             case UnconditionalTransition:
+            case SysIntConnectedIncompatible:
+            case CallFailedInt:
             default:
-                return false;
+                return true;
         }
     }
 

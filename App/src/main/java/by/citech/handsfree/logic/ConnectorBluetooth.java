@@ -58,8 +58,9 @@ import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.logic.ECallReport.CallFailedInt;
+import static by.citech.handsfree.logic.ECallReport.StopDebug;
+import static by.citech.handsfree.logic.ECallReport.SysIntConnectedIncompatible;
 import static by.citech.handsfree.logic.ECallReport.SysIntError;
-import static by.citech.handsfree.logic.ECallReport.SysIntFail;
 import static by.citech.handsfree.logic.ECallReport.SysIntReady;
 
 public class ConnectorBluetooth
@@ -472,7 +473,14 @@ public class ConnectorBluetooth
 
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
-        reportToCallerFsm(getCallerFsmState(), SysIntError, TAG);
+        switch (Settings.opMode) {
+            case Normal:
+                reportToCallerFsm(getCallerFsmState(), SysIntError, TAG);
+                break;
+            default:
+                reportToCallerFsm(getCallerFsmState(), StopDebug, TAG);
+                break;
+        }
     }
 
     private void processState() {
@@ -485,7 +493,7 @@ public class ConnectorBluetooth
                 if (Settings.debug) Log.e(TAG, "processState " + callerState);
                 return;
         }
-        Log.w(TAG, "processState recursive call");
+        if (Settings.debug) Log.w(TAG, "processState recursive call");
         processState();
     }
 
@@ -496,7 +504,7 @@ public class ConnectorBluetooth
         if (characteristics.getNotifyCharacteristic() != null && characteristics.getWriteCharacteristic() != null) {
             reportToCallerFsm(getCallerFsmState(), SysIntReady, TAG);
         } else
-            reportToCallerFsm(getCallerFsmState(), SysIntFail, TAG);
+            reportToCallerFsm(getCallerFsmState(), SysIntConnectedIncompatible, TAG);
     }
 
     //----------------------- Scanning ---------------------------

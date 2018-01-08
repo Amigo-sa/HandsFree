@@ -1,4 +1,4 @@
-package by.citech.handsfree.settings.enumeration;
+package by.citech.handsfree.settings.category;
 
 public interface ISettingCategory {
     Object getDefaultValue();

@@ -1,9 +1,7 @@
-package by.citech.handsfree.settings.enumeration;
+package by.citech.handsfree.settings;
 
-import by.citech.handsfree.settings.ISettingEnum;
-import by.citech.handsfree.settings.SettingsDefault;
-
-public enum OpMode implements ISettingEnum<OpMode> {
+public enum EOpMode
+        implements ISettingEnum<EOpMode> {
 
     Normal {},
     Bt2Bt {},
@@ -33,12 +31,12 @@ public enum OpMode implements ISettingEnum<OpMode> {
     }
 
     @Override
-    public OpMode getDefaultValue() {
+    public EOpMode getDefaultValue() {
         return SettingsDefault.Common.opMode;
     }
 
     @Override
-    public OpMode[] getValues() {
+    public EOpMode[] getValues() {
         return values();
     }
 
