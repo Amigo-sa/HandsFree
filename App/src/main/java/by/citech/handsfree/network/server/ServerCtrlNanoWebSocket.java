@@ -16,9 +16,9 @@ import by.citech.handsfree.network.server.connection.websockets.CloseCode;
 import by.citech.handsfree.network.server.connection.websockets.NanoWSD;
 import by.citech.handsfree.network.server.connection.websockets.WebSocket;
 import by.citech.handsfree.network.server.connection.websockets.WebSocketFrame;
-import by.citech.handsfree.param.Messages;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Messages;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public class ServerCtrlNanoWebSocket
         extends NanoWSD

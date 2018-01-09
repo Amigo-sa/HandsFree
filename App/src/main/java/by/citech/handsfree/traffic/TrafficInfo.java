@@ -1,7 +1,7 @@
 package by.citech.handsfree.traffic;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class TrafficInfo {
 

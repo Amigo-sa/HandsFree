@@ -1,4 +1,4 @@
-package by.citech.handsfree.param;
+package by.citech.handsfree.parameters;
 
 public class Tags {
 

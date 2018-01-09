@@ -12,7 +12,7 @@ import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.threading.IThreadManager;
 

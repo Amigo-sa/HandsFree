@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.util.Locale;
 
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ISettingEnum;
 import by.citech.handsfree.settings.Settings;
 

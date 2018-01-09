@@ -8,7 +8,7 @@ import java.util.List;
 import by.citech.handsfree.common.ICopy;
 import by.citech.handsfree.common.IIdentifier;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> {
 

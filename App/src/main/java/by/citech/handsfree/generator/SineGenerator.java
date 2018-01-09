@@ -2,11 +2,10 @@ package by.citech.handsfree.generator;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.util.ListHelper.getListInitiatedWithNulls;

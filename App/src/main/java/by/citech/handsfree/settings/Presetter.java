@@ -3,7 +3,7 @@ package by.citech.handsfree.settings;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.EAudioCodecType;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class Presetter {
 

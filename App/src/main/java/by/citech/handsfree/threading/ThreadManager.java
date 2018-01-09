@@ -4,7 +4,7 @@ import android.util.Log;
 
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 

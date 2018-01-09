@@ -2,7 +2,7 @@ package by.citech.handsfree.experimental;
 
 import by.citech.handsfree.common.IProcessing;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.param.StatusMessages;
+import by.citech.handsfree.parameters.StatusMessages;
 
 public abstract class DataExchanger<F, fromB, toB, T>
         implements IProcessing, ITx<F> {

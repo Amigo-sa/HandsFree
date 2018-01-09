@@ -7,10 +7,10 @@ import android.view.animation.Animation;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import by.citech.handsfree.param.Colors;
+import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public class ViewHelper {
 

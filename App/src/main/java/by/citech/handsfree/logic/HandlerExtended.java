@@ -6,8 +6,8 @@ import android.util.Log;
 
 import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 class HandlerExtended
         extends Handler {

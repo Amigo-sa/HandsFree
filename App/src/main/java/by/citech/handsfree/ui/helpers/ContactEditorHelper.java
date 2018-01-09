@@ -17,7 +17,7 @@ import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class ContactEditorHelper

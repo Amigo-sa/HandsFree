@@ -9,8 +9,8 @@ import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.generator.DataGeneratorFactory;
 import by.citech.handsfree.generator.EDataType;
 import by.citech.handsfree.generator.IDataGenerator;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
 public class FromGenerator

@@ -5,7 +5,7 @@ import android.util.Log;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class ActiveContactHelper
         implements IBase {

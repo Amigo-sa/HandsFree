@@ -10,15 +10,15 @@ import java.util.concurrent.TimeUnit;
 import by.citech.handsfree.common.EConnectionState;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
-import by.citech.handsfree.param.Messages;
-import by.citech.handsfree.param.StatusMessages;
+import by.citech.handsfree.parameters.Messages;
+import by.citech.handsfree.parameters.StatusMessages;
 
 public class ClientCtrlOkWebSocket
         extends WebSocketListener

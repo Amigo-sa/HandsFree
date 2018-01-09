@@ -7,7 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class Reflection {
 

@@ -1,7 +1,7 @@
 package by.citech.handsfree.generator;
 
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public abstract class DataGeneratorFactory
         implements IDataGenerator {

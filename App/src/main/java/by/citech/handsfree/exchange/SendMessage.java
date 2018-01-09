@@ -4,8 +4,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public class SendMessage
         extends AsyncTask<String, String, Void> {

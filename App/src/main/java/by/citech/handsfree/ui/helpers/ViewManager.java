@@ -17,11 +17,11 @@ import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
-import by.citech.handsfree.param.Colors;
+import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 import static by.citech.handsfree.ui.helpers.ViewHelper.clearAnimation;
 import static by.citech.handsfree.ui.helpers.ViewHelper.disableGray;

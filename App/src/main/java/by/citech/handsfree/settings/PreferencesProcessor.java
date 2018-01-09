@@ -7,8 +7,8 @@ import android.support.v7.preference.PreferenceManagerFix;
 import android.util.Log;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public class PreferencesProcessor {
 

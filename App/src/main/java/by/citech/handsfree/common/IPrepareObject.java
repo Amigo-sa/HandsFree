@@ -1,7 +1,7 @@
 package by.citech.handsfree.common;
 
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public interface IPrepareObject {
 

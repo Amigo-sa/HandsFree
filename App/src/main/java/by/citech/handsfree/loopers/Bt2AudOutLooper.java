@@ -11,7 +11,7 @@ import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegister;
-import by.citech.handsfree.param.StatusMessages;
+import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
@@ -19,7 +19,7 @@ import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class Bt2AudOutLooper
         implements IBase, ITransmitter, IPrepareObject,

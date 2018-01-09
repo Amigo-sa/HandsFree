@@ -3,7 +3,7 @@ package by.citech.handsfree.network.control;
 import android.os.AsyncTask;
 import android.util.Log;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class Disconnect
         extends AsyncTask<IConnCtrl, Void, Void> {

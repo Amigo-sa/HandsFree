@@ -6,7 +6,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class ServerOn
         extends AsyncTask<String, IServerCtrl, Void> {

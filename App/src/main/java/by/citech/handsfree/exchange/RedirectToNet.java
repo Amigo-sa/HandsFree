@@ -7,7 +7,7 @@ import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.consumers.ToNet;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreadManager;
 

@@ -39,7 +39,7 @@ import by.citech.handsfree.network.server.connection.protocols.http.threading.IA
 import by.citech.handsfree.network.server.connection.util.IFactory;
 import by.citech.handsfree.network.server.connection.util.IFactoryThrowing;
 import by.citech.handsfree.network.server.connection.util.IHandler;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 /**
  * A simple, tiny, nicely embeddable HTTP server in Java

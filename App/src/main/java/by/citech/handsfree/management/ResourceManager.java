@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
 public class ResourceManager

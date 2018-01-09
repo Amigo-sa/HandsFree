@@ -21,7 +21,7 @@ import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreadManager;
 
 public class AudIn2AudOutLooper

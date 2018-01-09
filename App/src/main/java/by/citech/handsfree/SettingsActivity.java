@@ -22,11 +22,11 @@ import android.view.ViewGroup;
 import java.util.Locale;
 
 import by.citech.handsfree.codec.audio.EAudioCodecType;
-import by.citech.handsfree.param.Colors;
+import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.SettingsDefault;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class SettingsActivity
         extends AppCompatActivity {

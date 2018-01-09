@@ -5,7 +5,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class ClientConn
         extends AsyncTask<String, IClientCtrl, Void> {

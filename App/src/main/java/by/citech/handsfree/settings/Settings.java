@@ -8,7 +8,7 @@ import android.media.MediaRecorder;
 import android.util.Log;
 
 import by.citech.handsfree.codec.audio.EAudioCodecType;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.category.ISettingCategory;
 
 public class Settings {

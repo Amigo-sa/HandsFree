@@ -9,10 +9,10 @@ import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
-import by.citech.handsfree.param.StatusMessages;
+import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 
 public class ToNet

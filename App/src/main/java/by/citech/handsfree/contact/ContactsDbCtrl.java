@@ -11,7 +11,7 @@ import android.util.Log;
 import java.util.List;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class ContactsDbCtrl
         extends SQLiteOpenHelper {

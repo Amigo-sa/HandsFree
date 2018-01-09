@@ -3,7 +3,7 @@ package by.citech.handsfree.codec.audio;
 import android.util.Log;
 
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public abstract class AudioCodecFactory
         implements ICodec {
@@ -15,12 +15,12 @@ public abstract class AudioCodecFactory
         switch (audioCodecType) {
             case Sit_3_0_java:
             case Sit_3_0_native:
-                Log.i(TAG, "getAudioCodec audioCodecType Sit_3_0_java");
+                if (debug) Log.i(TAG, "getAudioCodec audioCodecType Sit_3_0_java");
                 return new SitAudioCodec_3_0_java();
             case Sit_2_1_java:
             case Sit_2_1_native:
             default:
-                Log.i(TAG, "getAudioCodec audioCodecType default Sit_2_1_java");
+                if (debug) Log.i(TAG, "getAudioCodec audioCodecType default Sit_2_1_java");
                 return new SitAudioCodec_2_1_java();
         }
     }

@@ -6,8 +6,8 @@ import java.util.Map;
 
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public interface IMsgToUi {
 

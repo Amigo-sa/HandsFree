@@ -2,8 +2,8 @@ package by.citech.handsfree.management;
 
 import android.support.annotation.CallSuper;
 
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public interface IBase {
 

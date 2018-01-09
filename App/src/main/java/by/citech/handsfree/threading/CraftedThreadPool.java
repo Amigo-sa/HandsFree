@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 public class CraftedThreadPool
         implements IPrepareObject {

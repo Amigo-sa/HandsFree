@@ -21,7 +21,7 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
 import static by.citech.handsfree.settings.EDataSource.MICROPHONE;

@@ -7,7 +7,7 @@ import android.util.Log;
 import by.citech.handsfree.common.ICopy;
 import by.citech.handsfree.common.IIdentifier;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.util.InetAddress;
 import by.citech.handsfree.util.Name;
 

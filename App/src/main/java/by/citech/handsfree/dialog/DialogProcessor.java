@@ -10,8 +10,8 @@ import java.util.Map;
 
 import by.citech.handsfree.R;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.param.StatusMessages;
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.parameters.Tags;
 
 public class DialogProcessor {
 

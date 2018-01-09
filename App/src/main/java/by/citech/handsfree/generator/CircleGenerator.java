@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
-import by.citech.handsfree.param.Tags;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.util.MathHelper.arrayDoubleToShort;
