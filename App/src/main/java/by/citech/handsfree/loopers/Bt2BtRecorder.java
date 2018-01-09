@@ -9,7 +9,7 @@ import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
-import by.citech.handsfree.logic.ICallerFsmRegister;
+import by.citech.handsfree.logic.ICallerFsmRegisterListener;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
@@ -18,7 +18,7 @@ import by.citech.handsfree.threading.IThreadManager;
 
 public class Bt2BtRecorder
         implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
-        ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
+        ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.BT2BT_RECORDER;
     private static final boolean debug = Settings.debug;

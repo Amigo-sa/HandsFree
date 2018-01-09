@@ -65,7 +65,7 @@ import static by.citech.handsfree.logic.ECallReport.SysIntReady;
 
 public class ConnectorBluetooth
         implements StorageListener, ConnectAction, IBase,
-        ICallerFsmListener, ICallerFsm, ICallerFsmRegister {
+        ICallerFsmListener, ICallerFsm, ICallerFsmRegisterListener {
 
     private final static String STAG = "WSD_ConnectorBluetooth";
 

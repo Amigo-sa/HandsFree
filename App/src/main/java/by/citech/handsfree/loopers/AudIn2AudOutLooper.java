@@ -11,7 +11,7 @@ import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
-import by.citech.handsfree.logic.ICallerFsmRegister;
+import by.citech.handsfree.logic.ICallerFsmRegisterListener;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
@@ -26,7 +26,7 @@ import by.citech.handsfree.threading.IThreadManager;
 
 public class AudIn2AudOutLooper
         implements ITransmitter, IBase, IPrepareObject, IThreadManager,
-        ISettingsCtrl, ICallerFsmRegister, ICallerFsmListener, ICallerFsm {
+        ISettingsCtrl, ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.AUDIN2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;

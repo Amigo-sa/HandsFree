@@ -26,30 +26,14 @@ public class PreferencesProcessor {
         processOpMode(prefs);
     }
 
-    private static void processAudioCodecType(SharedPreferences prefs) {
-        if (prefs == null) {
-            Log.e(STAG, "processAudioCodecType" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setAudioCodecType(processEnum(prefs, SettingsDefault.AudioCommon.audioCodecType));
-    }
-
-    private static void processOpMode(SharedPreferences prefs) {
-        if (prefs == null) {
-            Log.e(STAG, "processOpMode" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setOpMode(processEnum(prefs, SettingsDefault.Common.opMode));
-    }
-
     private static <T extends ISettingEnum<T>> T processEnum(SharedPreferences prefs, T defaultT) {
         if (prefs == null || defaultT == null) {
-            Log.e(STAG, "processEnum" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Log.e(STAG, "processEnum" + StatusMessages.ERR_PARAMETERS);
             return null;
         }
         String read = prefs.getString(defaultT.getTypeName(), defaultT.getDefaultName());
         if (read == null || read.isEmpty()) {
-            Log.e(STAG, "processEnum read illegal value" + read);
+            if (debug) Log.e(STAG, "processEnum read illegal value" + read);
         } else {
             if (debug) Log.i(STAG, "processEnum read is " + read);
             for (T t : defaultT.getValues()) {
@@ -62,9 +46,25 @@ public class PreferencesProcessor {
         return defaultT;
     }
 
+    private static void processAudioCodecType(SharedPreferences prefs) {
+        if (prefs == null) {
+            if (debug) Log.e(STAG, "processAudioCodecType" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
+        Presetter.setAudioCodecType(processEnum(prefs, SettingsDefault.AudioCommon.audioCodecType));
+    }
+
+    private static void processOpMode(SharedPreferences prefs) {
+        if (prefs == null) {
+            if (debug) Log.e(STAG, "processOpMode" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
+        Presetter.setOpMode(processEnum(prefs, SettingsDefault.Common.opMode));
+    }
+
     private static void processBtLatencyMs(SharedPreferences prefs) {
         if (prefs == null) {
-            Log.e(STAG, "processBtLatencyMs" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Log.e(STAG, "processBtLatencyMs" + StatusMessages.ERR_PARAMETERS);
             return;
         }
         Presetter.setBtLatencyMs(Integer.parseInt(
@@ -74,7 +74,7 @@ public class PreferencesProcessor {
 
     private static void processBt2NetFactor(SharedPreferences prefs) {
         if (prefs == null) {
-            Log.e(STAG, "processBt2NetFactor" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Log.e(STAG, "processBt2NetFactor" + StatusMessages.ERR_PARAMETERS);
             return;
         }
         Presetter.setBt2NetFactor(Integer.parseInt(
@@ -84,7 +84,7 @@ public class PreferencesProcessor {
 
     private static void processBtSinglePacket(SharedPreferences prefs) {
         if (prefs == null) {
-            Log.e(STAG, "processBtSinglePacket" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Log.e(STAG, "processBtSinglePacket" + StatusMessages.ERR_PARAMETERS);
             return;
         }
         Presetter.setBtSinglePacket(

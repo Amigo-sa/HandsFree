@@ -1,6 +1,6 @@
 package by.citech.handsfree.logic;
 
-public interface ICallerFsmRegister {
+public interface ICallerFsmRegisterListener {
 
     default boolean registerCallerFsmListener(ICallerFsmListener listener, String who) {
         return CallerFsm.getInstance().registerListener(listener, who);

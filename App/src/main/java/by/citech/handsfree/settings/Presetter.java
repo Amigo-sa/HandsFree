@@ -10,7 +10,7 @@ public class Presetter {
     private static final String STAG = Tags.PRESETTER + " ST";
     private static final boolean debug = Settings.debug;
 
-    public static void setOpMode(EOpMode opMode) {
+    static void setOpMode(EOpMode opMode) {
         if (opMode != null) {
             switch (opMode) {
                 case Bt2Bt:
@@ -49,19 +49,19 @@ public class Presetter {
                     break;
                 case Net2Net:
                     setToDefault();
-                    Log.e(STAG, "setOpMode opMode is Net2Net (not implemented), set to default");
+                    if (debug) Log.e(STAG, "setOpMode opMode is Net2Net (not implemented), set to default");
                     break;
                 case Normal:
                     setToDefault();
                     break;
                 default:
                     setToDefault();
-                    Log.e(STAG, "setOpMode no matches for opMode, set to default");
+                    if (debug) Log.e(STAG, "setOpMode no matches for opMode, set to default");
                     break;
             }
         } else {
             Settings.opMode = SettingsDefault.Common.opMode;
-            Log.e(STAG, "setOpMode illegal value, set to default");
+            if (debug) Log.e(STAG, "setOpMode illegal value, set to default");
         }
         if (debug) Log.w(STAG, "setOpMode opMode set to " + Settings.opMode.getSettingName());
     }
@@ -72,37 +72,37 @@ public class Presetter {
         Settings.btFactor = SettingsDefault.Bluetooth.btFactor;
     }
 
-    public static void setAudioCodecType(EAudioCodecType audioCodecType) {
+    static void setAudioCodecType(EAudioCodecType audioCodecType) {
         if (audioCodecType == null) {
             Settings.audioCodecType = SettingsDefault.AudioCommon.audioCodecType;
-            Log.e(STAG, "setAudioCodecType illegal value, set to default");
+            if (debug) Log.e(STAG, "setAudioCodecType illegal value, set to default");
         } else {
             Settings.audioCodecType = audioCodecType;
         }
         if (debug) Log.w(STAG, "audioCodecType set to " + Settings.audioCodecType.getSettingName());
     }
 
-    public static void setBt2NetFactor(int bt2NetFactor) {
+    static void setBt2NetFactor(int bt2NetFactor) {
         if (bt2NetFactor < 0) {
             Settings.bt2NetFactor = SettingsDefault.Common.bt2NetFactor;
-            Log.e(STAG, "setBt2NetFactor illegal value, set to default");
+            if (debug) Log.e(STAG, "setBt2NetFactor illegal value, set to default");
         } else {
             Settings.bt2NetFactor = bt2NetFactor;
         }
         if (debug) Log.w(STAG, "setBt2NetFactor set to " + Settings.bt2NetFactor);
     }
 
-    public static void setBtLatencyMs(int btLatencyMs) {
+    static void setBtLatencyMs(int btLatencyMs) {
         if (btLatencyMs < 0) {
             Settings.btLatencyMs = SettingsDefault.Bluetooth.btLatencyMs;
-            Log.e(STAG, "setBtLatencyMs illegal value, set to default");
+            if (debug) Log.e(STAG, "setBtLatencyMs illegal value, set to default");
         } else {
             Settings.btLatencyMs = btLatencyMs;
         }
         if (debug) Log.w(STAG, "setBtLatencyMs set to " + Settings.btLatencyMs);
     }
 
-    public static void setBtSinglePacket(boolean btSinglePacket) {
+    static void setBtSinglePacket(boolean btSinglePacket) {
         Settings.btSinglePacket = btSinglePacket;
         if (debug) Log.w(STAG, "setBtSinglePacket set to " + Settings.btSinglePacket);
     }

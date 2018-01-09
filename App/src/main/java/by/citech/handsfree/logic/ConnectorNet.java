@@ -51,7 +51,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, ITransmitterCtrlReg, IClientCtrlReg, ICallerFsmListener,
-        IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreadManager, ICallerFsmRegister {
+        IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreadManager, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;

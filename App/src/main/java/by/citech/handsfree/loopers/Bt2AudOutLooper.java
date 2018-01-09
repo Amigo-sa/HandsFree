@@ -10,7 +10,7 @@ import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
-import by.citech.handsfree.logic.ICallerFsmRegister;
+import by.citech.handsfree.logic.ICallerFsmRegisterListener;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.ESeverityLevel;
@@ -23,7 +23,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class Bt2AudOutLooper
         implements IBase, ITransmitter, IPrepareObject,
-        ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegister {
+        ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.BT2AUDOUT_LOOPER;
     private static final boolean debug = Settings.debug;

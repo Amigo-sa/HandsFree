@@ -170,21 +170,21 @@ public class DeviceControlActivity
         if (debug) Log.w(TAG, "onStart");
 
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Log.e(TAG,"ble not supported");
+            if (debug) Log.e(TAG,"ble not supported");
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
 
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager == null || bluetoothManager.getAdapter() == null) {
-            Log.e(TAG,"Bluetooth not supported");
+            if (debug) Log.e(TAG,"Bluetooth not supported");
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
         if (!bluetoothManager.getAdapter().isEnabled()) {
-            Log.e(TAG,"Bluetooth is disable");
+            if (debug) Log.e(TAG,"Bluetooth is disable");
             bluetoothManager.getAdapter().enable();
             Toast.makeText(getApplicationContext(), "Bluetooth now enabling", Toast.LENGTH_LONG).show();
         } else {
@@ -585,26 +585,6 @@ public class DeviceControlActivity
         return getResources().getString(R.string.unknown_characteristic);
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        if (debug) Log.i(TAG, "onLocationChanged");
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-        if (debug) Log.i(TAG, "onStatusChanged");
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-        if (debug) Log.i(TAG, "onProviderEnabled");
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-        if (debug) Log.i(TAG, "onProviderDisabled");
-    }
-
     private void swipeScanStart(){
         if (!viewManager.isScanViewHidden()) {
             IUiToBtListener.swipeScanStartListener();
@@ -630,17 +610,17 @@ public class DeviceControlActivity
             static final int MIN_DISTANCE = 100;
             private float downX, downY, upX, upY;
 
-             LinearLayoutTouchListener() {}
-             void onRightToLeftSwipe() {Log.i(logTag, "RightToLeftSwipe!");}
-             void onLeftToRightSwipe() {Log.i(logTag, "LeftToRightSwipe!");}
+            LinearLayoutTouchListener() {}
+            void onRightToLeftSwipe() {if (debug) Log.i(logTag, "RightToLeftSwipe!");}
+            void onLeftToRightSwipe() {if (debug) Log.i(logTag, "LeftToRightSwipe!");}
 
              void onTopToBottomSwipe() {
-                Log.i(logTag, "onTopToBottomSwipe!");
+                if (debug) Log.i(logTag, "onTopToBottomSwipe!");
                 swipeScanStart();
             }
 
              void onBottomToTopSwipe() {
-                Log.i(logTag, "onBottomToTopSwipe!");
+                if (debug) Log.i(logTag, "onBottomToTopSwipe!");
                 swipeScanStop();
             }
 
@@ -657,10 +637,8 @@ public class DeviceControlActivity
                     upY = motionEvent.getY();
                     float deltaX = downX - upX;
                     float deltaY = downY - upY;
-                    // swipe horizontal?
-                    if (Math.abs(deltaX) > MIN_DISTANCE) {
-                        // left or right
-                        if (deltaX < 0) {
+                    if (Math.abs(deltaX) > MIN_DISTANCE) { // swipe horizontal?
+                        if (deltaX < 0) { // left or right
                             this.onLeftToRightSwipe();
                             return true;
                         }
@@ -669,13 +647,11 @@ public class DeviceControlActivity
                             return true;
                         }
                     } else {
-                        Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
+                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
                         // return false; // We don't consume the event
                     }
-                    // swipe vertical?
-                    if (Math.abs(deltaY) > MIN_DISTANCE) {
-                        // top or down
-                        if (deltaY < 0) {
+                    if (Math.abs(deltaY) > MIN_DISTANCE) { // swipe vertical?
+                        if (deltaY < 0) { // top or down
                             this.onTopToBottomSwipe();
                             return true;
                         }
@@ -684,7 +660,7 @@ public class DeviceControlActivity
                             return true;
                         }
                     } else {
-                        Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
+                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
                     }
                     return false; // no swipe horizontally and no swipe vertically
                 } // case MotionEvent.ACTION_UP:
@@ -693,6 +669,13 @@ public class DeviceControlActivity
         }
 
     }
+
+    //--------------------- LocationListener
+
+    @Override public void onLocationChanged(Location location) {}
+    @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
+    @Override public void onProviderEnabled(String provider) {}
+    @Override public void onProviderDisabled(String provider) {}
 
     //--------------------- ViewManager
 
@@ -738,7 +721,7 @@ public class DeviceControlActivity
         if (!isFinishing()) {
             sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(toRun, toDoMap, messages));
         } else {
-            Log.e(TAG, "sendToUiDialog isFinishing, not sending");
+            if (debug) Log.e(TAG, "sendToUiDialog isFinishing, not sending");
         }
     }
 
