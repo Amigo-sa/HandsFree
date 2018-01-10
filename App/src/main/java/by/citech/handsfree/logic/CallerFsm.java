@@ -279,7 +279,7 @@ public class CallerFsm
                 }
             case UnconditionalTransition:
             default:
-                return false;
+                return true;
         }
     }
 

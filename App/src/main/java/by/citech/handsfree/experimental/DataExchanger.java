@@ -23,8 +23,6 @@ public abstract class DataExchanger<F, fromB, toB, T>
 
     //--------------------- constructor
 
-
-
     //--------------------- getters and setters
 
     abstract void setSrcAndDst(ITxCtrl<F> src, ITx<T> dst);
