@@ -11,7 +11,6 @@ import by.citech.handsfree.settings.Settings;
 public class StorageData<T> {
 
     private static final boolean debug = Settings.debug;
-    private boolean debugGetSession, debugPutSession;
     private String TAG;
     private Queue<T> фифошка;
     private boolean isWriteLocked;
@@ -21,54 +20,33 @@ public class StorageData<T> {
         фифошка = new ConcurrentLinkedQueue<>();
     }
 
-    public void setWriteLocked(boolean writeLocked) {
-        isWriteLocked = writeLocked;
+    public void setWriteLocked(boolean isLocked) {
+        isWriteLocked = isLocked;
     }
 
     public boolean isEmpty() {
-        if (!debugGetSession && debug) {
-            boolean isEmpty = фифошка.isEmpty();
-            if (!isEmpty) {
-                Log.w(TAG, "isEmpty not empty first after clear");
-            }
-            return isEmpty;
-        } else {
-            return фифошка.isEmpty();
-        }
+        return фифошка.isEmpty();
+    }
+
+    public void clear() {
+        фифошка.clear();
     }
 
     public T getData() {
-        if (!debugGetSession && debug) {
-            Log.w(TAG, "getData first after clear");
-            debugGetSession = true;
+        T dataOut = фифошка.poll();
+        if (dataOut == null) {
+            if (debug) Log.e(TAG, "getData is null");
         }
-        if (debug) {
-            T dataOut = фифошка.poll();
-            if (dataOut == null) {
-                Log.e(TAG, "getData is null");
-            }
-            return dataOut;
-        } else {
-            return фифошка.poll();
-        }
+        return dataOut;
     }
 
     public void putData(T dataIn) {
         if (isWriteLocked) return;
-        if (!debugPutSession && debug) {
-            Log.w(TAG, "putData first after clear");
-            debugPutSession = true;
+        if (dataIn == null) {
+            if (debug) Log.e(TAG, "putData is null");
+            return;
         }
         фифошка.offer(dataIn);
-    }
-
-    public void clear() {
-        if (debug) {
-            Log.w(TAG, "clear");
-            debugGetSession = false;
-            debugPutSession = false;
-        }
-        фифошка.clear();
     }
 
 }
