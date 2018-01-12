@@ -16,6 +16,7 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -65,6 +66,19 @@ public class SettingsActivity
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(debug) Log.i(TAG,"onOptionsItemSelected");
+        super.onBackPressed();
+        return true;
+    }
+
+
     public static class SettingsFragment
             extends PreferenceFragmentCompatDividers
             implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -94,6 +108,7 @@ public class SettingsActivity
             prepareBtLatencyMsPref();
             prepareBt2NetFactorPref();
         }
+
 
         private void prepareOpModePref() {
             if (debug) Log.i(TAG, "prepareOpModePref");
