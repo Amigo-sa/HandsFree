@@ -165,6 +165,8 @@ public class DeviceControlActivity
         findViewById(R.id.btnRed).setOnClickListener((v) -> onClickBtnRed());
 
         setupActionBar();
+        chosenContactHelper = new ChosenContactHelper(viewManager);
+        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
         setupContactEditor();
         setupContactor();
         Contactor.getInstance().baseCreate();
@@ -198,9 +200,6 @@ public class DeviceControlActivity
         } else {
             Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
         }
-
-        chosenContactHelper = new ChosenContactHelper(viewManager);
-        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
 
         Caller.getInstance()
                 .setiNetInfoGetter(this)
