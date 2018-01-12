@@ -147,6 +147,9 @@ public class DeviceControlActivity
 
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecycler);
+        deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
+        setupViewRecyclerContacts();
+
         editTextSearch = findViewById(R.id.editTextSearch);
         editTextContactName = findViewById(R.id.editTextContactName);
         editTextContactIp = findViewById(R.id.editTextContactIp);
@@ -162,6 +165,10 @@ public class DeviceControlActivity
         findViewById(R.id.btnRed).setOnClickListener((v) -> onClickBtnRed());
 
         setupActionBar();
+        setupContactEditor();
+        setupContactor();
+        Contactor.getInstance().baseCreate();
+        ContactEditorHelper.getInstance().baseCreate();
     }
 
     @Override
@@ -174,6 +181,7 @@ public class DeviceControlActivity
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
+
 
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager == null || bluetoothManager.getAdapter() == null) {
@@ -193,7 +201,6 @@ public class DeviceControlActivity
 
         chosenContactHelper = new ChosenContactHelper(viewManager);
         activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
-        deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
 
         Caller.getInstance()
                 .setiNetInfoGetter(this)
@@ -205,21 +212,15 @@ public class DeviceControlActivity
                 .setiBtList(deviceListAdapter);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
-
         dialogProcessor = new DialogProcessor(this);
-
-        setupViewRecyclerContacts();
-        setupContactEditor();
-        setupContactor();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        Contactor.getInstance().baseStart();
         Caller.getInstance().baseStart();
-        ContactEditorHelper.getInstance().baseStart();
         getAllContacts();
         IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
+
     }
 
     //-------------------------- base
@@ -253,6 +254,7 @@ public class DeviceControlActivity
     protected void onPostResume() {
         super.onPostResume();
         if (debug) Log.w(TAG, "onPostResume");
+
     }
 
     @Override
@@ -266,7 +268,6 @@ public class DeviceControlActivity
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
         addRunnable(() -> ResourceManager.getInstance().stop());
-        deviceListAdapter = null;
     }
 
     @Override
@@ -274,6 +275,7 @@ public class DeviceControlActivity
         super.onDestroy();
         if (debug) Log.w(TAG, "onDestroy");
         addRunnable(() -> ResourceManager.getInstance().destroy());
+        deviceListAdapter = null;
     }
 
     //-------------------------- menu
@@ -433,13 +435,6 @@ public class DeviceControlActivity
         editTextContactName.addTextChangedListener(textWatcher);
     }
 
-    private void setupViewListDevices() {
-        if (debug) Log.i(TAG, "setupViewListDevices");
-        listDevices.setAdapter(deviceListAdapter);
-        listDevices.setOnTouchListener(new LinearLayoutTouchListener());
-        listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));
-    }
-
     private void setupViewRecyclerContacts() {
         if (debug) Log.i(TAG, "setupViewRecyclerContacts");
         contactsAdapter = new ContactsRecyclerAdapter(Contactor.getInstance().getContacts());
@@ -516,8 +511,10 @@ public class DeviceControlActivity
 
     public void clickBtnChangeDevice() {
         setVisibleList();
-        IUiToBtListener.clickBtnChangeDeviceListenerOne();
-        setupViewListDevices();
+        listDevices.setAdapter(deviceListAdapter);
+        listDevices.setOnTouchListener(new LinearLayoutTouchListener());
+        listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));
+        IUiToBtListener.initListDevices();
         if (debug) Log.i(TAG,"before caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
         // останавливаем сканирование и запускаем новое Activity

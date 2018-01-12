@@ -63,11 +63,11 @@ public class LeDeviceListAdapter extends BaseAdapter implements IBtList {
     }
 
     public BluetoothDevice getDevice(int position) {
-        if (mLeDevices != null) {
+        if (mLeDevices != null && !mLeDevices.isEmpty()) {
             if (position >= 0 && position <= mLeDevices.size())
                 return mLeDevices.get(position);
         } else
-            if (Settings.debug) Log.e(TAG, "Index out of bounds list");
+            if (Settings.debug) Log.e(TAG, "Index out of bounds list " + position);
         return null;
     }
 

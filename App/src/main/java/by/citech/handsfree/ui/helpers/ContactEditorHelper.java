@@ -88,16 +88,16 @@ public class ContactEditorHelper
     //--------------------- base
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (debug) Log.i(TAG, "baseCreate");
         prepareObject();
         return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStart");
+    public boolean baseDestroy() {
+        if (debug) Log.i(TAG, "baseDestroy");
         contactToEdit = null;
         contactToAdd = null;
         contactToEditPosition = -1;
@@ -115,7 +115,7 @@ public class ContactEditorHelper
         iContact = null;
         contactsAdapter = null;
         iMsgToUi = null;
-        IBase.super.baseStop();
+        IBase.super.baseDestroy();
         return true;
     }
 

@@ -43,7 +43,7 @@ public class BluetoothUi implements IUiToBtListener {
     }
 
     @Override
-    public void clickBtnChangeDeviceListenerOne() {
+    public void initListDevices() {
         ConnectorBluetooth.getInstance().initListBTDevice();
     }
 

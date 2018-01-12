@@ -8,7 +8,7 @@ public interface IUiToBtListener {
     void scanItemSelectedListener();
     void stopItemSelectedListener();
     void clickItemListListener(int position);
-    void clickBtnChangeDeviceListenerOne();
+    void initListDevices();
     void clickBtnChangeDeviceListenerTwo();
     void swipeScanStartListener();
     void swipeScanStopListener();

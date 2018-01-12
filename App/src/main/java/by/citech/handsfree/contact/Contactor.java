@@ -105,18 +105,18 @@ public class Contactor
         return this;
     }
 
-    //--------------------- main
+    //--------------------- IBase
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (debug) Log.i(TAG, "baseCreate");
         if (!prepareObject()) {
-            Log.e(TAG, "baseStart object not prepared, return");
+            Log.e(TAG, "baseCreate object not prepared, return");
             return false;
         }
         if (dbCtrl == null || listener == null || iMsgToUi == null) {
-            Log.e(TAG, "baseStart illegal parameters");
+            Log.e(TAG, "baseCreate illegal parameters");
             return false;
         }
         isReady = true;
@@ -124,8 +124,8 @@ public class Contactor
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public boolean baseDestroy() {
+        if (debug) Log.i(TAG, "baseDestroy");
         dbCtrl = null;
         if (contacts != null) {
             contacts.clear();
@@ -135,9 +135,11 @@ public class Contactor
         memCtrl = null;
         iMsgToUi = null;
         isReady = false;
-        IBase.super.baseStop();
+        IBase.super.baseDestroy();
         return true;
     }
+
+    //--------------------- contacts
 
     @Override
     public boolean initiateElements() {
