@@ -117,6 +117,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
         if (Settings.debug) Log.i(TAG, "disableTransmitData()");
         writeThreadStop();
         notifyThreadStop();
+        storageFromBt.clear();
         isMtuChanged = false;
     }
 
@@ -265,6 +266,8 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
             int numBtPkt = 0;
             isRunning = true;
             int pktSize = (Settings.btSinglePacket) ? 1 : Settings.btFactor;
+//          int nextZeroByte = 0;
+//          int currZeroByte = 0;
             while (isRunning) {
                 while (storageToBt.isEmpty()) {
                     try {
@@ -279,8 +282,24 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
                     // запись данных производим с учётом Калбэка onWriteCharacteristic
                     if (Callback) {
                         //if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
+
                         writeByteArrayData(arrayData[numBtPkt]);
-                        //if (Settings.debug) Log.w(TAG, numBtPkt + " write: " + Arrays.toString(arrayData[numBtPkt]));
+
+                        //---------------- TEST START ----------------
+
+                        /*
+                        byte[] toWrite = arrayData[numBtPkt];
+                        currZeroByte = toWrite[0];
+                        writeByteArrayData(toWrite);
+                        if (Settings.debug) Log.w(TAG, numBtPkt + " write: " + Arrays.toString(arrayData[numBtPkt]));
+                        if (Settings.debug && ((nextZeroByte != currZeroByte) || (nextZeroByte == 128 && currZeroByte != -128)))
+                            Log.e(TAG, String.format(
+                                    "write: ожидали <%d>, приняли <%d>, потеряно ",
+                                    nextZeroByte, currZeroByte));
+                        nextZeroByte = currZeroByte + 1;*/
+
+                        //---------------- TEST END ----------------
+
                         Callback = false;
                     }
                     // выдерживаем коннект интервал

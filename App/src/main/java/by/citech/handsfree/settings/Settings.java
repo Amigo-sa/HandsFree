@@ -129,7 +129,7 @@ public class Settings {
     public static EOpMode opMode = EOpMode.Normal;
     public static boolean showTraffic = true;
     public static boolean debug = true;
-    public static int bt2NetFactor = 50;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
+    public static int bt2NetFactor = 25;  // кол-во буфферизированных пакетов BT2BT, отправляемое в сеть (BT2NET-пакет)
     public static int audioIn2BtFactor = 1;  // кол-во буфферизированных пакетов BT2BT, принимаемое от аудиовхода
     public static int bt2AudioOutFactor = 1;  // кол-во буфферизированных пакетов BT2BT, отправляемое на аудиовыход
     public static int storageMaxSize = 100;
@@ -146,7 +146,7 @@ public class Settings {
     public static int btSignificantBytes = 20;  // кол-во значащих байтов данных в BT2BT-пакете
     public static int btRsvdBytesOffset = 20;  // позиция начала незначащих байтов данных в BT2BT-пакете
     public static int btFactor = bt2NetFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
-    public static int btLatencyMs = 9;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
+    public static int btLatencyMs = 7;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
     public static int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
     public static int btAudioMsPerNetSendSize = btAudioMsPerPacket * bt2NetFactor;  // миллисекунд звука в одном BT2NET-пакете
     public static int bt2NetSendSizeUncut = bt2btPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть

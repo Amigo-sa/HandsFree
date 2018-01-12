@@ -24,7 +24,7 @@ public class SettingsDefault {
             public static final EOpMode opMode = EOpMode.Normal;
             public static final boolean showTraffic = true;
             public static final boolean debug = true;
-            public static final int bt2NetFactor = 50;
+            public static final int bt2NetFactor = 25;
             public static final int audioIn2BtFactor = 1;
             public static final int bt2AudioOutFactor = 1;
         }
@@ -37,7 +37,7 @@ public class SettingsDefault {
             public static final int btSignificantBytes = 20;  // кол-во значащих байтов данных в BT2BT-пакете
             public static final int btRsvdBytesOffset = 20;  // позиция начала незначащих байтов данных в BT2BT-пакете
             public static final int btFactor = Common.bt2NetFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
-            public static final int btLatencyMs = 9;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
+            public static final int btLatencyMs = 7;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
             public static final int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
             public static final int btAudioMsPerNetSendSize = btAudioMsPerPacket * btFactor;  // миллисекунд звука в одном BT2NET-пакете
             public static final int bt2NetSendSizeUncut = bt2btPacketSize * btFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
