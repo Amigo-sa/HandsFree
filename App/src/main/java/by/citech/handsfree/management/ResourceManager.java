@@ -12,7 +12,7 @@ import by.citech.handsfree.settings.Settings;
 public class ResourceManager
         implements IPrepareObject {
 
-    private static final String STAG = Tags.RESOURCE_MANAGER;
+    private static final String STAG = Tags.ResourceManager;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
@@ -133,48 +133,52 @@ public class ResourceManager
 
     //--------------------- IBaseCtrl start-stop
 
-    synchronized boolean doBaseStart(IBase iBase) {
+    synchronized boolean registerBaseStart(IBase iBase) {
+        boolean isRegistered;
         if (iBase == null) {
-            Log.e(TAG, "doBaseStart iBase is null, return");
-            return false;
-        }
-        if (procOnStop(null)) {
-            if (debug) Log.w(TAG, "doBaseStart register delayed");
-            return iBaseStartsDelayed.add(iBase);
+            isRegistered = false;
+            if (debug) Log.e(TAG, "registerBaseStart iBase is null, return");
+        } else if (procOnStop(null)) {
+            isRegistered = iBaseStartsDelayed.add(iBase);
+            if (debug) Log.w(TAG, "registerBaseStart delayed count: " + iBaseStartsDelayed.size());
         } else {
-            if (debug) Log.i(TAG, "doBaseStart register");
-            return iBaseStarts.add(iBase);
+            isRegistered = iBaseStarts.add(iBase);
+            if (debug) Log.i(TAG, "registerBaseStart count: " + iBaseStarts.size());
         }
+        return isRegistered;
     }
 
-    synchronized boolean doBaseStop(IBase iBase) {
-        if (debug) Log.i(TAG, "doBaseStop unregister");
+    synchronized boolean unregisterBaseStart(IBase iBase) {
         if (!iBaseStarts.remove(iBase)) {
-            Log.w(TAG, "doBaseStop no such element");
+            if (debug) Log.w(TAG, "unregisterBaseStart no such element");
+        } else {
+            if (debug) Log.i(TAG, "unregisterBaseStart remaining: " + iBaseStarts.size());
         }
         return true;
     }
 
     //--------------------- IBaseCtrl create-destroy
 
-    synchronized boolean doBaseCreate(IBase iBase) {
+    synchronized boolean registerBaseCreate(IBase iBase) {
+        boolean isUnRegistered;
         if (iBase == null) {
-            Log.e(TAG, "doBaseCreate iBase is null, return");
-            return false;
-        }
-        if (procOnDestroy(null)) {
-            if (debug) Log.w(TAG, "doBaseCreate register delayed");
-            return iBaseCreatesDelayed.add(iBase);
+            isUnRegistered = false;
+            if (debug) Log.e(TAG, "registerBaseCreate iBase is null, return");
+        } else if (procOnDestroy(null)) {
+            isUnRegistered = iBaseCreatesDelayed.add(iBase);
+            if (debug) Log.w(TAG, "registerBaseCreate delayed count: " + iBaseCreatesDelayed.size());
         } else {
-            if (debug) Log.i(TAG, "doBaseCreate register");
-            return iBaseCreates.add(iBase);
+            isUnRegistered = iBaseCreates.add(iBase);
+            if (debug) Log.i(TAG, "registerBaseCreate count: " + iBaseCreates.size());
         }
+        return isUnRegistered;
     }
 
-    synchronized boolean doBaseDestroy(IBase iBase) {
-        if (debug) Log.i(TAG, "doBaseDestroy unregister");
+    synchronized boolean unregisterBaseCreate(IBase iBase) {
         if (!iBaseCreates.remove(iBase)) {
-            Log.w(TAG, "doBaseDestroy no such element");
+            if (debug) Log.w(TAG, "unregisterBaseCreate no such element");
+        } else {
+            if (debug) Log.i(TAG, "unregisterBaseCreate remaining: " + iBaseCreates.size());
         }
         return true;
     }

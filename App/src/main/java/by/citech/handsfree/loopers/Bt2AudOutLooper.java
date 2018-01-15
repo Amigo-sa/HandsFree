@@ -25,7 +25,7 @@ public class Bt2AudOutLooper
         implements IBase, ITransmitter, IPrepareObject,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
 
-    private static final String STAG = Tags.BT2AUDOUT_LOOPER;
+    private static final String STAG = Tags.Bt2AudOutLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

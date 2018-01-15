@@ -229,6 +229,7 @@ public class ConnectorBluetooth
         leDataTransmitter.addIRxDataListener(iTransmitter);
 
         //-----------------set data for command -------------
+
         closeService.setBluetoothLeService(mBluetoothLeService);
         bindService.setiService(iService);
         bindService.setServiceConnection(mServiceConnection);
@@ -236,6 +237,7 @@ public class ConnectorBluetooth
         unbindService.setServiceConnection(mServiceConnection);
         registerReceiver.setiBroadcastReceiver(iBroadcastReceiver);
         unregisterReceiver.setiBroadcastReceiver(iBroadcastReceiver);
+
         buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
         buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
         connDialogOn.setiMsgToUi(iMsgToUi);
@@ -246,14 +248,19 @@ public class ConnectorBluetooth
         connDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
         connDialogInfoOn.setiMsgToUi(iMsgToUi);
 
-        // привязываем сервис и регистрируем BroadcastReceiver
-        if (Settings.debug) Log.i(TAG, "registerReceiver ...");
         bleController.setCommand(registerReceiver)
                 .setCommand(bindService)
                 .execute();
     }
 
     //--------------------- IBase
+
+    @Override
+    public boolean baseCreate() {
+        IBase.super.baseCreate();
+        if (Settings.debug) Log.i(TAG, "baseCreate");
+        return true;
+    }
 
     @Override
     public boolean baseStart() {
@@ -267,30 +274,21 @@ public class ConnectorBluetooth
     @Override
     public boolean baseStop() {
         if (Settings.debug) Log.i(TAG, "baseStop");
-
         unregisterCallerFsmListener(this, TAG);
 
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff).execute();
-
-        bleController.setCommand(unregisterReceiver)
-                .setCommand(unbindService)
-                .setCommand(closeService)
-                .execute();
 
         iBtList = null;
         mBTDevice = null;
         mBTDeviceConn = null;
         initList.setDevice(null);
         addToList.setDevice(null);
+        bleController.setCommand(unregisterReceiver)
+                .setCommand(unbindService)
+                .setCommand(closeService)
+                .execute();
         IBase.super.baseStop();
-        return true;
-    }
-
-    @Override
-    public boolean baseCreate() {
-        IBase.super.baseCreate();
-        if (Settings.debug) Log.i(TAG, "baseCreate");
         return true;
     }
 

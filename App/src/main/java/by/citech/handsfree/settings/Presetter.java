@@ -7,7 +7,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class Presetter {
 
-    private static final String STAG = Tags.PRESETTER + " ST";
+    private static final String STAG = Tags.Presetter + " ST";
     private static final boolean debug = Settings.debug;
 
     static void setOpMode(EOpMode opMode) {

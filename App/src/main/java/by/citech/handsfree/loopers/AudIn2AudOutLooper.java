@@ -28,7 +28,7 @@ public class AudIn2AudOutLooper
         implements ITransmitter, IBase, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
 
-    private static final String STAG = Tags.AUDIN2AUDOUT_LOOPER;
+    private static final String STAG = Tags.AudIn2AudOutLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

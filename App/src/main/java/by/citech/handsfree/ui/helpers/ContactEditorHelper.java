@@ -9,7 +9,7 @@ import java.util.Map;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.EContactState;
-import by.citech.handsfree.contact.ContactsRecyclerAdapter;
+import by.citech.handsfree.contact.ContactsAdapter;
 import by.citech.handsfree.contact.IContactsListener;
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
@@ -23,7 +23,7 @@ import by.citech.handsfree.threading.IThreadManager;
 public class ContactEditorHelper
         implements IBase, IContactsListener, IPrepareObject, IThreadManager {
 
-    private static final String STAG = Tags.EDITOR_HELPER;
+    private static final String STAG = Tags.ContactEditorHelper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
@@ -39,10 +39,10 @@ public class ContactEditorHelper
     private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
     private EEditorState editorState;
     private ViewManager viewManager;
-    private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
+    private ContactsAdapter.SwipeCrutch swipeCrutch;
     private ActiveContactHelper activeContactHelper;
     private IElement<Contact> iContact;
-    private ContactsRecyclerAdapter contactsAdapter;
+    private ContactsAdapter contactsAdapter;
     private IMsgToUi iMsgToUi;
 
     {
@@ -126,7 +126,7 @@ public class ContactEditorHelper
         return this;
     }
 
-    public ContactEditorHelper setSwipeCrutch(ContactsRecyclerAdapter.SwipeCrutch swipeCrutch) {
+    public ContactEditorHelper setSwipeCrutch(ContactsAdapter.SwipeCrutch swipeCrutch) {
         this.swipeCrutch = swipeCrutch;
         return this;
     }
@@ -146,7 +146,7 @@ public class ContactEditorHelper
         return this;
     }
 
-    public ContactEditorHelper setContactsAdapter(ContactsRecyclerAdapter contactsAdapter) {
+    public ContactEditorHelper setContactsAdapter(ContactsAdapter contactsAdapter) {
         this.contactsAdapter = contactsAdapter;
         return this;
     }

@@ -54,7 +54,7 @@ public class Settings {
     public static class Common
             implements ISettingsReset {
 
-        private static final String STAG = Tags.SETTINGS_COMMON;
+        private static final String STAG = Tags.SettingCommon;
         private static int objCount;
         private final String TAG;
         private final int objNumber;

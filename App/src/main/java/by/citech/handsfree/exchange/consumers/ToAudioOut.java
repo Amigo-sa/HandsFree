@@ -20,7 +20,7 @@ import by.citech.handsfree.settings.ESeverityLevel;
 public class ToAudioOut
         implements ITransmitterCtrl, ITransmitter, ISettingsCtrl, IPrepareObject {
 
-    private static final String TAG = Tags.TO_AUDOUT;
+    private static final String TAG = Tags.ToAudioOut;
     private static final boolean debug = Settings.debug;
 
     //--------------------- preparation

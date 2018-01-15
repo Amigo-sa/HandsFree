@@ -20,7 +20,7 @@ public class Bt2BtRecorder
         implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
         ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
 
-    private static final String STAG = Tags.BT2BT_RECORDER;
+    private static final String STAG = Tags.Bt2BtRecorder;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

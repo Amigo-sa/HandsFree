@@ -32,9 +32,13 @@ public class ConnectCommand implements Command {
         // если сервис привязан производим соединение
         //long start_time = System.currentTimeMillis();
         if (mBluetoothLeService != null) {
+            if (Settings.debug) Log.i("ConnectCommand", "execute mBluetoothLeService connect");
             mBluetoothLeService.connect(mBTDevice.getAddress());
             //long end_time = System.currentTimeMillis();
            // if (Settings.debug) Log.i("ConnectCommand", "Connecting await time = " + (end_time - start_time));
+            if (Settings.debug) Log.i("ConnectCommand", "execute mBluetoothLeService connect done");
+        } else {
+            if (Settings.debug) Log.i("ConnectCommand", "execute mBluetoothLeService is null");
         }
     }
 

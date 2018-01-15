@@ -7,7 +7,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public interface ISettingsCtrl {
 
-    String TAG = Tags.I_SETTINGS;
+    String TAG = Tags.ISettingsCtrl;
     String ERR_OVR = StatusMessages.ERR_NOT_OVERRIDED;
 
     @CallSuper

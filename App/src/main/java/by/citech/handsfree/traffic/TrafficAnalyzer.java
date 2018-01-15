@@ -11,7 +11,7 @@ import by.citech.handsfree.parameters.Tags;
 public class TrafficAnalyzer
         extends Thread {
 
-    private static final String TAG = Tags.TRAFFIC_ANAL;
+    private static final String TAG = Tags.TrafficAnalyzer;
     private static final boolean debug = Settings.debug;
     private static final long SLEEP_INTERVAL = 500;
 

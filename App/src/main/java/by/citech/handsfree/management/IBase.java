@@ -7,27 +7,27 @@ import by.citech.handsfree.parameters.Tags;
 
 public interface IBase {
 
-    String TAG = Tags.I_BASE;
+    String TAG = Tags.IBase;
     String ERR_MSG = StatusMessages.ERR_NOT_OVERRIDED;
 
     @CallSuper
     default boolean baseStart() {
-        return ResourceManager.getInstance().doBaseStart(this);
+        return ResourceManager.getInstance().registerBaseStart(this);
     }
 
     @CallSuper
     default boolean baseStop() {
-        return ResourceManager.getInstance().doBaseStop(this);
+        return ResourceManager.getInstance().unregisterBaseStart(this);
     }
 
     @CallSuper
     default boolean baseCreate() {
-        return ResourceManager.getInstance().doBaseCreate(this);
+        return ResourceManager.getInstance().registerBaseCreate(this);
     }
 
     @CallSuper
     default boolean baseDestroy() {
-        return ResourceManager.getInstance().doBaseDestroy(this);
+        return ResourceManager.getInstance().unregisterBaseCreate(this);
     }
 
     @CallSuper

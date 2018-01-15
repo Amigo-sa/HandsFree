@@ -15,7 +15,7 @@ public class RedirectToNet
         extends AsyncTask<EDataSource, ITransmitterCtrl, Void>
         implements IThreadManager {
 
-    private static final String TAG = Tags.REDIR2NET;
+    private static final String TAG = Tags.RedirectToNet;
     private static final boolean debug = Settings.debug;
 
     private ITransmitterCtrlReg iTransmitterCtrlReg;

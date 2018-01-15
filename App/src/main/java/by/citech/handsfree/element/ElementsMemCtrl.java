@@ -13,7 +13,7 @@ import by.citech.handsfree.parameters.Tags;
 public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> {
 
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.ELEMENTS_MEM_CTRL;
+    private static final String TAG = Tags.ElementsMemCtrl;
 
     private List<T> elements;
 

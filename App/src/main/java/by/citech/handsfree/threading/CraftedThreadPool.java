@@ -14,7 +14,7 @@ public class CraftedThreadPool
         implements IPrepareObject {
 
     private static final boolean debug = Settings.debug;
-    private static final String STAG = Tags.THREADPOOL;
+    private static final String STAG = Tags.CraftedThreadPool;
     private static int objCount;
     private final String TAG;
     private static final int minThreadNumber = 2;

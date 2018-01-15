@@ -554,7 +554,7 @@ public abstract class NanoHTTPD {
      * Starts the server (in setDaemon(true) mode).
      */
     public void start(final int timeout) throws IOException {
-        Log.i(Tags.SRV_NANOHTTPD, "start");
+        Log.i(Tags.NanoHTTPD, "start");
         start(timeout, true);
     }
 
@@ -586,9 +586,9 @@ public abstract class NanoHTTPD {
                 // just waiting for the bind of the socket
             }
         }
-        Log.i(Tags.SRV_NANOHTTPD, "has binded");
+        Log.i(Tags.NanoHTTPD, "has binded");
         if (serverRunnable.getBindException() != null) {
-            Log.i(Tags.SRV_NANOHTTPD, "bind exception");
+            Log.i(Tags.NanoHTTPD, "bind exception");
             throw serverRunnable.getBindException();
         }
     }

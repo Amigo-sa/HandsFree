@@ -20,11 +20,11 @@ import okio.ByteString;
 import by.citech.handsfree.parameters.Messages;
 import by.citech.handsfree.parameters.StatusMessages;
 
-public class ClientCtrlOkWebSocket
+public class Client
         extends WebSocketListener
         implements IClientCtrl, ITransmitter {
 
-    private static final String STAG = Tags.CLT_WSOCKETCTRL;
+    private static final String STAG = Tags.Client;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
@@ -44,7 +44,7 @@ public class ClientCtrlOkWebSocket
         state = EConnectionState.Null;
     }
 
-    ClientCtrlOkWebSocket(String url, Handler handler) {
+    Client(String url, Handler handler) {
         this.url = url;
         this.handler = handler;
     }

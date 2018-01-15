@@ -12,7 +12,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class PreferencesProcessor {
 
-    private static final String STAG = Tags.PREF_PROCESSOR + " ST";
+    private static final String STAG = Tags.PreferencesProcessor + " ST";
     private static final boolean debug = Settings.debug;
 
     public static void process(Context context) {

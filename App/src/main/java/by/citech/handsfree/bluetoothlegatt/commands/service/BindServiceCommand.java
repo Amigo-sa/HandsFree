@@ -35,6 +35,8 @@ public class BindServiceCommand implements Command {
         try {
             if (iService != null) {
                 iService.bindService(iService.getServiceIntent(), serviceConnection,  BIND_AUTO_CREATE);
+            } else {
+                if (Settings.debug) Log.e("BindServiceCommand", "iService is null");
             }
         } catch (IllegalArgumentException e) {
             if (Settings.debug) Log.e("BindServiceCommand", "now Service are binded");

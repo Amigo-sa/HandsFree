@@ -41,7 +41,7 @@ public class ViewManager
         implements IBase, ISettingsCtrl, IPrepareObject,
         IViewKeeper, ICallerFsmListener, ICallerFsmRegisterListener {
 
-    private static final String STAG = Tags.VIEW_MANAGER;
+    private static final String STAG = Tags.ViewManager;
     private static final boolean debug = Settings.debug;
 
     private static int objCount;
@@ -296,11 +296,11 @@ public class ViewManager
     }
 
     public void setEditorButtonsFreeze() {
-        freezeState(Tags.VIEW_MANAGER, getBtnDelContact(), getBtnSaveContact(), getBtnCancelContact());
+        freezeState(TAG, getBtnDelContact(), getBtnSaveContact(), getBtnCancelContact());
     }
 
     public void setEditorButtonsRelease() {
-        releaseState(Tags.VIEW_MANAGER);
+        releaseState(TAG);
     }
 
     public void setEditorFieldChanged() {
@@ -312,16 +312,12 @@ public class ViewManager
     private void processNormal(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "processNormal");
         switch (why) {
-//          case SysIntFail:
-//          case SysIntDisconnected:
             case SysExtError:
             case SysIntError:
             case SysIntConnectedIncompatible:
                 disableGray(getBtnGreen(), "ERROR");
                 disableGray(getBtnRed(), "ERROR");
                 break;
-//          case SysIntConnected:
-//          case SysIntConnectedCompatible:
             case SysExtReady:
             case SysIntReady:
                 if (to == ReadyToWork) {
@@ -431,7 +427,7 @@ public class ViewManager
                                 enableBtnCall(getBtnRed(), "STOP");
                                 break;
                             default:
-                                if (debug) Log.e(TAG, "startDebug " + to.getName());
+                                if (debug) Log.e(TAG, "startDebug " + to);
                                 break;
                         }
                         break;

@@ -60,6 +60,8 @@ public class ConnectorNet
     private static int objCount;
     private final String TAG;
     static {objCount = 0;}
+
+
     {
         objCount++;
         TAG = STAG + " " + objCount;
@@ -76,25 +78,38 @@ public class ConnectorNet
     private INetInfoGetter iNetInfoGetter;
     private StorageData<byte[]> storageToNet;
     private StorageData<byte[][]> storageFromNet;
-    private boolean isBaseStop;
+    private boolean isBaseStopInProcess;
 
     //--------------------- runnables
 
-    private Runnable exchangeStop = new Runnable() {
+    private Runnable startServerDelayed = new Runnable() {
         @Override
         public void run() {
-            if (debug) Log.i(TAG, "exchangeStop run");
-            streamOff();
+            if (debug) Log.i(TAG, "startServerDelayed run");
+            while (isBaseStopInProcess) try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            handler.post(() -> startServer());
         }
     };
 
-    private Runnable netStop = new Runnable() {
+    private Runnable stopStreaming = new Runnable() {
         @Override
         public void run() {
-            if (debug) Log.i(TAG, "netStop run");
-            streamOff();
+            if (debug) Log.i(TAG, "stopStreaming run");
+            stopStream();
+        }
+    };
+
+    private Runnable stopNetworking = new Runnable() {
+        @Override
+        public void run() {
+            if (debug) Log.i(TAG, "stopNetworking run");
+            stopStream();
             disconnect(iConnCtrl);
-            serverOff();
+            stopServer();
         }
     };
 
@@ -149,7 +164,7 @@ public class ConnectorNet
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
         registerCallerFsmListener(this, TAG);
-        new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
+        startServer();
         return true;
     }
 
@@ -157,31 +172,31 @@ public class ConnectorNet
     public boolean baseStop() {
         if (debug) Log.i(TAG, "baseStop");
         unregisterCallerFsmListener(this, TAG);
-        isBaseStop = true;
-        addRunnable(netStop);
+        isBaseStopInProcess = true;
+        iNetInfoGetter = null;
+        handler = null;
+        storageToNet = null;
+        storageFromNet = null;
+        addRunnable(stopNetworking);
         IBase.super.baseStop();
         return true;
     }
 
     private void finishBaseStop() {
         if (debug) Log.i(TAG, "finishBaseStop");
-        iNetInfoGetter = null;
-        handler = null;
-        storageToNet = null;
-        storageFromNet = null;
         iServerCtrl = null;
         iClientCtrl = null;
-        transmitterCtrls.clear();
         iConnCtrl = null;
-        isBaseStop = false;
+        transmitterCtrls.clear();
+        isBaseStopInProcess = false;
     }
 
     private void processReport(Report report) {
-        if (debug) Log.i(TAG, "processReport");
+        if (debug) Log.i(TAG, "processReport: " + report);
         if (report == null) return;
         switch (report) {
             case ServerStopped:
-                if (isBaseStop) finishBaseStop();
+                if (isBaseStopInProcess) finishBaseStop();
                 break;
             default:
                 break;
@@ -198,8 +213,6 @@ public class ConnectorNet
     public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-//          case SysIntFail:
-//          case SysIntDisconnected:
             case SysIntError:
             case CallFailedInt:
             case CallEndedByLocalUser:
@@ -366,32 +379,81 @@ public class ConnectorNet
         cltOnClose();
     }
 
+    //--------------------- IServerCtrlReg
+
     @Override
-    public void serverStarted(IServerCtrl iServerCtrl) {
+    public void registerServerCtrl(IServerCtrl iServerCtrl) {
         ECallerState callerState = getCallerFsmState();
-        if (debug) Log.i(TAG, "serverStarted callerState is " + callerState);
+        if (debug) Log.i(TAG, "registerServerCtrl callerState is " + callerState);
         switch (callerState) {
             case PhaseReadyInt:
             case PhaseZero:
                 if (iServerCtrl == null) {
-                    if (reportToCallerFsm(callerState, SysExtError, TAG)) return;
-                } else if (reportToCallerFsm(callerState, SysExtReady, TAG)) {
+                    reportToCallerFsm(callerState, SysExtError, TAG);
+                    startServer();
+                } else {
+                    reportToCallerFsm(callerState, SysExtReady, TAG);
                     this.iServerCtrl = iServerCtrl;
-                    return;
                 }
-                break;
+                return;
             default:
-                if (debug) Log.w(TAG, "serverStarted " + callerState); return;
+                if (debug) Log.w(TAG, "registerServerCtrl " + callerState); return;
         }
-        if (debug) Log.w(TAG, "serverStarted recursive call");
-        serverStarted(iServerCtrl);
+    }
+
+    //--------------------- IClientCtrlReg
+
+    @Override
+    public void registerClientCtrl(IClientCtrl iClientCtrl) {
+        if (debug) Log.i(TAG, "registerClientCtrl");
+        if (iClientCtrl == null) {
+            if (debug) Log.e(TAG, "registerClientCtrl iClientCtrl is null");
+        } else {
+            this.iClientCtrl = iClientCtrl;
+        }
+    }
+
+    //--------------------- ITransmitterCtrlReg
+
+    @Override
+    public void registerTransmitterCtrl(ITransmitterCtrl iTransmitterCtrl) {
+        if (debug) Log.i(TAG, "registerTransmitterCtrl");
+        if (iTransmitterCtrl == null) {
+            if (debug) Log.e(TAG, "registerTransmitterCtrl fromCtrl is null");
+        } else {
+            transmitterCtrls.add(iTransmitterCtrl);
+        }
+    }
+
+    //--------------------- IServerOff
+
+    @Override
+    public void onServerStop() {
+        if (debug) Log.i(TAG, "onServerStop");
+        processReport(Report.ServerStopped);
     }
 
     //--------------------- network
 
+    private void startServer() {
+        if (debug) Log.i(TAG, "startServer");
+        if (isBaseStopInProcess) {
+            if (debug) Log.w(TAG, "startServer base stop in process, waiting");
+            addRunnable(startServerDelayed);
+        } else {
+            if (debug) Log.w(TAG, "startServer base stop is finisfed, starting server");
+            new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
+        }
+    }
+
     private void responseAccept() {
         if (debug) Log.i(TAG, "responseAccept");
         new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_ACCEPT);
+    }
+
+    private void responseReject() {
+        if (debug) Log.i(TAG, "responseAccept");
+        new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_REJECT);
     }
 
     private void connect() {
@@ -418,8 +480,8 @@ public class ConnectorNet
     }
 
     private void exchangeStop() {
-        if (debug) Log.i(TAG, "exchangeStop");
-        addRunnable(exchangeStop);
+        if (debug) Log.i(TAG, "stopStreaming");
+        addRunnable(stopStreaming);
     }
 
     private boolean isValidCoordinates() {
@@ -434,55 +496,29 @@ public class ConnectorNet
     private void printConnectControl() {
         if (debug) Log.i(TAG, String.format(Locale.US,
                 "printConnectControl iConnCtrl is instance of %s",
+                (iConnCtrl == null)        ? "null"        :
                 (iConnCtrl == iServerCtrl) ? "iServerCtrl" :
                 (iConnCtrl == iClientCtrl) ? "iClientCtrl" : "unknown"));
     }
 
     //--------------------- network low level
 
-    private void serverOff() {
-        if (debug) Log.i(TAG, "serverOff");
+    private void stopServer() {
+        if (debug) Log.i(TAG, "stopServer");
         if (iServerCtrl != null) {
             new ServerOff(this).execute(iServerCtrl);
-            iServerCtrl = null;
         }
     }
 
-    private void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
+    private void stopStream() {
+        if (debug) Log.i(TAG, "stopStream");
         for (ITransmitterCtrl transmitterCtrl : transmitterCtrls) {
             if (transmitterCtrl != null) {
                 transmitterCtrl.finishStream();
             }
             transmitterCtrls.remove(transmitterCtrl);
         }
-        if (debug) Log.i(TAG, "streamOff done");
-    }
-
-    @Override
-    public void serverStopped() {
-        if (debug) Log.i(TAG, "serverStopped");
-        processReport(Report.ServerStopped);
-    }
-
-    @Override
-    public void registerTransmitterCtrl(ITransmitterCtrl iTransmitterCtrl) {
-        if (debug) Log.i(TAG, "registerTransmitterCtrl");
-        if (iTransmitterCtrl == null) {
-            if (debug) Log.e(TAG, "registerTransmitterCtrl fromCtrl is null");
-        } else {
-            transmitterCtrls.add(iTransmitterCtrl);
-        }
-    }
-
-    @Override
-    public void registerClientCtrl(IClientCtrl iClientCtrl) {
-        if (debug) Log.i(TAG, "registerClientCtrl");
-        if (iClientCtrl == null) {
-            if (debug) Log.e(TAG, "registerClientCtrl iClientCtrl is null");
-        } else {
-            this.iClientCtrl = iClientCtrl;
-        }
+        if (debug) Log.i(TAG, "stopStream done");
     }
 
 }

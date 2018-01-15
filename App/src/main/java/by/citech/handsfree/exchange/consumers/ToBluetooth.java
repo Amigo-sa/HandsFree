@@ -20,7 +20,7 @@ public class ToBluetooth
         implements ITransmitterCtrl, ITransmitter,
         ITrafficUpdate, IPrepareObject, ISettingsCtrl {
 
-    private static final String TAG = Tags.TO_BLUETOOTH;
+    private static final String TAG = Tags.ToBluetooth;
     private static final boolean debug = Settings.debug;
 
     //--------------------- preparation

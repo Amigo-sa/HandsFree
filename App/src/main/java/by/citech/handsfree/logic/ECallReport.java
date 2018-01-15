@@ -3,8 +3,10 @@ package by.citech.handsfree.logic;
 public enum ECallReport {
 
     UnconditionalTransition, // безусловный переход
+    TurningOff, // выключение
+    TurningOn, // включение
 
-//  SysIntFail,  // BT failed
+    //  SysIntFail,  // BT failed
 //  SysIntDisconnected,  // BT disconnected
 //  SysIntConnected,  // BT connected
 //  SysIntConnectedCompatible,  // compatible BT device connected

@@ -5,7 +5,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class TrafficInfo {
 
-    private static final String TAG = Tags.TRAFFIC_INFO;
+    private static final String TAG = Tags.TrafficInfo;
     private static final boolean debug = Settings.debug;
     private static final long customPeriod = 2000;
     private static final long msToSFactor = 1000;

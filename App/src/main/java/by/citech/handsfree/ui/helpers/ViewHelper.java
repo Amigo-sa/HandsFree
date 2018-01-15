@@ -15,7 +15,7 @@ import by.citech.handsfree.parameters.Tags;
 public class ViewHelper {
 
     private static final boolean debug = Settings.debug;
-    private static final String STAG = Tags.VIEW_HELPER + " ST";
+    private static final String STAG = Tags.ViewHelper + " ST";
 
     //--------------------- animation
 

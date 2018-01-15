@@ -32,7 +32,7 @@ import by.citech.handsfree.parameters.Tags;
 public class SettingsActivity
         extends AppCompatActivity {
 
-    private static final String TAG = Tags.ACT_SETTINGS;
+    private static final String TAG = Tags.SettingsActivity;
     private static final boolean debug = Settings.debug;
 
     @Override

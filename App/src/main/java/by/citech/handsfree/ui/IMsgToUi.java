@@ -11,7 +11,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public interface IMsgToUi {
 
-    String TAG = Tags.I_MSG2UI;
+    String TAG = Tags.IMsgToUi;
     String MSG = StatusMessages.ERR_NOT_OVERRIDED;
 
     default void sendToUiToast(boolean isFromUiThread, String message) {

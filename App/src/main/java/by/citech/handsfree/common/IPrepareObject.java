@@ -5,7 +5,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public interface IPrepareObject {
 
-    String TAG = Tags.I_CHECK;
+    String TAG = Tags.IPrepareObject;
     String MSG_ERR = StatusMessages.ERR_NOT_OVERRIDED;
 
     default boolean prepareObject() {

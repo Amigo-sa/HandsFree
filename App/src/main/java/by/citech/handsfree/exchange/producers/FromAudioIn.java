@@ -17,7 +17,7 @@ import by.citech.handsfree.settings.ESeverityLevel;
 public class FromAudioIn
         implements ITransmitterCtrl, IPrepareObject, ISettingsCtrl {
 
-    private final String TAG = Tags.FROM_AUDIN;
+    private final String TAG = Tags.Audio;
     private final boolean debug = Settings.debug;
 
     //--------------------- preparation

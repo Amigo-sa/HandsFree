@@ -9,7 +9,7 @@ import by.citech.handsfree.parameters.Tags;
 public class ServerOff
         extends AsyncTask<IServerCtrl, Void, Void> {
 
-    private static final String TAG = Tags.SRV_SRVOFF;
+    private static final String TAG = Tags.ServerOff;
     private static final boolean debug = Settings.debug;
 
     private IServerOff iServerOff;
@@ -41,7 +41,7 @@ public class ServerOff
     @Override
     protected void onPostExecute(Void aVoid) {
         if (debug) Log.i(TAG, "onPostExecute");
-        iServerOff.serverStopped();
+        iServerOff.onServerStop();
     }
 
 }

@@ -11,7 +11,7 @@ public class ActiveContactHelper
         implements IBase {
 
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.ACTIVE_HELPER;
+    private static final String TAG = Tags.ActiveContactHelper;
 
     private EActiveContactState activeContactState;
     private ChosenContactHelper chosenContactHelper;

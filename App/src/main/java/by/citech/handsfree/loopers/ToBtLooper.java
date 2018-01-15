@@ -33,7 +33,7 @@ public class ToBtLooper
         implements IBase, ITransmitter, IPrepareObject, IThreadManager,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
 
-    private static final String STAG = Tags.AUDIN2BT_LOOPER;
+    private static final String STAG = Tags.ToBtLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

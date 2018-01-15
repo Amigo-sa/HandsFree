@@ -11,7 +11,7 @@ import by.citech.handsfree.parameters.Tags;
 public class ServerOn
         extends AsyncTask<String, IServerCtrl, Void> {
 
-    private static final String TAG = Tags.SRV_SRVON;
+    private static final String TAG = Tags.ServerOn;
     private static final boolean debug = Settings.debug;
 
     private IServerCtrlReg iServerCtrlReg;
@@ -25,14 +25,13 @@ public class ServerOn
 
     @Override
     protected Void doInBackground(String... port) {
-        if (debug) Log.i(TAG, "doInBackground");
         int portNum = Integer.parseInt(port[0]);
         if (debug) Log.i(TAG, "doInBackground portnum is " + portNum);
-        ServerCtrlNanoWebSocket serverCtrlNanoWebSocket = new ServerCtrlNanoWebSocket(portNum, handler);
+        Server server = new Server(portNum, handler);
 
-        if (!serverCtrlNanoWebSocket.isAliveServer()) {
+        if (!server.isAliveServer()) {
             try {
-                iServerCtrl = serverCtrlNanoWebSocket.startServer(Settings.serverTimeout);
+                iServerCtrl = server.startServer(Settings.serverTimeout);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -57,7 +56,7 @@ public class ServerOn
     @Override
     protected void onProgressUpdate(IServerCtrl... iServerCtrl) {
         if (debug) Log.i(TAG, "onProgressUpdate");
-        iServerCtrlReg.serverStarted(iServerCtrl[0]);
+        iServerCtrlReg.registerServerCtrl(iServerCtrl[0]);
     }
 
 }

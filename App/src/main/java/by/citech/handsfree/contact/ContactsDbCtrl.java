@@ -16,7 +16,7 @@ import by.citech.handsfree.parameters.Tags;
 public class ContactsDbCtrl
         extends SQLiteOpenHelper {
 
-    private static final String STAG = Tags.CONTACTS_DB_CTRL + " ST";
+    private static final String STAG = Tags.ContactsDbCtrl + " ST";
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

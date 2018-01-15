@@ -16,16 +16,16 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 
 
-public class ContactsRecyclerAdapter
-        extends RecyclerView.Adapter<ContactsRecyclerAdapter.ViewHolder> {
+public class ContactsAdapter
+        extends RecyclerView.Adapter<ContactsAdapter.ViewHolder> {
 
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.CONTACTS_ADAPTER;
+    private static final String TAG = Tags.ContactsAdapter;
 
     private List<Contact> contacts, contactsCleanCopy;
     private OnClickViewListener onClickViewListener;
 
-    public ContactsRecyclerAdapter(List<Contact> contacts) {
+    public ContactsAdapter(List<Contact> contacts) {
         this.contacts = contacts;
         contactsCleanCopy = this.contacts;
 //      setHasStableIds(true); //TODO: check if it has connection with Inconsistency FATAL EXCEPTION
@@ -75,12 +75,12 @@ public class ContactsRecyclerAdapter
             if (isSwiped) {
                 if (debug) Log.i(TAG, "resolveSwipe is swiped");
                 if (swipedPos < 0) {
-                    Log.e(TAG, "resolveSwipe swipedPos < 0");
+                    if (debug) Log.e(TAG, "resolveSwipe swipedPos < 0");
                 } else {
                     notifyItemChanged(swipedPos);
                 }
                 if (swipedView == null) {
-                    Log.e(TAG, "resolveSwipe swipedView == null");
+                    if (debug) Log.e(TAG, "resolveSwipe swipedView == null");
                 } else {
                     swipedView.setVisibility(View.VISIBLE);
                 }
@@ -108,7 +108,7 @@ public class ContactsRecyclerAdapter
         if (position >= 0 && contacts != null && position < contacts.size()) {
             return contacts.get(position);
         } else {
-            Log.e(TAG, "getItem something went wrong");
+            if (debug) Log.e(TAG, "getItem something went wrong");
             return null;
         }
     }
@@ -119,16 +119,11 @@ public class ContactsRecyclerAdapter
         this.onClickViewListener = onClickViewListener;
     }
 
-    public List<Contact> getContacts() {
-        if (debug) Log.i(TAG, "getContacts");
-        return contacts;
-    }
-
     //--------------------- base
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (debug) Log.i(TAG, "onCreateViewHolder");
+//      if (debug) Log.i(TAG, "onCreateViewHolder");
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_element_contact, parent, false);
         return new ViewHolder(v);
     }
@@ -136,7 +131,7 @@ public class ContactsRecyclerAdapter
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Contact contact = contacts.get(position);
-//        if (debug) Log.i(TAG, "onBindViewHolder " + contact.toString());
+//      if (debug) Log.i(TAG, "onBindViewHolder " + contact.toString());
         holder.textViewContactName.setText(contact.getName());
         holder.textViewContactIp.setText(contact.getIp());
         holder.itemView.setOnClickListener((view) -> {
@@ -148,37 +143,37 @@ public class ContactsRecyclerAdapter
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
-//        if (debug) Log.i(TAG, "onViewRecycled: " + getDebugItemInfoFromViewHolder(holder));
+//      if (debug) Log.i(TAG, "onViewRecycled: " + getDebugItemInfoFromViewHolder(holder));
         super.onViewRecycled(holder);
     }
 
     @Override
     public boolean onFailedToRecycleView(ViewHolder holder) {
-//        if (debug) Log.i(TAG, "onFailedToRecycleView: " + getDebugItemInfoFromViewHolder(holder));
+//      if (debug) Log.i(TAG, "onFailedToRecycleView: " + getDebugItemInfoFromViewHolder(holder));
         return super.onFailedToRecycleView(holder);
     }
 
     @Override
     public void onViewAttachedToWindow(ViewHolder holder) {
-//        if (debug) Log.i(TAG, "onViewAttachedToWindow: " + getDebugItemInfoFromViewHolder(holder));
+//      if (debug) Log.i(TAG, "onViewAttachedToWindow: " + getDebugItemInfoFromViewHolder(holder));
         super.onViewAttachedToWindow(holder);
     }
 
     @Override
     public void onViewDetachedFromWindow(ViewHolder holder) {
-//        if (debug) Log.i(TAG, "onViewDetachedFromWindow: " + getDebugItemInfoFromViewHolder(holder));
+//      if (debug) Log.i(TAG, "onViewDetachedFromWindow: " + getDebugItemInfoFromViewHolder(holder));
         super.onViewDetachedFromWindow(holder);
     }
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-//        if (debug) Log.i(TAG, "onAttachedToRecyclerView");
+//      if (debug) Log.i(TAG, "onAttachedToRecyclerView");
         super.onAttachedToRecyclerView(recyclerView);
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-//        if (debug) Log.i(TAG, "onDetachedFromRecyclerView");
+//      if (debug) Log.i(TAG, "onDetachedFromRecyclerView");
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
@@ -202,7 +197,7 @@ public class ContactsRecyclerAdapter
     @Override
     public int getItemCount() {
         if (contacts == null) {
-            Log.e(TAG, "getItemCount contacts are null");
+            if (debug) Log.e(TAG, "getItemCount contacts are null");
             return 0;
         } else {
             return contacts.size();
@@ -212,7 +207,7 @@ public class ContactsRecyclerAdapter
     @Override
     public long getItemId(int position) {
         if (contacts == null) {
-            Log.e(TAG, "getItemCount contacts are null");
+            if (debug) Log.e(TAG, "getItemCount contacts are null");
             return 0;
         } else {
             return contacts.get(position).getId();
@@ -220,7 +215,7 @@ public class ContactsRecyclerAdapter
     }
 
     public void filter(String charText) {
-        if (debug) Log.i(TAG, "filter");
+//      if (debug) Log.i(TAG, "filter");
         charText = charText.toLowerCase(Locale.getDefault());
         contacts = new ArrayList<>();
         if (charText.length() == 0) {

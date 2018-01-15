@@ -20,7 +20,7 @@ public class Bt2BtLooper
         implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
         ICallerFsm, ICallerFsmRegisterListener, ICallerFsmListener {
 
-    private static final String STAG = Tags.BT2BT_LOOPER;
+    private static final String STAG = Tags.Bt2BtLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

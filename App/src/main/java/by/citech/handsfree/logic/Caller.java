@@ -137,6 +137,7 @@ public class Caller
     public boolean baseStart() {
         IBase.super.baseStart();
         if (debug) Log.i(TAG, "baseStart");
+        CallerFsm.getInstance().baseStart();
         CallUi.getInstance().baseStart();
         switch (opMode) {
             case Bt2Bt:
@@ -237,7 +238,7 @@ public class Caller
             return;
         }
 
-        StorageData<byte[][]> toBtStorage = new StorageData<>(Tags.TOBT_STORE);
+        StorageData<byte[][]> toBtStorage = new StorageData<>(Tags.TO_BT_STORE);
 
         ToBtLooper toBtLooper = null;
 

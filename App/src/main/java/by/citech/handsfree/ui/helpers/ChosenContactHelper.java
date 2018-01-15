@@ -7,7 +7,7 @@ import by.citech.handsfree.parameters.Tags;
 public class ChosenContactHelper {
 
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.CHOSEN_HELPER;
+    private static final String TAG = Tags.ChosenContactHelper;
 
     private boolean isChosen;
     private Contact chosenContact;

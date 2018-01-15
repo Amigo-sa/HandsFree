@@ -53,7 +53,7 @@ import by.citech.handsfree.ui.helpers.ViewManager;
 import by.citech.handsfree.ui.helpers.EActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
-import by.citech.handsfree.contact.ContactsRecyclerAdapter;
+import by.citech.handsfree.contact.ContactsAdapter;
 import by.citech.handsfree.ui.helpers.EEditorState;
 import by.citech.handsfree.dialog.DialogProcessor;
 import by.citech.handsfree.dialog.EDialogState;
@@ -115,8 +115,8 @@ public class DeviceControlActivity
     private DialogProcessor dialogProcessor;
     private RecyclerView viewRecyclerContacts;
     private EditText editTextSearch, editTextContactName, editTextContactIp;
-    private ContactsRecyclerAdapter contactsAdapter;
-    private ContactsRecyclerAdapter.SwipeCrutch swipeCrutch;
+    private ContactsAdapter contactsAdapter;
+    private ContactsAdapter.SwipeCrutch swipeCrutch;
     private ActiveContactHelper activeContactHelper;
     private ChosenContactHelper chosenContactHelper;
 
@@ -138,17 +138,15 @@ public class DeviceControlActivity
         opMode = Settings.opMode;
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
-        CallerFsm.getInstance().baseCreate();
+        ThreadManager.getInstance().baseCreate();
         viewManager = new ViewManager();
         viewManager.setiGetter(this);
         viewManager.setDefaultView();
         viewManager.baseCreate();
-        ThreadManager.getInstance().baseCreate();
 
         listDevices = findViewById(R.id.listDevices);
-        viewRecyclerContacts = findViewById(R.id.viewRecycler);
+        viewRecyclerContacts = findViewById(R.id.viewRecyclerContacts);
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
-        setupViewRecyclerContacts();
 
         editTextSearch = findViewById(R.id.editTextSearch);
         editTextContactName = findViewById(R.id.editTextContactName);
@@ -164,13 +162,15 @@ public class DeviceControlActivity
         findViewById(R.id.btnGreen).setOnClickListener((v) -> onClickBtnGreen());
         findViewById(R.id.btnRed).setOnClickListener((v) -> onClickBtnRed());
 
-        setupActionBar();
-        chosenContactHelper = new ChosenContactHelper(viewManager);
-        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
+        setupToolbar();
+        setupContactsAdapter();
         setupContactEditor();
         setupContactor();
+        dialogProcessor = new DialogProcessor(this);
         Contactor.getInstance().baseCreate();
         ContactEditorHelper.getInstance().baseCreate();
+        getAllContacts();
+        gattServiceIntent = new Intent(this, BluetoothLeService.class);
     }
 
     @Override
@@ -181,15 +181,13 @@ public class DeviceControlActivity
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             if (debug) Log.e(TAG,"ble not supported");
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            finish();
+            return;
         }
-
 
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager == null || bluetoothManager.getAdapter() == null) {
             if (debug) Log.e(TAG,"Bluetooth not supported");
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
-            finish();
             return;
         }
 
@@ -210,16 +208,11 @@ public class DeviceControlActivity
                 .setiMsgToUi(this)
                 .setiBtList(deviceListAdapter);
 
-        IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
-        dialogProcessor = new DialogProcessor(this);
-
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
-        gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        Caller.getInstance().baseStart();
-        getAllContacts();
+        IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
         IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
-
+        Caller.getInstance().baseStart();
     }
 
     //-------------------------- base
@@ -288,13 +281,13 @@ public class DeviceControlActivity
         return true;
     }
 
-    private void onCreateConnectMenu(Menu menu){
+    private void onCreateConnectMenu(Menu menu) {
         if (debug) Log.i(TAG, "onCreateConnectMenu");
         getMenuInflater().inflate(R.menu.scan_menu, menu);
         actionBar.setCustomView(null);
     }
 
-    private void onCreateScanMenu(Menu menu){
+    private void onCreateScanMenu(Menu menu) {
         if (debug) Log.i(TAG, "onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
         if (!IBtToUiListener.menuChangeCondition()) {
@@ -344,7 +337,7 @@ public class DeviceControlActivity
 
     //-------------------------- permissons
 
-    private void enPermissions(){
+    private void enPermissions() {
         if (debug) Log.i(TAG, "enPermissions");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
@@ -354,7 +347,7 @@ public class DeviceControlActivity
             enPermission(Manifest.permission.RECORD_AUDIO);
     }
 
-    private boolean checkPermission(String permission, int requestPermission){
+    private boolean checkPermission(String permission, int requestPermission) {
         if (debug) Log.i(TAG, "checkPermission()");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
@@ -370,7 +363,7 @@ public class DeviceControlActivity
         return true;
     }
 
-    private void enPermission(String permission){
+    private void enPermission(String permission) {
         if (debug) Log.i(TAG, "enPermission");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
@@ -402,22 +395,44 @@ public class DeviceControlActivity
 
     //--------------------- setup
 
-    private void setupContactor() {
-        if (debug) Log.i(TAG, "setupContactor");
-        editTextSearch.setHintTextColor(Colors.GRAY);
-        editTextSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void afterTextChanged(Editable arg0) {contactsAdapter.filter(editTextSearch.getText().toString());}
-            @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
-            @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
-        });
-        Contactor.getInstance()
-                .setContext(this)
-                .setiMsgToUi(this)
-                .setListener(ContactEditorHelper.getInstance());
+    private void setupToolbar() {
+        actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayShowCustomEnabled(true);
+            String title = String.format(Locale.US, "%s %s:%d %s",
+                    getTitle().toString(),
+                    getIpAddr(Settings.isIpv4Used),
+                    Settings.serverLocalPortNumber,
+                    opMode.getSettingName()
+            );
+            SpannableString s = new SpannableString(title);
+            if (title != null) {
+                s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//              s.setSpan(new AbsoluteSizeSpan(56), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
+                s.setSpan(new RelativeSizeSpan(0.5f), 7, title.length(), 0);
+            }
+            actionBar.setTitle(s);
+        }
+    }
+
+    private void setupContactsAdapter() {
+        if (debug) Log.i(TAG, "setupContactsAdapter");
+        contactsAdapter = new ContactsAdapter(Contactor.getInstance().getContacts());
+        contactsAdapter.setOnClickViewListener(this::clickContactItem);
+        swipeCrutch = contactsAdapter.new SwipeCrutch();
+        viewRecyclerContacts.setHasFixedSize(false);
+        viewRecyclerContacts.setLayoutManager(new LinearLayoutManager(this));
+        viewRecyclerContacts.setAdapter(contactsAdapter);
+        viewRecyclerContacts.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(createHelperCallback());
+        itemTouchHelper.attachToRecyclerView(viewRecyclerContacts);
     }
 
     private void setupContactEditor() {
         if (debug) Log.i(TAG, "setupContactEditor");
+        chosenContactHelper = new ChosenContactHelper(viewManager);
+        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
         ContactEditorHelper.getInstance()
                 .setViewManager(viewManager)
                 .setSwipeCrutch(swipeCrutch)
@@ -434,17 +449,18 @@ public class DeviceControlActivity
         editTextContactName.addTextChangedListener(textWatcher);
     }
 
-    private void setupViewRecyclerContacts() {
-        if (debug) Log.i(TAG, "setupViewRecyclerContacts");
-        contactsAdapter = new ContactsRecyclerAdapter(Contactor.getInstance().getContacts());
-        contactsAdapter.setOnClickViewListener(this::clickContactItem);
-        swipeCrutch = contactsAdapter.new SwipeCrutch();
-        viewRecyclerContacts.setHasFixedSize(false);
-        viewRecyclerContacts.setLayoutManager(new LinearLayoutManager(this));
-        viewRecyclerContacts.setAdapter(contactsAdapter);
-        viewRecyclerContacts.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(createHelperCallback());
-        itemTouchHelper.attachToRecyclerView(viewRecyclerContacts);
+    private void setupContactor() {
+        if (debug) Log.i(TAG, "setupContactor");
+        editTextSearch.setHintTextColor(Colors.GRAY);
+        editTextSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable arg0) {contactsAdapter.filter(editTextSearch.getText().toString());}
+            @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
+            @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
+        });
+        Contactor.getInstance()
+                .setContext(this)
+                .setiMsgToUi(this)
+                .setListener(ContactEditorHelper.getInstance());
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
@@ -467,27 +483,6 @@ public class DeviceControlActivity
                 }
             }
         };
-    }
-
-    private void setupActionBar() {
-        actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowHomeEnabled(true);
-            actionBar.setDisplayShowCustomEnabled(true);
-            String title = String.format(Locale.US, "%s %s:%d %s",
-                    getTitle().toString(),
-                    getIpAddr(Settings.isIpv4Used),
-                    Settings.serverLocalPortNumber,
-                    opMode.getSettingName()
-            );
-            SpannableString s = new SpannableString(title);
-            if (title != null) {
-                s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//              s.setSpan(new AbsoluteSizeSpan(56), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
-                s.setSpan(new RelativeSizeSpan(0.5f), 7, title.length(), 0);
-            }
-            actionBar.setTitle(s);
-        }
     }
 
     //--------------------- actions

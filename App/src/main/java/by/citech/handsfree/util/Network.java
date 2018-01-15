@@ -10,7 +10,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class Network {
 
-    private static final String TAG = Tags.NET_INFO;
+    private static final String TAG = Tags.Network;
     private static final boolean debug = Settings.debug;
     /**
      * Returns MAC address of the given interface name.

@@ -7,7 +7,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public interface ITransmitter {
 
-    String TAG = Tags.I_TRANSMITTER;
+    String TAG = Tags.ITransmitter;
     String MSG = StatusMessages.ERR_NOT_OVERRIDED;
 
     default void sendMessage(String message) {

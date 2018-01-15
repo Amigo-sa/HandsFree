@@ -16,7 +16,7 @@ import by.citech.handsfree.util.Pair;
 public class ViewKeeper
         implements IBase, IPrepareObject {
 
-    private static final String STAG = Tags.VIEW_KEEPER;
+    private static final String STAG = Tags.ViewKeeper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

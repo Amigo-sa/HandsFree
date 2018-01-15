@@ -15,7 +15,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class DialogProcessor {
 
-    private static final String STAG = Tags.DIALOG_PROC;
+    private static final String STAG = Tags.DialogProcessor;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

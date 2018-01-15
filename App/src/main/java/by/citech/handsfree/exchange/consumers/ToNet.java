@@ -18,7 +18,7 @@ import by.citech.handsfree.settings.ESeverityLevel;
 public class ToNet
         implements ITransmitterCtrl, ISettingsCtrl, IPrepareObject {
 
-    private static final String STAG = Tags.TO_NET;
+    private static final String STAG = Tags.ToNet;
     private final String TAG;
     private static final boolean debug = Settings.debug;
     private static int objCount;

@@ -19,7 +19,7 @@ import by.citech.handsfree.parameters.Tags;
 public class Contactor
         implements IElement<Contact>, IBase, IPrepareObject {
 
-    private static final String STAG = Tags.CONTACTOR;
+    private static final String STAG = Tags.Contactor;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;

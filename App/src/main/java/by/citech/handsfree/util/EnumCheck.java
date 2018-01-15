@@ -10,7 +10,7 @@ import by.citech.handsfree.settings.Settings;
 
 public class EnumCheck {
 
-    private static final String TAG = Tags.ENUM_CHECK;
+    private static final String TAG = Tags.EnumCheck;
     private static final boolean debug = Settings.debug;
 
     public static <T extends Enum<T> & ISettingEnum<T>> boolean isEnumOk(T t) {

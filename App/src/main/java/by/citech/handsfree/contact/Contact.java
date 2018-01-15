@@ -15,7 +15,7 @@ import by.citech.handsfree.util.Name;
 public class Contact
         implements Comparable<Contact>, IIdentifier, ICopy<Contact>, IContactState, Cloneable {
 
-    private static final String TAG = Tags.CONTACT;
+    private static final String TAG = Tags.Contact;
     private static final boolean debug = Settings.debug;
 
     private static final String VALID = "valid";

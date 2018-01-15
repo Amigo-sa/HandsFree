@@ -20,13 +20,13 @@ import by.citech.handsfree.parameters.Messages;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 
-public class ServerCtrlNanoWebSocket
+public class Server
         extends NanoWSD
         implements IServerCtrl, ITransmitter {
 
-    private static final Logger LOG = Logger.getLogger(ServerCtrlNanoWebSocket.class.getName());
+    private static final Logger LOG = Logger.getLogger(Server.class.getName());
 
-    private static final String STAG = Tags.ServerCtrlNanoWebSocket;
+    private static final String STAG = Tags.Server;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
@@ -43,7 +43,7 @@ public class ServerCtrlNanoWebSocket
         state = EConnectionState.Null;
     }
 
-    ServerCtrlNanoWebSocket(int port, Handler handler) {
+    Server(int port, Handler handler) {
         super(port);
         this.handler = handler;
     }
@@ -217,7 +217,7 @@ public class ServerCtrlNanoWebSocket
         @Override
         protected void onException(IOException exception) {
             if (debug) Log.i(TAG, "onException " + exception.getMessage());
-            if (debug) ServerCtrlNanoWebSocket.LOG.log(Level.SEVERE, "exception occured", exception);
+            if (debug) Server.LOG.log(Level.SEVERE, "exception occured", exception);
             procState(EConnectionState.Failure);
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
         }

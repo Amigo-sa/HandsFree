@@ -44,16 +44,10 @@ public class CallerFsm
 
     @Override
     public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
         takeSettings();
-        listeners = new ConcurrentLinkedQueue<>();
         state = PhaseZero;
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return state != null && listeners != null;
+        listeners = new ConcurrentLinkedQueue<>();
+        return true;
     }
 
     @Override
@@ -84,86 +78,77 @@ public class CallerFsm
     //--------------------- IBase
 
     @Override
-    public boolean baseCreate() {
-        if (debug) Log.w(TAG, "baseCreate");
-        IBase.super.baseCreate();
-        prepareObject();
-        return true;
+    public boolean baseStart() {
+        if (debug) Log.i(TAG, "baseStart");
+        IBase.super.baseStart();
+        processStateChange(getState(), PhaseZero, TurningOn, true);
+        return false;
     }
 
     @Override
-    public boolean baseDestroy() {
-        if (debug) Log.w(TAG, "baseDestroy");
-        state = null;
-        opMode = null;
-        listeners.clear();
-        IBase.super.baseDestroy();
-        return true;
+    public boolean baseStop() {
+        if (debug) Log.i(TAG, "baseStop");
+        processStateChange(getState(), PhaseZero, TurningOff, true);
+        IBase.super.baseStop();
+        return false;
     }
 
-    //--------------------- base
+    //--------------------- ICallerFsmRegisterListener
 
-    synchronized boolean registerListener(ICallerFsmListener listener, String who) {
+    boolean registerListener(ICallerFsmListener listener, String who) {
         boolean isAdded;
         if (listeners.contains(listener)) {
-            if (debug) Log.w(TAG, "registerListener already contains listener " + who);
+            if (debug) Log.w(TAG, "registerListener already contains " + who);
             isAdded = true;
         } else {
             isAdded = listeners.add(listener);
             if (isAdded) {
                 if (debug) Log.w(TAG, String.format(Locale.US,
-                        "registerListener added listener %s, listeners count is %d",
+                        "registerListener added %s, count: %d",
                         who, listeners.size()));
             } else {
                 if (debug) Log.e(TAG, String.format(Locale.US,
-                        "registerListener failed to add listener %s, listeners count still %d",
+                        "registerListener failed to add %s, count: still %d",
                         who, listeners.size()));
             }
         }
         return isAdded;
     }
 
-    synchronized boolean unregisterListener(ICallerFsmListener listener, String who) {
+    boolean unregisterListener(ICallerFsmListener listener, String who) {
         boolean isRemoved;
         if (!listeners.contains(listener)) {
-            if (debug) Log.w(TAG, "unregisterListener not contains listener " + who);
+            if (debug) Log.w(TAG, "unregisterListener no such listener: " + who);
             isRemoved = true;
         } else {
             isRemoved = listeners.remove(listener);
             if (isRemoved) {
                 if (debug) Log.w(TAG, String.format(Locale.US,
-                        "unregisterListener removed listener %s, listeners count is %d",
+                        "unregisterListener removed %s, count: %d",
                         who, listeners.size()));
             } else {
                 if (debug) Log.e(TAG, String.format(Locale.US,
-                        "unregisterListener failed to remove listener %s, listeners count still %d",
+                        "unregisterListener failed to remove %s, count: still %d",
                         who, listeners.size()));
             }
         }
         return isRemoved;
     }
 
+    //--------------------- ICallerFsm
+
     synchronized ECallerState getState() {
-        if (!isObjectPrepared()) {
-            if (debug) Log.w(TAG, "getState object not prepared");
-            return null;
-        }
         return state;
     }
 
     synchronized boolean processReport(ECallReport report, ECallerState from, String msg) {
-        if (!isObjectPrepared()) {
-            if (debug) Log.w(TAG, "processReport object not prepared");
-            return false;
-        }
         if (debug) Log.w(TAG, String.format(Locale.US,
                 "processReport: report <%s>, from state <%s>, message is <%s>",
                 report, from, msg));
         if (report == null || from == null || msg == null) {
             if (debug) Log.e(TAG, "processReport" + StatusMessages.ERR_PARAMETERS);
             return false;
-        }
-        if (opMode == Normal) {
+        } else if (opMode == Normal) {
             return processReportNormal(report, from);
         } else {
             return processReportAbnormal(report, from);
@@ -172,13 +157,9 @@ public class CallerFsm
 
     //--------------------- main
 
-    private boolean processReportNormal(ECallReport report, ECallerState from) {
+    synchronized private boolean processReportNormal(ECallReport report, ECallerState from) {
         if (debug) Log.i(TAG, "processReportNormal");
         switch (report) {
-//          case SysIntConnectedCompatible:
-//          case SysIntDisconnected:
-//          case SysIntConnected:
-//          case SysIntFail:
             case SysIntError:
                 switch (from) {
                     case PhaseReadyInt:
@@ -208,6 +189,8 @@ public class CallerFsm
                         return (processStateChange(from, PhaseReadyExt, report));
                     case PhaseReadyInt:
                         return (processStateChange(from, ReadyToWork, report));
+                    default:
+                        return true;
                 }
             case OutConnectionFailed:
             case InCallFailed:
@@ -239,7 +222,7 @@ public class CallerFsm
         }
     }
 
-    private boolean processReportAbnormal(ECallReport report, ECallerState from) {
+    synchronized private boolean processReportAbnormal(ECallReport report, ECallerState from) {
         if (debug) Log.i(TAG, "processReportAbnormal");
         switch (report) {
             case StopDebug:
@@ -283,8 +266,16 @@ public class CallerFsm
         }
     }
 
-    private boolean processStateChange(ECallerState from, ECallerState to, ECallReport why) {
-        if (state == from) {
+    synchronized private boolean processStateChange(ECallerState from, ECallerState to, ECallReport why) {
+        return processStateChange(from, to, why, false);
+    }
+
+    synchronized private boolean processStateChange(ECallerState from, ECallerState to, ECallReport why, boolean isForce) {
+        if (isForce) {
+            state = to;
+            onStateChange(from, to, why);
+            return true;
+        } else if (state == from) {
             if (from.availableStates().contains(to)) {
                 state = to;
                 onStateChange(from, to, why);
@@ -314,10 +305,10 @@ public class CallerFsm
         return false;
     }
 
-    private void onStateChange(ECallerState from, ECallerState to, ECallReport why) {
+    synchronized private void onStateChange(ECallerState from, ECallerState to, ECallReport why) {
         if (debug) Log.w(TAG, String.format(Locale.US,
                 "onStateChange from state <%s> to state <%s>, reason is <%s>",
-                from.getName(), to.getName(), why.name()));
+                from, to, why));
         for (ICallerFsmListener listener : listeners) {
             if (listener != null) {
                 listener.onCallerStateChange(from, to, why);
