@@ -118,6 +118,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
         writeThreadStop();
         notifyThreadStop();
         storageFromBt.clear();
+        storageToBt.clear();
         isMtuChanged = false;
     }
 
