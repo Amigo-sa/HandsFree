@@ -82,7 +82,7 @@ public class CallerFsm
         if (debug) Log.i(TAG, "baseStart");
         IBase.super.baseStart();
         processStateChange(getState(), PhaseZero, TurningOn, true);
-        return false;
+        return true;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class CallerFsm
         if (debug) Log.i(TAG, "baseStop");
         processStateChange(getState(), PhaseZero, TurningOff, true);
         IBase.super.baseStop();
-        return false;
+        return true;
     }
 
     //--------------------- ICallerFsmRegisterListener
