@@ -7,9 +7,9 @@ import java.util.Arrays;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
-import static by.citech.handsfree.util.MathHelper.arrayDoubleToShort;
-import static by.citech.handsfree.util.MathHelper.invertDoubleArr;
-import static by.citech.handsfree.util.MathHelper.revertDoubleArr;
+import static by.citech.handsfree.util.ArrayHelper.arrayDoubleToShort;
+import static by.citech.handsfree.util.ArrayHelper.invertDoubleArr;
+import static by.citech.handsfree.util.ArrayHelper.getRevertedDoubleArr;
 
 class CircleGenerator
         extends DataGeneratorFactory {
@@ -91,7 +91,7 @@ class CircleGenerator
                 break;
             case QUARTER_2:
                 quarterD = getCircleQuarter(mult, div);
-                quarterD = revertDoubleArr(quarterD);
+                quarterD = getRevertedDoubleArr(quarterD);
                 break;
             case QUARTER_3:
                 quarterD = getCircleQuarter(mult, div);
@@ -99,7 +99,7 @@ class CircleGenerator
                 break;
             case QUARTER_4:
                 quarterD = getCircleQuarter(mult, div);
-                quarterD = revertDoubleArr(quarterD);
+                quarterD = getRevertedDoubleArr(quarterD);
                 invertDoubleArr(quarterD);
                 break;
             default:

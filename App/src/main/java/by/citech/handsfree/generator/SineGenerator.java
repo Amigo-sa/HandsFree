@@ -9,7 +9,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.util.ListHelper.getListInitiatedWithNulls;
-import static by.citech.handsfree.util.MathHelper.arrayDoubleToShort;
+import static by.citech.handsfree.util.ArrayHelper.arrayDoubleToShort;
 import static java.lang.Math.PI;
 
 class SineGenerator
