@@ -68,9 +68,14 @@ public class Presetter {
 
     private static void setToDefault() {
         Settings.opMode = SettingsDefault.Common.opMode;
-        Settings.btSinglePacket = SettingsDefault.Bluetooth.btSinglePacket;
-        Settings.btFactor = SettingsDefault.Bluetooth.btFactor;
-        Settings.bt2BtPacketSize = SettingsDefault.Bluetooth.bt2BtPacketSize;
+        Settings.btSinglePacket = false;
+        Settings.btSignificantAll = true;
+        Settings.btSignificantBytes = Settings.bt2BtPacketSize;
+        Settings.netChunkSignificantBytes = Settings.btSignificantBytes;
+        Settings.netChunkSize = Settings.bt2BtPacketSize;
+        Settings.netSignificantAll = Settings.btSignificantAll;
+        Settings.netFactor = Settings.btFactor;
+        Settings.btSendSize =  Settings.btSignificantBytes * Settings.btFactor;
     }
 
     static void setAudioCodecType(EAudioCodecType audioCodecType) {
