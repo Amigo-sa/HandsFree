@@ -4,7 +4,7 @@ public enum ECategoryBluetooth {
     btSignificantAll,
     btSinglePacket,
     btAudioMsPerPacket,
-    bt2btPacketSize,
+    bt2BtPacketSize,
     btSignificantBytes,
     btRsvdBytesOffset,
     btFactor,

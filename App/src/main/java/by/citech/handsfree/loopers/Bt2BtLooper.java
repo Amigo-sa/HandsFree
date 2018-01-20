@@ -32,7 +32,7 @@ public class Bt2BtLooper
     //--------------------- preparation
 
     private int btFactor;
-    private int bt2btPacketSize;
+    private int bt2BtPacketSize;
     private byte[][] dataBuff;
     private StorageData<byte[]> storageBtToNet;
     private StorageData<byte[][]> storageNetToBt;
@@ -87,7 +87,7 @@ public class Bt2BtLooper
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
         btFactor = Settings.btFactor;
-        bt2btPacketSize = Settings.bt2btPacketSize;
+        bt2BtPacketSize = Settings.bt2BtPacketSize;
         return true;
     }
 
@@ -164,7 +164,7 @@ public class Bt2BtLooper
         int btCount = 0;
         while (isRunning) {
             if (dataBuff == null) {
-                dataBuff = new byte[btFactor][bt2btPacketSize];
+                dataBuff = new byte[btFactor][bt2BtPacketSize];
             }
             while (storageBtToNet.isEmpty()) {
                 try {

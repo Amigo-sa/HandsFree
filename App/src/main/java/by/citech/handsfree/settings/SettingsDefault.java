@@ -14,6 +14,7 @@ public class SettingsDefault {
             public static final String opMode = "opMode";
             public static final String btLatencyMs = "btLatencyMs";
             public static final String btSinglePacket = "btSinglePacket";
+            public static final String bt2BtPacketSize = "bt2BtPacketSize";
             public static final String bt2NetFactor = "bt2NetFactor";
             public static final String audioCodecType = "audioCodecType";
         }
@@ -33,14 +34,14 @@ public class SettingsDefault {
             public static final boolean btSignificantAll = true;  // все байты значащие
             public static final boolean btSinglePacket = false;  // если возможно, не используем буфферизацию
             public static final int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете
-            public static final int bt2btPacketSize = 20;  // bytes in one BT message
+            public static final int bt2BtPacketSize = 20;  // bytes in one BT message
             public static final int btSignificantBytes = 20;  // кол-во значащих байтов данных в BT2BT-пакете
             public static final int btRsvdBytesOffset = 20;  // позиция начала незначащих байтов данных в BT2BT-пакете
             public static final int btFactor = Common.bt2NetFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
             public static final int btLatencyMs = 7;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
             public static final int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
             public static final int btAudioMsPerNetSendSize = btAudioMsPerPacket * btFactor;  // миллисекунд звука в одном BT2NET-пакете
-            public static final int bt2NetSendSizeUncut = bt2btPacketSize * btFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
+            public static final int bt2NetSendSizeUncut = bt2BtPacketSize * btFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
             public static final int btMtuSize = 20;  // запрашиваемый размер BT2BT-пакета
         }
 
@@ -70,7 +71,7 @@ public class SettingsDefault {
 
         public static class Network {
             public static final boolean netSignificantAll = Bluetooth.btSignificantAll;
-            public static final int netChunkSize = Bluetooth.bt2btPacketSize;
+            public static final int netChunkSize = Bluetooth.bt2BtPacketSize;
             public static final int netChunkSignificantBytes = Bluetooth.btSignificantBytes;
             public static final int netChunkRsvdBytesOffset = Bluetooth.btRsvdBytesOffset;
             public static final int netFactor = Bluetooth.btFactor;

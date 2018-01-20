@@ -55,7 +55,7 @@ public class ToBluetooth
         btSignificantAll = Settings.btSignificantAll;
         btSinglePacket = Settings.btSinglePacket;
         btFactor = Settings.btFactor;
-        btToBtSendSize = Settings.bt2btPacketSize;
+        btToBtSendSize = Settings.bt2BtPacketSize;
         btSignificantBytes = btSignificantAll ? btToBtSendSize : Settings.btSignificantBytes;
         btSendSize = Settings.btSendSize;
         return true;

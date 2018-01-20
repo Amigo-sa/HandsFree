@@ -104,11 +104,11 @@ public class SettingsActivity
             if (debug) Log.i(TAG, "onCreatePreferencesFix");
             setPreferencesFromResource(R.xml.settings, rootKey);
             prepareOpModePref();
-            prepareAudioCodecType();
+            prepareAudioCodecTypePref();
             prepareBtLatencyMsPref();
             prepareBt2NetFactorPref();
+            prepareBt2btPacketSizePref();
         }
-
 
         private void prepareOpModePref() {
             if (debug) Log.i(TAG, "prepareOpModePref");
@@ -143,8 +143,8 @@ public class SettingsActivity
             pref.setSummary(pref.getEntry());
         }
 
-        private void prepareAudioCodecType() {
-            if (debug) Log.i(TAG, "prepareAudioCodecType");
+        private void prepareAudioCodecTypePref() {
+            if (debug) Log.i(TAG, "prepareAudioCodecTypePref");
             ListPreference pref = (ListPreference) findPreference(getString(R.string.audioCodecType));
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
@@ -165,7 +165,7 @@ public class SettingsActivity
             pref.setSummary(pref.getEntry());
             CharSequence entry = pref.getEntry();
             if (entry == null || entry.length() == 0) {
-                if (debug) Log.i(TAG, "prepareAudioCodecType entry is null, set to default");
+                if (debug) Log.i(TAG, "prepareAudioCodecTypePref entry is null, set to default");
                 pref.setValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
             }
             pref.setSummary(pref.getEntry());
@@ -179,6 +179,18 @@ public class SettingsActivity
             String entry = pref.getText();
             if (entry == null || entry.length() == 0) {
                 pref.setText(String.valueOf(SettingsDefault.Common.bt2NetFactor));
+            }
+            pref.setSummary(pref.getText());
+        }
+
+        private void prepareBt2btPacketSizePref() {
+            if (debug) Log.i(TAG, "prepareBt2btPacketSizePref");
+            EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.bt2BtPacketSize));
+            if (pref == null) return;
+            pref.setDefaultValue(SettingsDefault.Bluetooth.bt2BtPacketSize);
+            String entry = pref.getText();
+            if (entry == null || entry.length() == 0) {
+                pref.setText(String.valueOf(SettingsDefault.Bluetooth.bt2BtPacketSize));
             }
             pref.setSummary(pref.getText());
         }
@@ -237,6 +249,7 @@ public class SettingsActivity
                     break;
                 case SettingsDefault.TypeName.bt2NetFactor:
                 case SettingsDefault.TypeName.btLatencyMs:
+                case SettingsDefault.TypeName.bt2BtPacketSize:
                     refreshEditTextPref(s);
                     break;
             }

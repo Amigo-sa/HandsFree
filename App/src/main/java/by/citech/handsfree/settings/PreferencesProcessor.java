@@ -21,6 +21,7 @@ public class PreferencesProcessor {
         SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(context);
         processAudioCodecType(prefs);
         processBtSinglePacket(prefs);
+        processBt2btPacketSize(prefs);
         processBt2NetFactor(prefs);
         processBtLatencyMs(prefs);
         processOpMode(prefs);
@@ -70,6 +71,17 @@ public class PreferencesProcessor {
         Presetter.setBtLatencyMs(Integer.parseInt(
                 prefs.getString(SettingsDefault.TypeName.btLatencyMs,
                 Integer.toString(SettingsDefault.Bluetooth.btLatencyMs))));
+    }
+
+
+    private static void processBt2btPacketSize(SharedPreferences prefs) {
+        if (prefs == null) {
+            if (debug) Log.e(STAG, "processBt2btPacketSize" + StatusMessages.ERR_PARAMETERS);
+            return;
+        }
+        Presetter.setBt2BtPacketSize(Integer.parseInt(
+                prefs.getString(SettingsDefault.TypeName.bt2BtPacketSize,
+                Integer.toString(SettingsDefault.Bluetooth.bt2BtPacketSize))));
     }
 
     private static void processBt2NetFactor(SharedPreferences prefs) {

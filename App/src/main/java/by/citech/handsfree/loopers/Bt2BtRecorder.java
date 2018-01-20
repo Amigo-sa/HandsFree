@@ -33,7 +33,7 @@ public class Bt2BtRecorder
 
     private int recordSize;
     private int btFactor;
-    private int bt2btPacketSize;
+    private int bt2BtPacketSize;
     private byte[][] dataBuff;
     private byte[][][] dataSaved;
     private int dataSavedCount;
@@ -91,8 +91,8 @@ public class Bt2BtRecorder
     @Override
     public boolean applySettings(ESeverityLevel severityLevel) {
         ISettingsCtrl.super.applySettings(severityLevel);
-        dataBuff = new byte[btFactor][bt2btPacketSize];
-        dataSaved = new byte[recordSize][btFactor][bt2btPacketSize];
+        dataBuff = new byte[btFactor][bt2BtPacketSize];
+        dataSaved = new byte[recordSize][btFactor][bt2BtPacketSize];
         return true;
     }
 
@@ -101,7 +101,7 @@ public class Bt2BtRecorder
         ISettingsCtrl.super.takeSettings();
         recordSize = 100;
         btFactor = Settings.btFactor;
-        bt2btPacketSize = Settings.bt2btPacketSize;
+        bt2BtPacketSize = Settings.bt2BtPacketSize;
         return true;
     }
 
@@ -157,7 +157,7 @@ public class Bt2BtRecorder
                 if (debug) Log.i(TAG, "run recorder output buffer contains enough data, saving");
                 dataSaved[dataSavedCount] = dataBuff;
                 dataSavedCount++;
-                if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.bt2btPacketSize));
+                if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.bt2BtPacketSize));
                 dataAssembledCount = 0;
             }
         }

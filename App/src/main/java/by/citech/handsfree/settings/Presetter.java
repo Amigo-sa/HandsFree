@@ -70,6 +70,7 @@ public class Presetter {
         Settings.opMode = SettingsDefault.Common.opMode;
         Settings.btSinglePacket = SettingsDefault.Bluetooth.btSinglePacket;
         Settings.btFactor = SettingsDefault.Bluetooth.btFactor;
+        Settings.bt2BtPacketSize = SettingsDefault.Bluetooth.bt2BtPacketSize;
     }
 
     static void setAudioCodecType(EAudioCodecType audioCodecType) {
@@ -90,6 +91,16 @@ public class Presetter {
             Settings.bt2NetFactor = bt2NetFactor;
         }
         if (debug) Log.w(STAG, "setBt2NetFactor set to " + Settings.bt2NetFactor);
+    }
+
+    static void setBt2BtPacketSize(int bt2BtPacketSize) {
+        if (bt2BtPacketSize < 0) {
+            Settings.bt2BtPacketSize = SettingsDefault.Bluetooth.bt2BtPacketSize;
+            if (debug) Log.e(STAG, "setBt2BtPacketSize illegal value, set to default");
+        } else {
+            Settings.bt2BtPacketSize = bt2BtPacketSize;
+        }
+        if (debug) Log.w(STAG, "setBt2BtPacketSize set to " + Settings.bt2BtPacketSize);
     }
 
     static void setBtLatencyMs(int btLatencyMs) {

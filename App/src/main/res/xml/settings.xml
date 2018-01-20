@@ -20,6 +20,12 @@
         android:dialogTitle="Choose BT2NET factor"
         android:title="BT2NET factor" />
 
+    <EditTextPreference
+        android:key="@string/bt2BtPacketSize"
+        android:inputType="number"
+        android:dialogTitle="Choose BT2BT packet size (bytes)"
+        android:title="BT2BT packet size" />
+
     <CheckBoxPreference
         android:key="@string/btSinglePacket"
         android:defaultValue="false"

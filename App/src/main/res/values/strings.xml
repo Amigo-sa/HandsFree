@@ -69,5 +69,6 @@
     <string name="audioCodecType">audioCodecType</string>
     <string name="bt2NetFactor">bt2NetFactor</string>
     <string name="btSinglePacket">btSingleBacket</string>
+    <string name="bt2BtPacketSize">bt2BtPacketSize</string>
 
 </resources>

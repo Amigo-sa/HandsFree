@@ -142,14 +142,14 @@ public class Settings {
     public static boolean btSignificantAll = true;  // все байты значащие
     public static boolean btSinglePacket = false;  // если возможно, не используем буфферизацию
     public static int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете
-    public static int bt2btPacketSize = 20;  // bytes in one BT message
+    public static int bt2BtPacketSize = 20;  // bytes in one BT message
     public static int btSignificantBytes = 20;  // кол-во значащих байтов данных в BT2BT-пакете
     public static int btRsvdBytesOffset = 20;  // позиция начала незначащих байтов данных в BT2BT-пакете
     public static int btFactor = bt2NetFactor;  // кол-во буфферизированных пакетов BT2BT, отправляемое на BT
     public static int btLatencyMs = 7;  // минимальный Thread.sleep между отправкой BT2BT-пакетов
     public static int btSendSize = btSignificantBytes * btFactor;  // кол-во принятых извне полезных байт, к-е подходит для BT
     public static int btAudioMsPerNetSendSize = btAudioMsPerPacket * bt2NetFactor;  // миллисекунд звука в одном BT2NET-пакете
-    public static int bt2NetSendSizeUncut = bt2btPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
+    public static int bt2NetSendSizeUncut = bt2BtPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
     public static int btMtuSize = 80;  // запрашиваемый размер BT2BT-пакета
     public static String deviceAddressPrefix = "54:6C:0E";
 
@@ -200,7 +200,7 @@ public class Settings {
     }
 
     public static boolean netSignificantAll = btSignificantAll;
-    public static int netChunkSize = bt2btPacketSize;
+    public static int netChunkSize = bt2BtPacketSize;
     public static int netChunkSignificantBytes = btSignificantBytes;
     public static int netChunkRsvdBytesOffset = btRsvdBytesOffset;
     public static int netFactor = btFactor;
