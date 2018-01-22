@@ -1,14 +1,10 @@
 package by.citech.handsfree.bluetoothlegatt.rwdata;
 
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -19,6 +15,9 @@ import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.ui.IMsgToUi;
+
+import static by.citech.handsfree.ThisApplication.getAppContext;
 
 /**
  * Created by tretyak on 22.11.2017.
@@ -30,6 +29,9 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
+    private Handler mHandler;
+
+
 
     static {
         objCount = 0;
@@ -39,6 +41,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
     {
         objCount++;
         TAG = STAG + " " + objCount;
+        mHandler = new Handler();
     }
 
     private static final long WAIT_PERIOD = 5;//
@@ -58,8 +61,20 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
     private boolean isNotyfyStartRunning;
     private boolean Callback = true;
     private int lostWritePkt = 0;
+    private int WritePkt = 0;
     private ArrayList<ITransmitter> iRxDataListeners;
     private boolean isMtuChanged = false;
+    private IMsgToUi iMsgToUi;
+
+    private Runnable postTheToast = () -> {
+        iMsgToUi.sendToUiToast(true, String.format(Locale.US, "Потеряно %d, принято %d", lostWritePkt, WritePkt));
+//      Toast.makeText(getAppContext(), String.format(Locale.US, "Потеряно %d, принято %d", lostWritePkt, WritePkt), Toast.LENGTH_SHORT).show();
+        postTheToast();
+    };
+
+    private void postTheToast() {
+        mHandler.postDelayed(postTheToast, 1000);
+    }
 
     public LeDataTransmitter(Characteristics characteristics) {
         this.characteristics = characteristics;
@@ -81,6 +96,10 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
 
     public void setStorageFromBt(StorageData<byte[]> storageFromBt) {
         this.storageFromBt = storageFromBt;
+    }
+
+    public void setiMsgToUi(IMsgToUi iMsgToUi) {
+        this.iMsgToUi = iMsgToUi;
     }
 
     //-----------------Oservers method -----------------------------
@@ -114,14 +133,16 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
 
     //отключаем поток записи и нотификации
     public void disableTransmitData() {
-        if (Settings.debug) Log.i(TAG, "disableTransmitData()");
+        if (Settings.debug) Log.i(TAG, "disableTransmitData() lostwritepkt = " + lostWritePkt);
+        if (Settings.debug) Log.i(TAG, "disableTransmitData() Writepkt = " + WritePkt);
         writeThreadStop();
         notifyThreadStop();
-        storageFromBt.clear();
-        storageToBt.clear();
+        if (storageFromBt != null)
+            storageFromBt.clear();
+        if (storageToBt != null)
+            storageToBt.clear();
         isMtuChanged = false;
     }
-
 
     //---------------------- Methods for notify -------------------------
 
@@ -141,7 +162,6 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
             mIBluetoothListener.disconnectToast();
         }
     }
-
 
     private void notifyThreadStart() {
         addRunnable(() -> {
@@ -219,8 +239,9 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
 
     @Override
     public void rcvBtPktIsDone(byte[] data) {
-        //if (Settings.debug) Log.w(TAG, "notify: " + Arrays.toString(data));
+        //if (Settings.debug) Log.w(TAG, "notify: " + data.length);
         //if (Settings.debug) Log.i(TAG, "rcvBtPktIsDone()");
+        WritePkt++;
         switch (Settings.opMode) {
             case Bt2AudOut:
                 updateRxData(data);
@@ -262,13 +283,14 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
                 Settings.btLatencyMs
 
         ));
+        postTheToast();
         addRunnable(() -> {
             byte[][] arrayData;
             int numBtPkt = 0;
             isRunning = true;
             int pktSize = (Settings.btSinglePacket) ? 1 : Settings.btFactor;
-//          int nextZeroByte = 0;
-//          int currZeroByte = 0;
+          byte predictedZeroByte = 0;
+          byte actualZeroByte = 0;
             while (isRunning) {
                 while (storageToBt.isEmpty()) {
                     try {
@@ -283,22 +305,15 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
                     // запись данных производим с учётом Калбэка onWriteCharacteristic
                     if (Callback) {
                         //if (Settings.debug) Log.w(TAG, "writeByteArrayData()");
-
                         writeByteArrayData(arrayData[numBtPkt]);
 
                         //---------------- TEST START ----------------
-
-                        /*
                         byte[] toWrite = arrayData[numBtPkt];
-                        currZeroByte = toWrite[0];
+                        actualZeroByte = toWrite[23];
                         writeByteArrayData(toWrite);
                         if (Settings.debug) Log.w(TAG, numBtPkt + " write: " + Arrays.toString(arrayData[numBtPkt]));
-                        if (Settings.debug && ((nextZeroByte != currZeroByte) || (nextZeroByte == 128 && currZeroByte != -128)))
-                            Log.e(TAG, String.format(
-                                    "write: ожидали <%d>, приняли <%d>, потеряно ",
-                                    nextZeroByte, currZeroByte));
-                        nextZeroByte = currZeroByte + 1;*/
-
+                        processPacketNum(actualZeroByte, predictedZeroByte);
+                        predictedZeroByte = (byte) (actualZeroByte + 1);
                         //---------------- TEST END ----------------
 
                         Callback = false;
@@ -312,20 +327,27 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager 
                     //if (Settings.debug) Log.w(TAG, "numBtPkt = " + numBtPkt);
                     numBtPkt++;
                     // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
-
                     if (!Callback && (WRITE_TYPE == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE) ) {
                         Callback = true;
-//                        if (Settings.debug)
-//                            Log.e(TAG, "num write package without callback " + lostWritePkt++);
+                        //if (Settings.debug) Log.e(TAG, "num write package without callback " + lostWritePkt++);
                     }
-
-
-
                 }
                 numBtPkt = 0;
             }
         });
     }
+
+    private void processPacketNum(byte actual, byte predicted) {
+        if (!Settings.debug) return;
+        if (predicted == actual) return;
+        if (predicted > actual) {
+            lostWritePkt = lostWritePkt + (predicted - actual);
+        } else if (predicted < actual) {
+            lostWritePkt = lostWritePkt + (actual - predicted);
+        }
+        Log.e(TAG, String.format("write: ожидали <%d>, приняли <%d>, потеряно %d", predicted, actual, lostWritePkt));
+    }
+
     // Прослушка  калбэка onWriteCharacteristic
     @Override
     public void callbackIsDone() {
