@@ -68,4 +68,6 @@ public class Tags {
     public static final String CircleGenerator     = "WSD_CircleGenerator";
     public static final String SineGenerator       = "WSD_SineGenerator";
     public static final String StaticSineGenerator = "WSD_StaticSineGen";
+    public static final String LeDataTransmitter   = "WSD_LeDataTransmitter";
+    public static final String NumberedTrafficAnalyzer = "WSD_NumberedAnalyzer";
 }

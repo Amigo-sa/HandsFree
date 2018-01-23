@@ -1,4 +1,4 @@
-package by.citech.handsfree;
+package by.citech.handsfree.activity;
 
 import android.Manifest;
 import android.bluetooth.BluetoothManager;
@@ -11,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -24,6 +25,7 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
@@ -39,17 +41,20 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
+import by.citech.handsfree.R;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.management.ResourceManager;
+import by.citech.handsfree.traffic.NumberedTrafficAnalyzer;
+import by.citech.handsfree.traffic.NumberedTrafficInfo;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.ui.helpers.IContactEditorHelper;
-import by.citech.handsfree.ui.helpers.ViewManager;
 import by.citech.handsfree.ui.helpers.EActiveContactState;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.Contactor;
@@ -66,7 +71,6 @@ import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.logic.Caller;
-import by.citech.handsfree.logic.CallerFsm;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.logic.ICallUi;
@@ -80,9 +84,11 @@ import by.citech.handsfree.threading.IThreadManager;
 import by.citech.handsfree.threading.ThreadManager;
 import by.citech.handsfree.util.Keyboard;
 
+import static android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE;
+import static by.citech.handsfree.util.MathHelper.convertByteArrToIntRaw;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
-public class DeviceControlActivity
+public class CallActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView, IThreadManager,
         IContactEditorHelper, IBroadcastReceiver, IService, IBtToUiCtrl, ICallUi, IMsgToUi {
@@ -102,7 +108,7 @@ public class DeviceControlActivity
     // TODO: отображение траффика для дебага
     private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
 
-    private ViewManager viewManager;
+    private CallActivityViewManager viewManager;
     private ActionBar actionBar;
 
     // список найденных устройств
@@ -131,7 +137,7 @@ public class DeviceControlActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_control);
+        setContentView(R.layout.activity_call);
         if (debug) Log.w(TAG, "onCreate");
 
         PreferencesProcessor.process(this);
@@ -139,7 +145,11 @@ public class DeviceControlActivity
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
         ThreadManager.getInstance().baseCreate();
-        viewManager = new ViewManager();
+        viewManager = new CallActivityViewManager();
+        NumberedTrafficAnalyzer.getInstance()
+                .setListener(viewManager)
+                .setHandler(new Handler())
+                .setInterval(1000);
         viewManager.setiGetter(this);
         viewManager.setDefaultView();
         viewManager.baseCreate();
@@ -245,8 +255,8 @@ public class DeviceControlActivity
     @Override
     protected void onPostResume() {
         super.onPostResume();
+        viewManager.onNumberedTrafficInfoUpdated(new NumberedTrafficInfo());
         if (debug) Log.w(TAG, "onPostResume");
-
     }
 
     @Override
@@ -312,7 +322,7 @@ public class DeviceControlActivity
                 break;
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
-                if (debug) Log.i(TAG, "menu settings");
+                finish();
                 break;
         }
         return true;
@@ -331,7 +341,7 @@ public class DeviceControlActivity
             IUiToBtListener.stopItemSelectedListener();
             invalidateOptionsMenu();
         } else {
-            super.onBackPressed();
+            finish();
         }
     }
 
@@ -409,7 +419,7 @@ public class DeviceControlActivity
             SpannableString s = new SpannableString(title);
             if (title != null) {
                 s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//              s.setSpan(new AbsoluteSizeSpan(56), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
+                s.setSpan(new AbsoluteSizeSpan(40), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
                 s.setSpan(new RelativeSizeSpan(0.5f), 7, title.length(), 0);
             }
             actionBar.setTitle(s);
@@ -668,7 +678,7 @@ public class DeviceControlActivity
     @Override public void onProviderEnabled(String provider) {}
     @Override public void onProviderDisabled(String provider) {}
 
-    //--------------------- ViewManager
+    //--------------------- CallActivityViewManager
 
     public void setVisibleMain() {
         runOnUiThread(() -> {

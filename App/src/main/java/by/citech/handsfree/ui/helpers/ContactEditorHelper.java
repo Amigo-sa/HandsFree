@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import by.citech.handsfree.activity.CallActivityViewManager;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.contact.EContactState;
@@ -38,7 +39,7 @@ public class ContactEditorHelper
     private int contactToEditPosition, contactToDeletePosition;
     private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
     private EEditorState editorState;
-    private ViewManager viewManager;
+    private CallActivityViewManager viewManager;
     private ContactsAdapter.SwipeCrutch swipeCrutch;
     private ActiveContactHelper activeContactHelper;
     private IElement<Contact> iContact;
@@ -121,7 +122,7 @@ public class ContactEditorHelper
 
     //--------------------- getters and setters
 
-    public ContactEditorHelper setViewManager(ViewManager viewManager) {
+    public ContactEditorHelper setViewManager(CallActivityViewManager viewManager) {
         this.viewManager = viewManager;
         return this;
     }

@@ -359,7 +359,6 @@ public class ConnectorBluetooth
 
     ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
-        leDataTransmitter.setiMsgToUi(iMsgToUi);
         return this;
     }
 

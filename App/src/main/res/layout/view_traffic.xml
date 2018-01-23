@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/viewTraffic"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <TextView
+        android:id="@+id/textViewPacketSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewLastLostPacketsAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewMaxLostPacketsAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewTotalPacketsCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewTotalReceivedPacketsCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewTotalLostPacketsCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewTotalBytesPerSec"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewTotalBytesCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewTotalLostPercent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewDeltaLostPacketsCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewDeltaLostPercent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewDeltaBytesPerSec"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="14sp"/>
+
+</LinearLayout>

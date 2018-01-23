@@ -1,4 +1,4 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.activity;
 
 import android.support.annotation.IdRes;
 import android.util.Log;
@@ -8,11 +8,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import by.citech.handsfree.R;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
+import by.citech.handsfree.traffic.NumberedTrafficAnalyzer.IOnInfoUpdateListener;
+import by.citech.handsfree.traffic.NumberedTrafficInfo;
 import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.logic.ICallerFsmListener;
@@ -22,6 +26,7 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.ui.helpers.IViewKeeper;
 
 import static by.citech.handsfree.ui.helpers.ViewHelper.clearAnimation;
 import static by.citech.handsfree.ui.helpers.ViewHelper.disableGray;
@@ -37,8 +42,8 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
 import static by.citech.handsfree.logic.ECallerState.ReadyToWork;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
-public class ViewManager
-        implements IBase, ISettingsCtrl, IPrepareObject,
+public class CallActivityViewManager
+        implements IBase, ISettingsCtrl, IPrepareObject, IOnInfoUpdateListener,
         IViewKeeper, ICallerFsmListener, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ViewManager;
@@ -87,6 +92,22 @@ public class ViewManager
     //--------------------- non-settings
 
     private IGetView iGetter;
+
+    private TextView textViewPacketSize;
+    private TextView textViewLastLostPacketsAmount;
+    private TextView textViewMaxLostPacketsAmount;
+    private TextView textViewTotalPacketsCount;
+    private TextView textViewTotalReceivedPacketsCount;
+    private TextView textViewTotalLostPacketsCount;
+    private TextView textViewTotalBytesPerSec;
+    private TextView textViewTotalBytesCount;
+    private TextView textViewTotalLostPercent;
+    private TextView textViewDeltaLostPacketsCount;
+    private TextView textViewDeltaLostPercent;
+    private TextView textViewDeltaBytesPerSec;
+
+    private View viewContacts;
+    private View viewTraffic;
     private View scanView;
     private View mainView;
     private View viewContactEditor;
@@ -149,10 +170,11 @@ public class ViewManager
 
     //--------------------- main
 
-    public void setDefaultView() {
+    void setDefaultView() {
         if (debug) Log.i(TAG, "setDefaultView");
         prepareObject();
 
+        setVisibility(getViewTraffic(), View.GONE);
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
 
         switch (opMode) {
@@ -176,6 +198,8 @@ public class ViewManager
                 enableBtnCall(getBtnGreen(), "LBACK ON");
                 disableGray(getBtnRed(), "LBACK OFF");
                 setVisibility(getBtnChangeDevice(), View.VISIBLE);
+                setVisibility(getViewContacts(), View.GONE);
+                setVisibility(getViewTraffic(), View.VISIBLE);
                 break;
             case Net2Net:
                 enableBtnCall(getBtnGreen(), "LBACK ON");
@@ -201,38 +225,38 @@ public class ViewManager
             @Override public void onAnimationRepeat(Animation animation) {}});
     }
 
-    public boolean isMainViewHidden() {
+    boolean isMainViewHidden() {
         return getVisibility(getMainView());
     }
 
-    public boolean isScanViewHidden() {
+    boolean isScanViewHidden() {
         return getVisibility(getScanView());
     }
 
-    public void showMainView() {
+    void showMainView() {
         setVisibility(getMainView(), View.VISIBLE);
         setVisibility(getViewContactEditor(), View.GONE);
         setVisibility(getScanView(), View.GONE);
     }
 
-    public void showScaner() {
+    void showScaner() {
         setVisibility(getMainView(), View.GONE);
         setVisibility(getScanView(), View.VISIBLE);
     }
 
     //--------------------- device connected/disconnected
 
-    public void setMainNoDevice() {
+    void setMainNoDevice() {
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
     }
 
-    public void setMainDeviceConnected() {
+    void setMainDeviceConnected() {
         setColorAndText(getBtnChangeDevice(), R.string.change_device, DARKKHAKI);
     }
 
     //--------------------- search
 
-    public void clearSearch() {
+    void clearSearch() {
         setText(getEditTextSearch(), "");
     }
 
@@ -506,16 +530,12 @@ public class ViewManager
     //--------------------- getters help
 
     private Animation getAnim(Animation a, int id) {
-        if (a == null) {
-            a = getAnimFromGetter(iGetter, id);
-        }
+        if (a == null) {a = getAnimFromGetter(iGetter, id);}
         return a;
     }
 
     private <T extends View> T getView(T t, @IdRes int id) {
-        if (t == null) {
-            t = getViewFromGetter(iGetter, id);
-        }
+        if (t == null) {t = getViewFromGetter(iGetter, id);}
         return t;
     }
 
@@ -523,12 +543,8 @@ public class ViewManager
         Animation a = null;
         if (iGetter != null) {
             a = iGetter.getAnimation(id);
-            if (a == null) {
-                if (debug) Log.w(TAG, "getAnimFromGetter anim is still null, return");
-            }
-        } else {
-            Log.e(TAG, "getAnimFromGetter iGetter is null, return");
-        }
+            if (a == null) {if (debug) Log.w(TAG, "getAnimFromGetter anim is still null, return");}
+        } else {if (debug) Log.e(TAG, "getAnimFromGetter iGetter is null, return");}
         return a;
     }
 
@@ -536,79 +552,62 @@ public class ViewManager
         T t = null;
         if (iGetter != null) {
             t = iGetter.getView(id);
-            if (t == null) {
-                if (debug) Log.w(TAG, "getViewFromGetter view is still null, return");
-            }
-        } else {
-            Log.e(TAG, "getViewFromGetter iGetter is null, return");
-        }
+            if (t == null) {if (debug) Log.w(TAG, "getViewFromGetter view is still null, return");}
+        } else {if (debug) Log.e(TAG, "getViewFromGetter iGetter is null, return");}
         return t;
     }
 
     //--------------------- getters
 
-    private Animation getAnimCall() {
-        return animCall = getAnim(animCall, R.anim.anim_call);
-    }
+    private Animation getAnimCall()                 {return animCall                  = getAnim(animCall,                  R.anim.anim_call);}
+    private View getScanView()                      {return scanView                  = getView(scanView,                  R.id.scanView);}
+    private View getMainView()                      {return mainView                  = getView(mainView,                  R.id.mainView);}
+    private View getViewContactEditor()             {return viewContactEditor         = getView(viewContactEditor,         R.id.viewContactEditor);}
+    private View getViewContactChosen()             {return viewContactChosen         = getView(viewContactChosen,         R.id.viewContactChosen);}
+    private EditText getEditTextSearch()            {return editTextSearch            = getView(editTextSearch,            R.id.editTextSearch);}
+    private TextView getTextViewContactChosenName() {return textViewContactChosenName = getView(textViewContactChosenName, R.id.textViewContactChosenName);}
+    private TextView getTextViewContactChosenIp()   {return textViewContactChosenIp   = getView(textViewContactChosenIp,   R.id.textViewContactChosenIp);}
+    private EditText getEditTextContactName()       {return editTextContactName       = getView(editTextContactName,       R.id.editTextContactName);}
+    private EditText getEditTextContactIp()         {return editTextContactIp         = getView(editTextContactIp,         R.id.editTextContactIp);}
+    private Button getBtnSaveContact()              {return btnSaveContact            = getView(btnSaveContact,            R.id.btnSaveContact);}
+    private Button getBtnDelContact()               {return btnDelContact             = getView(btnDelContact,             R.id.btnDelContact);}
+    private Button getBtnCancelContact()            {return btnCancelContact          = getView(btnCancelContact,          R.id.btnCancelContact);}
+    private Button getBtnGreen()                    {return btnGreen                  = getView(btnGreen,                  R.id.btnGreen);}
+    private Button getBtnRed()                      {return btnRed                    = getView(btnRed,                    R.id.btnRed);}
+    private Button getBtnChangeDevice()             {return btnChangeDevice           = getView(btnChangeDevice,           R.id.btnChangeDevice);}
 
-    private View getScanView() {
-        return scanView = getView(scanView, R.id.scanView);
-    }
+    private View getViewContacts() {return viewContacts = getView(viewContacts, R.id.contacts_list);}
+    private View getViewTraffic()  {return viewTraffic  = getView(viewTraffic,  R.id.traffic_info);}
 
-    private View getMainView() {
-        return mainView = getView(mainView, R.id.mainView);
-    }
+    private TextView getTextViewPacketSize()                {return textViewPacketSize                = getView(textViewPacketSize,                R.id.textViewPacketSize);}
+    private TextView getTextViewLastLostPacketsAmount()     {return textViewLastLostPacketsAmount     = getView(textViewLastLostPacketsAmount,     R.id.textViewLastLostPacketsAmount);}
+    private TextView getTextViewMaxLostPacketsAmount()      {return textViewMaxLostPacketsAmount      = getView(textViewMaxLostPacketsAmount,      R.id.textViewMaxLostPacketsAmount);}
+    private TextView getTextViewTotalPacketsCount()         {return textViewTotalPacketsCount         = getView(textViewTotalPacketsCount,         R.id.textViewTotalPacketsCount);}
+    private TextView getTextViewTotalReceivedPacketsCount() {return textViewTotalReceivedPacketsCount = getView(textViewTotalReceivedPacketsCount, R.id.textViewTotalReceivedPacketsCount);}
+    private TextView getTextViewTotalLostPacketsCount()     {return textViewTotalLostPacketsCount     = getView(textViewTotalLostPacketsCount,     R.id.textViewTotalLostPacketsCount);}
+    private TextView getTextViewTotalBytesPerSec()          {return textViewTotalBytesPerSec          = getView(textViewTotalBytesPerSec,          R.id.textViewTotalBytesPerSec);}
+    private TextView getTextViewTotalBytesCount()           {return textViewTotalBytesCount           = getView(textViewTotalBytesCount,           R.id.textViewTotalBytesCount);}
+    private TextView getTextViewTotalLostPercent()          {return textViewTotalLostPercent          = getView(textViewTotalLostPercent,          R.id.textViewTotalLostPercent);}
+    private TextView getTextViewDeltaLostPacketsCount()     {return textViewDeltaLostPacketsCount     = getView(textViewDeltaLostPacketsCount,     R.id.textViewDeltaLostPacketsCount);}
+    private TextView getTextViewDeltaLostPercent()          {return textViewDeltaLostPercent          = getView(textViewDeltaLostPercent,          R.id.textViewDeltaLostPercent);}
+    private TextView getTextViewDeltaBytesPerSec()          {return textViewDeltaBytesPerSec          = getView(textViewDeltaBytesPerSec,          R.id.textViewDeltaBytesPerSec);}
 
-    private View getViewContactEditor() {
-        return viewContactEditor = getView(viewContactEditor, R.id.viewContactEditor);
-    }
+    //--------------------- IOnInfoUpdateListener
 
-    private View getViewContactChosen() {
-        return viewContactChosen = getView(viewContactChosen, R.id.viewContactChosen);
-    }
-
-    private EditText getEditTextSearch() {
-        return editTextSearch = getView(editTextSearch, R.id.editTextSearch);
-    }
-
-    private TextView getTextViewContactChosenName() {
-        return textViewContactChosenName = getView(textViewContactChosenName, R.id.textViewContactChosenName);
-    }
-
-    private TextView getTextViewContactChosenIp() {
-        return textViewContactChosenIp = getView(textViewContactChosenIp, R.id.textViewContactChosenIp);
-    }
-
-    private EditText getEditTextContactName() {
-        return editTextContactName = getView(editTextContactName, R.id.editTextContactName);
-    }
-
-    private EditText getEditTextContactIp() {
-        return editTextContactIp = getView(editTextContactIp, R.id.editTextContactIp);
-    }
-
-    private Button getBtnSaveContact() {
-        return btnSaveContact = getView(btnSaveContact, R.id.btnSaveContact);
-    }
-
-    private Button getBtnDelContact() {
-        return btnDelContact = getView(btnDelContact, R.id.btnDelContact);
-    }
-
-    private Button getBtnCancelContact() {
-        return btnCancelContact = getView(btnCancelContact, R.id.btnCancelContact);
-    }
-
-    private Button getBtnGreen() {
-        return btnGreen = getView(btnGreen, R.id.btnGreen);
-    }
-
-    private Button getBtnRed() {
-        return btnRed = getView(btnRed, R.id.btnRed);
-    }
-
-    private Button getBtnChangeDevice() {
-        return btnChangeDevice = getView(btnChangeDevice, R.id.btnChangeDevice);
+    @Override
+    public void onNumberedTrafficInfoUpdated(NumberedTrafficInfo info) {
+        setText(getTextViewPacketSize()               , String.format(Locale.US, "  Размер пакета:             %010d", info.getPacketSize()));
+        setText(getTextViewLastLostPacketsAmount()    , String.format(Locale.US, "  Последняя потеря, пакетов: %010d", info.getLastLostPacketsAmount()));
+        setText(getTextViewMaxLostPacketsAmount()     , String.format(Locale.US, "  Макс. потеря, пакетов:     %010d", info.getMaxLostPacketsAmount()));
+        setText(getTextViewTotalPacketsCount()        , String.format(Locale.US, "  Всего, пакетов:            %010d", info.getTotalPacketsCount()));
+        setText(getTextViewTotalBytesCount()          , String.format(Locale.US, "  Всего, байт                %010d", info.getTotalBytesCount()));
+        setText(getTextViewTotalReceivedPacketsCount(), String.format(Locale.US, "  Всего принято, пакетов:    %010d", info.getTotalReceivedPacketsCount()));
+        setText(getTextViewTotalLostPacketsCount()    , String.format(Locale.US, "  Всего утеряно, пакетов:    %010d", info.getTotalLostPacketsCount()));
+        setText(getTextViewTotalLostPercent()         , String.format(Locale.US, "  Всего утеряно, процент:    %010f", info.getTotalLostPercent()));
+        setText(getTextViewTotalBytesPerSec()         , String.format(Locale.US, "  Байт/сек, среднее:         %010f", info.getTotalBytesPerSec()));
+        setText(getTextViewDeltaLostPacketsCount()    , String.format(Locale.US, "  Текущие потери, пакетов:   %010d", info.getDeltaLostPacketsCount()));
+        setText(getTextViewDeltaLostPercent()         , String.format(Locale.US, "  Текущий потери, процент:   %010f", info.getDeltaLostPercent()));
+        setText(getTextViewDeltaBytesPerSec()         , String.format(Locale.US, "  Байт/сек, текущее:         %010f", info.getDeltaBytesPerSec()));
     }
 
 }

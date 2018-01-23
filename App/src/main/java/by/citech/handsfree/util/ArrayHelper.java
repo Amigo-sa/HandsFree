@@ -2,6 +2,23 @@ package by.citech.handsfree.util;
 
 public class ArrayHelper {
 
+    //--------------------- bytes's arrays
+
+    public static boolean copyArray(byte[] toUpdate, byte[] toCopy) {
+        if (toUpdate == null || toCopy == null || (toUpdate.length != toCopy.length)) return false;
+        System.arraycopy(toCopy, 0, toUpdate, 0, toUpdate.length);
+        return true;
+    }
+
+    public static byte[] getClonedArray(byte[] toClone) {
+        if (toClone == null) return null;
+        byte[] msgDataClone = new byte[toClone.length];
+        System.arraycopy(toClone, 0, msgDataClone, 0, toClone.length);
+        return msgDataClone;
+    }
+
+    //--------------------- double's arrays
+
     public static double[] getRevertedDoubleArr(double[] arrToRevert) {
         int length = arrToRevert.length;
         double[] revertedArr = new double[length];

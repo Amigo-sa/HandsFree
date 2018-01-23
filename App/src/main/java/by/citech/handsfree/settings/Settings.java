@@ -123,6 +123,8 @@ public class Settings {
 
     }
 
+    public static int toolbarBaseSize = 40;
+    public static float toolbarMessageToPrefix = 0.6f;
     public static int threadNumber = 3;
     public static EDataSource dataSource = EDataSource.BLUETOOTH;
 //  public static EDataSource dataSource = EDataSource.MICROPHONE;
@@ -139,6 +141,8 @@ public class Settings {
     private class Bluetooth {
     }
 
+    public static int btNumberedBytePosition = 0;
+    public static int btNumberedBytesToIntStart = 20;
     public static boolean btSignificantAll = true;  // все байты значащие
     public static boolean btSinglePacket = false;  // если возможно, не используем буфферизацию
     public static int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете

@@ -2,6 +2,7 @@ package by.citech.handsfree.ui.helpers;
 
 import android.util.Log;
 
+import by.citech.handsfree.activity.CallActivityViewManager;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
@@ -15,9 +16,9 @@ public class ActiveContactHelper
 
     private EActiveContactState activeContactState;
     private ChosenContactHelper chosenContactHelper;
-    private ViewManager viewManager;
+    private CallActivityViewManager viewManager;
 
-    public ActiveContactHelper(ChosenContactHelper chosenContactHelper, ViewManager viewManager) {
+    public ActiveContactHelper(ChosenContactHelper chosenContactHelper, CallActivityViewManager viewManager) {
         this.chosenContactHelper = chosenContactHelper;
         this.viewManager = viewManager;
         activeContactState = EActiveContactState.IpFromSearch;

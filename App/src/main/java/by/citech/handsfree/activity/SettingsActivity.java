@@ -1,5 +1,6 @@
-package by.citech.handsfree;
+package by.citech.handsfree.activity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -22,6 +23,7 @@ import android.view.ViewGroup;
 
 import java.util.Locale;
 
+import by.citech.handsfree.R;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
@@ -60,7 +62,7 @@ public class SettingsActivity
             SpannableString s = new SpannableString(title);
             if (title != null) {
                 s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                s.setSpan(new AbsoluteSizeSpan(56), 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                s.setSpan(new AbsoluteSizeSpan(40), 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             }
             actionBar.setTitle(s);
         }
@@ -68,16 +70,20 @@ public class SettingsActivity
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        intoTheCall();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(debug) Log.i(TAG,"onOptionsItemSelected");
-        super.onBackPressed();
+        intoTheCall();
         return true;
     }
 
+    private void intoTheCall() {
+        startActivity(new Intent(this, CallActivity.class));
+        finish();
+    }
 
     public static class SettingsFragment
             extends PreferenceFragmentCompatDividers
@@ -211,7 +217,7 @@ public class SettingsActivity
             if (debug) Log.i(TAG, "refreshListPref");
             ListPreference pref = (ListPreference) findPreference(s);
             if (pref == null) {
-                Log.e(TAG, "refreshListPref pref is null");
+                if (debug) Log.e(TAG, "refreshListPref pref is null");
                 return;
             }
             pref.setSummary(pref.getEntry());
@@ -220,7 +226,7 @@ public class SettingsActivity
         private void refreshEditTextPref(String s) {
             EditTextPreference pref = (EditTextPreference) findPreference(s);
             if (pref == null) {
-                Log.e(TAG, "refreshListPref pref is null");
+                if (debug) Log.e(TAG, "refreshListPref pref is null");
                 return;
             }
             pref.setSummary(pref.getText());
@@ -236,21 +242,21 @@ public class SettingsActivity
         }
 
         @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-            if (debug) Log.i(TAG, "onSharedPreferenceChanged s is " + s);
-            if (s == null || s.isEmpty()) {
-                Log.e(TAG, "onSharedPreferenceChanged s is illegal");
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String prefName) {
+            if (debug) Log.i(TAG, "onSharedPreferenceChanged prefName is " + prefName);
+            if (prefName == null || prefName.isEmpty()) {
+                if (debug) Log.e(TAG, "onSharedPreferenceChanged prefName is illegal");
                 return;
             }
-            switch (s) {
+            switch (prefName) {
                 case SettingsDefault.TypeName.opMode:
                 case SettingsDefault.TypeName.audioCodecType:
-                    refreshListPref(s);
+                    refreshListPref(prefName);
                     break;
                 case SettingsDefault.TypeName.bt2NetFactor:
                 case SettingsDefault.TypeName.btLatencyMs:
                 case SettingsDefault.TypeName.bt2BtPacketSize:
-                    refreshEditTextPref(s);
+                    refreshEditTextPref(prefName);
                     break;
             }
         }

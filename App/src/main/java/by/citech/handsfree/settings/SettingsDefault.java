@@ -31,6 +31,7 @@ public class SettingsDefault {
         }
 
         public static class Bluetooth {
+            public static final int btNumberedBytePosition = 23;
             public static final boolean btSignificantAll = true;  // все байты значащие
             public static final boolean btSinglePacket = false;  // если возможно, не используем буфферизацию
             public static final int btAudioMsPerPacket = 10;  // миллисекунд звука в одном BT2BT-пакете

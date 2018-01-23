@@ -1,15 +1,10 @@
-package by.citech.handsfree;
+package by.citech.handsfree.application;
 
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.res.Configuration;
-
-
-import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.settings.PreferencesProcessor;
-
 
 public class ThisApplication
         extends Application {
@@ -25,9 +20,8 @@ public class ThisApplication
     @Override
     public void onCreate() {
         super.onCreate();
-
-//        bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-//        if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
+        bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
         appContext = getApplicationContext();
     }
 

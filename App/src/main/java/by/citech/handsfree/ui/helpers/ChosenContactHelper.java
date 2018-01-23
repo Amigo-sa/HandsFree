@@ -1,5 +1,6 @@
 package by.citech.handsfree.ui.helpers;
 
+import by.citech.handsfree.activity.CallActivityViewManager;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
@@ -13,9 +14,9 @@ public class ChosenContactHelper {
     private Contact chosenContact;
     private int chosenContactPosition;
 
-    private ViewManager viewManager;
+    private CallActivityViewManager viewManager;
 
-    public ChosenContactHelper(ViewManager viewManager) {
+    public ChosenContactHelper(CallActivityViewManager viewManager) {
         this.viewManager = viewManager;
         chosenContactPosition = -1;
     }

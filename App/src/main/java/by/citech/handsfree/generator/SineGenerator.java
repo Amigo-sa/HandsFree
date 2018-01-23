@@ -8,7 +8,7 @@ import java.util.List;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
-import static by.citech.handsfree.util.ListHelper.getListInitiatedWithNulls;
+import static by.citech.handsfree.util.CollectionHelper.getArrayListInitiatedWithNulls;
 import static by.citech.handsfree.util.ArrayHelper.arrayDoubleToShort;
 import static java.lang.Math.PI;
 
@@ -85,7 +85,7 @@ class SineGenerator
         checkParameters(quarterNum, mult, div);
 
         if (quartersS == null) {
-            quartersS = getListInitiatedWithNulls(QUARTER_1, QPP);
+            quartersS = getArrayListInitiatedWithNulls(QUARTER_1, QPP);
         } else if (quartersS.get(quarterNum) != null) {
             return quartersS.get(quarterNum);
         }

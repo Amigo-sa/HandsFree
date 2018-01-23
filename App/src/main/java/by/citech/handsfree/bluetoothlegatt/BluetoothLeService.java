@@ -151,7 +151,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             super.onMtuChanged(gatt, mtu, status);
             //if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
             if(status==BluetoothGatt.GATT_SUCCESS)
-                mCallbackWriteListener.MtuChangedDone(mtu);
+                mCallbackWriteListener.onMtuChangeIsDone(mtu);
         }
 
         @Override

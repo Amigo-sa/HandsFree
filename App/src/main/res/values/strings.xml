@@ -70,5 +70,6 @@
     <string name="bt2NetFactor">bt2NetFactor</string>
     <string name="btSinglePacket">btSingleBacket</string>
     <string name="bt2BtPacketSize">bt2BtPacketSize</string>
+    <string name="label_traffic">Traffic info:</string>
 
 </resources>
