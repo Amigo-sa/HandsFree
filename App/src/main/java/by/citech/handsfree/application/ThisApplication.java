@@ -2,16 +2,34 @@ package by.citech.handsfree.application;
 
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.res.Configuration;
 
+import by.citech.handsfree.activity.fsm.ActivityFsm;
+import by.citech.handsfree.activity.fsm.IActivityFsmListenerRegister;
+import by.citech.handsfree.connection.ChosenDeviceControl;
+import by.citech.handsfree.connection.ConnectionControl;
+import by.citech.handsfree.connection.fsm.ConnectionFsm;
+import by.citech.handsfree.connection.fsm.IConnectionFsmListenerRegister;
+import by.citech.handsfree.logic.ConnectorBluetooth;
+import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.settings.PreferencesProcessor;
+import by.citech.handsfree.threading.ThreadManager;
+
 public class ThisApplication
-        extends Application {
+        extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
 
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;
-
+    private static ThreadManager threadingManager;
+    private static ConnectorBluetooth connectorBluetooth;
+    private static ActivityFsm activityFsm;
+    private static ConnectionFsm connectionFsm;
+    private static ConnectionControl connectionControl;
+    private static ChosenDeviceControl chosenDeviceControl;
+    private static BluetoothDevice btConnectedDevice;
     private static String btConnectedAddr;
     private static Context appContext;
 
@@ -22,6 +40,18 @@ public class ThisApplication
         super.onCreate();
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
+        threadingManager = ThreadManager.getInstance();
+        threadingManager.activate();
+        appContext = getApplicationContext();
+        activityFsm = ActivityFsm.getInstance();
+        connectionFsm = ConnectionFsm.getInstance();
+        connectorBluetooth = ConnectorBluetooth.getInstance();
+        connectionControl = ConnectionControl.getInstance();
+        chosenDeviceControl = ChosenDeviceControl.getInstance();
+        registerActivityFsmListener(chosenDeviceControl, Tags.ChosenDeviceControl);
+        registerActivityFsmListener(connectionControl, Tags.ConnectionControl);
+        registerConnectionFsmListener(connectorBluetooth, Tags.ConnectorBluetooth);
+        PreferencesProcessor.init(this);
         appContext = getApplicationContext();
     }
 

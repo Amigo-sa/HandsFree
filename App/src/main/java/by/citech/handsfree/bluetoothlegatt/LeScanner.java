@@ -1,6 +1,7 @@
 package by.citech.handsfree.bluetoothlegatt;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -48,6 +49,7 @@ public class LeScanner implements IBtToUiListener {
         if (bluetoothAdapter == null) {
             if (Settings.debug) Log.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
             bluetoothAdapter = mIBluetoothListener.getBluetoothManager().getAdapter();
+            BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
         return bluetoothAdapter;
     }
@@ -90,7 +92,7 @@ public class LeScanner implements IBtToUiListener {
 
             //-------------- TEST START
             //leScanner.startScan(scanFilters, scanSettings, mScanCallback // с использованием фильтрации
-             //leScanner.startScan(mScanCallback);
+            //leScanner.startScan(mScanCallback);
             ScanSettings settings = new ScanSettings.Builder()
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                     .setReportDelay(0)
@@ -111,7 +113,7 @@ public class LeScanner implements IBtToUiListener {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             //if (Settings.debug) Log.i(TAG, "onScanResult() ");
-                iScannListener.scanCallback(result.getDevice(), result.getRssi());
+            iScannListener.scanCallback(result.getDevice(), result.getRssi());
         }
 
         @Override
