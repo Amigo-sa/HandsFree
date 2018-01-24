@@ -4,8 +4,8 @@ import android.util.Log;
 
 import java.util.Locale;
 
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IRxComplex;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.generator.DataGeneratorFactory;
 import by.citech.handsfree.generator.EDataType;
 import by.citech.handsfree.generator.IDataGenerator;
@@ -14,12 +14,12 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
 public class FromGenerator
-        implements ITransmitterCtrl {
+        implements IStreamer {
 
     private final String TAG = Tags.FromDataGenerator;
     private static final boolean debug = Settings.debug;
 
-    private ITransmitter iTransmitter;
+    private IRxComplex iRxComplex;
     private IDataGenerator dataGenerator;
     private EDataType dataType;
     private int buffSize;
@@ -41,10 +41,10 @@ public class FromGenerator
         this.dataType = dataType;
     }
 
-    //--------------------- ITransmitterCtrl
+    //--------------------- IStreamer
 
     @Override
-    public void prepareStream(ITransmitter receiver) throws Exception {
+    public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
             if (debug) Log.w(TAG, "prepareStream stream is finished, return");
             return;
@@ -52,7 +52,7 @@ public class FromGenerator
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
             if (debug) Log.i(TAG, "prepareStream");
-            this.iTransmitter = receiver;
+            this.iRxComplex = receiver;
         }
         dataGenerator = DataGeneratorFactory.getDataGenerator(buffSize, isShorts, dataType);
         if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
@@ -71,7 +71,7 @@ public class FromGenerator
         if (debug) Log.i(TAG, "finishStream");
         isFinished = true;
         streamOff();
-        iTransmitter = null;
+        iRxComplex = null;
     }
 
     @Override
@@ -123,11 +123,11 @@ public class FromGenerator
     //--------------------- main
 
     private void streamShorts() {
-        iTransmitter.sendData(dataGenerator.getNextDataShorts());
+        iRxComplex.sendData(dataGenerator.getNextDataShorts());
     }
 
     private void streamBytes() {
-        iTransmitter.sendData(dataGenerator.getNextDataBytes());
+        iRxComplex.sendData(dataGenerator.getNextDataBytes());
     }
 
 }

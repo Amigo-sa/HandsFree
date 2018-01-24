@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import by.citech.handsfree.common.EConnectionState;
-import by.citech.handsfree.exchange.ITransmitter;
+import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import okhttp3.OkHttpClient;
@@ -22,7 +22,7 @@ import by.citech.handsfree.parameters.StatusMessages;
 
 public class Client
         extends WebSocketListener
-        implements IClientCtrl, ITransmitter {
+        implements IClientCtrl, IRxComplex {
 
     private static final String STAG = Tags.Client;
     private static final boolean debug = Settings.debug;
@@ -34,7 +34,7 @@ public class Client
     private WebSocket webSocket;
     private String url;
     private Handler handler;
-    private ITransmitter receiver;
+    private IRxComplex receiver;
     private EConnectionState state;
 
     {
@@ -98,18 +98,18 @@ public class Client
     //--------------------- IExchangeCtrl
 
     @Override
-    public ITransmitter getTransmitter() {
+    public IRxComplex getTransmitter() {
         if (debug) Log.i(TAG, "getTransmitter");
         return this;
     }
 
     @Override
-    public void setReceiver(ITransmitter iTransmitter) {
+    public void setReceiver(IRxComplex iRxComplex) {
         if (debug) Log.i(TAG, "setReceiver");
-        this.receiver = iTransmitter;
+        this.receiver = iRxComplex;
     }
 
-    //--------------------- ITransmitter
+    //--------------------- IRxComplex
 
     @Override
     public void sendData(byte[] data) {

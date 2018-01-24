@@ -6,8 +6,8 @@ import android.util.Log;
 import java.util.Locale;
 
 import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IRxComplex;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
@@ -15,7 +15,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 
 public class FromAudioIn
-        implements ITransmitterCtrl, IPrepareObject, ISettingsCtrl {
+        implements IStreamer, IPrepareObject, ISettingsCtrl {
 
     private final String TAG = Tags.Audio;
     private final boolean debug = Settings.debug;
@@ -33,7 +33,7 @@ public class FromAudioIn
     private boolean isStreaming;
     private boolean isFinished;
     private boolean isPrepared;
-    private ITransmitter iTransmitter;
+    private IRxComplex iRxComplex;
 
     {
         prepareObject();
@@ -66,10 +66,10 @@ public class FromAudioIn
         return true;
     }
 
-    //--------------------- ITransmitterCtrl
+    //--------------------- IStreamer
 
     @Override
-    public void prepareStream(ITransmitter receiver) throws Exception {
+    public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
             if (debug) Log.w(TAG, "prepareStream stream is finished, return");
             return;
@@ -77,7 +77,7 @@ public class FromAudioIn
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
             if (debug) Log.i(TAG, "prepareStream");
-            this.iTransmitter = receiver;
+            this.iRxComplex = receiver;
         }
         recorder = new AudioRecord(
                 audioSource,
@@ -109,7 +109,7 @@ public class FromAudioIn
             recorder.release();
             recorder = null;
         }
-        iTransmitter = null;
+        iRxComplex = null;
     }
 
     @Override
@@ -160,11 +160,11 @@ public class FromAudioIn
     //--------------------- main
 
     private void streamShorts() {
-        iTransmitter.sendData(fillShortsBuff(audioBuffSizeShorts));
+        iRxComplex.sendData(fillShortsBuff(audioBuffSizeShorts));
     }
 
     private void streamBytes() {
-        iTransmitter.sendData(fillBytesBuff(audioBuffSizeBytes));
+        iRxComplex.sendData(fillBytesBuff(audioBuffSizeBytes));
     }
 
     private byte[] fillBytesBuff(int readLeft) {

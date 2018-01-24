@@ -71,7 +71,7 @@ public class Tags {
     public static final String ActiveContactHelper = PREFIX + "ActiveContactHelper";
     public static final String Presetter = PREFIX + "Presetter";
     public static final String IBase = PREFIX + "IBase";
-    public static final String ITransmitter = PREFIX + "ITransmitter";
+    public static final String ITransmitter = PREFIX + "IRxComplex";
     public static final String ISettingsCtrl = PREFIX + "ISettingsCtrl";
     public static final String IMsgToUi = PREFIX + "IMsgToUi";
     public static final String CraftedThreadPool = PREFIX + "CraftedThreadPool";

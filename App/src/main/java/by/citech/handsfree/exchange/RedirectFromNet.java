@@ -12,18 +12,18 @@ import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreading;
 
 public class RedirectFromNet
-        extends AsyncTask<EDataSource, ITransmitterCtrl, Void>
+        extends AsyncTask<EDataSource, IStreamer, Void>
         implements IThreading {
 
     private static final String TAG = Tags.RedirectFromNet;
     private static final boolean debug = Settings.debug;
 
-    private ITransmitterCtrlReg iTransmitterCtrlReg;
+    private IStreamerRegister iStreamerRegister;
     private IExchangeCtrl iExchangeCtrl;
     private StorageData<byte[][]> storageFromNet;
 
-    public RedirectFromNet(ITransmitterCtrlReg iTransmitterCtrlReg, IExchangeCtrl iExchangeCtrl, StorageData<byte[][]> storageFromNet) {
-        this.iTransmitterCtrlReg = iTransmitterCtrlReg;
+    public RedirectFromNet(IStreamerRegister iStreamerRegister, IExchangeCtrl iExchangeCtrl, StorageData<byte[][]> storageFromNet) {
+        this.iStreamerRegister = iStreamerRegister;
         this.iExchangeCtrl = iExchangeCtrl;
         this.storageFromNet = storageFromNet;
     }
@@ -31,35 +31,35 @@ public class RedirectFromNet
     @Override
     protected Void doInBackground(EDataSource... params) {
         if (debug) Log.i(TAG, "doInBackground");
-        ITransmitterCtrl iTransmitterCtrl;
+        IStreamer iStreamer;
         switch (params[0]) {
             case MICROPHONE:
                 if (debug) Log.i(TAG, "doInBackground audio");
                 try {
                     ToAudioOut toAudioOut = new ToAudioOut();
                     iExchangeCtrl.setReceiver(toAudioOut);
-                    iTransmitterCtrl = toAudioOut;
-                    iTransmitterCtrl.prepareStream(null);
+                    iStreamer = toAudioOut;
+                    iStreamer.prepareStream(null);
                 } catch (Exception e) {
                     e.printStackTrace();
                     break;
                 }
-                publishProgress(iTransmitterCtrl);
-                addRunnable(iTransmitterCtrl::streamOn);
+                publishProgress(iStreamer);
+                addRunnable(iStreamer::streamOn);
                 break;
             case BLUETOOTH:
                 Log.i(TAG, "doInBackground bluetooth");
                 try {
                     ToBluetooth toBluetooth = new ToBluetooth(storageFromNet);
                     iExchangeCtrl.setReceiver(toBluetooth);
-                    iTransmitterCtrl = toBluetooth;
-                    iTransmitterCtrl.prepareStream(null);
+                    iStreamer = toBluetooth;
+                    iStreamer.prepareStream(null);
                 } catch (Exception e) {
                     e.printStackTrace();
                     break;
                 }
-                publishProgress(iTransmitterCtrl);
-                addRunnable(iTransmitterCtrl::streamOn);
+                publishProgress(iStreamer);
+                addRunnable(iStreamer::streamOn);
                 break;
             default:
                 if (debug) Log.e(TAG, "doInBackground default dataSource");
@@ -69,9 +69,9 @@ public class RedirectFromNet
     }
 
     @Override
-    protected void onProgressUpdate(ITransmitterCtrl... iTransmitterCtrls) {
+    protected void onProgressUpdate(IStreamer... iStreamers) {
         if (debug) Log.i(TAG, "onProgressUpdate");
-        iTransmitterCtrlReg.registerTransmitterCtrl(iTransmitterCtrls[0]);
+        iStreamerRegister.registerTransmitterCtrl(iStreamers[0]);
     }
 
 }

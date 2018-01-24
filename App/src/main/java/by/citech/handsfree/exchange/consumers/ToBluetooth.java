@@ -7,8 +7,8 @@ import java.util.Locale;
 
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IStreamer;
+import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.StatusMessages;
@@ -17,7 +17,7 @@ import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.statistic.TrafficAnalyzer;
 
 public class ToBluetooth
-        implements ITransmitterCtrl, ITransmitter,
+        implements IStreamer, IRxComplex,
         TrafficAnalyzer.ITrafficUpdate, IPrepareObject, ISettingsCtrl {
 
     private static final String TAG = Tags.ToBluetooth;
@@ -82,7 +82,7 @@ public class ToBluetooth
     //--------------------- IReceiverCtrl
 
     @Override
-    public void prepareStream(ITransmitter receiver) throws Exception {
+    public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
             if (debug) Log.w(TAG, "prepareStream stream is finished, return");
             return;

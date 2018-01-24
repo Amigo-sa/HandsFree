@@ -4,112 +4,75 @@ import android.util.Log;
 
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
-import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.common.IBuilding;
+import by.citech.handsfree.exchange.IRxComplex;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegisterListener;
 import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
-import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 
 public class Bt2AudOutLooper
-        implements IBase, ITransmitter, IPrepareObject,
-        ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
+        implements IRxComplex, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener, IBuilding {
 
     private static final String STAG = Tags.Bt2AudOutLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
-
-    static {
-        objCount = 0;
-    }
+    static {objCount = 0;}
 
     //--------------------- preparation
 
     private EAudioCodecType codecType;
     private ICodec codec;
-    private ITransmitter iTransmitter;
-    private ITransmitterCtrl iTransmitterCtrl;
+    private IRxComplex iRxComplex;
+    private IStreamer iStreamer;
     private boolean isSession;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        applySettings(null);
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return codec != null && codecType != null;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
-        codec = AudioCodecFactory.getAudioCodec(codecType);
-        return true;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
         codecType = Settings.AudioCommon.audioCodecType;
-        return true;
+        codec = AudioCodecFactory.getAudioCodec(codecType);
     }
 
     //--------------------- constructor
 
     public Bt2AudOutLooper() {
         ToAudioOut toAudioOut = new ToAudioOut();
-        iTransmitterCtrl = toAudioOut;
-        iTransmitter = toAudioOut;
+        iStreamer = toAudioOut;
+        iRxComplex = toAudioOut;
     }
 
-    //--------------------- IBase
+    //--------------------- IBuilding
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public void build() {
+        if (debug) Log.i(TAG, "build");
         registerCallerFsmListener(this, TAG);
         try {
-            iTransmitterCtrl.prepareStream(this);
+            iStreamer.prepareStream(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public void destroy() {
+        if (debug) Log.i(TAG, "destroy");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
-        iTransmitterCtrl.finishStream();
-        iTransmitterCtrl = null;
-        iTransmitter = null;
+        iStreamer.finishStream();
+        iStreamer = null;
+        iRxComplex = null;
         codecType = null;
         codec = null;
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- ICallerFsmListener
@@ -130,14 +93,14 @@ public class Bt2AudOutLooper
 
     private void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        iTransmitterCtrl.streamOn();
+        iStreamer.streamOn();
         codec.initiateEncoder();
         codec.initiateDecoder();
     }
 
     private void stopDebug() {
         if (debug) Log.i(TAG, "stopDebug");
-        iTransmitterCtrl.streamOff();
+        iStreamer.streamOff();
         isSession = false;
     }
 
@@ -162,7 +125,7 @@ public class Bt2AudOutLooper
             if (debug) Log.i(TAG, "sendData byte[], first sendData on session");
             isSession = true;
         }
-        iTransmitter.sendData(dataDecoded);
+        iRxComplex.sendData(dataDecoded);
     }
 
 }

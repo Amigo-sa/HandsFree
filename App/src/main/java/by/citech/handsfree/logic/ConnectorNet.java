@@ -7,10 +7,10 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.RedirectFromNet;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.network.client.ClientConn;
@@ -21,7 +21,7 @@ import by.citech.handsfree.network.control.IDisc;
 import by.citech.handsfree.exchange.IMessageResult;
 import by.citech.handsfree.network.control.Disconnect;
 import by.citech.handsfree.exchange.SendMessage;
-import by.citech.handsfree.exchange.ITransmitterCtrlReg;
+import by.citech.handsfree.exchange.IStreamerRegister;
 import by.citech.handsfree.exchange.RedirectToNet;
 import by.citech.handsfree.network.server.ServerOff;
 import by.citech.handsfree.network.server.ServerOn;
@@ -50,7 +50,7 @@ import static by.citech.handsfree.logic.ECallReport.OutConnectionFailed;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
-        implements IServerCtrlReg, ITransmitterCtrlReg, IClientCtrlReg, ICallerFsmListener,
+        implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, ICallerFsmListener,
         IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreading, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ConnectorNet;
@@ -72,7 +72,7 @@ public class ConnectorNet
     private String remPort;
     private IServerCtrl iServerCtrl;
     private IClientCtrl iClientCtrl;
-    private Collection<ITransmitterCtrl> transmitterCtrls;
+    private Collection<IStreamer> transmitterCtrls;
     private IConnCtrl iConnCtrl;
     private Handler handler;
     private INetInfoGetter iNetInfoGetter;
@@ -413,15 +413,15 @@ public class ConnectorNet
         }
     }
 
-    //--------------------- ITransmitterCtrlReg
+    //--------------------- IStreamerRegister
 
     @Override
-    public void registerTransmitterCtrl(ITransmitterCtrl iTransmitterCtrl) {
+    public void registerTransmitterCtrl(IStreamer iStreamer) {
         if (debug) Log.i(TAG, "registerTransmitterCtrl");
-        if (iTransmitterCtrl == null) {
+        if (iStreamer == null) {
             if (debug) Log.e(TAG, "registerTransmitterCtrl fromCtrl is null");
         } else {
-            transmitterCtrls.add(iTransmitterCtrl);
+            transmitterCtrls.add(iStreamer);
         }
     }
 
@@ -512,7 +512,7 @@ public class ConnectorNet
 
     private void stopStream() {
         if (debug) Log.i(TAG, "stopStream");
-        for (ITransmitterCtrl transmitterCtrl : transmitterCtrls) {
+        for (IStreamer transmitterCtrl : transmitterCtrls) {
             if (transmitterCtrl != null) {
                 transmitterCtrl.finishStream();
             }

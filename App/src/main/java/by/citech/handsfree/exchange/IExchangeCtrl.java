@@ -1,6 +1,6 @@
 package by.citech.handsfree.exchange;
 
 public interface IExchangeCtrl {
-    ITransmitter getTransmitter();
-    void setReceiver(ITransmitter iTransmitter);
+    IRxComplex getTransmitter();
+    void setReceiver(IRxComplex iRxComplex);
 }

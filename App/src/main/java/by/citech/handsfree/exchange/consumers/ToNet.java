@@ -7,8 +7,8 @@ import java.util.Locale;
 
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IRxComplex;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
@@ -16,7 +16,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 
 public class ToNet
-        implements ITransmitterCtrl, ISettingsCtrl, IPrepareObject {
+        implements IStreamer, ISettingsCtrl, IPrepareObject {
 
     private static final String STAG = Tags.ToNet;
     private final String TAG;
@@ -36,7 +36,7 @@ public class ToNet
     private int netChunkSize;
     private int netFactor;
     private byte[] netChunk;
-    private ITransmitter iTransmitter;
+    private IRxComplex iRxComplex;
     private boolean isStreaming;
     private boolean isFinished;
     private boolean isPrepared;
@@ -89,10 +89,10 @@ public class ToNet
         this.source = source;
     }
 
-    //--------------------- ITransmitterCtrl
+    //--------------------- IStreamer
 
     @Override
-    public void prepareStream(ITransmitter receiver) throws Exception {
+    public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
             if (debug) Log.w(TAG, "prepareStream stream is finished, return");
             return;
@@ -100,7 +100,7 @@ public class ToNet
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
             if (debug) Log.i(TAG, "prepareStream");
-            this.iTransmitter = receiver;
+            this.iRxComplex = receiver;
         }
         if (debug) Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
                         " netSignificantAll is %b," +
@@ -122,7 +122,7 @@ public class ToNet
         if (debug) Log.i(TAG, "finishStream");
         isFinished = true;
         streamOff();
-        iTransmitter = null;
+        iRxComplex = null;
         source = null;
     }
 
@@ -187,7 +187,7 @@ public class ToNet
             if (netChunkCount == netFactor) {
                 if (debug) Log.w(TAG, String.format("streamOn net out buff contains enough data of %d bytes, sending", baos.size()));
                 if (isStreaming() && isReadyToStream()) {
-                    iTransmitter.sendData(baos.toByteArray());
+                    iRxComplex.sendData(baos.toByteArray());
                 }
                 netChunkCount = 0;
                 baos.reset();

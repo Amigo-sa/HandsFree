@@ -8,7 +8,7 @@ import java.util.Locale;
 
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.exchange.ITransmitter;
+import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
@@ -44,7 +44,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
     private boolean isMtuChanged = false;
 
     private int totalReceiveCount = 0;
-    private ArrayList<ITransmitter> iRxDataListeners;
+    private ArrayList<IRxComplex> iRxDataListeners;
 
     public LeDataTransmitter(Characteristics characteristics) {
         this.characteristics = characteristics;
@@ -70,12 +70,12 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
 
     //-----------------Observers method -----------------------------
 
-    public void addIRxDataListener(ITransmitter iTransmitter) {
-        iRxDataListeners.add(iTransmitter);
+    public void addIRxDataListener(IRxComplex iRxComplex) {
+        iRxDataListeners.add(iRxComplex);
     }
 
     private void updateRxData(byte[] data){
-        for (ITransmitter listener : iRxDataListeners) {
+        for (IRxComplex listener : iRxDataListeners) {
             listener.sendData(data);
         }
     }

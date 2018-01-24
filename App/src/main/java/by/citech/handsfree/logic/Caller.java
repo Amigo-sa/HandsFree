@@ -244,7 +244,7 @@ public class Caller {
                 .setiBtList(iBtList);
 
         connectorBluetooth.baseStart();
-        bt2AudOutLooper.baseStart();
+        bt2AudOutLooper.build();
     }
 
     //--------------------- data from microphone redirects to dynamic

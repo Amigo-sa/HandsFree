@@ -11,19 +11,19 @@ public class SendMessage
         extends AsyncTask<String, String, Void> {
 
     private IMessageResult iMessageResult;
-    private ITransmitter iTransmitter;
+    private IRxComplex iRxComplex;
 
-    public SendMessage(IMessageResult iMessageResult, ITransmitter iTransmitter) {
+    public SendMessage(IMessageResult iMessageResult, IRxComplex iRxComplex) {
         this.iMessageResult = iMessageResult;
-        this.iTransmitter = iTransmitter;
+        this.iRxComplex = iRxComplex;
     }
 
     @Override
     protected Void doInBackground(String... message) {
         if (Settings.debug) Log.i(Tags.SendMessage, "doInBackground");
         if (Settings.debug) Log.i(Tags.SendMessage, String.format("doInBackground message is <%s>", message[0]));
-        if (iTransmitter != null) {
-            iTransmitter.sendMessage(message[0]);
+        if (iRxComplex != null) {
+            iRxComplex.sendMessage(message[0]);
             publishProgress(StatusMessages.CLT_MESSAGE_SENDED);
         } else {
             if (Settings.debug) Log.i(Tags.SendMessage, "doInBackground iClientCtrl is null");

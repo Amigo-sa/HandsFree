@@ -6,7 +6,8 @@ import java.util.Arrays;
 
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
-import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.common.IBuilding;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.exchange.producers.FromGenerator;
 import by.citech.handsfree.generator.EDataType;
 import by.citech.handsfree.logic.ECallerState;
@@ -15,71 +16,39 @@ import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegisterListener;
 import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.exchange.consumers.ToBluetooth;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreading;
 
 public class ToBtLooper
-        implements IBase, ITransmitter, IPrepareObject, IThreading,
-        ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
+        implements IRxComplex, IThreading, IBuilding,
+        ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ToBtLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
-
-    static {
-        objCount = 0;
-    }
+    static {objCount = 0;}
 
     //--------------------- preparation
 
     private EAudioCodecType codecType;
     private ICodec codec;
-    private ITransmitterCtrl source, destination;
-    private ITransmitter iTransmitter;
+    private IStreamer source, destination;
+    private IRxComplex iRxComplex;
     private boolean isSession;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        takeSettings();
-        applySettings(null);
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return codec != null && codecType != null;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
         codecType = Settings.AudioCommon.audioCodecType;
-        return true;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
         codec = AudioCodecFactory.getAudioCodec(codecType);
-        return true;
     }
 
     //--------------------- constructor
@@ -97,16 +66,15 @@ public class ToBtLooper
                 break;
         }
         ToBluetooth toBluetooth = new ToBluetooth(micToBtStorage);
-        iTransmitter = toBluetooth;
+        iRxComplex = toBluetooth;
         destination = toBluetooth;
     }
 
-    //--------------------- IBase
+    //--------------------- IBuilding
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public void build() {
+        if (debug) Log.i(TAG, "build");
         registerCallerFsmListener(this, TAG);
         try {
             source.prepareStream(this);
@@ -114,12 +82,11 @@ public class ToBtLooper
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public void destroy() {
+        if (debug) Log.i(TAG, "destroy");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
         destination.finishStream();
@@ -128,8 +95,6 @@ public class ToBtLooper
         source = null;
         codecType = null;
         codec = null;
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- ICallerFsmListener
@@ -170,15 +135,15 @@ public class ToBtLooper
         if (debug) Log.w(TAG, "sendData short[] row (shorts): " + Arrays.toString(data));
         if (data == null || data.length != codecType.getDecodedShortsSize()) {
             if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
-        } else if (iTransmitter != null) {
+        } else if (iRxComplex != null) {
             if (!isSession) {
                 if (debug) Log.i(TAG, "sendData short[], first sendData on session");
                 isSession = true;
             }
             byte[] toSend = codec.getEncodedData(data);
             if (debug) Log.w(TAG, "sendData short[] encoded (bytes): " + Arrays.toString(toSend));
-            iTransmitter.sendData(toSend);
-//          iTransmitter.sendData(codec.getEncodedData(data));
+            iRxComplex.sendData(toSend);
+//          iRxComplex.sendData(codec.getEncodedData(data));
         }
     }
 

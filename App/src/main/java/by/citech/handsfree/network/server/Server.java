@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import by.citech.handsfree.common.EConnectionState;
-import by.citech.handsfree.exchange.ITransmitter;
+import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.network.server.connection.protocols.http.IHTTPSession;
 import by.citech.handsfree.network.server.connection.websockets.CloseCode;
@@ -22,7 +22,7 @@ import by.citech.handsfree.parameters.Tags;
 
 public class Server
         extends NanoWSD
-        implements IServerCtrl, ITransmitter {
+        implements IServerCtrl, IRxComplex {
 
     private static final Logger LOG = Logger.getLogger(Server.class.getName());
 
@@ -34,7 +34,7 @@ public class Server
 
     private WebSocket webSocket;
     private Handler handler;
-    private ITransmitter receiver;
+    private IRxComplex receiver;
     private EConnectionState state;
 
     {
@@ -76,7 +76,7 @@ public class Server
         stop();
     }
 
-    //--------------------- ITransmitter
+    //--------------------- IRxComplex
 
     @Override
     public void sendData(byte[] data) {
@@ -111,15 +111,15 @@ public class Server
     //--------------------- IExchangeCtrl
 
     @Override
-    public ITransmitter getTransmitter() {
+    public IRxComplex getTransmitter() {
         if (debug) Log.i(TAG, "getTransmitter");
         return this;
     }
 
     @Override
-    public void setReceiver(ITransmitter iTransmitter) {
+    public void setReceiver(IRxComplex iRxComplex) {
         if (debug) Log.i(TAG, "setReceiver");
-        this.receiver = iTransmitter;
+        this.receiver = iRxComplex;
     }
 
     //--------------------- IConnCtrl

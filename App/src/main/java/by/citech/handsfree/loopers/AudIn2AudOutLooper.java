@@ -6,36 +6,30 @@ import java.util.Arrays;
 
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
-import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.common.IBuilding;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegisterListener;
-import by.citech.handsfree.settings.ISettingsCtrl;
-import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreading;
 
 public class AudIn2AudOutLooper
-        implements ITransmitter, IBase, IPrepareObject, IThreading,
-        ISettingsCtrl, ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
+        implements IRxComplex, IThreading, ICallerFsmRegisterListener,
+        ICallerFsmListener, ICallerFsm, IBuilding {
 
     private static final String STAG = Tags.AudIn2AudOutLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
-
-    static {
-        objCount = 0;
-    }
+    static {objCount = 0;}
 
     //--------------------- preparation
 
@@ -46,46 +40,20 @@ public class AudIn2AudOutLooper
     private int audioBuffSizeShorts;
     private int buff2CodecFactor;
     private boolean audioSingleFrame;
-    private ITransmitter iTransmitter;
-    private ITransmitterCtrl fromCtrl, toCtrl;
+    private IRxComplex iRxComplex;
+    private IStreamer fromCtrl, toCtrl;
     private boolean isUsingCodec;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        applySettings(null);
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return codecType != null && codec != null;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
         codecType = Settings.AudioCommon.audioCodecType;
         codecFactor = codecType.getDecodedShortsSize();
         audioBuffSizeBytes = Settings.AudioCommon.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
         buff2CodecFactor = audioBuffSizeShorts / codecFactor;
         audioSingleFrame = Settings.AudioCommon.audioSingleFrame;
-        return true;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
         codec = AudioCodecFactory.getAudioCodec(codecType);
-        return true;
     }
 
     //--------------------- constructor
@@ -93,17 +61,16 @@ public class AudIn2AudOutLooper
     public AudIn2AudOutLooper(boolean isUsingCodec) {
         this.isUsingCodec = isUsingCodec;
         ToAudioOut toAudioOut = new ToAudioOut();
-        iTransmitter = toAudioOut;
+        iRxComplex = toAudioOut;
         toCtrl = toAudioOut;
         fromCtrl = new FromAudioIn();
     }
 
-    //--------------------- IBase
+    //--------------------- IBuilding
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public void build() {
+        if (debug) Log.i(TAG, "build");
         registerCallerFsmListener(this, TAG);
         try {
             toCtrl.prepareStream(null);
@@ -111,23 +78,20 @@ public class AudIn2AudOutLooper
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public void destroy() {
+        if (debug) Log.i(TAG, "destroy");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
         fromCtrl.finishStream();
         toCtrl.finishStream();
-        iTransmitter = null;
+        iRxComplex = null;
         fromCtrl = null;
         toCtrl = null;
         codecType = null;
         codec = null;
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- ICallerFsmListener
@@ -166,18 +130,18 @@ public class AudIn2AudOutLooper
     @Override
     public void sendData(byte[] data) {
         if (debug) Log.i(TAG, "sendData byte[]");
-        if (iTransmitter != null) {
+        if (iRxComplex != null) {
             if (debug) Log.i(TAG, "sendData data sended");
-            iTransmitter.sendData(data);
+            iRxComplex.sendData(data);
         }
     }
 
     @Override
     public void sendData(short[] data) {
         if (debug) Log.i(TAG, "sendData short[]");
-        if (iTransmitter != null) {
+        if (iRxComplex != null) {
             if (audioSingleFrame) {
-                iTransmitter.sendData(getPreparedData(data));
+                iRxComplex.sendData(getPreparedData(data));
             } else {
                 int from;
                 for (int i = 0; i < buff2CodecFactor; i++) {
@@ -185,7 +149,7 @@ public class AudIn2AudOutLooper
                     if (debug) Log.i(TAG, "sendData from is " + from);
                     System.arraycopy(getPreparedData(Arrays.copyOfRange(data, from, from + codecFactor)), 0, data, from, codecFactor);
                 }
-                iTransmitter.sendData(data);
+                iRxComplex.sendData(data);
             }
         }
     }

@@ -2,32 +2,26 @@ package by.citech.handsfree.loopers;
 
 import android.util.Log;
 
-import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
 import by.citech.handsfree.logic.ICallerFsm;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegisterListener;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.threading.IThreading;
 
 public class Bt2BtLooper
-        implements IBase, ISettingsCtrl, IPrepareObject, IThreading,
+        implements IThreading, IBuilding,
         ICallerFsm, ICallerFsmRegisterListener, ICallerFsmListener {
 
     private static final String STAG = Tags.Bt2BtLooper;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
-
-    static {
-        objCount = 0;
-    }
+    static {objCount = 0;}
 
     //--------------------- preparation
 
@@ -61,34 +55,8 @@ public class Bt2BtLooper
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        applySettings(null);
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return dataBuff != null;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
-        return true;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
         btFactor = Settings.Bluetooth.btFactor;
         bt2BtPacketSize = Settings.Bluetooth.bt2BtPacketSize;
-        return true;
     }
 
     //--------------------- non-settings
@@ -100,29 +68,24 @@ public class Bt2BtLooper
         isActive = false;
     }
 
-    //--------------------- IBase
+    //--------------------- IBuilding
 
     @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public void build() {
+        if (debug) Log.i(TAG, "build");
         registerCallerFsmListener(this, TAG);
-        prepareObject();
         isRunning = false;
         isActive = true;
         addRunnable(looping);
-        return true;
     }
 
     @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public void destroy() {
+        if (debug) Log.i(TAG, "destroy");
         unregisterCallerFsmListener(this, TAG);
         stopDebug();
         isActive = false;
         dataBuff = null;
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- ICallerFsmListener

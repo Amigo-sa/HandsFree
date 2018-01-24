@@ -8,17 +8,14 @@ import android.util.Log;
 
 import java.util.Locale;
 
-import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.exchange.ITransmitter;
-import by.citech.handsfree.exchange.ITransmitterCtrl;
+import by.citech.handsfree.exchange.IRxComplex;
+import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.settings.ESeverityLevel;
 
 public class ToAudioOut
-        implements ITransmitterCtrl, ITransmitter {
+        implements IStreamer, IRxComplex {
 
     private static final String TAG = Tags.ToAudioOut;
     private static final boolean debug = Settings.debug;
@@ -58,10 +55,10 @@ public class ToAudioOut
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
     }
 
-    //--------------------- ITransmitterCtrl
+    //--------------------- IStreamer
 
     @Override
-    public void prepareStream(ITransmitter receiver) throws Exception {
+    public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
             if (debug) Log.w(TAG, "prepareStream stream is finished, return");
             return;

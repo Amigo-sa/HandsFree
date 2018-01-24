@@ -5,7 +5,7 @@ import android.util.Log;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 
-public interface ITransmitter {
+public interface IRxComplex {
 
     String TAG = Tags.ITransmitter;
     String MSG = StatusMessages.ERR_NOT_OVERRIDED;
