@@ -41,7 +41,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
@@ -49,8 +48,9 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.common.IService;
 import by.citech.handsfree.management.ResourceManager;
-import by.citech.handsfree.traffic.NumberedTrafficAnalyzer;
-import by.citech.handsfree.traffic.NumberedTrafficInfo;
+import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
+import by.citech.handsfree.statistic.NumberedTrafficInfo;
+import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
@@ -85,7 +85,6 @@ import by.citech.handsfree.threading.ThreadManager;
 import by.citech.handsfree.util.Keyboard;
 
 import static android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE;
-import static by.citech.handsfree.util.MathHelper.convertByteArrToIntRaw;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class CallActivity
@@ -146,10 +145,19 @@ public class CallActivity
 
         ThreadManager.getInstance().baseCreate();
         viewManager = new CallActivityViewManager();
+
+        //---------------- TEST START
+        Handler handler = new Handler();
         NumberedTrafficAnalyzer.getInstance()
                 .setListener(viewManager)
-                .setHandler(new Handler())
+                .setHandler(handler)
                 .setInterval(1000);
+        RssiReporter.getInstance()
+                .setListener(viewManager)
+                .setHandler(handler)
+                .setInterval(1000);
+        //---------------- TEST END
+
         viewManager.setiGetter(this);
         viewManager.setDefaultView();
         viewManager.baseCreate();
@@ -255,7 +263,6 @@ public class CallActivity
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        viewManager.onNumberedTrafficInfoUpdated(new NumberedTrafficInfo());
         if (debug) Log.w(TAG, "onPostResume");
     }
 

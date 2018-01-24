@@ -9,16 +9,16 @@ import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.exchange.ITransmitterCtrl;
-import by.citech.handsfree.traffic.ITrafficUpdate;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
+import by.citech.handsfree.statistic.TrafficAnalyzer;
 
 public class ToBluetooth
         implements ITransmitterCtrl, ITransmitter,
-        ITrafficUpdate, IPrepareObject, ISettingsCtrl {
+        TrafficAnalyzer.ITrafficUpdate, IPrepareObject, ISettingsCtrl {
 
     private static final String TAG = Tags.ToBluetooth;
     private static final boolean debug = Settings.debug;

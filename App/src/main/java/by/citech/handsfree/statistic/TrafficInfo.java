@@ -1,4 +1,4 @@
-package by.citech.handsfree.traffic;
+package by.citech.handsfree.statistic;
 
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
@@ -17,10 +17,10 @@ public class TrafficInfo {
     private long overallMs;
     private long overallBytes;
     private ETrafficNodes node;
-    private ITrafficUpdate iTrafficUpdate;
+    private TrafficAnalyzer.ITrafficUpdate iTrafficUpdate;
     private boolean isInitiated;
 
-    public TrafficInfo(ETrafficNodes node, ITrafficUpdate iTrafficUpdate) {
+    public TrafficInfo(ETrafficNodes node, TrafficAnalyzer.ITrafficUpdate iTrafficUpdate) {
         if (node == null || iTrafficUpdate == null) {
             return;
         }

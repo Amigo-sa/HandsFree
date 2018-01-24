@@ -1,4 +1,4 @@
-package by.citech.handsfree.traffic;
+package by.citech.handsfree.statistic;
 
 public enum ETrafficNodes {
     BtOut,

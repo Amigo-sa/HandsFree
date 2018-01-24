@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
@@ -14,7 +13,7 @@ import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreadManager;
-import by.citech.handsfree.traffic.INumberedTrafficAnalyzer;
+import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.INumberedTrafficAnalyzer;
 
 public class LeDataTransmitter implements CallbackWriteListener, IThreadManager, INumberedTrafficAnalyzer {
 

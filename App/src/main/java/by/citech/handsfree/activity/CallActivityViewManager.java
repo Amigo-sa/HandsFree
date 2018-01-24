@@ -15,8 +15,9 @@ import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
-import by.citech.handsfree.traffic.NumberedTrafficAnalyzer.IOnInfoUpdateListener;
-import by.citech.handsfree.traffic.NumberedTrafficInfo;
+import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.IOnInfoUpdateListener;
+import by.citech.handsfree.statistic.NumberedTrafficInfo;
+import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.logic.ICallerFsmListener;
@@ -44,7 +45,7 @@ import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallActivityViewManager
         implements IBase, ISettingsCtrl, IPrepareObject, IOnInfoUpdateListener,
-        IViewKeeper, ICallerFsmListener, ICallerFsmRegisterListener {
+        IViewKeeper, ICallerFsmListener, ICallerFsmRegisterListener, RssiReporter.IOnRssiUpdateListener {
 
     private static final String STAG = Tags.ViewManager;
     private static final boolean debug = Settings.debug;
@@ -93,6 +94,7 @@ public class CallActivityViewManager
 
     private IGetView iGetter;
 
+    private TextView textViewRssi;
     private TextView textViewPacketSize;
     private TextView textViewLastLostPacketsAmount;
     private TextView textViewMaxLostPacketsAmount;
@@ -579,6 +581,7 @@ public class CallActivityViewManager
     private View getViewContacts() {return viewContacts = getView(viewContacts, R.id.contacts_list);}
     private View getViewTraffic()  {return viewTraffic  = getView(viewTraffic,  R.id.traffic_info);}
 
+    private TextView getTextViewRssi()                      {return textViewRssi                      = getView(textViewRssi,                      R.id.textViewRssi);}
     private TextView getTextViewPacketSize()                {return textViewPacketSize                = getView(textViewPacketSize,                R.id.textViewPacketSize);}
     private TextView getTextViewLastLostPacketsAmount()     {return textViewLastLostPacketsAmount     = getView(textViewLastLostPacketsAmount,     R.id.textViewLastLostPacketsAmount);}
     private TextView getTextViewMaxLostPacketsAmount()      {return textViewMaxLostPacketsAmount      = getView(textViewMaxLostPacketsAmount,      R.id.textViewMaxLostPacketsAmount);}
@@ -592,22 +595,29 @@ public class CallActivityViewManager
     private TextView getTextViewDeltaLostPercent()          {return textViewDeltaLostPercent          = getView(textViewDeltaLostPercent,          R.id.textViewDeltaLostPercent);}
     private TextView getTextViewDeltaBytesPerSec()          {return textViewDeltaBytesPerSec          = getView(textViewDeltaBytesPerSec,          R.id.textViewDeltaBytesPerSec);}
 
+    //--------------------- IOnRssiUpdateListener
+
+    @Override
+    public void onRssiUpdated(int rssi) {
+        setText(getTextViewRssi()                     , String.format(Locale.US, " RSSI:                      %08d", rssi));
+    }
+
     //--------------------- IOnInfoUpdateListener
 
     @Override
     public void onNumberedTrafficInfoUpdated(NumberedTrafficInfo info) {
-        setText(getTextViewPacketSize()               , String.format(Locale.US, "  Размер пакета:             %010d", info.getPacketSize()));
-        setText(getTextViewLastLostPacketsAmount()    , String.format(Locale.US, "  Последняя потеря, пакетов: %010d", info.getLastLostPacketsAmount()));
-        setText(getTextViewMaxLostPacketsAmount()     , String.format(Locale.US, "  Макс. потеря, пакетов:     %010d", info.getMaxLostPacketsAmount()));
-        setText(getTextViewTotalPacketsCount()        , String.format(Locale.US, "  Всего, пакетов:            %010d", info.getTotalPacketsCount()));
-        setText(getTextViewTotalBytesCount()          , String.format(Locale.US, "  Всего, байт                %010d", info.getTotalBytesCount()));
-        setText(getTextViewTotalReceivedPacketsCount(), String.format(Locale.US, "  Всего принято, пакетов:    %010d", info.getTotalReceivedPacketsCount()));
-        setText(getTextViewTotalLostPacketsCount()    , String.format(Locale.US, "  Всего утеряно, пакетов:    %010d", info.getTotalLostPacketsCount()));
-        setText(getTextViewTotalLostPercent()         , String.format(Locale.US, "  Всего утеряно, процент:    %010f", info.getTotalLostPercent()));
-        setText(getTextViewTotalBytesPerSec()         , String.format(Locale.US, "  Байт/сек, среднее:         %010f", info.getTotalBytesPerSec()));
-        setText(getTextViewDeltaLostPacketsCount()    , String.format(Locale.US, "  Текущие потери, пакетов:   %010d", info.getDeltaLostPacketsCount()));
-        setText(getTextViewDeltaLostPercent()         , String.format(Locale.US, "  Текущий потери, процент:   %010f", info.getDeltaLostPercent()));
-        setText(getTextViewDeltaBytesPerSec()         , String.format(Locale.US, "  Байт/сек, текущее:         %010f", info.getDeltaBytesPerSec()));
+        setText(getTextViewPacketSize()               , String.format(Locale.US, " Размер пакета:             %08d", info.getPacketSize()));
+        setText(getTextViewLastLostPacketsAmount()    , String.format(Locale.US, " Последняя потеря, пакетов: %08d", info.getLastLostPacketsAmount()));
+        setText(getTextViewMaxLostPacketsAmount()     , String.format(Locale.US, " Макс. потеря, пакетов:     %08d", info.getMaxLostPacketsAmount()));
+        setText(getTextViewTotalPacketsCount()        , String.format(Locale.US, " Всего, пакетов:            %08d", info.getTotalPacketsCount()));
+        setText(getTextViewTotalBytesCount()          , String.format(Locale.US, " Всего, байт                %08d", info.getTotalBytesCount()));
+        setText(getTextViewTotalReceivedPacketsCount(), String.format(Locale.US, " Всего принято, пакетов:    %08d", info.getTotalReceivedPacketsCount()));
+        setText(getTextViewTotalLostPacketsCount()    , String.format(Locale.US, " Всего утеряно, пакетов:    %08d", info.getTotalLostPacketsCount()));
+        setText(getTextViewTotalLostPercent()         , String.format(Locale.US, " Всего утеряно, процент:    %08f", info.getTotalLostPercent()));
+        setText(getTextViewTotalBytesPerSec()         , String.format(Locale.US, " Байт/сек, среднее:         %08f", info.getTotalBytesPerSec()));
+        setText(getTextViewDeltaLostPacketsCount()    , String.format(Locale.US, " Текущие потери, пакетов:   %08d", info.getDeltaLostPacketsCount()));
+        setText(getTextViewDeltaLostPercent()         , String.format(Locale.US, " Текущий потери, процент:   %08f", info.getDeltaLostPercent()));
+        setText(getTextViewDeltaBytesPerSec()         , String.format(Locale.US, " Байт/сек, текущее:         %08f", info.getDeltaBytesPerSec()));
     }
 
 }

@@ -70,4 +70,5 @@ public class Tags {
     public static final String StaticSineGenerator = "WSD_StaticSineGen";
     public static final String LeDataTransmitter   = "WSD_LeDataTransmitter";
     public static final String NumberedTrafficAnalyzer = "WSD_NumberedAnalyzer";
+    public static final String RssiReporter = "WSD_RssiReporter";
 }

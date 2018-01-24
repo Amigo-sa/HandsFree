@@ -1,4 +1,4 @@
-package by.citech.handsfree.traffic;
+package by.citech.handsfree.statistic;
 
 import android.util.Log;
 
@@ -19,7 +19,7 @@ public class TrafficAnalyzer
     private List<TrafficInfo> trafficInfos;
     private ITrafficReporter iTrafficReporter;
     private boolean isRunning;
-    private long previousTimestamp, currentTimestamp, timeDelta;
+    private long prevTimestamp, currTimestamp, timeDelta;
 
     //--------------------- singleton
 
@@ -27,8 +27,8 @@ public class TrafficAnalyzer
 
     private TrafficAnalyzer() {
         isRunning = false;
-        previousTimestamp = 0;
-        currentTimestamp = 0;
+        prevTimestamp = 0;
+        currTimestamp = 0;
         timeDelta = 0;
         trafficInfos = new ArrayList<>();
     }
@@ -62,21 +62,21 @@ public class TrafficAnalyzer
     @Override
     public void run() {
         if (iTrafficReporter == null) {
-            Log.e(TAG, "run one of key parameters are null");
+            if (debug) Log.e(TAG, "run one of key parameters are null");
             return;
         }
         if (debug) Log.i(TAG, "run");
         isRunning = true;
         while (isRunning) {
-            currentTimestamp = System.currentTimeMillis();
-            if (previousTimestamp != 0) {
-                timeDelta = currentTimestamp - previousTimestamp;
+            currTimestamp = System.currentTimeMillis();
+            if (prevTimestamp != 0) {
+                timeDelta = currTimestamp - prevTimestamp;
                 for (TrafficInfo trafficInfo : trafficInfos) {
                     trafficInfo.updateInfo(timeDelta);
                 }
                 iTrafficReporter.updateTrafficInfo();
             }
-            previousTimestamp = currentTimestamp;
+            prevTimestamp = currTimestamp;
             try {
                 Thread.sleep(SLEEP_INTERVAL);
                 if (!isRunning) return;
@@ -89,6 +89,15 @@ public class TrafficAnalyzer
     public void deactivate() {
         if (debug) Log.i(TAG, "deactivate");
         isRunning = false;
+    }
+
+    public interface ITrafficReporter {
+        void publishTrafficInfo(TrafficInfo trafficInfo);
+        void updateTrafficInfo();
+    }
+
+    public interface ITrafficUpdate {
+        default Long getBytesDelta() {return null;};
     }
 
 }

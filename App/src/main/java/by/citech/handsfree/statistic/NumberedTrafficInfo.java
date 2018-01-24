@@ -1,4 +1,4 @@
-package by.citech.handsfree.traffic;
+package by.citech.handsfree.statistic;
 
 public class NumberedTrafficInfo {
 
@@ -43,51 +43,17 @@ public class NumberedTrafficInfo {
         this.deltaBytesPerSec          = deltaBytesPerSec         ;
     }
 
-    public int getPacketSize() {
-        return packetSize;
-    }
+    public int getPacketSize()                 {return packetSize;}
+    public long getLastLostPacketsAmount()     {return lastLostPacketsAmount;}
+    public long getMaxLostPacketsAmount()      {return maxLostPacketsAmount;}
+    public long getTotalPacketsCount()         {return totalPacketsCount;}
+    public long getTotalReceivedPacketsCount() {return totalReceivedPacketsCount;}
+    public long getTotalLostPacketsCount()     {return totalLostPacketsCount;}
+    public double getTotalBytesPerSec()        {return totalBytesPerSec;}
+    public long getTotalBytesCount()           {return totalBytesCount;}
+    public double getTotalLostPercent()        {return totalLostPercent;}
+    public long getDeltaLostPacketsCount()     {return deltaLostPacketsCount;}
+    public double getDeltaLostPercent()        {return deltaLostPercent;}
+    public double getDeltaBytesPerSec()        {return deltaBytesPerSec;}
 
-    public long getLastLostPacketsAmount() {
-        return lastLostPacketsAmount;
-    }
-
-    public long getMaxLostPacketsAmount() {
-        return maxLostPacketsAmount;
-    }
-
-    public long getTotalPacketsCount() {
-        return totalPacketsCount;
-    }
-
-    public long getTotalReceivedPacketsCount() {
-        return totalReceivedPacketsCount;
-    }
-
-    public long getTotalLostPacketsCount() {
-        return totalLostPacketsCount;
-    }
-
-    public double getTotalBytesPerSec() {
-        return totalBytesPerSec;
-    }
-
-    public long getTotalBytesCount() {
-        return totalBytesCount;
-    }
-
-    public double getTotalLostPercent() {
-        return totalLostPercent;
-    }
-
-    public long getDeltaLostPacketsCount() {
-        return deltaLostPacketsCount;
-    }
-
-    public double getDeltaLostPercent() {
-        return deltaLostPercent;
-    }
-
-    public double getDeltaBytesPerSec() {
-        return deltaBytesPerSec;
-    }
 }

@@ -22,15 +22,19 @@ import java.util.UUID;
 import by.citech.handsfree.bluetoothlegatt.rwdata.CallbackWriteListener;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Requestable;
 import by.citech.handsfree.data.SampleGattAttributes;
-import by.citech.handsfree.traffic.ITrafficUpdate;
 import by.citech.handsfree.settings.Settings;
+import by.citech.handsfree.statistic.RssiReporter;
+import by.citech.handsfree.statistic.TrafficAnalyzer;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
 
-public class BluetoothLeService extends Service implements ITrafficUpdate, Requestable {
+public class BluetoothLeService
+        extends Service
+        implements TrafficAnalyzer.ITrafficUpdate, Requestable, RssiReporter.IRssiProvider, RssiReporter.IRssiProviderRegister {
+
     private final static String TAG = "WSD_BluetoothLeService";
 
     private BluetoothManager mBluetoothManager;
@@ -55,7 +59,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
 
     public final static UUID READ_BYTES = UUID.fromString(SampleGattAttributes.READ_BYTES);
 
-    public void setCallbackWriteListener(CallbackWriteListener callbackWriteListener){
+    public void setCallbackWriteListener(CallbackWriteListener callbackWriteListener) {
         this.mCallbackWriteListener = callbackWriteListener;
     }
 
@@ -66,16 +70,26 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+
+                //------------- TEST START
+                registerRssiProvider(BluetoothLeService.this);
+                //------------- TEST END
+
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
-                Log.i(TAG, "Connected to GATT server.");
+                if (Settings.debug) Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
-                Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
+                if (Settings.debug) Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+
+                //------------- TEST START
+                unregisterRssiProvider(BluetoothLeService.this);
+                //------------- TEST END
+
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
-                Log.i(TAG, "Disconnected from GATT server.");
+                if (Settings.debug) Log.i(TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
             }
         }
@@ -85,7 +99,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+                if (Settings.debug) Log.w(TAG, "onServicesDiscovered received: " + status);
             }
         }
 
@@ -100,41 +114,40 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                super.onCharacteristicWrite(gatt, characteristic, status);
-                //if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
-                if (mCallbackWriteListener != null)
-                    mCallbackWriteListener.callbackIsDone();
-                if(status==BluetoothGatt.GATT_SUCCESS) {
-                    //if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA WRITE:");
-                }
-                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED) {
-                    if (Settings.debug) Log.i(TAG,"GATT WRITE connection congested");
-                }
-                if(status==BluetoothGatt.GATT_WRITE_NOT_PERMITTED) {
-                    if (Settings.debug) Log.i(TAG,"GATT WRITE not permitted");
-                }
-                if(status==BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH) {
-                    if (Settings.debug) Log.i(TAG,"GATT invalid attribute lenght");
-                }
-                if(status==BluetoothGatt.GATT_FAILURE) {
-                    if (Settings.debug) Log.i(TAG,"GATT WRITE other errors");
-                }
-                if(status==BluetoothGatt.GATT_CONNECTION_CONGESTED) {
-                    if (Settings.debug) Log.i(TAG,"GATT WRITE congested");
-                }
-                if(status==BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
-                    if (Settings.debug) Log.i(TAG,"GATT WRITE authentication");
-                }
-                else {
-                    //if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
-                }
-                broadcastUpdate(ACTION_DATA_WRITE);
+            super.onCharacteristicWrite(gatt, characteristic, status);
+            //if (Settings.debug) Log.i(TAG,"onCharacteristicWrite");
+            if (mCallbackWriteListener != null) mCallbackWriteListener.callbackIsDone();
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                //if (Settings.debug) Log.i(TAG,"GATT SUCCESS " + "DATA WRITE:");
+            }
+            if (status == BluetoothGatt.GATT_CONNECTION_CONGESTED) {
+                if (Settings.debug) Log.i(TAG, "GATT WRITE connection congested");
+            }
+            if (status == BluetoothGatt.GATT_WRITE_NOT_PERMITTED) {
+                if (Settings.debug) Log.i(TAG, "GATT WRITE not permitted");
+            }
+            if (status == BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH) {
+                if (Settings.debug) Log.i(TAG, "GATT invalid attribute lenght");
+            }
+            if (status == BluetoothGatt.GATT_FAILURE) {
+                if (Settings.debug) Log.i(TAG, "GATT WRITE other errors");
+            }
+            if (status == BluetoothGatt.GATT_CONNECTION_CONGESTED) {
+                if (Settings.debug) Log.i(TAG, "GATT WRITE congested");
+            }
+            if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
+                if (Settings.debug) Log.i(TAG, "GATT WRITE authentication");
+            } else {
+                //if (Settings.debug) Log.i(TAG,"GATT WRITE :"+status);
+            }
+            broadcastUpdate(ACTION_DATA_WRITE);
         }
 
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-            super.onReadRemoteRssi(gatt, rssi, status);
-            if (Settings.debug) Log.w(TAG, "RSSI " + rssi);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                RssiReporter.getInstance().onRssiResponse(rssi);
+            }
         }
 
         @Override
@@ -150,16 +163,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
             //if (Settings.debug) Log.w("WSD_MTU", String.format("mtu = %d, status = %d", mtu, status));
-            if(status==BluetoothGatt.GATT_SUCCESS)
-                mCallbackWriteListener.onMtuChangeIsDone(mtu);
+            if (status==BluetoothGatt.GATT_SUCCESS) mCallbackWriteListener.onMtuChangeIsDone(mtu);
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorWrite(gatt, descriptor, status);
             if (Settings.debug) Log.i(TAG, String.format("onDescriptorWrite() success, write status = %d", status));
-            if(status==BluetoothGatt.GATT_SUCCESS)
-                mCallbackWriteListener.callbackDescriptorIsDone();
+            if (status==BluetoothGatt.GATT_SUCCESS) mCallbackWriteListener.callbackDescriptorIsDone();
         }
 
     };
@@ -170,17 +181,17 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
        //intent.putExtra(EXTRA_WDATA, wrData);
         sendBroadcast(intent);
     }
-   // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
-   // и получаем данные
-   private void broadcastUpdate(final String action,final BluetoothGattCharacteristic characteristic) {
-       final Intent intent = new Intent(action);
-       sendBroadcast(intent);
-   }
+
+    // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
+    // и получаем данные
+    private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
 
     @Override
     public void requestMtu() {
-        if (mBluetoothGatt != null)
-            mBluetoothGatt.requestMtu(Settings.btMtuSize);
+        if (mBluetoothGatt != null) mBluetoothGatt.requestMtu(Settings.btMtuSize);
         if (Settings.debug) Log.i(TAG, "requestMtu was sendet, await callback ...");
     }
 
@@ -222,13 +233,11 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
                 return false;
             }
         }
-
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null) {
             if (Settings.debug) Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
-
         return true;
     }
 
@@ -245,7 +254,6 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
-
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress) && mBluetoothGatt != null) {
             if (Settings.debug) Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
@@ -265,12 +273,17 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         if (Settings.debug) Log.i(TAG, "Get remote Device " + device);
         if (device == null) {
-            if (Settings.debug) Log.w(TAG, "Device not found.  Unable to connect.");
+            if (Settings.debug) Log.w(TAG, "Device not found. Unable to connect.");
             return false;
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.    , BluetoothDevice.TRANSPORT_LE
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback );
+
+        //--------------- TEST START
+        // mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        mBluetoothGatt = device.connectGatt(this, true, mGattCallback);
+        //--------------- TEST END
+
         mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
 
         if (Settings.debug) Log.i(TAG, "Trying to create a new connection.");
@@ -279,6 +292,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
 
         return true;
     }
+
     /**
      * Disconnects an existing connection or closeConnectionForce a pending connection. The disconnection result
      * is reported asynchronously through the
@@ -290,9 +304,9 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
-
         mBluetoothGatt.disconnect();
     }
+
     /**
      * After using a given BLE device, the app must call this method to ensure resources are
      * released properly.
@@ -304,6 +318,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         mBluetoothGatt.close();
         mBluetoothGatt = null;
     }
+
     /**
      * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
      * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
@@ -317,6 +332,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         }
         mBluetoothGatt.readCharacteristic(characteristic);
     }
+
     /**
      * Request a write on a given {@code BluetoothGattCharacteristic}. The read result is reported
      * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt,
@@ -324,8 +340,7 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
      * callback.
      * @param characteristic The characteristic write to.
      */
-
-    public boolean  oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
+    public boolean oneCharacteristicWrite(BluetoothGattCharacteristic characteristic) {
         //if (Settings.debug) Log.w(TAG, "oneCharacteristicWrite()");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             if (Settings.debug) Log.w(TAG, "BluetoothAdapter not initialized");
@@ -349,20 +364,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
         if (READ_BYTES.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
                     UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
-
             if (descriptor != null) {
-                if (enabled)
-                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                else
-                    descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-
+                if (enabled) descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                else         descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
                 //if (Settings.debug) Log.i(TAG, "descriptorValue = " + descriptor.getValue());
                 if (Settings.debug) Log.i(TAG, "descriptorCharacteristic = " + descriptor.getCharacteristic());
                 //if (Settings.debug) Log.i(TAG, "descriptorUUID = " + descriptor.getUuid());
                 //if (Settings.debug) Log.i(TAG, "descriptorPermissions = " + descriptor.getPermissions());
-
                 mBluetoothGatt.writeDescriptor(descriptor);
-
                 if (Settings.debug) Log.i(TAG, "Notify descriptor was written, await callback ...");
             }
             else {
@@ -378,8 +387,14 @@ public class BluetoothLeService extends Service implements ITrafficUpdate, Reque
      */
     public List<BluetoothGattService> getSupportedGattServices() {
         if (mBluetoothGatt == null) return null;
-
         return mBluetoothGatt.getServices();
+    }
+
+    //--------------------- IRssiProvider
+
+    @Override
+    public void requestRssi() {
+        if (mBluetoothGatt != null) mBluetoothGatt.readRemoteRssi();
     }
 
 }

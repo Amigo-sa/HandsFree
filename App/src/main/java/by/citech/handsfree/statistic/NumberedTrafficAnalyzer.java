@@ -1,6 +1,7 @@
-package by.citech.handsfree.traffic;
+package by.citech.handsfree.statistic;
 
 import android.os.Handler;
+import android.support.annotation.CallSuper;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -14,16 +15,16 @@ public class NumberedTrafficAnalyzer {
 
     private final static String STAG = Tags.NumberedTrafficAnalyzer;
     private static final boolean debug = Settings.debug;
-    private static final int MIN_INTERVAL = 500;
-    private static final int from = Settings.btNumberedBytesToIntStart;
-    private static final int to = from + 4;
     private static int objCount;
     private final String TAG;
     static {objCount = 0;}
-
     {objCount++;TAG = STAG + " " + objCount;}
 
-    private boolean isAfterReset;
+    private static final int MIN_INTERVAL = 500;
+    private static final int from = Settings.btNumberedBytesToIntStart;
+    private static final int to = from + 4;
+
+    private boolean isDeactivated;
 
     private int packetSize;
     private int expectedInt;
@@ -44,11 +45,11 @@ public class NumberedTrafficAnalyzer {
 
     private NumberedTrafficInfo info;
     private IOnInfoUpdateListener listener;
-    private int interval;
     private long deltaTime;
     private long prevTimestamp;
     private long currTimestamp;
     private long totalTime;
+    private int interval;
     private Handler handler;
 
     private Runnable postToPost = () -> {
@@ -77,7 +78,7 @@ public class NumberedTrafficAnalyzer {
         return instance;
     }
 
-    //--------------------- common
+    //--------------------- getters and setters
 
     public NumberedTrafficAnalyzer setInterval(int interval) {
         if (interval > MIN_INTERVAL) this.interval = interval;
@@ -94,12 +95,12 @@ public class NumberedTrafficAnalyzer {
         return this;
     }
 
-    //--------------------- common
+    //--------------------- analyze
 
     void analyzeNumberedBytes(byte[] traffic) {
         if (!debug || traffic == null) return;
         actualInt = convertByteArrToIntRaw(Arrays.copyOfRange(traffic, from, to));
-        if (!isAfterReset) {
+        if (!isDeactivated) {
             if (expectedInt != actualInt) {
                 if (expectedInt > actualInt) {
                     lastLostPacketsAmount = expectedInt - actualInt;
@@ -122,7 +123,8 @@ public class NumberedTrafficAnalyzer {
                 maxLostPacketsAmount = lastLostPacketsAmount;
             }
         } else {
-            isAfterReset = false;
+            isDeactivated = false;
+            prevTimestamp = System.currentTimeMillis();
             packetSize = traffic.length;
             postThePost();
         }
@@ -133,7 +135,8 @@ public class NumberedTrafficAnalyzer {
     }
 
     void resetStatistic() {
-        isAfterReset = true;
+        handler.removeCallbacks(postToPost);
+        isDeactivated = true;
         packetSize = 0;
         totalLostPacketsCount = 0;
         maxLostPacketsAmount = 0;
@@ -143,7 +146,7 @@ public class NumberedTrafficAnalyzer {
         totalPacketsCount = 0;
         lastLostPacketsAmount = 0;
         deltaTime = 0;
-        prevTimestamp = System.currentTimeMillis();
+        prevTimestamp = 0;
         currTimestamp = 0;
         totalTime = 0;
         totalBytesCount = 0;
@@ -154,7 +157,10 @@ public class NumberedTrafficAnalyzer {
         deltaBytesPerSec = 0;
     }
 
+    //--------------------- updating
+
     private void updateInfo() {
+        if (isDeactivated) return;
         currTimestamp = System.currentTimeMillis();
         deltaTime = currTimestamp - prevTimestamp;
         totalTime += deltaTime;
@@ -187,6 +193,8 @@ public class NumberedTrafficAnalyzer {
         deltaPacketsCount = 0;
     }
 
+    //--------------------- additional
+
     private void logError(int actualInt, long lastLost) {
         Log.e(TAG, String.format(
                 "analyzeNumberedBytes: приняли <%08x>, ожидали <%08x>, потеряно %d, всего потеряно %d",
@@ -201,8 +209,24 @@ public class NumberedTrafficAnalyzer {
         if (handler != null) handler.postDelayed(postToPost, interval);
     }
 
+    //--------------------- interfaces
+
     public interface IOnInfoUpdateListener {
         void onNumberedTrafficInfoUpdated(NumberedTrafficInfo updatedInfo);
+    }
+
+    public interface INumberedTrafficAnalyzer {
+
+        @CallSuper
+        default void resetStatistic() {
+            NumberedTrafficAnalyzer.getInstance().resetStatistic();
+        }
+
+        @CallSuper
+        default void analyzeNumberedBytes(byte[] lastReceived) {
+            NumberedTrafficAnalyzer.getInstance().analyzeNumberedBytes(lastReceived);
+        }
+
     }
 
 }
