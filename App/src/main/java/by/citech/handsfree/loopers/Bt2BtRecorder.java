@@ -14,10 +14,10 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 
 public class Bt2BtRecorder
-        implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
+        implements IBase, ISettingsCtrl, IPrepareObject, IThreading,
         ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.Bt2BtRecorder;
@@ -100,8 +100,8 @@ public class Bt2BtRecorder
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
         recordSize = 100;
-        btFactor = Settings.btFactor;
-        bt2BtPacketSize = Settings.bt2BtPacketSize;
+        btFactor = Settings.Bluetooth.btFactor;
+        bt2BtPacketSize = Settings.Bluetooth.bt2BtPacketSize;
         return true;
     }
 
@@ -157,7 +157,7 @@ public class Bt2BtRecorder
                 if (debug) Log.i(TAG, "run recorder output buffer contains enough data, saving");
                 dataSaved[dataSavedCount] = dataBuff;
                 dataSavedCount++;
-                if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.bt2BtPacketSize));
+                if (debug) Log.i(TAG, String.format("run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each", dataSavedCount, dataAssembledCount, Settings.Bluetooth.bt2BtPacketSize));
                 dataAssembledCount = 0;
             }
         }

@@ -12,10 +12,10 @@ import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.INumberedTrafficAnalyzer;
 
-public class LeDataTransmitter implements CallbackWriteListener, IThreadManager, INumberedTrafficAnalyzer {
+public class LeDataTransmitter implements CallbackWriteListener, IThreading, INumberedTrafficAnalyzer {
 
     private final static String STAG = Tags.LeDataTransmitter;
     private static final boolean debug = Settings.debug;
@@ -205,7 +205,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager,
         //if (debug) Log.i(TAG, "rcvBtPktIsDone()");
         analyzeNumberedBytes(data);
         totalReceiveCount++;
-        switch (Settings.opMode) {
+        switch (Settings.Common.opMode) {
             case Bt2AudOut:
                 updateRxData(data);
                 break;
@@ -241,9 +241,9 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager,
                         " btSinglePacket is %b," +
                         " btFactor is %d," +
                         " btLatencyMs is %d,",
-                Settings.btSinglePacket,
-                Settings.btFactor,
-                Settings.btLatencyMs
+                Settings.Bluetooth.btSinglePacket,
+                Settings.Bluetooth.btFactor,
+                Settings.Bluetooth.btLatencyMs
         ));
         addRunnable(() -> {
             byte[][] arrayData;
@@ -270,7 +270,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager,
                     }
                     // выдерживаем коннект интервал
                     try {
-                        Thread.sleep(Settings.btLatencyMs);
+                        Thread.sleep(Settings.Bluetooth.btLatencyMs);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

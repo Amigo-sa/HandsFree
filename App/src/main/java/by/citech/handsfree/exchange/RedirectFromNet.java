@@ -9,11 +9,11 @@ import by.citech.handsfree.exchange.consumers.ToBluetooth;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 
 public class RedirectFromNet
         extends AsyncTask<EDataSource, ITransmitterCtrl, Void>
-        implements IThreadManager {
+        implements IThreading {
 
     private static final String TAG = Tags.RedirectFromNet;
     private static final boolean debug = Settings.debug;

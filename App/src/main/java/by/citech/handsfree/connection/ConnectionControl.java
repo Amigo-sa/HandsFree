@@ -12,13 +12,12 @@ import by.citech.handsfree.connection.fsm.IConnectionFsmListenerRegister;
 import by.citech.handsfree.connection.fsm.IConnectionFsmReporter;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 import timber.log.Timber;
 
 import static by.citech.handsfree.activity.fsm.EActivityReport.LightA2ScanAPressed;
 import static by.citech.handsfree.activity.fsm.EActivityState.LightA;
 import static by.citech.handsfree.application.ThisApplication.setBtConnectedAddr;
-import static by.citech.handsfree.connection.fsm.EConnectionReport.*;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.ConnectStarted;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.ConnectStopped;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.GettingInitDataStarted;
@@ -27,7 +26,6 @@ import static by.citech.handsfree.connection.fsm.EConnectionReport.GettingStatus
 import static by.citech.handsfree.connection.fsm.EConnectionReport.GettingStatusStopped;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.SearchStarted;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.SearchStopped;
-import static by.citech.handsfree.connection.fsm.EConnectionState.*;
 import static by.citech.handsfree.connection.fsm.EConnectionState.Connected;
 import static by.citech.handsfree.connection.fsm.EConnectionState.Found;
 import static by.citech.handsfree.connection.fsm.EConnectionState.GotInitData;
@@ -35,7 +33,7 @@ import static by.citech.handsfree.settings.PreferencesProcessor.getBtChosenAddr;
 
 public class ConnectionControl
         implements IConnectionFsmListener, IConnectionFsmListenerRegister, IConnectionFsmReporter,
-        IThreadManager, IActivityFsmListener {
+        IThreading, IActivityFsmListener {
 
     private static final String STAG = Tags.ConnectionControl;
     private static final boolean debug = Settings.debug;

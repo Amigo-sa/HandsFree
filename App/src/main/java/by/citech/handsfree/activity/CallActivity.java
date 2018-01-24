@@ -46,10 +46,7 @@ import java.util.Map;
 
 import by.citech.handsfree.R;
 import by.citech.handsfree.common.IBroadcastReceiver;
-import by.citech.handsfree.common.IService;
-import by.citech.handsfree.management.ResourceManager;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
-import by.citech.handsfree.statistic.NumberedTrafficInfo;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
@@ -79,8 +76,7 @@ import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.threading.IThreadManager;
-import by.citech.handsfree.threading.ThreadManager;
+import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.util.Keyboard;
 
 import static android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE;
@@ -88,8 +84,8 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class CallActivity
         extends AppCompatActivity
-        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView, IThreadManager,
-        IContactEditorHelper, IBroadcastReceiver, IService, IBtToUiCtrl, ICallUi, IMsgToUi {
+        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView, IThreading,
+        IContactEditorHelper, IBroadcastReceiver, IBtToUiCtrl, ICallUi, IMsgToUi {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -112,8 +108,6 @@ public class CallActivity
     // список найденных устройств
     private ListView listDevices;
     private LeDeviceListAdapter deviceListAdapter;
-
-    private Intent gattServiceIntent;
 
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
@@ -139,11 +133,12 @@ public class CallActivity
         if (debug) Log.w(TAG, "onCreate");
 
         PreferencesProcessor.process(this);
-        opMode = Settings.opMode;
+        opMode = Settings.Common.opMode;
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
-        ThreadManager.getInstance().baseCreate();
         viewManager = new CallActivityViewManager();
+
+        enPermissions();
 
         //---------------- TEST START
         Handler handler = new Handler();
@@ -161,10 +156,11 @@ public class CallActivity
         viewManager.setDefaultView();
         viewManager.baseCreate();
 
+        deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
+        dialogProcessor = new DialogProcessor(this);
+
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecyclerContacts);
-        deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
-
         editTextSearch = findViewById(R.id.editTextSearch);
         editTextContactName = findViewById(R.id.editTextContactName);
         editTextContactIp = findViewById(R.id.editTextContactIp);
@@ -183,44 +179,12 @@ public class CallActivity
         setupContactsAdapter();
         setupContactEditor();
         setupContactor();
-        dialogProcessor = new DialogProcessor(this);
-        Contactor.getInstance().baseCreate();
-        ContactEditorHelper.getInstance().baseCreate();
         getAllContacts();
-        //gattServiceIntent = new Intent(this, BluetoothLeService.class);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (debug) Log.w(TAG, "onStart");
-
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            if (debug) Log.e(TAG,"ble not supported");
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetoothManager == null || bluetoothManager.getAdapter() == null) {
-            if (debug) Log.e(TAG,"Bluetooth not supported");
-            Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!bluetoothManager.getAdapter().isEnabled()) {
-            if (debug) Log.e(TAG,"Bluetooth is disable");
-            bluetoothManager.getAdapter().enable();
-            Toast.makeText(getApplicationContext(), "Bluetooth now enabling", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(getApplicationContext(), "Bluetooth already enabled", Toast.LENGTH_LONG).show();
-        }
 
         Caller.getInstance()
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiBroadcastReceiver(this)
-                .setiService(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
                 .setiBtList(deviceListAdapter);
@@ -229,7 +193,12 @@ public class CallActivity
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
         IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
-        Caller.getInstance().baseStart();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (debug) Log.w(TAG, "onStart");
     }
 
     //-------------------------- base
@@ -250,7 +219,6 @@ public class CallActivity
     protected void onResume() {
         super.onResume();
         if (debug) Log.w(TAG,"onResume");
-        enPermissions();
     }
 
     @Override
@@ -275,15 +243,12 @@ public class CallActivity
     protected void onStop() {
         super.onStop();
         if (debug) Log.w(TAG, "onStop");
-        addRunnable(() -> ResourceManager.getInstance().stop());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (debug) Log.w(TAG, "onDestroy");
-        addRunnable(() -> ResourceManager.getInstance().destroy());
-        deviceListAdapter = null;
     }
 
     //-------------------------- menu
@@ -418,8 +383,8 @@ public class CallActivity
             actionBar.setDisplayShowCustomEnabled(true);
             String title = String.format(Locale.US, "%s %s:%d %s",
                     getTitle().toString(),
-                    getIpAddr(Settings.isIpv4Used),
-                    Settings.serverLocalPortNumber,
+                    getIpAddr(Settings.Network.isIpv4Used),
+                    Settings.Network.serverLocalPortNumber,
                     opMode.getSettingName()
             );
             SpannableString s = new SpannableString(title);
@@ -602,11 +567,6 @@ public class CallActivity
         if (!viewManager.isScanViewHidden()) {
             IUiToBtListener.swipeScanStopListener();
         }
-    }
-
-    @Override
-    public Intent getServiceIntent() {
-        return gattServiceIntent;
     }
 
     public class LinearLayoutTouchListener

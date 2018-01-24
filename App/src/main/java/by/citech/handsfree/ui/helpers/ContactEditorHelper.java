@@ -19,10 +19,10 @@ import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 
 public class ContactEditorHelper
-        implements IBase, IContactsListener, IPrepareObject, IThreadManager {
+        implements IBase, IContactsListener, IPrepareObject, IThreading {
 
     private static final String STAG = Tags.ContactEditorHelper;
     private static final boolean debug = Settings.debug;

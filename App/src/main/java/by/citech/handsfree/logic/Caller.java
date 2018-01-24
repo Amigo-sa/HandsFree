@@ -4,9 +4,6 @@ import android.os.Handler;
 import android.util.Log;
 
 import by.citech.handsfree.bluetoothlegatt.IBtList;
-import by.citech.handsfree.management.IBase;
-import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.common.IService;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.data.StorageData;
@@ -17,7 +14,6 @@ import by.citech.handsfree.loopers.AudIn2AudOutLooper;
 import by.citech.handsfree.loopers.ToBtLooper;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.network.INetInfoGetter;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
@@ -26,24 +22,19 @@ import by.citech.handsfree.parameters.Tags;
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
 import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
 
-public class Caller
-        implements IBase, ISettingsCtrl, IPrepareObject {
+public class Caller {
 
     private static final String STAG = Tags.Caller;
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final String TAG;
-
-    static {
-        objCount = 0;
-    }
+    static {objCount = 0;}
 
     //--------------------- preparation
 
     private INetInfoGetter iNetInfoGetter;
     private IBluetoothListener iBluetoothListener;
     private IBroadcastReceiver iBroadcastReceiver;
-    private IService iService;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
     private IBtList iBtList;
@@ -52,26 +43,7 @@ public class Caller
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return opMode != null;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
         opMode = Settings.getInstance().getCommon().getOpMode();
-        return true;
     }
 
     //--------------------- singleton
@@ -88,8 +60,6 @@ public class Caller
                     instance = new Caller();
                 }
             }
-        } else {
-            instance.prepareObject();
         }
         return instance;
     }
@@ -111,11 +81,6 @@ public class Caller
         return this;
     }
 
-    public Caller setiService(IService iService) {
-        this.iService = iService;
-        return this;
-    }
-
     public Caller setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
         this.iBtToUiCtrl = iBtToUiCtrl;
         return this;
@@ -133,12 +98,8 @@ public class Caller
 
     //--------------------- main
 
-    @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
-        CallerFsm.getInstance().baseStart();
-        CallUi.getInstance().baseStart();
+    public boolean build() {
+        if (debug) Log.i(TAG, "build");
         switch (opMode) {
             case Bt2Bt:
                 buildBt2Bt();
@@ -169,18 +130,15 @@ public class Caller
         return true;
     }
 
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public boolean breakTheBonds() {
+        if (debug) Log.i(TAG, "breakTheBonds");
         iNetInfoGetter = null;
         iBluetoothListener = null;
         opMode = null;
         iBroadcastReceiver = null;
-        iService = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
         iBtList = null;
-        IBase.super.baseStop();
         return true;
     }
 
@@ -190,7 +148,6 @@ public class Caller
         if (debug) Log.i(TAG, "buildNormal");
         if (iNetInfoGetter == null
                 || iBluetoothListener == null
-                || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
@@ -227,8 +184,7 @@ public class Caller
 
     private void build2Bt(EDataSource dataSource) {
         if (debug) Log.i(TAG, "build2Bt");
-        if (iService == null
-                || iBroadcastReceiver == null
+        if (iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null
@@ -268,7 +224,6 @@ public class Caller
     private void buildBt2AudOut() {
         if (debug) Log.i(TAG, "buildBt2AudOut");
         if (iBluetoothListener == null
-                || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
@@ -306,7 +261,6 @@ public class Caller
     private void buildBt2Bt() {
         if (debug) Log.i(TAG, "buildBt2Bt");
         if (iBluetoothListener == null
-                || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
@@ -339,7 +293,6 @@ public class Caller
     private void buildRecord() {
         if (debug) Log.i(TAG, "buildRecord");
         if (iBluetoothListener == null
-                || iService == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null

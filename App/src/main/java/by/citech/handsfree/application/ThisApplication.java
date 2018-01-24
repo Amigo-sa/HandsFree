@@ -16,14 +16,14 @@ import by.citech.handsfree.connection.fsm.IConnectionFsmListenerRegister;
 import by.citech.handsfree.logic.ConnectorBluetooth;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.PreferencesProcessor;
-import by.citech.handsfree.threading.ThreadManager;
+import by.citech.handsfree.threading.ThreadingManager;
 
 public class ThisApplication
         extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
 
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;
-    private static ThreadManager threadingManager;
+    private static ThreadingManager threadingManager;
     private static ConnectorBluetooth connectorBluetooth;
     private static ActivityFsm activityFsm;
     private static ConnectionFsm connectionFsm;
@@ -40,7 +40,7 @@ public class ThisApplication
         super.onCreate();
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
-        threadingManager = ThreadManager.getInstance();
+        threadingManager = ThreadingManager.getInstance();
         threadingManager.activate();
         appContext = getApplicationContext();
         activityFsm = ActivityFsm.getInstance();

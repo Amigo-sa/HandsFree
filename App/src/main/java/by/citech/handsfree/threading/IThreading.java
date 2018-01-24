@@ -1,7 +1,7 @@
 package by.citech.handsfree.threading;
 
-public interface IThreadManager {
+public interface IThreading {
     default boolean addRunnable(Runnable runnable) {
-        return ThreadManager.getInstance().addRunnable(runnable);
+        return ThreadingManager.getInstance().addRunnable(runnable);
     }
 }

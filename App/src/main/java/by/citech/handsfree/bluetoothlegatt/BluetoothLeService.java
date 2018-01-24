@@ -191,7 +191,7 @@ public class BluetoothLeService
 
     @Override
     public void requestMtu() {
-        if (mBluetoothGatt != null) mBluetoothGatt.requestMtu(Settings.btMtuSize);
+        if (mBluetoothGatt != null) mBluetoothGatt.requestMtu(Settings.Bluetooth.btMtuSize);
         if (Settings.debug) Log.i(TAG, "requestMtu was sendet, await callback ...");
     }
 

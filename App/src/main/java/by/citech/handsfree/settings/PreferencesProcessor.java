@@ -10,10 +10,72 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 
+import static by.citech.handsfree.settings.Presetter.setBtLatencyMs;
+
 public class PreferencesProcessor {
 
     private static final String STAG = Tags.PreferencesProcessor + " ST";
     private static final boolean debug = Settings.debug;
+
+    private static SharedPreferences prefs;
+
+    //-------------------------- save/restore/reset
+
+    public static void init(Context context) {
+//      ApplicationInfo applicationInfo = context.getApplicationInfo();
+//      int stringId = applicationInfo.labelRes;
+//      preferences = context.getSharedPreferences(context.getString(stringId), MODE_PRIVATE);
+        prefs = PreferenceManagerFix.getDefaultSharedPreferences(context);
+    }
+
+    public static String getBtChosenAddr() {
+        return Settings.Bluetooth.btChosendAddr;
+    }
+
+    public static void saveBtChosenAddr(String btAddrToChoose) {
+        Settings.Bluetooth.btChosendAddr = btAddrToChoose;
+        saveBtChosenAddrPref(Settings.Bluetooth.btChosendAddr);
+    }
+
+    public static SharedPreferences getPrefs() {
+        return prefs;
+    }
+
+    public static SharedPreferences.Editor getEditor() {
+        return prefs.edit();
+    }
+
+    //-------------------------- saving preferences
+
+    public static void saveBtChosenAddrPref(String newValue) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(SettingsDefault.TypeName.btChosenAddr, newValue);
+        editor.apply();
+        Presetter.setBtChosenAddr(newValue);
+    }
+
+    public static void saveBtLatencyMsPref(int newValue) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putInt(SettingsDefault.TypeName.btLatencyMs, newValue);
+        editor.apply();
+        setBtLatencyMs(newValue);
+    }
+
+    //-------------------------- getting preferences
+
+    public static String getBtChosenAddrPref() {
+        return prefs.getString(
+                SettingsDefault.TypeName.btChosenAddr,
+                SettingsDefault.Bluetooth.btChosenAddr);
+    }
+
+    public static String getBtLatencyMsPref() {
+        return prefs.getString(
+                SettingsDefault.TypeName.btLatencyMs,
+                Integer.toString(SettingsDefault.Bluetooth.btLatencyMs));
+    }
+
+    //-------------------------- process
 
     public static void process(Context context) {
         if (debug) Log.i(STAG, "process");
@@ -68,7 +130,7 @@ public class PreferencesProcessor {
             if (debug) Log.e(STAG, "processBtLatencyMs" + StatusMessages.ERR_PARAMETERS);
             return;
         }
-        Presetter.setBtLatencyMs(Integer.parseInt(
+        setBtLatencyMs(Integer.parseInt(
                 prefs.getString(SettingsDefault.TypeName.btLatencyMs,
                 Integer.toString(SettingsDefault.Bluetooth.btLatencyMs))));
     }

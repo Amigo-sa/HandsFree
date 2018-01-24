@@ -18,7 +18,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 
 public class ToAudioOut
-        implements ITransmitterCtrl, ITransmitter, ISettingsCtrl, IPrepareObject {
+        implements ITransmitterCtrl, ITransmitter {
 
     private static final String TAG = Tags.ToAudioOut;
     private static final boolean debug = Settings.debug;
@@ -44,38 +44,18 @@ public class ToAudioOut
     private boolean isFinished;
 
     {
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        takeSettings();
-        applySettings(null);
-        return true;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
-        return true;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
-        audioBuffIsShorts = Settings.audioBuffIsShorts;
-        audioStreamType = Settings.audioStreamType;
-        audioUsage = Settings.audioUsage;
-        audioContentType = Settings.audioContentType;
-        audioEncoding = Settings.audioEncoding;
-        audioRate = Settings.audioRate;
-        audioOutChannel = Settings.audioOutChannel;
-        audioMode = Settings.audioMode;
-        audioBuffSizeBytes = Settings.audioSingleFrame
-                ? (Settings.audioCodecType.getDecodedShortsSize() * 2)
-                : Settings.audioBuffSizeBytes;
+        audioBuffIsShorts = Settings.AudioCommon.audioBuffIsShorts;
+        audioStreamType = Settings.AudioOut.audioStreamType;
+        audioUsage = Settings.AudioOut.audioUsage;
+        audioContentType = Settings.AudioOut.audioContentType;
+        audioEncoding = Settings.AudioCommon.audioEncoding;
+        audioRate = Settings.AudioCommon.audioRate;
+        audioOutChannel = Settings.AudioOut.audioOutChannel;
+        audioMode = Settings.AudioOut.audioMode;
+        audioBuffSizeBytes = Settings.AudioCommon.audioSingleFrame
+                ? (Settings.AudioCommon.audioCodecType.getDecodedShortsSize() * 2)
+                : Settings.AudioCommon.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
-        return true;
     }
 
     //--------------------- ITransmitterCtrl

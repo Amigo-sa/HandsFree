@@ -17,6 +17,7 @@ public class SettingsDefault {
             public static final String bt2BtPacketSize = "bt2BtPacketSize";
             public static final String bt2NetFactor = "bt2NetFactor";
             public static final String audioCodecType = "audioCodecType";
+            public static String btChosenAddr;
         }
 
         public static class Common {
@@ -24,7 +25,6 @@ public class SettingsDefault {
             public static final EDataSource dataSource = EDataSource.BLUETOOTH;
             public static final EOpMode opMode = EOpMode.Normal;
             public static final boolean showTraffic = true;
-            public static final boolean debug = true;
             public static final int bt2NetFactor = 25;
             public static final int audioIn2BtFactor = 1;
             public static final int bt2AudioOutFactor = 1;
@@ -44,6 +44,7 @@ public class SettingsDefault {
             public static final int btAudioMsPerNetSendSize = btAudioMsPerPacket * btFactor;  // миллисекунд звука в одном BT2NET-пакете
             public static final int bt2NetSendSizeUncut = bt2BtPacketSize * btFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
             public static final int btMtuSize = 20;  // запрашиваемый размер BT2BT-пакета
+            public static String btChosenAddr;
         }
 
         public static class AudioCommon {

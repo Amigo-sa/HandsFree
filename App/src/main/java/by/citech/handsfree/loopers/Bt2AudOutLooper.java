@@ -71,7 +71,7 @@ public class Bt2AudOutLooper
     @Override
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
-        codecType = Settings.audioCodecType;
+        codecType = Settings.AudioCommon.audioCodecType;
         return true;
     }
 

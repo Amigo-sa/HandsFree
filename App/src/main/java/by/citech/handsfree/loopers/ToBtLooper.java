@@ -27,10 +27,10 @@ import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 
 public class ToBtLooper
-        implements IBase, ITransmitter, IPrepareObject, IThreadManager,
+        implements IBase, ITransmitter, IPrepareObject, IThreading,
         ISettingsCtrl, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ToBtLooper;
@@ -71,7 +71,7 @@ public class ToBtLooper
     @Override
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
-        codecType = Settings.audioCodecType;
+        codecType = Settings.AudioCommon.audioCodecType;
         return true;
     }
 

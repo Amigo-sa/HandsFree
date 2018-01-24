@@ -48,14 +48,14 @@ public class FromAudioIn
 
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
-        audioBuffIsShorts = Settings.audioBuffIsShorts;
+        audioBuffIsShorts = Settings.AudioCommon.audioBuffIsShorts;
         audioSource = Settings.audioSource;
-        audioRate = Settings.audioRate;
+        audioRate = Settings.AudioCommon.audioRate;
         audioInChannel = Settings.audioInChannel;
-        audioEncoding = Settings.audioEncoding;
-        audioBuffSizeBytes = Settings.audioSingleFrame
-                ? (Settings.audioCodecType.getDecodedShortsSize() * 2)
-                : Settings.audioBuffSizeBytes;
+        audioEncoding = Settings.AudioCommon.audioEncoding;
+        audioBuffSizeBytes = Settings.AudioCommon.audioSingleFrame
+                ? (Settings.AudioCommon.audioCodecType.getDecodedShortsSize() * 2)
+                : Settings.AudioCommon.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
         return true;
     }

@@ -22,10 +22,10 @@ import by.citech.handsfree.exchange.consumers.ToAudioOut;
 import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 
 public class AudIn2AudOutLooper
-        implements ITransmitter, IBase, IPrepareObject, IThreadManager,
+        implements ITransmitter, IBase, IPrepareObject, IThreading,
         ISettingsCtrl, ICallerFsmRegisterListener, ICallerFsmListener, ICallerFsm {
 
     private static final String STAG = Tags.AudIn2AudOutLooper;
@@ -72,12 +72,12 @@ public class AudIn2AudOutLooper
     @Override
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
-        codecType = Settings.audioCodecType;
+        codecType = Settings.AudioCommon.audioCodecType;
         codecFactor = codecType.getDecodedShortsSize();
-        audioBuffSizeBytes = Settings.audioBuffSizeBytes;
+        audioBuffSizeBytes = Settings.AudioCommon.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
         buff2CodecFactor = audioBuffSizeShorts / codecFactor;
-        audioSingleFrame = Settings.audioSingleFrame;
+        audioSingleFrame = Settings.AudioCommon.audioSingleFrame;
         return true;
     }
 

@@ -52,12 +52,12 @@ public class ToBluetooth
     @Override
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
-        btSignificantAll = Settings.btSignificantAll;
-        btSinglePacket = Settings.btSinglePacket;
-        btFactor = Settings.btFactor;
-        btToBtSendSize = Settings.bt2BtPacketSize;
-        btSignificantBytes = btSignificantAll ? btToBtSendSize : Settings.btSignificantBytes;
-        btSendSize = Settings.btSendSize;
+        btSignificantAll = Settings.Bluetooth.btSignificantAll;
+        btSinglePacket = Settings.Bluetooth.btSinglePacket;
+        btFactor = Settings.Bluetooth.btFactor;
+        btToBtSendSize = Settings.Bluetooth.bt2BtPacketSize;
+        btSignificantBytes = btSignificantAll ? btToBtSendSize : Settings.Bluetooth.btSignificantBytes;
+        btSendSize = Settings.Bluetooth.btSendSize;
         return true;
     }
 

@@ -21,7 +21,7 @@ public class NumberedTrafficAnalyzer {
     {objCount++;TAG = STAG + " " + objCount;}
 
     private static final int MIN_INTERVAL = 500;
-    private static final int from = Settings.btNumberedBytesToIntStart;
+    private static final int from = Settings.Bluetooth.btNumberedBytesToIntStart;
     private static final int to = from + 4;
 
     private boolean isDeactivated;

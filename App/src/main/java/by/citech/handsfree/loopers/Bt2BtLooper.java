@@ -14,10 +14,10 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 
 public class Bt2BtLooper
-        implements IBase, ISettingsCtrl, IPrepareObject, IThreadManager,
+        implements IBase, ISettingsCtrl, IPrepareObject, IThreading,
         ICallerFsm, ICallerFsmRegisterListener, ICallerFsmListener {
 
     private static final String STAG = Tags.Bt2BtLooper;
@@ -86,8 +86,8 @@ public class Bt2BtLooper
     @Override
     public boolean takeSettings() {
         ISettingsCtrl.super.takeSettings();
-        btFactor = Settings.btFactor;
-        bt2BtPacketSize = Settings.bt2BtPacketSize;
+        btFactor = Settings.Bluetooth.btFactor;
+        bt2BtPacketSize = Settings.Bluetooth.bt2BtPacketSize;
         return true;
     }
 

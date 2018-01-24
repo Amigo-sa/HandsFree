@@ -485,7 +485,7 @@ public class ConnectorBluetooth
 
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
-        switch (Settings.opMode) {
+        switch (Settings.Common.opMode) {
             case Normal:
                 reportToCallerFsm(getCallerFsmState(), SysIntError, TAG);
                 break;
@@ -650,7 +650,7 @@ public class ConnectorBluetooth
                 disableTransmitData();
                 break;
             case StartDebug:
-                switch (Settings.opMode) {
+                switch (Settings.Common.opMode) {
                     case DataGen2Bt:
                     case AudIn2Bt:
                         enableTransmitData();
@@ -673,7 +673,7 @@ public class ConnectorBluetooth
                 }
                 break;
             case StopDebug:
-                switch (Settings.opMode) {
+                switch (Settings.Common.opMode) {
                     default:
                         disableTransmitData();
                         break;

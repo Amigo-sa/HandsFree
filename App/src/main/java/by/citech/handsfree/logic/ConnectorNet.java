@@ -32,7 +32,7 @@ import by.citech.handsfree.parameters.Messages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
-import by.citech.handsfree.threading.IThreadManager;
+import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.util.InetAddress;
 
 import static by.citech.handsfree.logic.ECallReport.CallEndedByRemoteUser;
@@ -51,7 +51,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, ITransmitterCtrlReg, IClientCtrlReg, ICallerFsmListener,
-        IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreadManager, ICallerFsmRegisterListener {
+        IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreading, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
