@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.os.Handler;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ public class LeScanner implements IBtToUiListener {
     private static final long SCAN_PERIOD = 10000;
     private Handler mHandler;
     private boolean mScanning;
+
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
     private IBluetoothListener mIBluetoothListener;
     private IScannListener iScannListener;
@@ -58,9 +60,6 @@ public class LeScanner implements IBtToUiListener {
         scanLeDevice(false);
     }
 
-
-
-
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
         final BluetoothLeScanner leScanner = getBluetoothAdapter().getBluetoothLeScanner();
@@ -88,8 +87,17 @@ public class LeScanner implements IBtToUiListener {
             }, SCAN_PERIOD);
 
             mScanning = true;
-            //leScanner.startScan(scanFilters, scanSettings, mScanCallback);        // С использованием фильтрации
-            leScanner.startScan(mScanCallback);
+
+            //-------------- TEST START
+            //leScanner.startScan(scanFilters, scanSettings, mScanCallback // с использованием фильтрации
+             //leScanner.startScan(mScanCallback);
+            ScanSettings settings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .setReportDelay(0)
+                    .build();
+            leScanner.startScan(null, settings, mScanCallback);
+            //-------------- TEST STOP
+
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
