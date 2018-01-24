@@ -1,7 +1,7 @@
 package by.citech.handsfree.exchange;
 
-import by.citech.vincentwillemvangogh.parameters.Tags;
-import by.citech.vincentwillemvangogh.settings.Settings;
+import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.settings.Settings;
 
 public abstract class AbstractExchanger {
 

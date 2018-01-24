@@ -1,6 +1,6 @@
 package by.citech.handsfree.bluetoothlegatt.commands.service;
 
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
+import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 
 /**
@@ -8,12 +8,12 @@ import by.citech.handsfree.bluetoothlegatt.commands.Command;
  */
 
 public class CloseServiceCommand implements Command {
-    private BluetoothLeService bluetoothLeService;
+    private BluetoothLeCore bluetoothLeService;
 
     public CloseServiceCommand() {
     }
 
-    public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
+    public void setBluetoothLeService(BluetoothLeCore bluetoothLeService) {
         this.bluetoothLeService = bluetoothLeService;
     }
 

@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
+import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.ITransmitter;
 import by.citech.handsfree.logic.IBluetoothListener;
@@ -28,7 +28,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager,
     private static final long NOTIFY_SET_PERIOD = 200;//ms
     private static final int WRITE_TYPE = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
 
-    private BluetoothLeService mBluetoothLeService;
+    private BluetoothLeCore mBluetoothLeService;
     private Characteristics characteristics;
 
     // обьявляем характеристику для включения нотификации на периферийном устройстве(сервере)
@@ -56,7 +56,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager,
     public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
     }
-    public void setBluetoothLeService(BluetoothLeService mBluetoothLeService) {
+    public void setBluetoothLeService(BluetoothLeCore mBluetoothLeService) {
         this.mBluetoothLeService = mBluetoothLeService;
     }
 
@@ -193,9 +193,10 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreadManager,
             writeThreadStart();
             isNotifyStartRunning = false;
         }
-        if (isNotifyStopRunning)
+        if (isNotifyStopRunning) {
             if (debug) Log.i(TAG, "notify stopped");
-        isNotifyStopRunning = false; //TODO: правильная логика?
+            isNotifyStopRunning = false; //TODO: правильная логика?
+        }
     }
 
     @Override

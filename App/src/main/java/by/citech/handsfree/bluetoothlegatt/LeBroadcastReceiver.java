@@ -38,16 +38,16 @@ public class LeBroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
             //if (Settings.debug) Log.i(TAG, "onReceive");
             final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+            if (BluetoothLeCore.ACTION_GATT_CONNECTED.equals(action)) {
                 connectAction.actionConnected();
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+            } else if (BluetoothLeCore.ACTION_GATT_DISCONNECTED.equals(action)) {
                 connectAction.actionDisconnected();
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+            } else if (BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 connectAction.actionServiceDiscovered();
-            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+            } else if (BluetoothLeCore.ACTION_DATA_AVAILABLE.equals(action)) {
                 //if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
-            } else if (BluetoothLeService.ACTION_DATA_WRITE.equals(action)){
+            } else if (BluetoothLeCore.ACTION_DATA_WRITE.equals(action)){
                 //if (Settings.debug) Log.i(TAG, "ACTION_DATA_WRITE");
                 // displayWdata(intent.getStringExtra(BluetoothLeService.EXTRA_WDATA));
             }
@@ -57,11 +57,11 @@ public class LeBroadcastReceiver {
     // определяем фильтр для нашего BroadcastReceivera, чтобы регистрировать конкретные события
     public static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_WRITE);
+        intentFilter.addAction(BluetoothLeCore.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeCore.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeCore.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BluetoothLeCore.ACTION_DATA_WRITE);
         return intentFilter;
     }
 

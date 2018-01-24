@@ -1,6 +1,6 @@
 package by.citech.handsfree.bluetoothlegatt.commands.characteristics;
 
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
+import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 
@@ -11,13 +11,13 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 public class CharacteristicsDisplayOnCommand implements Command {
 
     private Characteristics characteristics;
-    private BluetoothLeService bluetoothLeService;
+    private BluetoothLeCore bluetoothLeService;
 
     public CharacteristicsDisplayOnCommand(Characteristics characteristics) {
         this.characteristics = characteristics;
     }
 
-    public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
+    public void setBluetoothLeService(BluetoothLeCore bluetoothLeService) {
         this.bluetoothLeService = bluetoothLeService;
     }
 

@@ -53,7 +53,6 @@ import by.citech.handsfree.statistic.NumberedTrafficInfo;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
 import by.citech.handsfree.ui.helpers.IContactEditorHelper;
 import by.citech.handsfree.ui.helpers.EActiveContactState;
 import by.citech.handsfree.contact.Contact;
@@ -188,7 +187,7 @@ public class CallActivity
         Contactor.getInstance().baseCreate();
         ContactEditorHelper.getInstance().baseCreate();
         getAllContacts();
-        gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        //gattServiceIntent = new Intent(this, BluetoothLeService.class);
     }
 
     @Override

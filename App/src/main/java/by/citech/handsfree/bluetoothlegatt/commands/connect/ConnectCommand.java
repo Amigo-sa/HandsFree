@@ -3,7 +3,7 @@ package by.citech.handsfree.bluetoothlegatt.commands.connect;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeService;
+import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
 import by.citech.handsfree.settings.Settings;
 
@@ -13,7 +13,7 @@ import by.citech.handsfree.settings.Settings;
 
 public class ConnectCommand implements Command {
     private BluetoothDevice mBTDevice;
-    private BluetoothLeService mBluetoothLeService;
+    private BluetoothLeCore mBluetoothLeService;
 
     public ConnectCommand() {
 
@@ -23,7 +23,7 @@ public class ConnectCommand implements Command {
         this.mBTDevice = mBTDevice;
     }
 
-    public void setmBluetoothLeService(BluetoothLeService mBluetoothLeService) {
+    public void setmBluetoothLeService(BluetoothLeCore mBluetoothLeService) {
         this.mBluetoothLeService = mBluetoothLeService;
     }
 

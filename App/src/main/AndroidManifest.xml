@@ -35,9 +35,9 @@
             android:screenOrientation="portrait"
             android:parentActivityName="by.citech.handsfree.activity.CallActivity"/>
 
-        <service
-            android:name="by.citech.handsfree.bluetoothlegatt.BluetoothLeService"
-            android:enabled="true" />
+        <!--<service-->
+            <!--android:name="by.citech.handsfree.bluetoothlegatt.BluetoothLeService"-->
+            <!--android:enabled="true" />-->
 
     </application>
 
