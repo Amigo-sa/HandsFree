@@ -1,10 +1,13 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.call;
 
 import android.os.Handler;
-import android.util.Log;
 
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.common.IBroadcastReceiver;
+import by.citech.handsfree.network.ConnectorNet;
+import by.citech.handsfree.common.HandlerExtended;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.loopers.Bt2AudOutLooper;
@@ -12,7 +15,6 @@ import by.citech.handsfree.loopers.Bt2BtLooper;
 import by.citech.handsfree.loopers.Bt2BtRecorder;
 import by.citech.handsfree.loopers.AudIn2AudOutLooper;
 import by.citech.handsfree.loopers.ToBtLooper;
-import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.settings.EDataSource;
@@ -24,7 +26,7 @@ import timber.log.Timber;
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
 import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
 
-public class Caller {
+public class CallControl {
 
     private static final String STAG = Tags.Caller;
     private static final boolean debug = Settings.debug;
@@ -41,7 +43,6 @@ public class Caller {
     private IMsgToUi iMsgToUi;
     private IBtList iBtList;
     private EOpMode opMode;
-    private IBtToUiListener iBtToUiListener;
 
     {
         objCount++;
@@ -51,16 +52,16 @@ public class Caller {
 
     //--------------------- singleton
 
-    private static volatile Caller instance = null;
+    private static volatile CallControl instance = null;
 
-    private Caller() {
+    private CallControl() {
     }
 
-    public static Caller getInstance() {
+    public static CallControl getInstance() {
         if (instance == null) {
-            synchronized (Caller.class) {
+            synchronized (CallControl.class) {
                 if (instance == null) {
-                    instance = new Caller();
+                    instance = new CallControl();
                 }
             }
         }
@@ -69,37 +70,32 @@ public class Caller {
 
     //--------------------- getters and setters
 
-    public Caller setiNetInfoGetter(INetInfoGetter listener) {
+    public CallControl setiNetInfoGetter(INetInfoGetter listener) {
         iNetInfoGetter = listener;
         return this;
     }
 
-    public Caller setiBluetoothListener(IBluetoothListener listener) {
+    public CallControl setiBluetoothListener(IBluetoothListener listener) {
         iBluetoothListener = listener;
         return this;
     }
 
-    public Caller setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
+    public CallControl setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
         this.iBroadcastReceiver = iBroadcastReceiver;
         return this;
     }
 
-    public Caller setiBtToUiListener(IBtToUiListener iBtToUiListener) {
-        this.iBtToUiListener = iBtToUiListener;
-        return this;
-    }
-
-    public Caller setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
+    public CallControl setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
         this.iBtToUiCtrl = iBtToUiCtrl;
         return this;
     }
 
-    public Caller setiMsgToUi(IMsgToUi iMsgToUi) {
+    public CallControl setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
         return this;
     }
 
-    public Caller setiBtList(IBtList iBtList) {
+    public CallControl setiBtList(IBtList iBtList) {
         this.iBtList = iBtList;
         return this;
     }
@@ -172,7 +168,6 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
-                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -212,7 +207,6 @@ public class Caller {
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
                 .setiBroadcastReceiver(iBroadcastReceiver)
-                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -242,7 +236,6 @@ public class Caller {
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
                 .setiBroadcastReceiver(iBroadcastReceiver)
-                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -283,7 +276,6 @@ public class Caller {
                 .setStorageFromBt(storageFromBt)
                 .setStorageToBt(storageToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
-                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -315,7 +307,6 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
-                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);

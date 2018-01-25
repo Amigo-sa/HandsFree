@@ -11,16 +11,15 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.common.IBuilding;
+import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
 import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.logic.ECallerState;
-import by.citech.handsfree.logic.ECallReport;
+import by.citech.handsfree.call.fsm.ECallState;
+import by.citech.handsfree.call.fsm.ECallReport;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.IOnInfoUpdateListener;
 import by.citech.handsfree.statistic.NumberedTrafficInfo;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IGetView;
-import by.citech.handsfree.logic.ICallerFsmListener;
-import by.citech.handsfree.logic.ICallerFsmRegisterListener;
+import by.citech.handsfree.call.fsm.ICallFsmListener;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
@@ -38,12 +37,12 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
 import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
 import static by.citech.handsfree.ui.helpers.ContactHelper.setContactInfo;
 import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
-import static by.citech.handsfree.logic.ECallerState.ReadyToWork;
+import static by.citech.handsfree.call.fsm.ECallState.ReadyToWork;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallActivityViewManager
-        implements IOnInfoUpdateListener, IViewKeeper, ICallerFsmListener,
-        ICallerFsmRegisterListener, RssiReporter.IOnRssiUpdateListener {
+        implements IOnInfoUpdateListener, IViewKeeper, ICallFsmListener,
+        ICallFsmListenerRegister, RssiReporter.IOnRssiUpdateListener {
 
     private static final String STAG = Tags.ViewManager;
     private static final boolean debug = Settings.debug;
@@ -271,7 +270,7 @@ public class CallActivityViewManager
 
     //--------------------- ICallNetListener
 
-    private void processNormal(ECallerState from, ECallerState to, ECallReport why) {
+    private void processNormal(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "processNormal");
         switch (why) {
             case SysExtError:
@@ -365,7 +364,7 @@ public class CallActivityViewManager
         }
     }
 
-    private void processAbnormal(ECallerState from, ECallerState to, ECallReport why) {
+    private void processAbnormal(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "processAbnormal");
         switch (why) {
             case StartDebug:
@@ -423,7 +422,7 @@ public class CallActivityViewManager
     }
 
     @Override
-    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         if (opMode == Normal) {
             processNormal(from, to, why);

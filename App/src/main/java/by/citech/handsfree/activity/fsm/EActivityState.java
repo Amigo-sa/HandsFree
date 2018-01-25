@@ -10,52 +10,37 @@ public enum EActivityState {
         @Override public HashSet<EActivityState> available() {return s(TurnedOn);}
     },
     TurnedOn {
-        @Override public HashSet<EActivityState> available() {return s(LightA);}
+        @Override public HashSet<EActivityState> available() {return s(CallA);}
     },
-    ScanA2SettingsA {
+    CallA2SettingsA {
         @Override public HashSet<EActivityState> available() {return s(SettingsA);}
     },
-    ScanA2LightA {
-        @Override public HashSet<EActivityState> available() {return s(LightA);}
-    },
-    LightA2SettingsA {
-        @Override public HashSet<EActivityState> available() {return s(SettingsA);}
-    },
-    LightA2ScanA {
-        @Override public HashSet<EActivityState> available() {return s(ScanA);}
-    },
-    SettingsA2ScanA {
-        @Override public HashSet<EActivityState> available() {return s(ScanA);}
-    },
-    SettingsA2LightA {
-        @Override public HashSet<EActivityState> available() {return s(LightA);}
+    SettingsA2CallA {
+        @Override public HashSet<EActivityState> available() {return s(CallA);}
     },
     PowerOn {
-        @Override public HashSet<EActivityState> available() {return s(ScanA, LightA, SettingsA);}
+        @Override public HashSet<EActivityState> available() {return s(CallA, SettingsA);}
     },
     BackArrow {
-        @Override public HashSet<EActivityState> available() {return s(ScanA, LightA, SettingsA);}
+        @Override public HashSet<EActivityState> available() {return s(CallA, SettingsA);}
     },
     Destroyed {
-        @Override public HashSet<EActivityState> available() {return s(ScanA, LightA, SettingsA);}
+        @Override public HashSet<EActivityState> available() {return s(CallA, SettingsA);}
     },
     Home {
-        @Override public HashSet<EActivityState> available() {return s(ScanA, LightA, SettingsA);}
+        @Override public HashSet<EActivityState> available() {return s(CallA, SettingsA);}
     },
     Back {
-        @Override public HashSet<EActivityState> available() {return s(ScanA, LightA, SettingsA);}
+        @Override public HashSet<EActivityState> available() {return s(CallA, SettingsA);}
     },
     PowerOff {
         @Override public HashSet<EActivityState> available() {return s(PowerOn);}
     },
-    ScanA {
-        @Override public HashSet<EActivityState> available() {return s(BackArrow, Destroyed, Home, Back, PowerOff, ScanA2SettingsA, ScanA2LightA);}
-    },
-    LightA {
-        @Override public HashSet<EActivityState> available() {return s(BackArrow, Destroyed, Home, Back, PowerOff, LightA2SettingsA, LightA2ScanA);}
+    CallA {
+        @Override public HashSet<EActivityState> available() {return s(BackArrow, Destroyed, Home, Back, PowerOff, CallA2SettingsA);}
     },
     SettingsA {
-        @Override public HashSet<EActivityState> available() {return s(BackArrow, Destroyed, Home, Back, PowerOff, SettingsA2LightA, SettingsA2ScanA);}
+        @Override public HashSet<EActivityState> available() {return s(BackArrow, Destroyed, Home, Back, PowerOff, SettingsA2CallA);}
     };
 
     public String getName() {return this.toString();}

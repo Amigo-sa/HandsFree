@@ -4,15 +4,15 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+import by.citech.handsfree.call.fsm.ICallFsmListener;
+import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
+import by.citech.handsfree.call.fsm.ICallFsmReporter;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.exchange.IStreamer;
-import by.citech.handsfree.logic.ECallerState;
-import by.citech.handsfree.logic.ECallReport;
-import by.citech.handsfree.logic.ICallerFsm;
-import by.citech.handsfree.logic.ICallerFsmListener;
-import by.citech.handsfree.logic.ICallerFsmRegisterListener;
+import by.citech.handsfree.call.fsm.ECallState;
+import by.citech.handsfree.call.fsm.ECallReport;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.producers.FromAudioIn;
 import by.citech.handsfree.exchange.IRxComplex;
@@ -22,8 +22,8 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreading;
 
 public class AudIn2AudOutLooper
-        implements IRxComplex, IThreading, ICallerFsmRegisterListener,
-        ICallerFsmListener, ICallerFsm, IBuilding {
+        implements IRxComplex, IThreading, ICallFsmListenerRegister,
+        ICallFsmListener, ICallFsmReporter, IBuilding {
 
     private static final String STAG = Tags.AudIn2AudOutLooper;
     private static final boolean debug = Settings.debug;
@@ -94,10 +94,10 @@ public class AudIn2AudOutLooper
         codec = null;
     }
 
-    //--------------------- ICallerFsmListener
+    //--------------------- ICallFsmListener
 
     @Override
-    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:

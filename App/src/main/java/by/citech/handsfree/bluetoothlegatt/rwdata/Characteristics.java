@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import by.citech.handsfree.data.SampleGattAttributes;
-import by.citech.handsfree.logic.IBluetoothListener;
+import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 
 /**

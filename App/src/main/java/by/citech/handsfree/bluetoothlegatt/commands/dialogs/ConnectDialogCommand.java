@@ -9,7 +9,7 @@ import by.citech.handsfree.bluetoothlegatt.commands.Command;
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.logic.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 
 /**
  * Created by tretyak on 07.12.2017.

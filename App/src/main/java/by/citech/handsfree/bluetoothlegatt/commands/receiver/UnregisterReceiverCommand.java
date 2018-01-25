@@ -2,10 +2,9 @@ package by.citech.handsfree.bluetoothlegatt.commands.receiver;
 
 import android.util.Log;
 
-import by.citech.handsfree.bluetoothlegatt.LeBroadcastReceiver;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.logic.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.settings.Settings;
 
 /**

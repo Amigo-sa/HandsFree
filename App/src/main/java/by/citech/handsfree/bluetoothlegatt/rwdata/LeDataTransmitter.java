@@ -9,7 +9,7 @@ import java.util.Locale;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.IRxComplex;
-import by.citech.handsfree.logic.IBluetoothListener;
+import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreading;

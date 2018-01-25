@@ -1,4 +1,4 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.bluetoothlegatt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,21 +9,21 @@ import android.os.Handler;
 import android.util.Log;
 
 import by.citech.handsfree.application.ThisApplication;
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
-import by.citech.handsfree.bluetoothlegatt.IBtList;
+import by.citech.handsfree.call.fsm.ECallReport;
+import by.citech.handsfree.call.fsm.ECallState;
+import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
+import by.citech.handsfree.call.fsm.ICallFsmReporter;
+import by.citech.handsfree.call.fsm.ICallFsmListener;
+import by.citech.handsfree.data.StorageListener;
 import by.citech.handsfree.connection.fsm.EConnectionReport;
 import by.citech.handsfree.connection.fsm.EConnectionState;
 import by.citech.handsfree.connection.fsm.IConnectionFsmListener;
 import by.citech.handsfree.exchange.IRxComplex;
-import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.common.IBroadcastReceiver;
-import by.citech.handsfree.bluetoothlegatt.BluetoothLeState;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.ControlAdapter;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
-import by.citech.handsfree.bluetoothlegatt.LeBroadcastReceiver;
-import by.citech.handsfree.bluetoothlegatt.LeScanner;
 import by.citech.handsfree.bluetoothlegatt.commands.adapter.AddConnectDeviceToAdapterCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.adapter.AddToListCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.BLEController;
@@ -48,22 +48,21 @@ import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOffCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOnCommand;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
-import by.citech.handsfree.bluetoothlegatt.StorageListener;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
-import static by.citech.handsfree.logic.ECallReport.CallFailedInt;
-import static by.citech.handsfree.logic.ECallReport.StopDebug;
-import static by.citech.handsfree.logic.ECallReport.SysIntConnectedIncompatible;
-import static by.citech.handsfree.logic.ECallReport.SysIntError;
-import static by.citech.handsfree.logic.ECallReport.SysIntReady;
+import static by.citech.handsfree.call.fsm.ECallReport.CallFailedInt;
+import static by.citech.handsfree.call.fsm.ECallReport.StopDebug;
+import static by.citech.handsfree.call.fsm.ECallReport.SysIntConnectedIncompatible;
+import static by.citech.handsfree.call.fsm.ECallReport.SysIntError;
+import static by.citech.handsfree.call.fsm.ECallReport.SysIntReady;
 
 public class ConnectorBluetooth
-        implements StorageListener, ConnectAction, ICallerFsmListener,
-        ICallerFsm, ICallerFsmRegisterListener, IConnectionFsmListener {
+        implements StorageListener, ConnectAction, ICallFsmListener,
+        ICallFsmReporter, ICallFsmListenerRegister, IConnectionFsmListener {
 
     private final static String STAG = Tags.ConnectorBluetooth;
 
@@ -455,7 +454,7 @@ public class ConnectorBluetooth
     }
 
     private void processState() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         switch (callerState) {
             case Call:
                 if (reportToCallerFsm(callerState, CallFailedInt, TAG)) return;
@@ -592,10 +591,10 @@ public class ConnectorBluetooth
         setBLEState(BluetoothLeState.TRANSMIT_DATA, BluetoothLeState.SERVICES_DISCOVERED);
     }
 
-    //--------------------- ICallerFsmListener
+    //--------------------- ICallFsmListener
 
     @Override
-    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (Settings.debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case InCallAcceptedByLocalUser:
@@ -619,7 +618,7 @@ public class ConnectorBluetooth
                         }
                         break;
                     case Record:
-                        if (getCallerFsmState() == ECallerState.DebugRecord) {
+                        if (getCallerFsmState() == ECallState.DebugRecord) {
                             enableTransmitData();
                         }
                         break;

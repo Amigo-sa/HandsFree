@@ -39,7 +39,7 @@ public class Tags {
     public static final String ConnectorNet = PREFIX + "ConnectorNet";
     public static final String Network = PREFIX + "Network";
     public static final String DECODE = PREFIX + "DECODE";
-    public static final String Caller = PREFIX + "Caller";
+    public static final String Caller = PREFIX + "CallControl";
     public static final String CallUi = PREFIX + "CallUi";
     public static final String RedirectToNet = PREFIX + "RedirectToNet";
     public static final String RedirectFromNet = PREFIX + "RedirectFromNet";
@@ -81,7 +81,7 @@ public class Tags {
     public static final String ResourceManager = PREFIX + "ResourceManager";
     public static final String ViewKeeper = PREFIX + "ViewKeeper";
     public static final String HandlerExtended = PREFIX + "HandlerExtended";
-    public static final String CallerFsm = PREFIX + "CallerFsm";
+    public static final String CallerFsm = PREFIX + "CallFsm";
     public static final String Generator = PREFIX + "DataGenerator";
     public static final String FromDataGenerator = PREFIX + "FromDataGenerator";
     public static final String CircleGenerator = PREFIX + "CircleGenerator";

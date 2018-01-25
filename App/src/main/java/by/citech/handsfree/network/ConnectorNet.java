@@ -1,4 +1,4 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.network;
 
 import android.os.Handler;
 import android.util.Log;
@@ -7,11 +7,14 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import by.citech.handsfree.call.fsm.ECallReport;
+import by.citech.handsfree.call.fsm.ECallState;
+import by.citech.handsfree.call.fsm.ICallFsmListener;
+import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
+import by.citech.handsfree.call.fsm.ICallFsmReporter;
 import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.RedirectFromNet;
-import by.citech.handsfree.network.INetInfoGetter;
-import by.citech.handsfree.network.INetListener;
 import by.citech.handsfree.network.client.ClientConn;
 import by.citech.handsfree.network.client.IClientCtrl;
 import by.citech.handsfree.network.client.IClientCtrlReg;
@@ -34,23 +37,23 @@ import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.util.InetAddress;
 
-import static by.citech.handsfree.logic.ECallReport.CallEndedByRemoteUser;
-import static by.citech.handsfree.logic.ECallReport.CallFailedExt;
-import static by.citech.handsfree.logic.ECallReport.SysExtError;
-import static by.citech.handsfree.logic.ECallReport.SysExtReady;
-import static by.citech.handsfree.logic.ECallReport.InCallCanceledByRemoteUser;
-import static by.citech.handsfree.logic.ECallReport.InCallDetected;
-import static by.citech.handsfree.logic.ECallReport.InCallFailed;
-import static by.citech.handsfree.logic.ECallReport.OutCallAcceptedByRemoteUser;
-import static by.citech.handsfree.logic.ECallReport.OutCallInvalidCoordinates;
-import static by.citech.handsfree.logic.ECallReport.OutCallRejectedByRemoteUser;
-import static by.citech.handsfree.logic.ECallReport.OutConnectionConnected;
-import static by.citech.handsfree.logic.ECallReport.OutConnectionFailed;
+import static by.citech.handsfree.call.fsm.ECallReport.CallEndedByRemoteUser;
+import static by.citech.handsfree.call.fsm.ECallReport.CallFailedExt;
+import static by.citech.handsfree.call.fsm.ECallReport.SysExtError;
+import static by.citech.handsfree.call.fsm.ECallReport.SysExtReady;
+import static by.citech.handsfree.call.fsm.ECallReport.InCallCanceledByRemoteUser;
+import static by.citech.handsfree.call.fsm.ECallReport.InCallDetected;
+import static by.citech.handsfree.call.fsm.ECallReport.InCallFailed;
+import static by.citech.handsfree.call.fsm.ECallReport.OutCallAcceptedByRemoteUser;
+import static by.citech.handsfree.call.fsm.ECallReport.OutCallInvalidCoordinates;
+import static by.citech.handsfree.call.fsm.ECallReport.OutCallRejectedByRemoteUser;
+import static by.citech.handsfree.call.fsm.ECallReport.OutConnectionConnected;
+import static by.citech.handsfree.call.fsm.ECallReport.OutConnectionFailed;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
-        implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, ICallerFsmListener,
-        IMessageResult, IServerOff, IDisc, INetListener, ICallerFsm, IThreading, ICallerFsmRegisterListener {
+        implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, ICallFsmListener,
+        IMessageResult, IServerOff, IDisc, INetListener, ICallFsmReporter, IThreading, ICallFsmListenerRegister {
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
@@ -200,10 +203,10 @@ public class ConnectorNet
         ServerStopped
     }
 
-    //--------------------- ICallerFsmListener
+    //--------------------- ICallFsmListener
 
     @Override
-    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case SysIntError:
@@ -236,7 +239,7 @@ public class ConnectorNet
 
     @Override
     public void srvOnOpen() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnOpen callerState is " + callerState);
         switch (callerState) {
             case ReadyToWork:
@@ -252,7 +255,7 @@ public class ConnectorNet
 
     @Override
     public void srvOnFailure() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnFailure callerState is " + callerState);
         switch (callerState) {
             case InDetected:
@@ -272,7 +275,7 @@ public class ConnectorNet
 
     @Override
     public void srvOnClose() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "srvOnClose callerState is " + callerState);
         switch (callerState) {
             case InDetected:
@@ -292,7 +295,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnOpen() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnOpen callerState is " + callerState);
         switch (callerState) {
             case OutStarted:
@@ -308,7 +311,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnFailure() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnFailure callerState is " + callerState);
         switch (callerState) {
             case OutConnected:
@@ -330,7 +333,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnMessageText(String message) {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnMessageText callerState is " + callerState);
         switch (callerState) {
             case OutConnected:
@@ -358,7 +361,7 @@ public class ConnectorNet
 
     @Override
     public void cltOnClose() {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "cltOnClose callerState is " + callerState);
         switch (callerState) {
             case OutConnected:
@@ -376,7 +379,7 @@ public class ConnectorNet
 
     @Override
     public void registerServerCtrl(IServerCtrl iServerCtrl) {
-        ECallerState callerState = getCallerFsmState();
+        ECallState callerState = getCallerFsmState();
         if (debug) Log.i(TAG, "registerServerCtrl callerState is " + callerState);
         switch (callerState) {
             case PhaseReadyInt:

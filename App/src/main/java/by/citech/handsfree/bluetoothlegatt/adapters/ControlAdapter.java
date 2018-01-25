@@ -5,7 +5,7 @@ import android.util.Log;
 
 import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.bluetoothlegatt.IScannListener;
-import by.citech.handsfree.logic.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.settings.Settings;
 
 /**

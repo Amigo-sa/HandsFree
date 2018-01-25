@@ -123,30 +123,18 @@ public class ActivityFsm {
     private boolean processReportNormal(EActivityReport report, EActivityState from) {
         if (debug) Timber.tag(TAG).i("processReportNormal");
         switch (report) {
+            case CallAOnCreate:
+            case CallA2SettingsAPressed:
+            case SettingsA2CallAPressed:
+                return processStateChange(from, BackArrow, report);
             case BackArrowPressed:
                 return processStateChange(from, BackArrow, report);
             case onDestroy:
                 return processStateChange(from, Destroyed, report);
-            case SettingsA2ScanAPressed:
-                return processStateChange(from, SettingsA2ScanA, report);
-            case SettingsA2LightAPressed:
-                return processStateChange(from, SettingsA2LightA, report);
             case TurningOn:
                 return processStateChange(from, TurnedOn, report);
             case TurningOff:
                 return processStateChange(from, TurnedOff, report);
-            case ScanA2LightAPressed:
-                return processStateChange(from, ScanA2LightA, report);
-            case ScanA2SettingsAPressed:
-                return processStateChange(from, ScanA2SettingsA, report);
-            case LightA2ScanAPressed:
-                return processStateChange(from, LightA2ScanA, report);
-            case LightA2SettingsAPressed:
-                return processStateChange(from, LightA2SettingsA, report);
-            case ScanAOnCreate:
-                return processStateChange(from, ScanA, report);
-            case LightAOnCreate:
-                return processStateChange(from, LightA, report);
             case SettingsAOnCreate:
                 return processStateChange(from, SettingsA, report);
             case BackPressed:

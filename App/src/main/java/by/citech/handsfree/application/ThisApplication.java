@@ -13,7 +13,7 @@ import by.citech.handsfree.connection.ChosenDeviceControl;
 import by.citech.handsfree.connection.ConnectionControl;
 import by.citech.handsfree.connection.fsm.ConnectionFsm;
 import by.citech.handsfree.connection.fsm.IConnectionFsmListenerRegister;
-import by.citech.handsfree.logic.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;

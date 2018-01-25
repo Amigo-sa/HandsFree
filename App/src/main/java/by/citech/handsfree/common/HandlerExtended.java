@@ -1,4 +1,4 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.common;
 
 import android.os.Handler;
 import android.os.Message;
@@ -9,7 +9,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 
-class HandlerExtended
+public class HandlerExtended
         extends Handler {
 
     private static final String STAG = Tags.HandlerExtended;

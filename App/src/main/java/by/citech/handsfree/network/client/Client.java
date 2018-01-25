@@ -1,13 +1,11 @@
 package by.citech.handsfree.network.client;
 
 import android.os.Handler;
-import android.util.Log;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import by.citech.handsfree.common.EConnectionState;
+import by.citech.handsfree.common.ELinkState;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
@@ -36,13 +34,13 @@ public class Client
     private String url;
     private Handler handler;
     private IRxComplex receiver;
-    private EConnectionState state;
+    private ELinkState state;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
         url = "";
-        state = EConnectionState.Null;
+        state = ELinkState.Null;
     }
 
     Client(String url, Handler handler) {
@@ -65,7 +63,7 @@ public class Client
                 .url(url)
                 .build();
         client.newWebSocket(request, this);
-        procState(EConnectionState.Opening);
+        procState(ELinkState.Opening);
         // Trigger shutdown of the dispatcher's executor so this applyPrefsToSettings can exit cleanly.
         client.dispatcher().executorService().shutdown();
         return this;
@@ -93,7 +91,7 @@ public class Client
     @Override
     public boolean isAliveConnection() {
         // TODO: достаточна ли такая проверка?
-        return state == EConnectionState.Opened || state == EConnectionState.Opening;
+        return state == ELinkState.Opened || state == ELinkState.Opening;
     }
 
     //--------------------- IExchangeCtrl
@@ -135,7 +133,7 @@ public class Client
 
     //--------------------- main
 
-    private void procState(EConnectionState state) {
+    private void procState(ELinkState state) {
         if (debug) Timber.tag(TAG).i("procState from %s to %s, connections count is %d",
                 this.state.name(), state.name(), client.connectionPool().connectionCount());
         this.state = state;
@@ -145,7 +143,7 @@ public class Client
     public void onOpen(WebSocket webSocket, Response response) {
         if (debug) Timber.tag(TAG).i("onOpen");
         this.webSocket = webSocket;
-        procState(EConnectionState.Opened);
+        procState(ELinkState.Opened);
         webSocket.send(Messages.CLT2SRV_ONOPEN);
         if (debug) Timber.tag(TAG).i("onOpen message sended: %s", Messages.CLT2SRV_ONOPEN);
         handler.sendEmptyMessage(StatusMessages.CLT_ONOPEN);
@@ -173,21 +171,21 @@ public class Client
     @Override public void onClosing(WebSocket webSocket, int code, String reason) {
         if (debug) Timber.tag(TAG).i("onClosing");
         webSocket.close(1000, Messages.CLT2SRV_ONCLOSE);
-        procState(EConnectionState.Closing);
+        procState(ELinkState.Closing);
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSING);
     }
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
         if (debug) Timber.tag(TAG).i("onClosed");
-        procState(EConnectionState.Closed);
+        procState(ELinkState.Closed);
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSED);
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
         if (debug) Timber.tag(TAG).i("onFailure");
-        procState(EConnectionState.Failure);
+        procState(ELinkState.Failure);
         handler.sendEmptyMessage(StatusMessages.CLT_ONFAILURE);
     }
 

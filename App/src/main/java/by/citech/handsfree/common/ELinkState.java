@@ -1,6 +1,6 @@
 package by.citech.handsfree.common;
 
-public enum EConnectionState {
+public enum ELinkState {
     Opened,
     Failure,
     Timeout,

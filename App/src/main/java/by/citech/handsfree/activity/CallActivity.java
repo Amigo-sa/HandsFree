@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
 import by.citech.handsfree.statistic.RssiReporter;
@@ -65,10 +66,9 @@ import by.citech.handsfree.ui.helpers.ContactEditorHelper;
 import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.ui.IUiToBtListener;
-import by.citech.handsfree.logic.Caller;
-import by.citech.handsfree.logic.ConnectorBluetooth;
-import by.citech.handsfree.logic.IBluetoothListener;
-import by.citech.handsfree.logic.ICallUi;
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
+import by.citech.handsfree.call.ICallUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
@@ -188,7 +188,7 @@ public class CallActivity
         setupContactor();
         getAllContacts();
 
-        Caller.getInstance()
+        CallControl.getInstance()
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiBroadcastReceiver(this)

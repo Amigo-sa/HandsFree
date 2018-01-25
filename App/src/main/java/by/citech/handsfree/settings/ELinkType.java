@@ -1,6 +1,6 @@
 package by.citech.handsfree.settings;
 
-public enum EConnectionType {
+public enum ELinkType {
     HTTP,
     TCP,
     UDP,

@@ -2,16 +2,16 @@ package by.citech.handsfree.loopers;
 
 import android.util.Log;
 
+import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
+import by.citech.handsfree.call.fsm.ICallFsmReporter;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.exchange.IStreamer;
-import by.citech.handsfree.logic.ECallerState;
-import by.citech.handsfree.logic.ECallReport;
-import by.citech.handsfree.logic.ICallerFsm;
-import by.citech.handsfree.logic.ICallerFsmListener;
-import by.citech.handsfree.logic.ICallerFsmRegisterListener;
+import by.citech.handsfree.call.fsm.ECallState;
+import by.citech.handsfree.call.fsm.ECallReport;
+import by.citech.handsfree.call.fsm.ICallFsmListener;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
@@ -19,7 +19,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 
 public class Bt2AudOutLooper
-        implements IRxComplex, ICallerFsm, ICallerFsmListener, ICallerFsmRegisterListener, IBuilding {
+        implements IRxComplex, ICallFsmReporter, ICallFsmListener, ICallFsmListenerRegister, IBuilding {
 
     private static final String STAG = Tags.Bt2AudOutLooper;
     private static final boolean debug = Settings.debug;
@@ -75,9 +75,9 @@ public class Bt2AudOutLooper
         codec = null;
     }
 
-    //--------------------- ICallerFsmListener
+    //--------------------- ICallFsmListener
 
-    public void onCallerStateChange(ECallerState from, ECallerState to, ECallReport why) {
+    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
             case StartDebug:

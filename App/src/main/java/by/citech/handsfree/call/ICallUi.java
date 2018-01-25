@@ -1,4 +1,4 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.call;
 
 public interface ICallUi {
 

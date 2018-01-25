@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import by.citech.handsfree.common.EConnectionState;
+import by.citech.handsfree.common.ELinkState;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.network.server.connection.protocols.http.IHTTPSession;
@@ -35,12 +35,12 @@ public class Server
     private WebSocket webSocket;
     private Handler handler;
     private IRxComplex receiver;
-    private EConnectionState state;
+    private ELinkState state;
 
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        state = EConnectionState.Null;
+        state = ELinkState.Null;
     }
 
     Server(int port, Handler handler) {
@@ -155,7 +155,7 @@ public class Server
 
     //--------------------- main
 
-    private void procState(EConnectionState state) {
+    private void procState(ELinkState state) {
         if (debug) Log.i(TAG, String.format(
                 "procState from %s to %s",
                 this.state.name(), state.name()));
@@ -172,7 +172,7 @@ public class Server
         @Override
         protected void onOpen() {
             if (debug) Log.i(TAG, "onOpen");
-            procState(EConnectionState.Opened);
+            procState(ELinkState.Opened);
             handler.sendEmptyMessage(StatusMessages.SRV_ONOPEN);
             try {
                 send(Messages.SRV2CLT_ONOPEN);
@@ -189,7 +189,7 @@ public class Server
                     "Initiated by " + (initiatedByRemote ? "remote. " : "self. ") +
                     "Close code is <" + code + ">. " +
                     "Reason is <" + reason + ">.");
-            procState(EConnectionState.Closed);
+            procState(ELinkState.Closed);
             handler.sendEmptyMessage(StatusMessages.SRV_ONCLOSE);
         }
 
@@ -218,7 +218,7 @@ public class Server
         protected void onException(IOException exception) {
             if (debug) Log.i(TAG, "onException " + exception.getMessage());
             if (debug) Server.LOG.log(Level.SEVERE, "exception occured", exception);
-            procState(EConnectionState.Failure);
+            procState(ELinkState.Failure);
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
         }
 

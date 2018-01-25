@@ -1,4 +1,4 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.call.fsm;
 
 public enum ECallReport {
 
@@ -6,7 +6,7 @@ public enum ECallReport {
     TurningOff, // выключение
     TurningOn, // включение
 
-    //  SysIntFail,  // BT failed
+//  SysIntFail,  // BT failed
 //  SysIntDisconnected,  // BT disconnected
 //  SysIntConnected,  // BT connected
 //  SysIntConnectedCompatible,  // compatible BT device connected

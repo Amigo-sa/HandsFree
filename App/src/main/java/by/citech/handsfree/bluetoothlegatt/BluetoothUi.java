@@ -1,4 +1,4 @@
-package by.citech.handsfree.logic;
+package by.citech.handsfree.bluetoothlegatt;
 
 import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
