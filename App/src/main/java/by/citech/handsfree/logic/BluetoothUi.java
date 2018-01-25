@@ -31,12 +31,12 @@ public class BluetoothUi implements IUiToBtListener {
 
     @Override
     public void scanItemSelectedListener() {
-        ConnectorBluetooth.getInstance().scanWork();
+        ConnectorBluetooth.getInstance().initList();
     }
 
     @Override
     public void stopItemSelectedListener() {
-        ConnectorBluetooth.getInstance().stopScanBTDevice();
+        ConnectorBluetooth.getInstance().stopScan();
     }
 
     @Override
@@ -51,16 +51,16 @@ public class BluetoothUi implements IUiToBtListener {
 
     @Override
     public void clickBtnChangeDeviceListenerTwo() {
-        ConnectorBluetooth.getInstance().startScanBTDevices();
+        ConnectorBluetooth.getInstance().startScan();
     }
 
     @Override
     public void swipeScanStartListener() {
-        ConnectorBluetooth.getInstance().scanWork();
+        ConnectorBluetooth.getInstance().initList();
     }
 
     @Override
     public void swipeScanStopListener() {
-        ConnectorBluetooth.getInstance().stopScanBTDevice();
+        ConnectorBluetooth.getInstance().stopScan();
     }
 }

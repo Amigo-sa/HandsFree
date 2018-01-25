@@ -56,7 +56,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
     public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
     }
-    public void setBluetoothLeService(BluetoothLeCore mBluetoothLeService) {
+    public void setBluetoothLeCore(BluetoothLeCore mBluetoothLeService) {
         this.mBluetoothLeService = mBluetoothLeService;
     }
 
