@@ -27,6 +27,8 @@ public class BluetoothUi implements IUiToBtListener {
     }
 
 
+
+
     @Override
     public void scanItemSelectedListener() {
         ConnectorBluetooth.getInstance().scanWork();

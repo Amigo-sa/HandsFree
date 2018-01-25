@@ -123,7 +123,7 @@ public class LeDeviceListAdapter extends BaseAdapter implements IBtList {
 
         if (deviceAddr != null && deviceName != null) {
             viewHolder.deviceName.setText(deviceName);
-            if (deviceAddr.substring(0, 8).equals(Settings.deviceAddressPrefix)) {
+            if (deviceAddr.substring(0, 8).equals(Settings.Bluetooth.deviceAddressPrefix)) {
                 viewHolder.deviceIcon.setVisibility(View.GONE);
                 viewHolder.deviceHeadSet.setVisibility(View.VISIBLE);
             } else {

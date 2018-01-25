@@ -129,6 +129,8 @@ public class ConnectorBluetooth
 //  private Command startService;
 //  private BindServiceCommand bindService;
 //  private UnbindServiceCommand unbindService;
+//  private RegisterReceiverCommand registerReceiver;
+//  private UnregisterReceiverCommand unregisterReceiver;
 
     private ConnectDialogCommand connDialogOn;
     private DisconnectDialogCommand discDialogOn;
@@ -142,8 +144,7 @@ public class ConnectorBluetooth
     private AddConnectDeviceToAdapterCommand addConnDeviceToAdapter;
     private ClearConnectDeviceFromAdapterCommand clrConnDeviceFromAdapter;
 
-    private RegisterReceiverCommand registerReceiver;
-    private UnregisterReceiverCommand unregisterReceiver;
+
 
     private CharacteristicsDisplayOnCommand characteristicDisplayOn;
     //--------------------- singleton
@@ -169,9 +170,8 @@ public class ConnectorBluetooth
 //      startService = new StartServiceCommand(iService, serviceIntent);
 //      bindService = new BindServiceCommand();
 //      unbindService = new UnbindServiceCommand();
-
-        registerReceiver = new RegisterReceiverCommand(this);
-        unregisterReceiver = new UnregisterReceiverCommand(this);
+//      registerReceiver = new RegisterReceiverCommand(this);
+//      unregisterReceiver = new UnregisterReceiverCommand(this);
 
         buttonViewColorChangeOn = new ButtonChangeViewOnCommand();
         buttonViewColorChangeOff = new ButtonChangeViewOffCommand();
@@ -241,8 +241,8 @@ public class ConnectorBluetooth
 //      bindService.setServiceConnection(mServiceConnection);
 //      unbindService.setiService(iService);
 //      unbindService.setServiceConnection(mServiceConnection);
-        registerReceiver.setiBroadcastReceiver(iBroadcastReceiver);
-        unregisterReceiver.setiBroadcastReceiver(iBroadcastReceiver);
+//      registerReceiver.setiBroadcastReceiver(iBroadcastReceiver);
+//      unregisterReceiver.setiBroadcastReceiver(iBroadcastReceiver);
 
         buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
         buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
@@ -330,7 +330,6 @@ public class ConnectorBluetooth
     }
 
     ConnectorBluetooth setiBtList(IBtList iBtList) {
-        //BluetoothUi.getInstance().setiBtList(iBtList);
         this.iBtList = iBtList;
         return this;
     }
@@ -638,7 +637,45 @@ public class ConnectorBluetooth
 
     @Override
     public void onConnectionFsmStateChange(EConnectionState from, EConnectionState to, EConnectionReport why) {
-
+        switch (why) {
+            case TurningOn:
+                if (!isBtSuppported()) {
+//                    reportToConnectionFsm(to, EConnectionReport.BtNotSupported, TAG);
+                    return;
+                }
+                if (!isBleSupported()) {
+//                    reportToConnectionFsm(to, EConnectionReport.BtLeNotSupported, TAG);
+                    return;
+                }
+                enableBt();
+                build();
+//                registerSuperDataConsumer(getTransmitter());
+//                leDataTransmitter.addIRxDataListener(getReceiver());
+                mBluetoothLeService.initialize();
+//                reportToConnectionFsm(getConnectionFsmState(), EConnectionReport.BtPrepared, TAG);
+                break;
+            case SearchStarted:
+//                startScan();
+//                state = STATE_SCANNING;
+                break;
+            case SearchStopped:
+//                stopScan();
+//                state = STATE_SCANSTOPED;
+                break;
+            case ConnectStarted:
+//                connect();
+//                state = STATE_CONNECTING;
+                break;
+            case ConnectStopped:
+                if (Settings.debug)
+//                Timber.tag(TAG).i("ConnectStopped -> disconnect() -> await BtDisconnected");
+                disconnect();
+                break;
+            case TurningOff:
+                onStop();
+                break;
+            default:
+                break;
+        }
     }
-
 }
