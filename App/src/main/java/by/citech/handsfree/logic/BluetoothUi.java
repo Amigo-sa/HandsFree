@@ -63,4 +63,9 @@ public class BluetoothUi implements IUiToBtListener {
     public void swipeScanStopListener() {
         ConnectorBluetooth.getInstance().stopScan();
     }
+
+    @Override
+    public boolean isScanning() {
+        return ConnectorBluetooth.getInstance().isScanning();
+    }
 }

@@ -279,7 +279,7 @@ public class CallActivity
     private void onCreateScanMenu(Menu menu) {
         if (debug) Log.i(TAG, "onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        if (!ConnectorBluetooth.getInstance().isScanning()) {
+        if (!IUiToBtListener.isScanning()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
             menu.findItem(R.id.menu_scan).setVisible(true);
         } else {
@@ -492,6 +492,7 @@ public class CallActivity
 
     public void clickBtnChangeDevice() {
         setVisibleList();
+        //LinearLayoutTouchListener linearLayoutTouchListener = new LinearLayoutTouchListener(IUiToBtListener);
         listDevices.setAdapter(deviceListAdapter);
         listDevices.setOnTouchListener(new LinearLayoutTouchListener());
         listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));

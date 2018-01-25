@@ -12,4 +12,5 @@ public interface IUiToBtListener {
     void clickBtnChangeDeviceListenerTwo();
     void swipeScanStartListener();
     void swipeScanStopListener();
+    boolean isScanning();
 }
