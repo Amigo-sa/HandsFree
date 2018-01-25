@@ -17,7 +17,7 @@ public class SettingsDefault {
             public static final String bt2BtPacketSize = "bt2BtPacketSize";
             public static final String bt2NetFactor = "bt2NetFactor";
             public static final String audioCodecType = "audioCodecType";
-            public static String btChosenAddr;
+            public static final String btChosenAddr = "btChosenAddr";
         }
 
         public static class Common {
@@ -44,7 +44,8 @@ public class SettingsDefault {
             public static final int btAudioMsPerNetSendSize = btAudioMsPerPacket * btFactor;  // миллисекунд звука в одном BT2NET-пакете
             public static final int bt2NetSendSizeUncut = bt2BtPacketSize * btFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
             public static final int btMtuSize = 20;  // запрашиваемый размер BT2BT-пакета
-            public static String btChosenAddr;
+            public static final String deviceAddressPrefix = "54:6C:0E";
+            public static final String btChosenAddr = "";
         }
 
         public static class AudioCommon {

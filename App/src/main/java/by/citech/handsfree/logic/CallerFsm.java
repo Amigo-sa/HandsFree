@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
@@ -19,7 +18,7 @@ import static by.citech.handsfree.logic.ECallReport.*;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallerFsm
-        implements ISettingsCtrl, IPrepareObject, IBase {
+        implements ISettingsCtrl, IPrepareObject {
 
     private static final String STAG = Tags.CallerFsm;
     private static final boolean debug = Settings.debug;
@@ -39,22 +38,10 @@ public class CallerFsm
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        takeSettings();
+        opMode = Settings.Common.opMode;
         state = PhaseZero;
         listeners = new ConcurrentLinkedQueue<>();
-        return true;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
-        opMode = Settings.getInstance().getCommon().getOpMode();
-        return false;
+        processStateChange(getState(), PhaseZero, TurningOn, true);
     }
 
     //--------------------- singleton
@@ -73,24 +60,6 @@ public class CallerFsm
             }
         }
         return instance;
-    }
-
-    //--------------------- IBase
-
-    @Override
-    public boolean baseStart() {
-        if (debug) Log.i(TAG, "baseStart");
-        IBase.super.baseStart();
-        processStateChange(getState(), PhaseZero, TurningOn, true);
-        return true;
-    }
-
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        processStateChange(getState(), PhaseZero, TurningOff, true);
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- ICallerFsmRegisterListener

@@ -29,7 +29,6 @@ import static by.citech.handsfree.connection.fsm.EConnectionReport.SearchStopped
 import static by.citech.handsfree.connection.fsm.EConnectionState.Connected;
 import static by.citech.handsfree.connection.fsm.EConnectionState.Found;
 import static by.citech.handsfree.connection.fsm.EConnectionState.GotInitData;
-import static by.citech.handsfree.settings.PreferencesProcessor.getBtChosenAddr;
 
 public class ConnectionControl
         implements IConnectionFsmListener, IConnectionFsmListenerRegister, IConnectionFsmReporter,
@@ -106,7 +105,7 @@ public class ConnectionControl
             case Connecting:
                 add(checkIfConnected, 20000); break;
             case Connected:
-                setBtConnectedAddr(getBtChosenAddr());
+                setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
                 remove(checkIfConnected);
                 reportToConnectionFsm(to, GettingStatusStarted, TAG); break;
             case GotStatus:
@@ -155,15 +154,11 @@ public class ConnectionControl
     @Override
     public void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why) {
         if (to == LightA) {
-            registerConnectionFsmListener(getLightControl(), Tags.LightControl);
-            registerConnectionFsmListener(getStatusControl(), Tags.StatusControl);
             registerConnectionFsmListener(this, TAG);
             reportToConnectionFsm(getConnectionFsmState(), GettingInitDataStarted, TAG);
         } else if (why == LightA2ScanAPressed) {
             removeAll();
             unregisterConnectionFsmListener(this, TAG);
-            unregisterConnectionFsmListener(getLightControl(), Tags.LightControl);
-            unregisterConnectionFsmListener(getStatusControl(), Tags.StatusControl);
         }
     }
 

@@ -3,13 +3,11 @@ package by.citech.handsfree.ui.helpers;
 import android.util.Log;
 
 import by.citech.handsfree.activity.CallActivityViewManager;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 
-public class ActiveContactHelper
-        implements IBase {
+public class ActiveContactHelper {
 
     private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.ActiveContactHelper;
@@ -22,25 +20,6 @@ public class ActiveContactHelper
         this.chosenContactHelper = chosenContactHelper;
         this.viewManager = viewManager;
         activeContactState = EActiveContactState.IpFromSearch;
-    }
-
-    //--------------------- IBase
-
-    @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
-        return true;
-    }
-
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        activeContactState = null;
-        chosenContactHelper = null;
-        viewManager = null;
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- getters and setters

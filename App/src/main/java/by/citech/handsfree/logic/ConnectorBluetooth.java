@@ -640,4 +640,5 @@ public class ConnectorBluetooth
     public void onConnectionFsmStateChange(EConnectionState from, EConnectionState to, EConnectionReport why) {
 
     }
+
 }

@@ -4,22 +4,11 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
-import android.util.Log;
 
 import by.citech.handsfree.codec.audio.EAudioCodecType;
-import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.settings.category.ISettingCategory;
 
-import static by.citech.handsfree.settings.Settings.AudioCommon.audioEncoding;
-import static by.citech.handsfree.settings.Settings.AudioCommon.audioRate;
-import static by.citech.handsfree.settings.Settings.Bluetooth.bt2BtPacketSize;
-import static by.citech.handsfree.settings.Settings.Bluetooth.btFactor;
-import static by.citech.handsfree.settings.Settings.Bluetooth.btRsvdBytesOffset;
-import static by.citech.handsfree.settings.Settings.Bluetooth.btSignificantAll;
-import static by.citech.handsfree.settings.Settings.Bluetooth.btSignificantBytes;
 import static by.citech.handsfree.settings.Settings.Common.bt2NetFactor;
 
 public class Settings {
@@ -44,7 +33,6 @@ public class Settings {
     //---------------- Bluetooth
 
     public static class Bluetooth {
-        public static String btChosendAddr = "";
         public static int btNumberedBytePosition = 0;
         public static int btNumberedBytesToIntStart = 20;
         public static boolean btSignificantAll = true;  // все байты значащие
@@ -60,6 +48,7 @@ public class Settings {
         public static int bt2NetSendSizeUncut = bt2BtPacketSize * bt2NetFactor;  // кол-во байт, к-е буфферизизируются перед отправкой в сеть
         public static int btMtuSize = 80;  // запрашиваемый размер BT2BT-пакета
         public static String deviceAddressPrefix = "54:6C:0E";
+        public static String btChosenAddr = "";
     }
 
     //---------------- AudioCommon

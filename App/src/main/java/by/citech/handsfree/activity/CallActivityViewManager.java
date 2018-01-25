@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.common.IPrepareObject;
+import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.logic.ECallerState;
 import by.citech.handsfree.logic.ECallReport;
@@ -19,11 +19,9 @@ import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.IOnInfoUpdateListen
 import by.citech.handsfree.statistic.NumberedTrafficInfo;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IGetView;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.logic.ICallerFsmListener;
 import by.citech.handsfree.logic.ICallerFsmRegisterListener;
 import by.citech.handsfree.parameters.Colors;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
@@ -44,22 +42,18 @@ import static by.citech.handsfree.logic.ECallerState.ReadyToWork;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallActivityViewManager
-        implements IBase, ISettingsCtrl, IPrepareObject, IOnInfoUpdateListener,
-        IViewKeeper, ICallerFsmListener, ICallerFsmRegisterListener, RssiReporter.IOnRssiUpdateListener {
+        implements IOnInfoUpdateListener, IViewKeeper, ICallerFsmListener,
+        ICallerFsmRegisterListener, RssiReporter.IOnRssiUpdateListener {
 
     private static final String STAG = Tags.ViewManager;
     private static final boolean debug = Settings.debug;
 
     private static int objCount;
     private final String TAG;
+    static {objCount = 0;}
 
     private static final int DARKCYAN = Colors.DARKCYAN;
     private static final int DARKKHAKI = Colors.DARKKHAKI;
-
-    static {
-        if (debug) Log.i(STAG,"static initiate");
-        objCount = 0;
-    }
 
     //--------------------- preparation
 
@@ -68,32 +62,12 @@ public class CallActivityViewManager
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return iGetter != null;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
-        opMode = Settings.getInstance().getCommon().getOpMode();
-        return true;
+        opMode = Settings.Common.opMode;
     }
 
     //--------------------- non-settings
 
     private IGetView iGetter;
-
     private TextView textViewRssi;
     private TextView textViewPacketSize;
     private TextView textViewLastLostPacketsAmount;
@@ -107,7 +81,6 @@ public class CallActivityViewManager
     private TextView textViewDeltaLostPacketsCount;
     private TextView textViewDeltaLostPercent;
     private TextView textViewDeltaBytesPerSec;
-
     private View viewContacts;
     private View viewTraffic;
     private View scanView;
@@ -134,47 +107,10 @@ public class CallActivityViewManager
         this.iGetter = iGetter;
     }
 
-    //--------------------- IBase
-
-    @Override
-    public boolean baseCreate() {
-        IBase.super.baseCreate();
-        if (debug) Log.i(TAG, "baseCreate");
-        registerCallerFsmListener(this, TAG);
-        return true;
-    }
-
-    @Override
-    public boolean baseDestroy() {
-        if (debug) Log.i(TAG, "baseDestroy");
-        unregisterCallerFsmListener(this, TAG);
-        scanView = null;
-        mainView = null;
-        viewContactEditor = null;
-        viewContactChosen = null;
-        editTextSearch = null;
-        textViewContactChosenName = null;
-        textViewContactChosenIp = null;
-        editTextContactName = null;
-        editTextContactIp = null;
-        btnSaveContact = null;
-        btnDelContact = null;
-        btnCancelContact = null;
-        btnGreen = null;
-        btnRed = null;
-        btnChangeDevice = null;
-        animCall = null;
-        iGetter = null;
-        isCallAnim = false;
-        IBase.super.baseDestroy();
-        return true;
-    }
-
     //--------------------- main
 
     void setDefaultView() {
         if (debug) Log.i(TAG, "setDefaultView");
-        prepareObject();
 
         setVisibility(getViewTraffic(), View.GONE);
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
@@ -504,7 +440,7 @@ public class CallActivityViewManager
         } else if (button == getBtnRed()) {
             return Colors.RED;
         } else {
-            Log.e(TAG, "enableBtnCall color not defined");
+            if (debug) Log.e(TAG, "enableBtnCall color not defined");
             return Colors.GRAY;
         }
     }

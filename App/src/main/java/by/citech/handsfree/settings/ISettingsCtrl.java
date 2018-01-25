@@ -12,7 +12,8 @@ public interface ISettingsCtrl {
 
     @CallSuper
     default boolean takeSettings() {
-        return Settings.subscribe(new SettingsSubscriber(this));
+//        return Settings.subscribe(new SettingsSubscriber(this));
+        return true;
     }
 
     @CallSuper

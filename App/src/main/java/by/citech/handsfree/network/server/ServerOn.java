@@ -31,7 +31,7 @@ public class ServerOn
 
         if (!server.isAliveServer()) {
             try {
-                iServerCtrl = server.startServer(Settings.serverTimeout);
+                iServerCtrl = server.startServer(Settings.Network.serverTimeout);
             } catch (IOException e) {
                 e.printStackTrace();
             }

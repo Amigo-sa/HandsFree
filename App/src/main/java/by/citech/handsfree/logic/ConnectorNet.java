@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.exchange.IStreamer;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.RedirectFromNet;
 import by.citech.handsfree.network.INetInfoGetter;
@@ -51,11 +50,11 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
         implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, ICallerFsmListener,
-        IMessageResult, IServerOff, IDisc, INetListener, IBase, ICallerFsm, IThreading, ICallerFsmRegisterListener {
+        IMessageResult, IServerOff, IDisc, INetListener, ICallerFsm, IThreading, ICallerFsmRegisterListener {
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
-    private static final EDataSource dataSource = Settings.dataSource;
+    private static final EDataSource dataSource = Settings.Common.dataSource;
 
     private static int objCount;
     private final String TAG;
@@ -159,18 +158,14 @@ public class ConnectorNet
 
     //--------------------- main
 
-    @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
+    public void build() {
+        if (debug) Log.i(TAG, "build");
         registerCallerFsmListener(this, TAG);
         startServer();
-        return true;
     }
 
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
+    public void destroy() {
+        if (debug) Log.i(TAG, "destroy");
         unregisterCallerFsmListener(this, TAG);
         isBaseStopInProcess = true;
         iNetInfoGetter = null;
@@ -178,8 +173,6 @@ public class ConnectorNet
         storageToNet = null;
         storageFromNet = null;
         addRunnable(stopNetworking);
-        IBase.super.baseStop();
-        return true;
     }
 
     private void finishBaseStop() {
@@ -438,7 +431,7 @@ public class ConnectorNet
     private void startServer() {
         if (debug) Log.i(TAG, "startServer");
         if (isBaseStopInProcess) {
-            if (debug) Log.w(TAG, "startServer base stop in process, waiting");
+            if (debug) Log.w(TAG, "startServer base stop in applyPrefsToSettings, waiting");
             addRunnable(startServerDelayed);
         } else {
             if (debug) Log.w(TAG, "startServer base stop is finisfed, starting server");
@@ -488,7 +481,7 @@ public class ConnectorNet
         if (debug) Log.i(TAG, "isValidCoordinates");
         remAddr = iNetInfoGetter.getRemAddr();
         remPort = iNetInfoGetter.getRemPort();
-        return !(remAddr.matches(getIpAddr(Settings.isIpv4Used))
+        return !(remAddr.matches(getIpAddr(Settings.Network.isIpv4Used))
                 || remAddr.matches("127.0.0.1")
                 || !InetAddress.checkForValidityIpAddr(remAddr));
     }

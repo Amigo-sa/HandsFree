@@ -3,7 +3,6 @@ package by.citech.handsfree.logic;
 import android.util.Log;
 import java.util.Locale;
 
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EOpMode;
@@ -20,7 +19,7 @@ import static by.citech.handsfree.logic.ECallReport.StartDebug;
 import static by.citech.handsfree.logic.ECallReport.StopDebug;
 
 public class CallUi
-        implements IBase, ISettingsCtrl, IPrepareObject, ICallerFsm {
+        implements ISettingsCtrl, IPrepareObject, ICallerFsm {
 
     private static final String STAG = Tags.CallUi;
     private static final boolean debug = Settings.debug;
@@ -41,25 +40,7 @@ public class CallUi
         objCount++;
         TAG = STAG + " " + objCount;
         prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return opMode != null;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
-        opMode = Settings.getInstance().getCommon().getOpMode();
-        return true;
+        opMode = Settings.Common.opMode;
     }
 
     //--------------------- singleton
@@ -80,24 +61,6 @@ public class CallUi
             instance.prepareObject();
         }
         return instance;
-    }
-
-    //--------------------- base
-
-    @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
-        prepareObject();
-        return true;
-    }
-
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        opMode = null;
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- main

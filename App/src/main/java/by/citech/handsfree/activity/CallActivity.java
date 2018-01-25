@@ -132,7 +132,7 @@ public class CallActivity
         setContentView(R.layout.activity_call);
         if (debug) Log.w(TAG, "onCreate");
 
-        PreferencesProcessor.process(this);
+        PreferencesProcessor.applyPrefsToSettings(this);
         opMode = Settings.Common.opMode;
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
@@ -154,7 +154,6 @@ public class CallActivity
 
         viewManager.setiGetter(this);
         viewManager.setDefaultView();
-        viewManager.baseCreate();
 
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
         dialogProcessor = new DialogProcessor(this);
@@ -505,12 +504,12 @@ public class CallActivity
 
     @Override
     public String getRemPort() {
-        return Integer.toString(Settings.serverRemotePortNumber);
+        return Integer.toString(Settings.Network.serverRemotePortNumber);
     }
 
     @Override
     public String getLocPort() {
-        return Integer.toString(Settings.serverLocalPortNumber);
+        return Integer.toString(Settings.Network.serverLocalPortNumber);
     }
 
     //--------------------- IBluetoothListener

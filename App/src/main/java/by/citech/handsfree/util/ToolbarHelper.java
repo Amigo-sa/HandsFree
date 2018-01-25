@@ -22,10 +22,10 @@ public class ToolbarHelper {
         String title = String.format(Locale.US, "%s%s%s", prefix, placeholder, message);
         int titleLength = title.length();
         SpannableString s = new SpannableString(title);
-        s.setSpan(new AbsoluteSizeSpan(Settings.toolbarBaseSize), 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        s.setSpan(new AbsoluteSizeSpan(Settings.Common.toolbarBaseSize), 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         s.setSpan(new ForegroundColorSpan(Colors.WHITE), 0, toolbarMessageOffset, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         s.setSpan(new ForegroundColorSpan(color), toolbarMessageOffset, titleLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        s.setSpan(new RelativeSizeSpan(Settings.toolbarMessageToPrefix), toolbarMessageOffset, titleLength, 0);
+        s.setSpan(new RelativeSizeSpan(Settings.Common.toolbarMessageToPrefix), toolbarMessageOffset, titleLength, 0);
         toolbar.setTitle(s);
     }
 

@@ -1,50 +1,25 @@
 package by.citech.handsfree.ui.helpers;
 
-import android.util.Log;
 import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import by.citech.handsfree.management.IBase;
-import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.util.Pair;
+import timber.log.Timber;
 
-public class ViewKeeper
-        implements IBase, IPrepareObject {
+public class ViewKeeper {
 
-    private static final String STAG = Tags.ViewKeeper;
     private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
-
-    static {
-        objCount = 0;
-    }
 
     //--------------------- preparation
 
     private Map<String, Pair<TextView[], boolean[]>> pairMap;
 
     {
-        objCount++;
-        TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
         pairMap = new HashMap<>();
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return pairMap != null;
     }
 
     //--------------------- singleton
@@ -61,44 +36,15 @@ public class ViewKeeper
                     instance = new ViewKeeper();
                 }
             }
-        } else {
-            instance.prepareObject();
         }
         return instance;
-    }
-
-    //--------------------- IBase
-
-    @Override
-    public boolean baseStart() {
-        IBase.super.baseStart();
-        if (debug) Log.i(TAG, "baseStart");
-        if (!prepareObject()) {
-            Log.e(TAG, "baseStart object is not prepared, return");
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean baseStop() {
-        if (debug) Log.i(TAG, "baseStop");
-        if (pairMap != null) {
-            pairMap.clear();
-        }
-        IBase.super.baseStop();
-        return true;
     }
 
     //--------------------- main
 
     public void freezeState(String key, TextView... textViews) {
         if (key == null || textViews == null || textViews.length < 1) {
-            Log.e(TAG, "freezeState" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        if (!prepareObject()) {
-            Log.w(TAG, "freezeState object not prepared, return");
+            if (debug) Timber.e("freezeState %s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         pairMap.remove(key);
@@ -112,11 +58,11 @@ public class ViewKeeper
 
     public void releaseState(String key) {
         if (key == null) {
-            Log.e(TAG, "releaseState" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Timber.e("releaseState %s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         if (pairMap == null) {
-            Log.e(TAG, "releaseState pairMap is null, return");
+            if (debug) Timber.e("releaseState pairMap is null, return");
             return;
         }
         Pair<TextView[], boolean[]> pair = pairMap.get(key);

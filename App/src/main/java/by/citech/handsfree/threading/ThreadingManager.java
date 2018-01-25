@@ -19,7 +19,7 @@ public class ThreadingManager {
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        threadPool = new CraftedThreadPool(Settings.threadNumber);
+        threadPool = new CraftedThreadPool(Settings.Common.threadNumber);
     }
 
     //--------------------- singleton

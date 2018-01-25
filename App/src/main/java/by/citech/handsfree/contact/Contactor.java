@@ -11,13 +11,12 @@ import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.element.ElementsMemCtrl;
 import by.citech.handsfree.element.IElement;
 import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.management.IBase;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 
 public class Contactor
-        implements IElement<Contact>, IBase, IPrepareObject {
+        implements IElement<Contact>, IPrepareObject {
 
     private static final String STAG = Tags.Contactor;
     private static final boolean debug = Settings.debug;
@@ -103,40 +102,6 @@ public class Contactor
     public Contactor setContext(Context context) {
         dbCtrl = new ContactsDbCtrl(context);
         return this;
-    }
-
-    //--------------------- IBase
-
-    @Override
-    public boolean baseCreate() {
-        IBase.super.baseCreate();
-        if (debug) Log.i(TAG, "baseCreate");
-        if (!prepareObject()) {
-            Log.e(TAG, "baseCreate object not prepared, return");
-            return false;
-        }
-        if (dbCtrl == null || listener == null || iMsgToUi == null) {
-            Log.e(TAG, "baseCreate illegal parameters");
-            return false;
-        }
-        isReady = true;
-        return true;
-    }
-
-    @Override
-    public boolean baseDestroy() {
-        if (debug) Log.i(TAG, "baseDestroy");
-        dbCtrl = null;
-        if (contacts != null) {
-            contacts.clear();
-            contacts = null;
-        }
-        listener = null;
-        memCtrl = null;
-        iMsgToUi = null;
-        isReady = false;
-        IBase.super.baseDestroy();
-        return true;
     }
 
     //--------------------- contacts

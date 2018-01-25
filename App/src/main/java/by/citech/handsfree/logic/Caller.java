@@ -43,7 +43,7 @@ public class Caller {
     {
         objCount++;
         TAG = STAG + " " + objCount;
-        opMode = Settings.getInstance().getCommon().getOpMode();
+        opMode = Settings.Common.opMode;
     }
 
     //--------------------- singleton
@@ -98,7 +98,7 @@ public class Caller {
 
     //--------------------- main
 
-    public boolean build() {
+    public void build() {
         if (debug) Log.i(TAG, "build");
         switch (opMode) {
             case Bt2Bt:
@@ -127,10 +127,9 @@ public class Caller {
                 buildNormal();
                 break;
         }
-        return true;
     }
 
-    public boolean breakTheBonds() {
+    public void destroy() {
         if (debug) Log.i(TAG, "breakTheBonds");
         iNetInfoGetter = null;
         iBluetoothListener = null;
@@ -139,7 +138,6 @@ public class Caller {
         iBtToUiCtrl = null;
         iMsgToUi = null;
         iBtList = null;
-        return true;
     }
 
     //--------------------- data from bluetooth redirects to network and vice versa
@@ -175,9 +173,6 @@ public class Caller {
                 .setStorageFromNet(storageNetToBt)
                 .setiNetInfoGetter(iNetInfoGetter)
                 .setHandler(handlerExtended);
-
-        connectorBluetooth.baseStart();
-        connectorNet.baseStart();
     }
 
     //--------------------- data from data source redirects to bluetooth
@@ -212,10 +207,8 @@ public class Caller {
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        connectorBluetooth.baseStart();
-
         if (toBtLooper != null) {
-            toBtLooper.baseStart();
+            toBtLooper.build();
         }
     }
 
@@ -243,7 +236,6 @@ public class Caller {
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        connectorBluetooth.baseStart();
         bt2AudOutLooper.build();
     }
 
@@ -253,7 +245,7 @@ public class Caller {
         if (debug) Log.i(TAG, "buildAudIn2AudOut");
 
         AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper(true);
-        audIn2AudOutLooper.baseStart();
+        audIn2AudOutLooper.build();
     }
 
     //--------------------- data from bluetooth loops back to bluetooth
@@ -284,8 +276,7 @@ public class Caller {
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        connectorBluetooth.baseStart();
-        bt2BtLooper.baseStart();
+        bt2BtLooper.build();
     }
 
     //--------------------- data from bluetooth recorded and looped back to bluetooth
@@ -316,8 +307,7 @@ public class Caller {
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        connectorBluetooth.baseStart();
-        bt2BtRecorder.baseStart();
+        bt2BtRecorder.build();
     }
 
     //--------------------- data from network looped back to network

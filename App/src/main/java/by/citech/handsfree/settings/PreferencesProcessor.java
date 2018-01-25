@@ -4,17 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import android.support.v7.preference.PreferenceManagerFix;
-import android.util.Log;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.parameters.Tags;
-
-import static by.citech.handsfree.settings.Presetter.setBtLatencyMs;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
+import timber.log.Timber;
 
 public class PreferencesProcessor {
 
-    private static final String STAG = Tags.PreferencesProcessor + " ST";
     private static final boolean debug = Settings.debug;
 
     private static SharedPreferences prefs;
@@ -28,15 +24,6 @@ public class PreferencesProcessor {
         prefs = PreferenceManagerFix.getDefaultSharedPreferences(context);
     }
 
-    public static String getBtChosenAddr() {
-        return Settings.Bluetooth.btChosendAddr;
-    }
-
-    public static void saveBtChosenAddr(String btAddrToChoose) {
-        Settings.Bluetooth.btChosendAddr = btAddrToChoose;
-        saveBtChosenAddrPref(Settings.Bluetooth.btChosendAddr);
-    }
-
     public static SharedPreferences getPrefs() {
         return prefs;
     }
@@ -45,125 +32,132 @@ public class PreferencesProcessor {
         return prefs.edit();
     }
 
+    //-------------------------- applyPrefsToSettings
+
+    public static void applyPrefsToSettings(Context context) {
+        if (debug) Timber.i("applyPrefsToSettings");
+        PreferenceManagerFix.setDefaultValues(context, R.xml.settings, false);
+        Presetter.setAudioCodecType(processEnum(SettingsDefault.AudioCommon.audioCodecType));
+        Presetter.setBtSinglePacket(getBtSinglePacketPref());
+        Presetter.setBt2BtPacketSize(getBt2btPacketSizePref());
+        Presetter.setBt2NetFactor(getBt2NetFactorPref());
+        Presetter.setBtLatencyMs(getBtLatencyMsPref());
+        Presetter.setOpMode(processEnum(SettingsDefault.Common.opMode));
+    }
+
     //-------------------------- saving preferences
 
     public static void saveBtChosenAddrPref(String newValue) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(SettingsDefault.TypeName.btChosenAddr, newValue);
-        editor.apply();
+        savePref(SettingsDefault.TypeName.btChosenAddr, newValue);
         Presetter.setBtChosenAddr(newValue);
     }
 
     public static void saveBtLatencyMsPref(int newValue) {
+        savePref(SettingsDefault.TypeName.btLatencyMs, newValue);
+        Presetter.setBtLatencyMs(newValue);
+    }
+
+    public static void saveBt2btPacketSizePref(int newValue) {
+        savePref(SettingsDefault.TypeName.bt2BtPacketSize, newValue);
+        Presetter.setBt2BtPacketSize(newValue);
+    }
+
+    public static void saveBt2NetFactorPref(int newValue) {
+        savePref(SettingsDefault.TypeName.bt2NetFactor, newValue);
+        Presetter.setBt2NetFactor(newValue);
+    }
+
+    public static void saveBtSinglePacketPref(boolean newValue) {
+        savePref(SettingsDefault.TypeName.btSinglePacket, newValue);
+        Presetter.setBtSinglePacket(newValue);
+    }
+
+    public static void saveAudioCodecTypePref(EAudioCodecType newValue) {
+        savePref(SettingsDefault.TypeName.audioCodecType, newValue.getTypeName());
+        Presetter.setAudioCodecType(newValue);
+    }
+
+    public static void saveOpModePref(EOpMode newValue) {
+        savePref(SettingsDefault.TypeName.opMode, newValue.getTypeName());
+        Presetter.setOpMode(newValue);
+    }
+
+    //-------------------------- common saving
+
+    private static void savePref(String typeName, int newValue) {
         SharedPreferences.Editor editor = getEditor();
-        editor.putInt(SettingsDefault.TypeName.btLatencyMs, newValue);
+        editor.putInt(typeName, newValue);
         editor.apply();
-        setBtLatencyMs(newValue);
+    }
+
+    private static void savePref(String typeName, String newValue) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(typeName, newValue);
+        editor.apply();
+    }
+
+    private static void savePref(String typeName, boolean newValue) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putBoolean(typeName, newValue);
+        editor.apply();
     }
 
     //-------------------------- getting preferences
 
-    public static String getBtChosenAddrPref() {
+    private static String getBtChosenAddrPref() {
         return prefs.getString(
                 SettingsDefault.TypeName.btChosenAddr,
                 SettingsDefault.Bluetooth.btChosenAddr);
     }
 
-    public static String getBtLatencyMsPref() {
-        return prefs.getString(
-                SettingsDefault.TypeName.btLatencyMs,
-                Integer.toString(SettingsDefault.Bluetooth.btLatencyMs));
+    private static int getBtLatencyMsPref() {
+        return Integer.parseInt(
+                prefs.getString(
+                        SettingsDefault.TypeName.btLatencyMs,
+                        Integer.toString(SettingsDefault.Bluetooth.btLatencyMs)));
     }
 
-    //-------------------------- process
-
-    public static void process(Context context) {
-        if (debug) Log.i(STAG, "process");
-        PreferenceManagerFix.setDefaultValues(context, R.xml.settings, false);
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(context);
-        processAudioCodecType(prefs);
-        processBtSinglePacket(prefs);
-        processBt2btPacketSize(prefs);
-        processBt2NetFactor(prefs);
-        processBtLatencyMs(prefs);
-        processOpMode(prefs);
+    private static int getBt2btPacketSizePref() {
+        return Integer.parseInt(
+                prefs.getString(
+                        SettingsDefault.TypeName.bt2BtPacketSize,
+                        Integer.toString(SettingsDefault.Bluetooth.bt2BtPacketSize)));
     }
 
-    private static <T extends ISettingEnum<T>> T processEnum(SharedPreferences prefs, T defaultT) {
-        if (prefs == null || defaultT == null) {
-            if (debug) Log.e(STAG, "processEnum" + StatusMessages.ERR_PARAMETERS);
-            return null;
-        }
-        String read = prefs.getString(defaultT.getTypeName(), defaultT.getDefaultName());
+    private static int getBt2NetFactorPref() {
+        return Integer.parseInt(
+                prefs.getString(
+                        SettingsDefault.TypeName.bt2NetFactor,
+                        Integer.toString(SettingsDefault.Common.bt2NetFactor)));
+    }
+
+    private static boolean getBtSinglePacketPref() {
+        return prefs.getBoolean(
+                SettingsDefault.TypeName.btSinglePacket,
+                SettingsDefault.Bluetooth.btSinglePacket);
+    }
+
+    //-------------------------- common
+
+    private static <T extends ISettingEnum<T>> String getEnumPref(T defaultT) {
+        return prefs.getString(defaultT.getTypeName(), defaultT.getDefaultName());
+    }
+
+    private static <T extends ISettingEnum<T>> T processEnum(T defaultT) {
+        String read = getEnumPref(defaultT);
         if (read == null || read.isEmpty()) {
-            if (debug) Log.e(STAG, "processEnum read illegal value" + read);
+            if (debug) Timber.e("processEnum read illegal value: <%s>", read);
         } else {
-            if (debug) Log.i(STAG, "processEnum read is " + read);
+            if (debug) Timber.i("processEnum read: <%s>", read);
             for (T t : defaultT.getValues()) {
                 if (read.matches(t.getSettingNumber())) {
-                    if (debug) Log.i(STAG, "processEnum found matching setting: " + t.getSettingName());
+                    if (debug)
+                        Timber.i("processEnum found matching setting: <%s>", t);
                     return t;
                 }
             }
         }
         return defaultT;
-    }
-
-    private static void processAudioCodecType(SharedPreferences prefs) {
-        if (prefs == null) {
-            if (debug) Log.e(STAG, "processAudioCodecType" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setAudioCodecType(processEnum(prefs, SettingsDefault.AudioCommon.audioCodecType));
-    }
-
-    private static void processOpMode(SharedPreferences prefs) {
-        if (prefs == null) {
-            if (debug) Log.e(STAG, "processOpMode" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setOpMode(processEnum(prefs, SettingsDefault.Common.opMode));
-    }
-
-    private static void processBtLatencyMs(SharedPreferences prefs) {
-        if (prefs == null) {
-            if (debug) Log.e(STAG, "processBtLatencyMs" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        setBtLatencyMs(Integer.parseInt(
-                prefs.getString(SettingsDefault.TypeName.btLatencyMs,
-                Integer.toString(SettingsDefault.Bluetooth.btLatencyMs))));
-    }
-
-
-    private static void processBt2btPacketSize(SharedPreferences prefs) {
-        if (prefs == null) {
-            if (debug) Log.e(STAG, "processBt2btPacketSize" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setBt2BtPacketSize(Integer.parseInt(
-                prefs.getString(SettingsDefault.TypeName.bt2BtPacketSize,
-                Integer.toString(SettingsDefault.Bluetooth.bt2BtPacketSize))));
-    }
-
-    private static void processBt2NetFactor(SharedPreferences prefs) {
-        if (prefs == null) {
-            if (debug) Log.e(STAG, "processBt2NetFactor" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setBt2NetFactor(Integer.parseInt(
-                prefs.getString(SettingsDefault.TypeName.bt2NetFactor,
-                Integer.toString(SettingsDefault.Common.bt2NetFactor))));
-    }
-
-    private static void processBtSinglePacket(SharedPreferences prefs) {
-        if (prefs == null) {
-            if (debug) Log.e(STAG, "processBtSinglePacket" + StatusMessages.ERR_PARAMETERS);
-            return;
-        }
-        Presetter.setBtSinglePacket(
-                prefs.getBoolean(SettingsDefault.TypeName.btSinglePacket,
-                SettingsDefault.Bluetooth.btSinglePacket));
     }
 
 }

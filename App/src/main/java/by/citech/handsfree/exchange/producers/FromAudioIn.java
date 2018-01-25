@@ -15,7 +15,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 
 public class FromAudioIn
-        implements IStreamer, IPrepareObject, ISettingsCtrl {
+        implements IStreamer {
 
     private final String TAG = Tags.Audio;
     private final boolean debug = Settings.debug;
@@ -36,34 +36,15 @@ public class FromAudioIn
     private IRxComplex iRxComplex;
 
     {
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        takeSettings();
-        applySettings(null);
-        return false;
-    }
-
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
         audioBuffIsShorts = Settings.AudioCommon.audioBuffIsShorts;
-        audioSource = Settings.audioSource;
+        audioSource = Settings.AudioIn.audioSource;
         audioRate = Settings.AudioCommon.audioRate;
-        audioInChannel = Settings.audioInChannel;
+        audioInChannel = Settings.AudioIn.audioInChannel;
         audioEncoding = Settings.AudioCommon.audioEncoding;
         audioBuffSizeBytes = Settings.AudioCommon.audioSingleFrame
                 ? (Settings.AudioCommon.audioCodecType.getDecodedShortsSize() * 2)
                 : Settings.AudioCommon.audioBuffSizeBytes;
         audioBuffSizeShorts = audioBuffSizeBytes / 2;
-        return true;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
-        return true;
     }
 
     //--------------------- IStreamer

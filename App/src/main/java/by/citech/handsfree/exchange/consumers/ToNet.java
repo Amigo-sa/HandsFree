@@ -16,7 +16,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 
 public class ToNet
-        implements IStreamer, ISettingsCtrl, IPrepareObject {
+        implements IStreamer {
 
     private static final String STAG = Tags.ToNet;
     private final String TAG;
@@ -46,38 +46,12 @@ public class ToNet
         objCount++;
         objNumber = objCount;
         TAG = STAG + " " + objNumber;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        takeSettings();
-        applySettings(null);
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return netChunk != null;
-    }
-
-    @Override
-    public boolean takeSettings() {
-        ISettingsCtrl.super.takeSettings();
-        netSignificantAll = Settings.netSignificantAll;
-        netChunkSignificantBytes = Settings.netChunkSignificantBytes;
-        netChunkSize = netSignificantAll ? Settings.netChunkSize : netChunkSignificantBytes;
-        netFactor = Settings.netFactor;
+        netSignificantAll = Settings.Network.netSignificantAll;
+        netChunkSignificantBytes = Settings.Network.netChunkSignificantBytes;
+        netChunkSize = netSignificantAll ? Settings.Network.netChunkSize : netChunkSignificantBytes;
+        netFactor = Settings.Network.netFactor;
         netSendSize = netChunkSize * netFactor;
-        return true;
-    }
-
-    @Override
-    public boolean applySettings(ESeverityLevel severityLevel) {
-        ISettingsCtrl.super.applySettings(severityLevel);
         netChunk = new byte[netChunkSize];
-        return true;
     }
 
     //--------------------- constructor

@@ -13,7 +13,6 @@ import static by.citech.handsfree.connection.fsm.EConnectionReport.ChosenDeviceF
 import static by.citech.handsfree.connection.fsm.EConnectionReport.ChosenDevicePassedTheCheck;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.ConnectStopped;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.SearchStopped;
-import static by.citech.handsfree.settings.PreferencesProcessor.getBtChosenAddr;
 import static by.citech.handsfree.util.BluetoothHelper.isValidAddr;
 
 public class ChosenDeviceControl
@@ -50,19 +49,19 @@ public class ChosenDeviceControl
     public void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why) {
         switch (to) {
             case LightA:
-                if (isValidAddr(getBtChosenAddr())) {
+                if (isValidAddr(Settings.Bluetooth.btChosenAddr)) {
                     if (isValidAddr(getBtConnectedAddr())
-                            && !getBtChosenAddr().matches(getBtConnectedAddr())) {
+                            && !Settings.Bluetooth.btChosenAddr.matches(getBtConnectedAddr())) {
                         reportToConnectionFsm(getConnectionFsmState(), SearchStopped, TAG);
                         reportToConnectionFsm(getConnectionFsmState(), ConnectStopped, TAG);
                     } else reportToConnectionFsm(getConnectionFsmState(), ChosenDevicePassedTheCheck, TAG);
                 } else reportToConnectionFsm(getConnectionFsmState(), ChosenDeviceFailedTheCheck, TAG);
                 break;
             case SettingsA:
-                setBtConnectedAddr(getBtChosenAddr());
+                setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
                 break;
             case ScanA:
-                setBtConnectedAddr(getBtChosenAddr());
+                setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
                 break;
             default:
                 break;

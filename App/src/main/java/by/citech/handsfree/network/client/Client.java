@@ -55,9 +55,9 @@ public class Client
     public IClientCtrl startClient() {
         if (debug) Log.i(TAG, "startClient");
         client = new OkHttpClient.Builder()
-                .readTimeout(Settings.clientReadTimeout, TimeUnit.MILLISECONDS)
-                .connectTimeout(Settings.connectTimeout, TimeUnit.MILLISECONDS)
-                .retryOnConnectionFailure(Settings.reconnectOnFail)
+                .readTimeout(Settings.Network.clientReadTimeout, TimeUnit.MILLISECONDS)
+                .connectTimeout(Settings.Network.connectTimeout, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(Settings.Network.reconnectOnFail)
                 .build();
         Request request = new Request.Builder()
 //              .url("ws://echo.network.org")
@@ -65,7 +65,7 @@ public class Client
                 .build();
         client.newWebSocket(request, this);
         procState(EConnectionState.Opening);
-        // Trigger shutdown of the dispatcher's executor so this process can exit cleanly.
+        // Trigger shutdown of the dispatcher's executor so this applyPrefsToSettings can exit cleanly.
         client.dispatcher().executorService().shutdown();
         return this;
     }
