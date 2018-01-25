@@ -51,6 +51,7 @@ import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
 import by.citech.handsfree.ui.IScanListener;
+import by.citech.handsfree.ui.LinearLayoutTouchListener;
 import by.citech.handsfree.ui.helpers.IContactEditorHelper;
 import by.citech.handsfree.ui.helpers.EActiveContactState;
 import by.citech.handsfree.contact.Contact;
@@ -93,7 +94,7 @@ public class CallActivity
                    IBtToUiCtrl,
                    ICallUi,
                    IMsgToUi,
-        IScanListener {
+                   IScanListener {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -125,6 +126,7 @@ public class CallActivity
     private ContactsAdapter.SwipeCrutch swipeCrutch;
     private ActiveContactHelper activeContactHelper;
     private ChosenContactHelper chosenContactHelper;
+    private LinearLayoutTouchListener linearLayoutTouchListener;
 
     // для включения разрешения местоположения
     private LocationManager locationManager;
@@ -144,7 +146,6 @@ public class CallActivity
         if (debug) Log.w(TAG, "onCreate opMode is getSettingName " + opMode.getSettingName());
 
         viewManager = new CallActivityViewManager();
-
         enPermissions();
 
         //---------------- TEST START
@@ -172,7 +173,7 @@ public class CallActivity
         editTextContactIp = findViewById(R.id.editTextContactIp);
 
         findViewById(R.id.btnChangeDevice).setOnClickListener((v) -> clickBtnChangeDevice());
-        findViewById(R.id.baseView).setOnTouchListener(new LinearLayoutTouchListener());
+
         findViewById(R.id.btnClearContact).setOnClickListener((v) -> clickBtnClearContact());
         findViewById(R.id.btnAddContact).setOnClickListener((v) -> startEditorAddContact());
         findViewById(R.id.btnDelContact).setOnClickListener((v) -> deleteFromEditor());
@@ -199,6 +200,9 @@ public class CallActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
+        linearLayoutTouchListener = new LinearLayoutTouchListener(IUiToBtListener);
+        findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
+
         //IScanListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
@@ -256,6 +260,7 @@ public class CallActivity
     protected void onDestroy() {
         super.onDestroy();
         if (debug) Log.w(TAG, "onDestroy");
+        linearLayoutTouchListener = null;
     }
 
     //-------------------------- menu
@@ -491,9 +496,8 @@ public class CallActivity
 
     public void clickBtnChangeDevice() {
         setVisibleList();
-        //LinearLayoutTouchListener linearLayoutTouchListener = new LinearLayoutTouchListener(IUiToBtListener);
         listDevices.setAdapter(deviceListAdapter);
-        listDevices.setOnTouchListener(new LinearLayoutTouchListener());
+        listDevices.setOnTouchListener(linearLayoutTouchListener);
         listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));
         IUiToBtListener.initListDevices();
         if (debug) Log.i(TAG,"before caller getBluetoothAdapter");
@@ -567,73 +571,73 @@ public class CallActivity
         actionBar.setCustomView(null);
     }
 
-    public class LinearLayoutTouchListener
-            implements View.OnTouchListener {
-
-            static final String logTag = "ActivitySwipeDetector";
-            // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
-            static final int MIN_DISTANCE = 100;
-            private float downX, downY, upX, upY;
-
-            LinearLayoutTouchListener() {}
-            void onRightToLeftSwipe() {if (debug) Log.i(logTag, "RightToLeftSwipe!");}
-            void onLeftToRightSwipe() {if (debug) Log.i(logTag, "LeftToRightSwipe!");}
-
-             void onTopToBottomSwipe() {
-                if (debug) Log.i(logTag, "onTopToBottomSwipe!");
-                swipeScanStart();
-            }
-
-             void onBottomToTopSwipe() {
-                if (debug) Log.i(logTag, "onBottomToTopSwipe!");
-                swipeScanStop();
-            }
-
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            switch (motionEvent.getAction()) {
-                case MotionEvent.ACTION_DOWN: {
-                    downX = motionEvent.getX();
-                    downY = motionEvent.getY();
-                    return true;
-                }
-                case MotionEvent.ACTION_UP: {
-                    upX = motionEvent.getX();
-                    upY = motionEvent.getY();
-                    float deltaX = downX - upX;
-                    float deltaY = downY - upY;
-                    if (Math.abs(deltaX) > MIN_DISTANCE) { // swipe horizontal?
-                        if (deltaX < 0) { // left or right
-                            this.onLeftToRightSwipe();
-                            return true;
-                        }
-                        if (deltaX > 0) {
-                            this.onRightToLeftSwipe();
-                            return true;
-                        }
-                    } else {
-                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
-                        // return false; // We don't consume the event
-                    }
-                    if (Math.abs(deltaY) > MIN_DISTANCE) { // swipe vertical?
-                        if (deltaY < 0) { // top or down
-                            this.onTopToBottomSwipe();
-                            return true;
-                        }
-                        if (deltaY > 0) {
-                            this.onBottomToTopSwipe();
-                            return true;
-                        }
-                    } else {
-                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
-                    }
-                    return false; // no swipe horizontally and no swipe vertically
-                } // case MotionEvent.ACTION_UP:
-            }
-            return false;
-        }
-
-    }
+//    public class LinearLayoutTouchListener
+//            implements View.OnTouchListener {
+//
+//            static final String logTag = "ActivitySwipeDetector";
+//            // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
+//            static final int MIN_DISTANCE = 100;
+//            private float downX, downY, upX, upY;
+//
+//            LinearLayoutTouchListener() {}
+//            void onRightToLeftSwipe() {if (debug) Log.i(logTag, "RightToLeftSwipe!");}
+//            void onLeftToRightSwipe() {if (debug) Log.i(logTag, "LeftToRightSwipe!");}
+//
+//             void onTopToBottomSwipe() {
+//                if (debug) Log.i(logTag, "onTopToBottomSwipe!");
+//                swipeScanStart();
+//            }
+//
+//             void onBottomToTopSwipe() {
+//                if (debug) Log.i(logTag, "onBottomToTopSwipe!");
+//                swipeScanStop();
+//            }
+//
+//        @Override
+//        public boolean onTouch(View view, MotionEvent motionEvent) {
+//            switch (motionEvent.getAction()) {
+//                case MotionEvent.ACTION_DOWN: {
+//                    downX = motionEvent.getX();
+//                    downY = motionEvent.getY();
+//                    return true;
+//                }
+//                case MotionEvent.ACTION_UP: {
+//                    upX = motionEvent.getX();
+//                    upY = motionEvent.getY();
+//                    float deltaX = downX - upX;
+//                    float deltaY = downY - upY;
+//                    if (Math.abs(deltaX) > MIN_DISTANCE) { // swipe horizontal?
+//                        if (deltaX < 0) { // left or right
+//                            this.onLeftToRightSwipe();
+//                            return true;
+//                        }
+//                        if (deltaX > 0) {
+//                            this.onRightToLeftSwipe();
+//                            return true;
+//                        }
+//                    } else {
+//                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
+//                        // return false; // We don't consume the event
+//                    }
+//                    if (Math.abs(deltaY) > MIN_DISTANCE) { // swipe vertical?
+//                        if (deltaY < 0) { // top or down
+//                            this.onTopToBottomSwipe();
+//                            return true;
+//                        }
+//                        if (deltaY > 0) {
+//                            this.onBottomToTopSwipe();
+//                            return true;
+//                        }
+//                    } else {
+//                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
+//                    }
+//                    return false; // no swipe horizontally and no swipe vertically
+//                } // case MotionEvent.ACTION_UP:
+//            }
+//            return false;
+//        }
+//
+//    }
 
     //--------------------- LocationListener
 
