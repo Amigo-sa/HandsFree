@@ -27,14 +27,15 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
+import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.SettingsDefault;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class SettingsActivity
         extends AppCompatActivity {
 
-    private static final String TAG = Tags.SettingsActivity;
     private static final boolean debug = Settings.debug;
 
     @Override
@@ -50,8 +51,27 @@ public class SettingsActivity
         setupActionBar();
     }
 
+    @Override
+    public void onBackPressed() {
+        intoTheCall();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(debug) Timber.i("onOptionsItemSelected");
+        intoTheCall();
+        return true;
+    }
+
+    private void intoTheCall() {
+        startActivity(new Intent(this, CallActivity.class));
+        finish();
+    }
+
+    //-------------------------- setup
+
     private void setupActionBar() {
-        if (debug) Log.i(TAG, "setupActionBar");
+        if (debug) Timber.i("setupActionBar");
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowHomeEnabled(true);
@@ -68,22 +88,7 @@ public class SettingsActivity
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        intoTheCall();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if(debug) Log.i(TAG,"onOptionsItemSelected");
-        intoTheCall();
-        return true;
-    }
-
-    private void intoTheCall() {
-        startActivity(new Intent(this, CallActivity.class));
-        finish();
-    }
+    //-------------------------- SettingsFragment
 
     public static class SettingsFragment
             extends PreferenceFragmentCompatDividers
@@ -92,22 +97,18 @@ public class SettingsActivity
         @Override
         public void onResume() {
             super.onResume();
-            getPreferenceScreen()
-                    .getSharedPreferences()
-                    .registerOnSharedPreferenceChangeListener(this);
+            getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
 
         @Override
         public void onPause() {
             super.onPause();
-            getPreferenceScreen()
-                    .getSharedPreferences()
-                    .unregisterOnSharedPreferenceChangeListener(this);
+            getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
         }
 
         @Override
         public void onCreatePreferencesFix(@Nullable Bundle savedInstanceState, String rootKey) {
-            if (debug) Log.i(TAG, "onCreatePreferencesFix");
+            if (debug) Timber.i("onCreatePreferencesFix");
             setPreferencesFromResource(R.xml.settings, rootKey);
             prepareOpModePref();
             prepareAudioCodecTypePref();
@@ -116,19 +117,24 @@ public class SettingsActivity
             prepareBt2btPacketSizePref();
         }
 
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
+            try {
+                return super.onCreateView(inflater, container, savedInstanceState);
+            } finally {
+                setDividerPreferences(DIVIDER_PADDING_CHILD | DIVIDER_CATEGORY_AFTER_LAST | DIVIDER_CATEGORY_BETWEEN);
+            }
+        }
+
+        //-------------------------- preferences preparation
+
         private void prepareOpModePref() {
-            if (debug) Log.i(TAG, "prepareOpModePref");
+            if (debug) Timber.i("prepareOpModePref");
             ListPreference pref = (ListPreference) findPreference(getString(R.string.opMode));
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.Common.opMode.getSettingName());
             CharSequence[] entries = {
-                    EOpMode.Normal.getSettingName(),
-                    EOpMode.Bt2Bt.getSettingName(),
-                    EOpMode.DataGen2Bt.getSettingName(),
-                    EOpMode.AudIn2Bt.getSettingName(),
-                    EOpMode.Bt2AudOut.getSettingName(),
-                    EOpMode.AudIn2AudOut.getSettingName(),
-                    EOpMode.Record.getSettingName()
+
             };
             CharSequence[] entryValues = {
                     EOpMode.Normal.getSettingNumber(),
@@ -143,14 +149,14 @@ public class SettingsActivity
             pref.setEntryValues(entryValues);
             CharSequence entry = pref.getEntry();
             if (entry == null || entry.length() == 0) {
-                if (debug) Log.i(TAG, "prepareOpModePref entry is null, set to default");
+                if (debug) Timber.i("prepareOpModePref entry is null, set to default");
                 pref.setValue(SettingsDefault.Common.opMode.getSettingName());
             }
             pref.setSummary(pref.getEntry());
         }
 
         private void prepareAudioCodecTypePref() {
-            if (debug) Log.i(TAG, "prepareAudioCodecTypePref");
+            if (debug) Timber.i("prepareAudioCodecTypePref");
             ListPreference pref = (ListPreference) findPreference(getString(R.string.audioCodecType));
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
@@ -171,14 +177,14 @@ public class SettingsActivity
             pref.setSummary(pref.getEntry());
             CharSequence entry = pref.getEntry();
             if (entry == null || entry.length() == 0) {
-                if (debug) Log.i(TAG, "prepareAudioCodecTypePref entry is null, set to default");
+                if (debug) Timber.i("prepareAudioCodecTypePref entry is null, set to default");
                 pref.setValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
             }
             pref.setSummary(pref.getEntry());
         }
 
         private void prepareBt2NetFactorPref() {
-            if (debug) Log.i(TAG, "prepareBt2NetFactorPref");
+            if (debug) Timber.i("prepareBt2NetFactorPref");
             EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.bt2NetFactor));
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.Common.bt2NetFactor);
@@ -190,7 +196,7 @@ public class SettingsActivity
         }
 
         private void prepareBt2btPacketSizePref() {
-            if (debug) Log.i(TAG, "prepareBt2btPacketSizePref");
+            if (debug) Timber.i("prepareBt2btPacketSizePref");
             EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.bt2BtPacketSize));
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.Bluetooth.bt2BtPacketSize);
@@ -202,7 +208,7 @@ public class SettingsActivity
         }
 
         private void prepareBtLatencyMsPref() {
-            if (debug) Log.i(TAG, "prepareBtLatencyMsPref");
+            if (debug) Timber.i("prepareBtLatencyMsPref");
             EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.btLatencyMs));
             if (pref == null) return;
             pref.setDefaultValue(SettingsDefault.Bluetooth.btLatencyMs);
@@ -213,53 +219,56 @@ public class SettingsActivity
             pref.setSummary(pref.getText());
         }
 
-        private void refreshListPref(String s) {
-            if (debug) Log.i(TAG, "refreshListPref");
-            ListPreference pref = (ListPreference) findPreference(s);
-            if (pref == null) {
-                if (debug) Log.e(TAG, "refreshListPref pref is null");
-                return;
-            }
-            pref.setSummary(pref.getEntry());
+        //-------------------------- on change refresh
+
+        private String getRefreshedListPref(String prefName) {
+            if (debug) Timber.i("refreshListPref");
+            ListPreference pref = (ListPreference) findPreference(prefName);
+            String newSummary = pref.getValue();
+            pref.setSummary(newSummary);
+            return newSummary;
         }
 
-        private void refreshEditTextPref(String s) {
-            EditTextPreference pref = (EditTextPreference) findPreference(s);
-            if (pref == null) {
-                if (debug) Log.e(TAG, "refreshListPref pref is null");
-                return;
-            }
-            pref.setSummary(pref.getText());
+        private String getRefreshedEditTextPref(String prefName) {
+            if (debug) Timber.i("refreshEditTextPref");
+            EditTextPreference pref = (EditTextPreference) findPreference(prefName);
+            String newSummary = pref.getText();
+            pref.setSummary(newSummary);
+            return newSummary;
         }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
-            try {
-                return super.onCreateView(inflater, container, savedInstanceState);
-            } finally {
-                setDividerPreferences(DIVIDER_PADDING_CHILD | DIVIDER_CATEGORY_AFTER_LAST | DIVIDER_CATEGORY_BETWEEN);
-            }
-        }
+        //-------------------------- OnSharedPreferenceChangeListener
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String prefName) {
-            if (debug) Log.i(TAG, "onSharedPreferenceChanged prefName is " + prefName);
+            if (debug) Timber.i("onSharedPreferenceChanged prefName is %s", prefName);
             if (prefName == null || prefName.isEmpty()) {
-                if (debug) Log.e(TAG, "onSharedPreferenceChanged prefName is illegal");
+                if (debug) Timber.e("onSharedPreferenceChanged prefName is illegal");
                 return;
             }
             switch (prefName) {
-                case SettingsDefault.TypeName.opMode:
-                case SettingsDefault.TypeName.audioCodecType:
-                    refreshListPref(prefName);
-                    break;
-                case SettingsDefault.TypeName.bt2NetFactor:
                 case SettingsDefault.TypeName.btLatencyMs:
+                    PreferencesProcessor.saveBtLatencyMsPref(Integer.parseInt(getRefreshedEditTextPref(prefName)));
+                    break;
+                case SettingsDefault.TypeName.btChosenAddr:
+                    PreferencesProcessor.saveBtChosenAddrPref(getRefreshedEditTextPref(prefName));
+                    break;
+                case SettingsDefault.TypeName.opMode:
+                    PreferencesProcessor.saveOpModePref(EOpMode.valueOf(getRefreshedListPref(prefName)));
+                    break;
+                case SettingsDefault.TypeName.audioCodecType:
+                    PreferencesProcessor.saveAudioCodecTypePref(EAudioCodecType.valueOf(getRefreshedListPref(prefName)));
+                    break;
                 case SettingsDefault.TypeName.bt2BtPacketSize:
-                    refreshEditTextPref(prefName);
+                    PreferencesProcessor.saveBt2btPacketSizePref(Integer.parseInt(getRefreshedEditTextPref(prefName)));
+                    break;
+                case SettingsDefault.TypeName.btSinglePacket:
+                    PreferencesProcessor.saveBtSinglePacketPref();
+                default:
                     break;
             }
         }
+
     }
 
 }

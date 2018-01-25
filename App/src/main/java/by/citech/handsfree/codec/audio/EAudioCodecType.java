@@ -25,36 +25,12 @@ public enum EAudioCodecType implements ISettingEnum<EAudioCodecType> {
         @Override public int getEncodedBytesSize() {return 20;}
     };
 
-    @Override
-    public String getSettingName() {
-        return this.toString();
-    }
-
-    @Override
-    public String getSettingNumber() {
-        return String.valueOf(this.ordinal() + 1);
-    }
-
-    @Override
-    public String getDefaultName() {
-        return getDefaultValue().getSettingName();
-    };
-
-    @Override
-    public String getTypeName() {
-        return SettingsDefault.TypeName.audioCodecType;
-    };
-
-    @Override
-    public EAudioCodecType getDefaultValue() {
-        return SettingsDefault.AudioCommon.audioCodecType;
-    }
-
-    @Override
-    public EAudioCodecType[] getValues() {
-        return values();
-    }
-
+    @Override public String getSettingName() {return this.toString();}
+    @Override public String getSettingNumber() {return String.valueOf(this.ordinal() + 1);}
+    @Override public String getDefaultName() {return getDefaultValue().getSettingName();};
+    @Override public String getTypeName() {return SettingsDefault.TypeName.audioCodecType;};
+    @Override public EAudioCodecType getDefaultValue() {return SettingsDefault.AudioCommon.audioCodecType;}
+    @Override public EAudioCodecType[] getValues() {return values();}
 
     public abstract int getEncodedBytesSize();
     public abstract int getDecodedShortsSize();

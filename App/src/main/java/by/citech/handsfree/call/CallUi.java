@@ -1,15 +1,11 @@
 package by.citech.handsfree.call;
 
-import android.util.Log;
-import java.util.Locale;
-
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ICallFsmReporter;
-import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 import static by.citech.handsfree.call.fsm.ECallReport.CallEndedByLocalUser;
 import static by.citech.handsfree.call.fsm.ECallReport.InCallAcceptedByLocalUser;
@@ -21,27 +17,18 @@ import static by.citech.handsfree.call.fsm.ECallReport.StartDebug;
 import static by.citech.handsfree.call.fsm.ECallReport.StopDebug;
 
 public class CallUi
-        implements ISettingsCtrl, IPrepareObject, ICallFsmReporter {
+        implements ICallFsmReporter {
 
-    private static final String STAG = Tags.CallUi;
     private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
+    private final String TAG = Tags.CallUi;
     private final static String onClickBtnGreen = "onClickBtnGreen";
     private final static String onClickBtnRed = "onClickBtnRed";
-
-    static {
-        objCount = 0;
-    }
 
     //--------------------- preparation
 
     private EOpMode opMode;
 
     {
-        objCount++;
-        TAG = STAG + " " + objCount;
-        prepareObject();
         opMode = Settings.Common.opMode;
     }
 
@@ -59,8 +46,6 @@ public class CallUi
                     instance = new CallUi();
                 }
             }
-        } else {
-            instance.prepareObject();
         }
         return instance;
     }
@@ -68,14 +53,12 @@ public class CallUi
     //--------------------- main
 
     private void onMethodWrongState(ECallState callerState, String methodName) {
-        if (debug) Log.e(TAG, methodName + " " + callerState);
+        if (debug) Timber.e(methodName + " " + callerState);
     }
 
     void onClickBtnGreen() {
         ECallState callerState = getCallerFsmState();
-        if (debug) Log.w(TAG, String.format(Locale.US,
-                "onClickBtnGreen opMode is %s, callerState is %s",
-                opMode, callerState));
+        if (debug) Timber.w("onClickBtnGreen opMode is %s, callerState is %s", opMode, callerState);
         switch (opMode) {
             case DataGen2Bt:
             case AudIn2Bt:
@@ -110,17 +93,15 @@ public class CallUi
                 break;
             case Net2Net:
             default:
-                if (debug) Log.e(TAG, "onClickBtnGreen illegal opMode: " + opMode); return;
+                if (debug) Timber.e("onClickBtnGreen illegal opMode: %s", opMode); return;
         }
-        if (debug) Log.w(TAG, "onClickBtnGreen recursive call");
+        if (debug) Timber.tag(TAG).w("onClickBtnGreen recursive call");
         onClickBtnGreen();
     }
 
     void onClickBtnRed() {
         ECallState callerState = getCallerFsmState();
-        if (debug) Log.w(TAG, String.format(Locale.US,
-                "onClickBtnRed opMode is %s, callerState is %s",
-                opMode, callerState));
+        if (debug) Timber.w("onClickBtnRed opMode is %s, callerState is %s", opMode, callerState);
         switch (opMode) {
             case AudIn2Bt:
             case DataGen2Bt:
@@ -159,9 +140,9 @@ public class CallUi
                 break;
             case Net2Net:
             default:
-                if (debug) Log.e(TAG, "onClickBtnRed illegal opMode: " + opMode); return;
+                if (debug) Timber.e("onClickBtnRed illegal opMode: %s", opMode); return;
         }
-        if (debug) Log.w(TAG, "onClickBtnRed recursive call");
+        if (debug) Timber.tag(TAG).w("onClickBtnRed recursive call");
         onClickBtnRed();
     }
 
