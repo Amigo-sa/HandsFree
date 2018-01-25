@@ -21,6 +21,7 @@ import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.ui.IScanListener;
 import timber.log.Timber;
 
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
@@ -39,6 +40,7 @@ public class CallControl {
     private INetInfoGetter iNetInfoGetter;
     private IBluetoothListener iBluetoothListener;
     private IBroadcastReceiver iBroadcastReceiver;
+    private IScanListener iScanListener;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
     private IBtList iBtList;
@@ -82,6 +84,11 @@ public class CallControl {
 
     public CallControl setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
         this.iBroadcastReceiver = iBroadcastReceiver;
+        return this;
+    }
+
+    public CallControl setiScanListener(IScanListener iScanListener) {
+        this.iScanListener = iScanListener;
         return this;
     }
 
@@ -168,6 +175,7 @@ public class CallControl {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiScanListener(iScanListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -207,6 +215,7 @@ public class CallControl {
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiScanListener(iScanListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -236,6 +245,7 @@ public class CallControl {
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiScanListener(iScanListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -276,6 +286,7 @@ public class CallControl {
                 .setStorageFromBt(storageFromBt)
                 .setStorageToBt(storageToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiScanListener(iScanListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -307,6 +318,7 @@ public class CallControl {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiScanListener(iScanListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);

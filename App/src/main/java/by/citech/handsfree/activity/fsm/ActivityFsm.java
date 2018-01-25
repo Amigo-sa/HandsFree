@@ -15,17 +15,9 @@ import static by.citech.handsfree.activity.fsm.EActivityState.Back;
 import static by.citech.handsfree.activity.fsm.EActivityState.BackArrow;
 import static by.citech.handsfree.activity.fsm.EActivityState.Destroyed;
 import static by.citech.handsfree.activity.fsm.EActivityState.Home;
-import static by.citech.handsfree.activity.fsm.EActivityState.LightA;
-import static by.citech.handsfree.activity.fsm.EActivityState.LightA2ScanA;
-import static by.citech.handsfree.activity.fsm.EActivityState.LightA2SettingsA;
 import static by.citech.handsfree.activity.fsm.EActivityState.PowerOff;
 import static by.citech.handsfree.activity.fsm.EActivityState.PowerOn;
-import static by.citech.handsfree.activity.fsm.EActivityState.ScanA;
-import static by.citech.handsfree.activity.fsm.EActivityState.ScanA2LightA;
-import static by.citech.handsfree.activity.fsm.EActivityState.ScanA2SettingsA;
 import static by.citech.handsfree.activity.fsm.EActivityState.SettingsA;
-import static by.citech.handsfree.activity.fsm.EActivityState.SettingsA2LightA;
-import static by.citech.handsfree.activity.fsm.EActivityState.SettingsA2ScanA;
 import static by.citech.handsfree.activity.fsm.EActivityState.TurnedOff;
 import static by.citech.handsfree.activity.fsm.EActivityState.TurnedOn;
 
@@ -157,7 +149,7 @@ public class ActivityFsm {
     private boolean processStateChange(EActivityState from, EActivityState to, EActivityReport why, boolean isForce) {
         if (currState == from || isForce) {
             if (EActivityState.availableFromAny().contains(to) || from.available().contains(to) || isForce) {
-                if (isActivity(from) && isTransition(why)) prevActivityState = from;
+              //  if (isActivity(from) && isTransition(why)) prevActivityState = from;
                 prevReport = why;
                 prevState = currState;
                 currState = to;
@@ -172,8 +164,8 @@ public class ActivityFsm {
         return report != PowerOffPressed && report != HomePressed;
     }
 
-    private boolean isActivity(EActivityState state) {
-        return state == ScanA || state == SettingsA || state == LightA;
-    }
+//    private boolean isActivity(EActivityState state) {
+//        return state == ScanA || state == SettingsA || state == LightA;
+//    }
 
 }

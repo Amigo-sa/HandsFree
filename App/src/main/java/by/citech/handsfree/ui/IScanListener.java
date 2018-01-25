@@ -1,0 +1,10 @@
+package by.citech.handsfree.ui;
+
+/**
+ * Created by tretyak on 16.12.2017.
+ */
+
+public interface IScanListener {
+    void onStartScan();
+    void onStopScan();
+}

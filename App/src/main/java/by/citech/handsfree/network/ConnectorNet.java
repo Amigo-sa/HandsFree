@@ -135,22 +135,22 @@ public class ConnectorNet
 
     //--------------------- getters and setters
 
-    ConnectorNet setHandler(Handler handler) {
+    public ConnectorNet setHandler(Handler handler) {
         this.handler = handler;
         return this;
     }
 
-    ConnectorNet setiNetInfoGetter(INetInfoGetter iNetInfoGetter) {
+    public ConnectorNet setiNetInfoGetter(INetInfoGetter iNetInfoGetter) {
         this.iNetInfoGetter = iNetInfoGetter;
         return this;
     }
 
-    ConnectorNet setStorageToNet(StorageData<byte[]> storageBtToNet) {
+    public ConnectorNet setStorageToNet(StorageData<byte[]> storageBtToNet) {
         this.storageToNet = storageBtToNet;
         return this;
     }
 
-    ConnectorNet setStorageFromNet(StorageData<byte[][]> storageNetToBt) {
+    public ConnectorNet setStorageFromNet(StorageData<byte[][]> storageNetToBt) {
         this.storageFromNet = storageNetToBt;
         return this;
     }

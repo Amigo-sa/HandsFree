@@ -48,21 +48,21 @@ public class ChosenDeviceControl
     @Override
     public void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why) {
         switch (to) {
-            case LightA:
-                if (isValidAddr(Settings.Bluetooth.btChosenAddr)) {
-                    if (isValidAddr(getBtConnectedAddr())
-                            && !Settings.Bluetooth.btChosenAddr.matches(getBtConnectedAddr())) {
-                        reportToConnectionFsm(getConnectionFsmState(), SearchStopped, TAG);
-                        reportToConnectionFsm(getConnectionFsmState(), ConnectStopped, TAG);
-                    } else reportToConnectionFsm(getConnectionFsmState(), ChosenDevicePassedTheCheck, TAG);
-                } else reportToConnectionFsm(getConnectionFsmState(), ChosenDeviceFailedTheCheck, TAG);
-                break;
+//            case LightA:
+//                if (isValidAddr(Settings.Bluetooth.btChosenAddr)) {
+//                    if (isValidAddr(getBtConnectedAddr())
+//                            && !Settings.Bluetooth.btChosenAddr.matches(getBtConnectedAddr())) {
+//                        reportToConnectionFsm(getConnectionFsmState(), SearchStopped, TAG);
+//                        reportToConnectionFsm(getConnectionFsmState(), ConnectStopped, TAG);
+//                    } else reportToConnectionFsm(getConnectionFsmState(), ChosenDevicePassedTheCheck, TAG);
+//                } else reportToConnectionFsm(getConnectionFsmState(), ChosenDeviceFailedTheCheck, TAG);
+//                break;
             case SettingsA:
                 setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
                 break;
-            case ScanA:
-                setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
-                break;
+//            case ScanA:
+//                setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
+//                break;
             default:
                 break;
         }

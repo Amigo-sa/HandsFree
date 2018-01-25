@@ -15,8 +15,6 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreading;
 import timber.log.Timber;
 
-import static by.citech.handsfree.activity.fsm.EActivityReport.LightA2ScanAPressed;
-import static by.citech.handsfree.activity.fsm.EActivityState.LightA;
 import static by.citech.handsfree.application.ThisApplication.setBtConnectedAddr;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.ConnectStarted;
 import static by.citech.handsfree.connection.fsm.EConnectionReport.ConnectStopped;
@@ -153,13 +151,13 @@ public class ConnectionControl
 
     @Override
     public void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why) {
-        if (to == LightA) {
-            registerConnectionFsmListener(this, TAG);
-            reportToConnectionFsm(getConnectionFsmState(), GettingInitDataStarted, TAG);
-        } else if (why == LightA2ScanAPressed) {
-            removeAll();
-            unregisterConnectionFsmListener(this, TAG);
-        }
+//        if (to == LightA) {
+//            registerConnectionFsmListener(this, TAG);
+//            reportToConnectionFsm(getConnectionFsmState(), GettingInitDataStarted, TAG);
+//        } else if (why == LightA2ScanAPressed) {
+//            removeAll();
+//            unregisterConnectionFsmListener(this, TAG);
+//        }
     }
 
 }

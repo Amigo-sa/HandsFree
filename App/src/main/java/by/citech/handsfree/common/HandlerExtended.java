@@ -21,7 +21,7 @@ public class HandlerExtended
 
     private INetListener iNetListener;
 
-    HandlerExtended (INetListener iNetListener) {
+    public HandlerExtended (INetListener iNetListener) {
         super();
         this.iNetListener = iNetListener;
     }

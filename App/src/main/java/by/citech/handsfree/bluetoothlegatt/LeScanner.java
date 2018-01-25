@@ -12,7 +12,7 @@ import android.util.Log;
 import java.util.List;
 
 import by.citech.handsfree.application.ThisApplication;
-import by.citech.handsfree.ui.IBtToUiListener;
+import by.citech.handsfree.ui.IScanListener;
 import by.citech.handsfree.settings.Settings;
 
 public class LeScanner {
@@ -30,7 +30,7 @@ public class LeScanner {
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
     private IScannListener iScannListener;
     private BluetoothAdapter bluetoothAdapter;
-    private IBtToUiListener iBtToUiListener;
+    private IScanListener iScanListener;
 
     public LeScanner(IScannListener iScannListener) {
         this.iScannListener = iScannListener;
@@ -42,8 +42,8 @@ public class LeScanner {
         this.mHandler = mHandler;
     }
 
-    public void setiBtToUiListener(IBtToUiListener iBtToUiListener) {
-        this.iBtToUiListener = iBtToUiListener;
+    public void setiScanListener(IScanListener iScanListener) {
+        this.iScanListener = iScanListener;
     }
 
     private BluetoothAdapter getBluetoothAdapter() {
@@ -84,7 +84,7 @@ public class LeScanner {
                 if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
                 mScanning = false;
                 leScanner.stopScan(mScanCallback);
-                mHandler.post(() -> iBtToUiListener.unshowScanning());
+                mHandler.post(() -> iScanListener.onStopScan());
             }, SCAN_PERIOD);
 
             mScanning = true;
@@ -97,14 +97,14 @@ public class LeScanner {
                     .setReportDelay(0)
                     .build();
             leScanner.startScan(null, settings, mScanCallback);
-            mHandler.post(() -> iBtToUiListener.showScanning());
+            mHandler.post(() -> iScanListener.onStartScan());
             //-------------- TEST STOP
 
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
             leScanner.stopScan(mScanCallback);
-            mHandler.post(() -> iBtToUiListener.unshowScanning());
+            mHandler.post(() -> iScanListener.onStopScan());
         }
     }
 

@@ -50,6 +50,7 @@ import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
+import by.citech.handsfree.ui.IScanListener;
 import by.citech.handsfree.ui.helpers.IContactEditorHelper;
 import by.citech.handsfree.ui.helpers.EActiveContactState;
 import by.citech.handsfree.contact.Contact;
@@ -64,7 +65,6 @@ import by.citech.handsfree.ui.helpers.ActiveContactHelper;
 import by.citech.handsfree.ui.helpers.ChosenContactHelper;
 import by.citech.handsfree.ui.helpers.ContactEditorHelper;
 import by.citech.handsfree.ui.IGetView;
-import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
@@ -93,7 +93,7 @@ public class CallActivity
                    IBtToUiCtrl,
                    ICallUi,
                    IMsgToUi,
-                   IBtToUiListener {
+        IScanListener {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -132,7 +132,6 @@ public class CallActivity
 
     // интерфейсы для работы gui с bt
     private IUiToBtListener IUiToBtListener;
-    private IBtToUiListener IBtToUiListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +191,7 @@ public class CallActivity
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiBroadcastReceiver(this)
-                .setiBtToUiListener(this)
+                .setiScanListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
                 .setiBtList(deviceListAdapter);
@@ -200,7 +199,7 @@ public class CallActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
-        //IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
+        //IScanListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
     @Override
@@ -556,15 +555,15 @@ public class CallActivity
         }
     }
 
-    //------------------ IBtToUiListener ---------------------
+    //------------------ IScanListener ---------------------
 
     @Override
-    public void showScanning() {
+    public void onStartScan() {
         actionBar.setCustomView(R.layout.actionbar);
     }
 
     @Override
-    public void unshowScanning() {
+    public void onStopScan() {
         actionBar.setCustomView(null);
     }
 

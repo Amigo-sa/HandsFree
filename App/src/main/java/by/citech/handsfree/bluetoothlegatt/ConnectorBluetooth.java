@@ -50,7 +50,7 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.ui.IBtToUiListener;
+import by.citech.handsfree.ui.IScanListener;
 import by.citech.handsfree.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
@@ -272,12 +272,12 @@ public class ConnectorBluetooth
 
     //--------------------- getters and setters
 
-    ConnectorBluetooth setmHandler(Handler mHandler) {
+    public ConnectorBluetooth setmHandler(Handler mHandler) {
         this.mHandler = mHandler;
         return this;
     }
 
-    ConnectorBluetooth addIRxDataListener(IRxComplex iRxComplex) {
+    public ConnectorBluetooth addIRxDataListener(IRxComplex iRxComplex) {
         this.iRxComplex = iRxComplex;
         return this;
     }
@@ -299,42 +299,42 @@ public class ConnectorBluetooth
     }
 
 
-    ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
+    public ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
         return this;
     }
 
-    ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt) {
+    public ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt) {
         this.storageFromBt = storageFromBt;
         return this;
     }
 
-    ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt) {
+    public ConnectorBluetooth setStorageToBt(StorageData<byte[][]> storageToBt) {
         this.storageToBt = storageToBt;
         return this;
     }
 
-    ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
+    public ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
         this.iBroadcastReceiver = iBroadcastReceiver;
         return this;
     }
 
-    ConnectorBluetooth setiBtToUiListener(IBtToUiListener mIBtToUiListener) {
-        leScanner.setiBtToUiListener(mIBtToUiListener);
+    public ConnectorBluetooth setiScanListener(IScanListener mIScanListener) {
+        leScanner.setiScanListener(mIScanListener);
         return this;
     }
 
-    ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
+    public ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
         this.iBtToUiCtrl = iBtToUiCtrl;
         return this;
     }
 
-    ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
+    public ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
         return this;
     }
 
-    ConnectorBluetooth setiBtList(IBtList iBtList) {
+    public ConnectorBluetooth setiBtList(IBtList iBtList) {
         this.iBtList = iBtList;
         return this;
     }
