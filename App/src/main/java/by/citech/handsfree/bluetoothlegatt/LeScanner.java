@@ -11,11 +11,11 @@ import android.util.Log;
 
 import java.util.List;
 
+import by.citech.handsfree.application.ThisApplication;
 import by.citech.handsfree.ui.IBtToUiListener;
-import by.citech.handsfree.logic.IBluetoothListener;
 import by.citech.handsfree.settings.Settings;
 
-public class LeScanner implements IBtToUiListener {
+public class LeScanner {
 
     private final static String STAG = "WSD_LeScanner";
     private static int objCount;
@@ -28,9 +28,9 @@ public class LeScanner implements IBtToUiListener {
     private boolean mScanning;
 
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
-    private IBluetoothListener mIBluetoothListener;
     private IScannListener iScannListener;
     private BluetoothAdapter bluetoothAdapter;
+    private IBtToUiListener iBtToUiListener;
 
     public LeScanner(IScannListener iScannListener) {
         this.iScannListener = iScannListener;
@@ -42,13 +42,14 @@ public class LeScanner implements IBtToUiListener {
         this.mHandler = mHandler;
     }
 
-    public void setIBluetoothListener(IBluetoothListener mIBluetoothListener) {
-        this.mIBluetoothListener = mIBluetoothListener;
+    public void setiBtToUiListener(IBtToUiListener iBtToUiListener) {
+        this.iBtToUiListener = iBtToUiListener;
     }
+
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
             if (Settings.debug) Log.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
-            bluetoothAdapter = mIBluetoothListener.getBluetoothManager().getAdapter();
+            bluetoothAdapter = ThisApplication.getBluetoothManager().getAdapter();
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
         return bluetoothAdapter;
@@ -83,9 +84,7 @@ public class LeScanner implements IBtToUiListener {
                 if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
                 mScanning = false;
                 leScanner.stopScan(mScanCallback);
-
-                mIBluetoothListener.changeOptionMenu();
-
+                mHandler.post(() -> iBtToUiListener.unshowScanning());
             }, SCAN_PERIOD);
 
             mScanning = true;
@@ -98,14 +97,15 @@ public class LeScanner implements IBtToUiListener {
                     .setReportDelay(0)
                     .build();
             leScanner.startScan(null, settings, mScanCallback);
+            mHandler.post(() -> iBtToUiListener.showScanning());
             //-------------- TEST STOP
 
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
             leScanner.stopScan(mScanCallback);
+            mHandler.post(() -> iBtToUiListener.unshowScanning());
         }
-        mIBluetoothListener.changeOptionMenu();
     }
 
     private ScanCallback mScanCallback = new ScanCallback() {
@@ -129,8 +129,7 @@ public class LeScanner implements IBtToUiListener {
         }
     };
 
-    @Override
-    public boolean menuChangeCondition() {
+    public boolean isScanning() {
         return mScanning;
     }
 }

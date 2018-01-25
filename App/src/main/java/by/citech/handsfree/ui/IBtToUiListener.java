@@ -5,5 +5,6 @@ package by.citech.handsfree.ui;
  */
 
 public interface IBtToUiListener {
-    boolean menuChangeCondition();
+    void showScanning();
+    void unshowScanning();
 }

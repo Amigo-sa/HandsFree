@@ -1,7 +1,6 @@
 package by.citech.handsfree.activity;
 
 import android.Manifest;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -84,8 +83,17 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class CallActivity
         extends AppCompatActivity
-        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView, IThreading,
-        IContactEditorHelper, IBroadcastReceiver, IBtToUiCtrl, ICallUi, IMsgToUi {
+        implements INetInfoGetter,
+                   IBluetoothListener,
+                   LocationListener,
+                   IGetView,
+                   IThreading,
+                   IContactEditorHelper,
+                   IBroadcastReceiver,
+                   IBtToUiCtrl,
+                   ICallUi,
+                   IMsgToUi,
+                   IBtToUiListener {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -184,6 +192,7 @@ public class CallActivity
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiBroadcastReceiver(this)
+                .setiBtToUiListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
                 .setiBtList(deviceListAdapter);
@@ -191,7 +200,7 @@ public class CallActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
-        IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
+        //IBtToUiListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
     @Override
@@ -270,14 +279,12 @@ public class CallActivity
     private void onCreateScanMenu(Menu menu) {
         if (debug) Log.i(TAG, "onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        if (!IBtToUiListener.menuChangeCondition()) {
+        if (!ConnectorBluetooth.getInstance().isScanning()) {
             menu.findItem(R.id.menu_stop).setVisible(false);
             menu.findItem(R.id.menu_scan).setVisible(true);
-            actionBar.setCustomView(null);
         } else {
             menu.findItem(R.id.menu_stop).setVisible(true);
             menu.findItem(R.id.menu_scan).setVisible(false);
-            actionBar.setCustomView(R.layout.actionbar);
         }
     }
 
@@ -515,26 +522,6 @@ public class CallActivity
     //--------------------- IBluetoothListener
 
     @Override
-    public void changeOptionMenu() {
-        invalidateOptionsMenu();
-    }
-
-    @Override
-    public BluetoothManager getBluetoothManager() {
-        return (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-    }
-
-    @Override
-    public void finishConnection() {
-        finish();
-    }
-
-    @Override
-    public void disconnectToast() {
-        Toast.makeText(this, "Device not connected", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     public void withoutDeviceView() {
         viewManager.setMainNoDevice();
         invalidateOptionsMenu();
@@ -566,6 +553,18 @@ public class CallActivity
         if (!viewManager.isScanViewHidden()) {
             IUiToBtListener.swipeScanStopListener();
         }
+    }
+
+    //------------------ IBtToUiListener ---------------------
+
+    @Override
+    public void showScanning() {
+        actionBar.setCustomView(R.layout.actionbar);
+    }
+
+    @Override
+    public void unshowScanning() {
+        actionBar.setCustomView(null);
     }
 
     public class LinearLayoutTouchListener

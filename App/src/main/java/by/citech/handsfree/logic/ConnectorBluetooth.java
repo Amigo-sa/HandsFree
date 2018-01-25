@@ -228,8 +228,10 @@ public class ConnectorBluetooth
 
     private void build() {
         if (Settings.debug) Log.i(TAG, "build");
+        if (Settings.debug) Log.i(TAG, "mHandler = " + mHandler);
+        if (Settings.debug) Log.i(TAG, "mIBluetoothListener = " + mIBluetoothListener);
+
         leScanner.setHandler(mHandler);
-        leScanner.setIBluetoothListener(mIBluetoothListener);
         characteristics.setIBluetoothListener(mIBluetoothListener);
         leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
         leDataTransmitter.addIRxDataListener(iRxComplex);
@@ -295,9 +297,10 @@ public class ConnectorBluetooth
         return BluetoothUi.getInstance();
     }
 
-    public IBtToUiListener getIbtToUiListener() {
-        return leScanner;
+    public boolean isScanning() {
+        return leScanner.isScanning();
     }
+
 
     ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
         this.mIBluetoothListener = mIBluetoothListener;
@@ -316,6 +319,11 @@ public class ConnectorBluetooth
 
     ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
         this.iBroadcastReceiver = iBroadcastReceiver;
+        return this;
+    }
+
+    ConnectorBluetooth setiBtToUiListener(IBtToUiListener mIBtToUiListener) {
+        leScanner.setiBtToUiListener(mIBtToUiListener);
         return this;
     }
 
@@ -559,7 +567,6 @@ public class ConnectorBluetooth
         return false;
     }
 
-
     //------------ устанавливаем хранилища для данных ---------------
 
     @Override
@@ -639,6 +646,7 @@ public class ConnectorBluetooth
     public void onConnectionFsmStateChange(EConnectionState from, EConnectionState to, EConnectionReport why) {
         switch (why) {
             case TurningOn:
+                if (Settings.debug) Log.i(TAG, "TurningOn");
                 if (!isBtSuppported()) {
 //                    reportToConnectionFsm(to, EConnectionReport.BtNotSupported, TAG);
                     return;
@@ -648,30 +656,37 @@ public class ConnectorBluetooth
                     return;
                 }
                 enableBt();
-                build();
+                build();// ToDo: перекинуть в то состояние, когда активити уже создано
+
 //                registerSuperDataConsumer(getTransmitter());
 //                leDataTransmitter.addIRxDataListener(getReceiver());
+
                 mBluetoothLeService.initialize();
 //                reportToConnectionFsm(getConnectionFsmState(), EConnectionReport.BtPrepared, TAG);
                 break;
             case SearchStarted:
+                if (Settings.debug) Log.i(TAG, "SearchStarted");
 //                startScan();
 //                state = STATE_SCANNING;
                 break;
             case SearchStopped:
+                if (Settings.debug) Log.i(TAG, "SearchStopped");
 //                stopScan();
 //                state = STATE_SCANSTOPED;
                 break;
             case ConnectStarted:
+                if (Settings.debug) Log.i(TAG, "ConnectStarted");
 //                connect();
 //                state = STATE_CONNECTING;
                 break;
             case ConnectStopped:
+                if (Settings.debug) Log.i(TAG, "ConnectStopped");
                 if (Settings.debug)
 //                Timber.tag(TAG).i("ConnectStopped -> disconnect() -> await BtDisconnected");
                 disconnect();
                 break;
             case TurningOff:
+                if (Settings.debug) Log.i(TAG, "TurningOff");
                 onStop();
                 break;
             default:

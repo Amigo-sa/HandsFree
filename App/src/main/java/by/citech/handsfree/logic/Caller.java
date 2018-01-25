@@ -12,6 +12,7 @@ import by.citech.handsfree.loopers.Bt2BtLooper;
 import by.citech.handsfree.loopers.Bt2BtRecorder;
 import by.citech.handsfree.loopers.AudIn2AudOutLooper;
 import by.citech.handsfree.loopers.ToBtLooper;
+import by.citech.handsfree.ui.IBtToUiListener;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.settings.EDataSource;
@@ -40,6 +41,7 @@ public class Caller {
     private IMsgToUi iMsgToUi;
     private IBtList iBtList;
     private EOpMode opMode;
+    private IBtToUiListener iBtToUiListener;
 
     {
         objCount++;
@@ -79,6 +81,11 @@ public class Caller {
 
     public Caller setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
         this.iBroadcastReceiver = iBroadcastReceiver;
+        return this;
+    }
+
+    public Caller setiBtToUiListener(IBtToUiListener iBtToUiListener) {
+        this.iBtToUiListener = iBtToUiListener;
         return this;
     }
 
@@ -165,6 +172,7 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -204,6 +212,7 @@ public class Caller {
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -233,6 +242,7 @@ public class Caller {
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -273,6 +283,7 @@ public class Caller {
                 .setStorageFromBt(storageFromBt)
                 .setStorageToBt(storageToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
@@ -304,6 +315,7 @@ public class Caller {
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
                 .setiBroadcastReceiver(iBroadcastReceiver)
+                .setiBtToUiListener(iBtToUiListener)
                 .setiBtToUiCtrl(iBtToUiCtrl)
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);

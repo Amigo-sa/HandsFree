@@ -121,7 +121,6 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
             notifyThreadStart();
         } else {
             if (debug) Log.i(TAG, "disconnectToast()");
-            mIBluetoothListener.disconnectToast();
         }
     }
 
