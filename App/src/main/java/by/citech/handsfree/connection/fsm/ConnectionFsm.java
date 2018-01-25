@@ -9,7 +9,6 @@ import by.citech.handsfree.settings.Settings;
 import timber.log.Timber;
 
 import static by.citech.handsfree.connection.fsm.EConnectionReport.TurningOn;
-import static by.citech.handsfree.connection.fsm.EConnectionState.*;
 import static by.citech.handsfree.connection.fsm.EConnectionState.BtNotSupported;
 import static by.citech.handsfree.connection.fsm.EConnectionState.BtPrepared;
 import static by.citech.handsfree.connection.fsm.EConnectionState.Connected;
@@ -30,14 +29,7 @@ import static by.citech.handsfree.connection.fsm.EConnectionState.TurnedOn;
 
 public class ConnectionFsm {
 
-    private static final String STAG = Tags.ConnectionFsm;
     private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
-
-    static {
-        objCount = 0;
-    }
 
     //--------------------- preparation
 
@@ -46,11 +38,9 @@ public class ConnectionFsm {
     private volatile EConnectionReport prevReport;
 
     {
-        objCount++;
-        TAG = STAG + " " + objCount;
         listeners = new ConcurrentLinkedQueue<>();
         currState = EConnectionState.TurnedOff;
-        processReport(TurningOn, currState, TAG);
+        processReport(TurningOn, currState, Tags.ConnectionFsm);
     }
 
     //--------------------- singleton
@@ -76,15 +66,15 @@ public class ConnectionFsm {
     synchronized boolean registerListener(IConnectionFsmListener listener, String who) {
         boolean isAdded;
         if (listener == null) {
-            if (debug) Timber.tag(TAG).w("register fail, null listener: <%s>", who);
+            if (debug) Timber.w("register fail, null listener: <%s>", who);
             return false;
         } else if (listeners.contains(listener)) {
-            if (debug) Timber.tag(TAG).w("register fail, already registered: <%s>", who);
+            if (debug) Timber.w("register fail, already registered: <%s>", who);
             isAdded = true;
         } else {
             isAdded = listeners.add(listener);
-            if (isAdded) {if (debug) Timber.tag(TAG).i("register success: <%s>, count: <%d>", who, listeners.size());}
-            else         {if (debug) Timber.tag(TAG).e("register fail: <%s>, count: still <%d>", who, listeners.size());}
+            if (isAdded) {if (debug) Timber.i("register success: <%s>, count: <%d>", who, listeners.size());}
+            else         {if (debug) Timber.e("register fail: <%s>, count: still <%d>", who, listeners.size());}
         }
         if (isAdded) listener.onConnectionFsmStateChange(prevState, currState, prevReport);
         return isAdded;
@@ -93,15 +83,15 @@ public class ConnectionFsm {
     synchronized boolean unregisterListener(IConnectionFsmListener listener, String who) {
         boolean isRemoved;
         isRemoved = listeners.remove(listener);
-        if (isRemoved) {if (debug) Timber.tag(TAG).w("unregister success: <%s>, count: <%d>", who, listeners.size());}
-        else           {if (debug) Timber.tag(TAG).e("unregister fail: <%s>, count: still <%d>", who, listeners.size());}
+        if (isRemoved) {if (debug) Timber.w("unregister success: <%s>, count: <%d>", who, listeners.size());}
+        else           {if (debug) Timber.e("unregister fail: <%s>, count: still <%d>", who, listeners.size());}
         return isRemoved;
     }
 
     //--------------------- IConnectionFsmListener onConnectionFsmStateChange
 
     synchronized private void onStateChange(EConnectionState from, EConnectionState to, EConnectionReport why) {
-        if (debug) Timber.tag(TAG).w("onConnectionFsmStateChange: <%s> ==> <%s>, report: <%s>", from, to, why);
+        if (debug) Timber.w("onConnectionFsmStateChange: <%s> ==> <%s>, report: <%s>", from, to, why);
         for (IConnectionFsmListener listener : listeners) listener.onConnectionFsmStateChange(from, to, why);
     }
 
@@ -112,7 +102,7 @@ public class ConnectionFsm {
     }
 
     synchronized boolean processReport(EConnectionReport report, EConnectionState from, String msg) {
-        if (debug) Timber.tag(TAG).w("processReport: report <%s> from <%s>, message: <%s>", report, from, msg);
+        if (debug) Timber.w("processReport: report <%s> from <%s>, message: <%s>", report, from, msg);
         if (report == null || from == null || msg == null) {
             if (debug) Timber.e("processReport %s", StatusMessages.ERR_PARAMETERS);
             return false;
@@ -123,7 +113,7 @@ public class ConnectionFsm {
     //--------------------- processing
 
     private boolean processReportNormal(EConnectionReport report, EConnectionState from) {
-        if (debug) Timber.tag(TAG).i("processReportNormal");
+        if (debug) Timber.i("processReportNormal");
         switch (report) {
             case TurningOn:
                 return processStateChange(from, TurnedOn, report);
@@ -183,8 +173,8 @@ public class ConnectionFsm {
                 currState = to;
                 onStateChange(from, to, why);
                 return true;
-            } else if (debug) Timber.tag(TAG).e("processStateChange: <%s> not available from <%s>", to, from);
-        } else if (debug) Timber.tag(TAG).e("processStateChange: current currState is <%s>, not <%s>", currState, from);
+            } else if (debug) Timber.e("processStateChange: <%s> not available from <%s>", to, from);
+        } else if (debug) Timber.e("processStateChange: current currState is <%s>, not <%s>", currState, from);
         return false;
     }
 

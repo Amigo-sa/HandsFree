@@ -18,6 +18,7 @@ import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
 import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
@@ -99,7 +100,7 @@ public class Caller {
     //--------------------- main
 
     public void build() {
-        if (debug) Log.i(TAG, "build");
+        if (debug) Timber.i("build");
         switch (opMode) {
             case Bt2Bt:
                 buildBt2Bt();
@@ -130,7 +131,7 @@ public class Caller {
     }
 
     public void destroy() {
-        if (debug) Log.i(TAG, "breakTheBonds");
+        if (debug) Timber.i("destroy");
         iNetInfoGetter = null;
         iBluetoothListener = null;
         opMode = null;
@@ -143,14 +144,14 @@ public class Caller {
     //--------------------- data from bluetooth redirects to network and vice versa
 
     private void buildNormal() {
-        if (debug) Log.i(TAG, "buildNormal");
+        if (debug) Timber.i("buildNormal");
         if (iNetInfoGetter == null
                 || iBluetoothListener == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
-            Log.e(TAG, "buildNormal illegal parameters");
+            if (debug) Timber.e("buildNormal illegal parameters");
             return;
         }
 
@@ -158,7 +159,7 @@ public class Caller {
         StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
         HandlerExtended handlerExtended = new HandlerExtended(ConnectorNet.getInstance());
 
-        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
@@ -168,7 +169,7 @@ public class Caller {
                 .setiMsgToUi(iMsgToUi)
                 .setiBtList(iBtList);
 
-        ConnectorNet connectorNet = ConnectorNet.getInstance()
+        ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)
                 .setStorageFromNet(storageNetToBt)
                 .setiNetInfoGetter(iNetInfoGetter)
@@ -178,13 +179,13 @@ public class Caller {
     //--------------------- data from data source redirects to bluetooth
 
     private void build2Bt(EDataSource dataSource) {
-        if (debug) Log.i(TAG, "build2Bt");
+        if (debug) Timber.i("build2Bt");
         if (iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null
                 || dataSource == null) {
-            if (debug) Log.e(TAG, "build2Bt illegal parameters");
+            if (debug) Timber.e("build2Bt illegal parameters");
             return;
         }
 
@@ -198,7 +199,7 @@ public class Caller {
             e.printStackTrace();
         }
 
-        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
@@ -215,19 +216,19 @@ public class Caller {
     //--------------------- data from bluetooth redirects to dynamic
 
     private void buildBt2AudOut() {
-        if (debug) Log.i(TAG, "buildBt2AudOut");
+        if (debug) Timber.i("buildBt2AudOut");
         if (iBluetoothListener == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
-            if (debug) Log.e(TAG, "buildBt2AudOut illegal parameters");
+            if (debug) Timber.e("buildBt2AudOut illegal parameters");
             return;
         }
 
         Bt2AudOutLooper bt2AudOutLooper = new Bt2AudOutLooper();
 
-        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
@@ -242,7 +243,7 @@ public class Caller {
     //--------------------- data from microphone redirects to dynamic
 
     private void buildAudIn2AudOut() {
-        if (debug) Log.i(TAG, "buildAudIn2AudOut");
+        if (debug) Timber.i("buildAudIn2AudOut");
 
         AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper(true);
         audIn2AudOutLooper.build();
@@ -251,13 +252,13 @@ public class Caller {
     //--------------------- data from bluetooth loops back to bluetooth
 
     private void buildBt2Bt() {
-        if (debug) Log.i(TAG, "buildBt2Bt");
+        if (debug) Timber.i("buildBt2Bt");
         if (iBluetoothListener == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
-            if (debug) Log.e(TAG, "buildBt2Bt illegal parameters");
+            if (debug) Timber.e("buildBt2Bt illegal parameters");
             return;
         }
 
@@ -266,7 +267,7 @@ public class Caller {
 
         Bt2BtLooper bt2BtLooper = new Bt2BtLooper(storageFromBt, storageToBt);
 
-        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageFromBt)
@@ -282,13 +283,13 @@ public class Caller {
     //--------------------- data from bluetooth recorded and looped back to bluetooth
 
     private void buildRecord() {
-        if (debug) Log.i(TAG, "buildRecord");
+        if (debug) Timber.i("buildRecord");
         if (iBluetoothListener == null
                 || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
-            if (debug) Log.e(TAG, "buildBt2Bt illegal parameters");
+            if (debug) Timber.e("buildBt2Bt illegal parameters");
             return;
         }
 
@@ -297,7 +298,7 @@ public class Caller {
 
         Bt2BtRecorder bt2BtRecorder = new Bt2BtRecorder(storageBtToNet, storageNetToBt);
 
-        ConnectorBluetooth connectorBluetooth = ConnectorBluetooth.getInstance()
+        ConnectorBluetooth.getInstance()
                 .setiBluetoothListener(iBluetoothListener)
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageBtToNet)
@@ -313,7 +314,7 @@ public class Caller {
     //--------------------- data from network looped back to network
 
     private void buildNet2Net() {
-        if (debug) Log.i(TAG, "buildNet2Net");
+        if (debug) Timber.i("buildNet2Net");
     }
 
 }

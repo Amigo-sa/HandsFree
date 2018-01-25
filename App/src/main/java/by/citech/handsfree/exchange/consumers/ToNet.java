@@ -1,19 +1,14 @@
 package by.citech.handsfree.exchange.consumers;
 
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
-import java.util.Locale;
 
-import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.settings.ESeverityLevel;
+import timber.log.Timber;
 
 public class ToNet
         implements IStreamer {
@@ -23,10 +18,7 @@ public class ToNet
     private static final boolean debug = Settings.debug;
     private static int objCount;
     private final int objNumber;
-
-    static {
-        objCount = 0;
-    }
+    static {objCount = 0;}
 
     //--------------------- preparation
 
@@ -68,15 +60,15 @@ public class ToNet
     @Override
     public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
-            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            if (debug) Timber.tag(TAG).w("prepareStream stream is finished, return");
             return;
         } else if (receiver == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
-            if (debug) Log.i(TAG, "prepareStream");
+            if (debug) Timber.tag(TAG).i("prepareStream");
             this.iRxComplex = receiver;
         }
-        if (debug) Log.w(TAG, String.format(Locale.US, "streamOn parameters is:" +
+        if (debug) Timber.tag(TAG).w("streamOn parameters is:" +
                         " netSignificantAll is %b," +
                         " netChunkSignificantBytes is %d," +
                         " netChunkSize is %d," +
@@ -87,13 +79,13 @@ public class ToNet
                 netChunkSize,
                 netFactor,
                 netSendSize
-        ));
+        );
         isPrepared = true;
     }
 
     @Override
     public void finishStream() {
-        if (debug) Log.i(TAG, "finishStream");
+        if (debug) Timber.tag(TAG).i("finishStream");
         isFinished = true;
         streamOff();
         iRxComplex = null;
@@ -102,7 +94,7 @@ public class ToNet
 
     @Override
     public void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
+        if (debug) Timber.tag(TAG).i("streamOff");
         isStreaming = false;
     }
 
@@ -114,10 +106,10 @@ public class ToNet
     @Override
     public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "isReadyToStream finished");
+            if (debug) Timber.tag(TAG).w("isReadyToStream finished");
             return false;
         } else if (!isPrepared) {
-            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            if (debug) Timber.tag(TAG).w("isReadyToStream not prepared");
             return false;
         } else {
             return true;
@@ -129,7 +121,7 @@ public class ToNet
         if (isStreaming() || !isReadyToStream()) {
             return;
         } else {
-            if (debug) Log.i(TAG, "streamOn");
+            if (debug) Timber.tag(TAG).i("streamOn");
         }
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -148,30 +140,30 @@ public class ToNet
             if (netChunk != null) {
                 netChunkSizeActual = netChunk.length;
                 if (netChunkSizeActual != netChunkSize) {
-                    if (debug) Log.e(TAG, String.format(Locale.US, "streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize));
+                    if (debug) Timber.tag(TAG).e("streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize);
                 } else {
                     baos.write(netChunk, 0, netChunkSize);
                     netChunkCount++;
                 }
             } else {
-                if (debug) Log.e(TAG, "streamOn readed null data from storage");
+                if (debug) Timber.tag(TAG).e("streamOn readed null data from storage");
                 return;
             }
-            if (debug) Log.i(TAG, String.format("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize));
+            if (debug) Timber.tag(TAG).i("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize);
             if (netChunkCount == netFactor) {
-                if (debug) Log.w(TAG, String.format("streamOn net out buff contains enough data of %d bytes, sending", baos.size()));
+                if (debug) Timber.tag(TAG).w("streamOn net out buff contains enough data of %d bytes, sending", baos.size());
                 if (isStreaming() && isReadyToStream()) {
                     iRxComplex.sendData(baos.toByteArray());
                 }
                 netChunkCount = 0;
                 baos.reset();
             } else if (netChunkCount > netFactor) {
-                if (debug) Log.e(TAG, "streamOn too much data in net out buff");
+                if (debug) Timber.tag(TAG).e("streamOn too much data in net out buff");
                 netChunkCount = 0;
                 baos.reset();
             }
         }
-        if (debug) Log.i(TAG, "streamOn done");
+        if (debug) Timber.tag(TAG).i("streamOn done");
     }
 
 }
