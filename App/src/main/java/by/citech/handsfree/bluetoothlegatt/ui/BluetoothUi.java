@@ -18,7 +18,10 @@ import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.ui.ISwipeListener;
 
-public class BluetoothUi implements IUiToBtListener, ConnectAction , ISwipeListener{
+public class BluetoothUi implements IUiToBtListener,
+                                    ConnectAction,
+                                    ISwipeListener,
+                                    IMenuListener {
 
     private static final String TAG = "WSD_BleUi";
     private static final boolean debug = Settings.debug;
@@ -82,6 +85,11 @@ public class BluetoothUi implements IUiToBtListener, ConnectAction , ISwipeListe
         return this;
     }
 
+    public BluetoothUi registerListenerBroadcast() {
+        ConnectorBluetooth.getInstance().getLeBroadcastReceiver().registerListener(this);
+        return this;
+    }
+
     public BluetoothUi build() {
         buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
         buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
@@ -114,17 +122,6 @@ public class BluetoothUi implements IUiToBtListener, ConnectAction , ISwipeListe
     }
 
 
-
-    @Override
-    public void menuScanStartListener() {
-        ConnectorBluetooth.getInstance().startScan();
-    }
-
-    @Override
-    public void menuScanStopListener() {
-        ConnectorBluetooth.getInstance().stopScan();
-    }
-
     @Override
     public void clickBtnListener() {
         ConnectorBluetooth.getInstance().build();
@@ -146,8 +143,11 @@ public class BluetoothUi implements IUiToBtListener, ConnectAction , ISwipeListe
         return ConnectorBluetooth.getInstance().getConnectDevice();
     }
 
+    //------------------ ConnectAction --------------------
+
     @Override
     public void actionConnected() {
+
         uiController.setCommand(connDialogOn).undo();
         uiController.setCommand(connDialogInfoOn).execute();
         uiController.setCommand(connDialogInfoOn).undo();
@@ -167,6 +167,8 @@ public class BluetoothUi implements IUiToBtListener, ConnectAction , ISwipeListe
 
     }
 
+    //------------------ ISwipeListener --------------------
+
     @Override
     public void onSwipe(SwipeDirection direction) {
         switch (direction){
@@ -182,4 +184,18 @@ public class BluetoothUi implements IUiToBtListener, ConnectAction , ISwipeListe
                 break;
         }
     }
+
+    //------------------ IMenuListener --------------------
+
+    @Override
+    public void menuScanStartListener() {
+        ConnectorBluetooth.getInstance().startScan();
+    }
+
+    @Override
+    public void menuScanStopListener() {
+        ConnectorBluetooth.getInstance().stopScan();
+    }
+
+
 }

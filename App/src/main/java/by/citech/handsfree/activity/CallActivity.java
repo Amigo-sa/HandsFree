@@ -45,6 +45,7 @@ import java.util.Map;
 
 import by.citech.handsfree.R;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
+import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
 import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
@@ -136,6 +137,7 @@ public class CallActivity
 
     // интерфейсы для работы gui с bt
     private IUiToBtListener IUiToBtListener;
+    private IMenuListener iMenuListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,9 +203,14 @@ public class CallActivity
                 .build();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        BluetoothUi.getInstance().setmIBluetoothListener(this)
+                                 .setiBtToUiCtrl(this)
+                                 .setiMsgToUi(this)
+                                 .registerListenerBroadcast()
+                                 .build();
 
-        IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
-
+        IUiToBtListener = BluetoothUi.getInstance();
+        iMenuListener = (IMenuListener) IUiToBtListener;
         linearLayoutTouchListener = new LinearLayoutTouchListener((ISwipeListener) IUiToBtListener);
         findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
 
@@ -300,10 +307,10 @@ public class CallActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                IUiToBtListener.menuScanStartListener();
+                iMenuListener.menuScanStartListener();
                 break;
             case R.id.menu_stop:
-                IUiToBtListener.menuScanStopListener();
+                iMenuListener.menuScanStopListener();
                 break;
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -323,7 +330,7 @@ public class CallActivity
             actionBar.setCustomView(null);
             if (getEditorState() != EEditorState.Inactive)
                 goToEditorState(EEditorState.Inactive);
-            IUiToBtListener.menuScanStopListener();
+            iMenuListener.menuScanStopListener();
             invalidateOptionsMenu();
         } else {
             finish();
@@ -567,11 +574,13 @@ public class CallActivity
         if (IUiToBtListener.isConnecting())
             deviceListAdapter.addDevice(IUiToBtListener.getConnectDevice(), 200);
         actionBar.setCustomView(R.layout.actionbar);
+        invalidateOptionsMenu();
     }
 
     @Override
     public void onStopScan() {
         actionBar.setCustomView(null);
+        invalidateOptionsMenu();
     }
 
     @Override

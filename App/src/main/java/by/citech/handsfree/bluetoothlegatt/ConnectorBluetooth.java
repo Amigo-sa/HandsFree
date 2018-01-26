@@ -140,22 +140,6 @@ public class ConnectorBluetooth
         exchangeDataOff = new DataExchangeOffCommand(leDataTransmitter);
         receiveDataOn = new ReceiveDataOn(leDataTransmitter);
 
-//      closeService = new CloseServiceCommand();
-//      startService = new StartServiceCommand(iService, serviceIntent);
-//      bindService = new BindServiceCommand();
-//      unbindService = new UnbindServiceCommand();
-//      registerReceiver = new RegisterReceiverCommand(this);
-//      unregisterReceiver = new UnregisterReceiverCommand(this);
-
-//      buttonViewColorChangeOn = new ButtonChangeViewOnCommand();
-//      buttonViewColorChangeOff = new ButtonChangeViewOffCommand();
-//
-//      discDialogOn = new DisconnectDialogCommand(this);
-//      reconnDiaologOn = new ReconnectDialogCommand(this);
-//      connDialogOn = new ConnectDialogCommand(this);
-//      disconnDialogInfoOn = new DisconnInfoDialogCommand();
-//      connDialogInfoOn = new ConnInfoDialogCommand();
-
         // инициализация комманд
         scanOn = new ScanOnCommand(leScanner);
         scanOff = new ScanOffCommand(leScanner);
@@ -200,25 +184,6 @@ public class ConnectorBluetooth
         leDataTransmitter.addIRxDataListener(iRxComplex);
         leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
         leBroadcastReceiver.registerListener(this);
-        //-----------------set data for command -------------
-
-//      closeService.setBluetoothLeCore(mBluetoothLeCore);
-//      bindService.setiService(iService);
-//      bindService.setServiceConnection(mServiceConnection);
-//      unbindService.setiService(iService);
-//      unbindService.setServiceConnection(mServiceConnection);
-//      registerReceiver.setiBroadcastReceiver(iBroadcastReceiver);
-//      unregisterReceiver.setiBroadcastReceiver(iBroadcastReceiver);
-
-//        buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
-//        buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
-//        connDialogOn.setiMsgToUi(iMsgToUi);
-//        discDialogOn.setiMsgToUi(iMsgToUi);
-//        reconnDiaologOn.setiMsgToUi(iMsgToUi);
-//        disconnDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
-//        disconnDialogInfoOn.setiMsgToUi(iMsgToUi);
-//        connDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
-//        connDialogInfoOn.setiMsgToUi(iMsgToUi);
     }
 
     //--------------------- IBase
@@ -230,6 +195,7 @@ public class ConnectorBluetooth
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff).execute();
 
+        leBroadcastReceiver.clearListeners();
         mBTDevice = null;
         mBTDeviceConn = null;
     }
@@ -260,16 +226,8 @@ public class ConnectorBluetooth
         return leBroadcastReceiver.getGattUpdateReceiver();
     }
 
-    public IUiToBtListener getUiBtListener() {
-
-        BluetoothUi.getInstance().setiMsgToUi(iMsgToUi)
-                                 .setiBtToUiCtrl(iBtToUiCtrl)
-                                 .setmIBluetoothListener(mIBluetoothListener)
-                                 .build();
-
-        leBroadcastReceiver.registerListener(BluetoothUi.getInstance());
-
-        return BluetoothUi.getInstance();
+    public LeBroadcastReceiver getLeBroadcastReceiver() {
+        return leBroadcastReceiver;
     }
 
     public boolean isScanning() {

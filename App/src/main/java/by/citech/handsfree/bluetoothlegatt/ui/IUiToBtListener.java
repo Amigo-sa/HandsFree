@@ -11,9 +11,6 @@ public interface IUiToBtListener {
     BluetoothDevice getConnectDevice();
     void clickBtnListener();
 
-    void menuScanStartListener();
-    void menuScanStopListener();
-
     boolean isScanning();
     boolean isConnecting();
 }

@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 
 import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.activity.fsm.IActivityFsmListenerRegister;
+import by.citech.handsfree.bluetoothlegatt.LeBroadcastReceiver;
 import by.citech.handsfree.connection.ChosenDeviceControl;
 import by.citech.handsfree.connection.ConnectionControl;
 import by.citech.handsfree.connection.fsm.ConnectionFsm;
@@ -55,6 +56,7 @@ public class ThisApplication
         registerConnectionFsmListener(connectorBluetooth, Tags.ConnectorBluetooth);
         PreferencesProcessor.init(this);
         appContext = getApplicationContext();
+        registerReceiver(connectorBluetooth.getBroadcastReceiver(), LeBroadcastReceiver.makeGattUpdateIntentFilter());
     }
 
     // Called by the system when the device configuration changes while your component is running.

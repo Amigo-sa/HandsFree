@@ -75,6 +75,7 @@ public class LeBroadcastReceiver {
             //if (Settings.debug) Log.i(TAG, "onReceive");
             final String action = intent.getAction();
             if (BluetoothLeCore.ACTION_GATT_CONNECTED.equals(action)) {
+                Log.i(TAG, "BluetoothLeCore.ACTION_GATT_CONNECTED");
                 notifyConnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_DISCONNECTED.equals(action)) {
                 notifyDisconnectedListeners();
