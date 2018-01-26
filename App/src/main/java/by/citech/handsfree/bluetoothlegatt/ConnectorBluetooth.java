@@ -19,7 +19,6 @@ import by.citech.handsfree.connection.fsm.EConnectionState;
 import by.citech.handsfree.connection.fsm.IConnectionFsmListener;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.BLEController;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.characteristics.CharacteristicsDisplayOnCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
@@ -33,7 +32,6 @@ import by.citech.handsfree.bluetoothlegatt.commands.blecommands.scanner.ScanOnCo
 import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.call.fsm.ECallReport.CallFailedInt;
@@ -83,10 +81,6 @@ public class ConnectorBluetooth
 
     private volatile BluetoothLeState BLEState;
 
-    private IBtToUiCtrl iBtToUiCtrl;
-    private IMsgToUi iMsgToUi;
-    private IBtList iBtList;
-
     private BLEController bleController;
 
     // команды
@@ -99,22 +93,6 @@ public class ConnectorBluetooth
     private Command exchangeDataOn;
     private Command exchangeDataOff;
     private Command receiveDataOn;
-
-//  private CloseServiceCommand closeService;
-//  private Command startService;
-//  private BindServiceCommand bindService;
-//  private UnbindServiceCommand unbindService;
-//  private RegisterReceiverCommand registerReceiver;
-//  private UnregisterReceiverCommand unregisterReceiver;
-
-//    private ConnectDialogCommand connDialogOn;
-//    private DisconnectDialogCommand discDialogOn;
-//    private ReconnectDialogCommand reconnDiaologOn;
-//    private ConnInfoDialogCommand connDialogInfoOn;
-//    private DisconnInfoDialogCommand disconnDialogInfoOn;
-//
-//    private ButtonChangeViewOnCommand buttonViewColorChangeOn;
-//    private ButtonChangeViewOffCommand buttonViewColorChangeOff;
 
     private CharacteristicsDisplayOnCommand characteristicDisplayOn;
     //--------------------- singleton
@@ -190,7 +168,6 @@ public class ConnectorBluetooth
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff).execute();
 
-        //broadcastReceiverWrapper.clearListeners();
         mBTDevice = null;
         mBTDeviceConn = null;
     }
@@ -233,17 +210,6 @@ public class ConnectorBluetooth
         return this;
     }
 
-//    public ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl){
-//        this.iBtToUiCtrl = iBtToUiCtrl;
-//        return this;
-//    }
-
-    public ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi){
-        this.iMsgToUi = iMsgToUi;
-        return this;
-    }
-
-
     public ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt) {
         this.storageFromBt = storageFromBt;
         return this;
@@ -258,11 +224,6 @@ public class ConnectorBluetooth
         leScanner.setiScanListener(mIScanListener);
         return this;
     }
-
-//    public ConnectorBluetooth setiBtList(IBtList iBtList) {
-//        this.iBtList = iBtList;
-//        return this;
-//    }
 
     //------------------ get Device from adapter-------------------------
 

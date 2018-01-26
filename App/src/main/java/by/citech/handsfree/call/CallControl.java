@@ -164,9 +164,7 @@ public class CallControl {
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
-                .setiScanListener(iScanListener)
-                .setiMsgToUi(iMsgToUi);
-                //.setiBtList(iBtList)
+                .setiScanListener(iScanListener);
 
         ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)
@@ -201,9 +199,7 @@ public class CallControl {
                 .setiBluetoothListener(iBluetoothListener)
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
-                .setiScanListener(iScanListener)
-                .setiMsgToUi(iMsgToUi);
-                //.setiBtList(iBtList)
+                .setiScanListener(iScanListener);
 
         if (toBtLooper != null) {
             toBtLooper.build();
@@ -228,9 +224,7 @@ public class CallControl {
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
-                .setiScanListener(iScanListener)
-                .setiMsgToUi(iMsgToUi);
-                //.setiBtList(iBtList)
+                .setiScanListener(iScanListener);
 
         bt2AudOutLooper.build();
     }
@@ -266,8 +260,7 @@ public class CallControl {
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageFromBt)
                 .setStorageToBt(storageToBt)
-                .setiScanListener(iScanListener)
-                .setiMsgToUi(iMsgToUi);
+                .setiScanListener(iScanListener);
 
         bt2BtLooper.build();
     }
@@ -294,8 +287,7 @@ public class CallControl {
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
-                .setiScanListener(iScanListener)
-                .setiMsgToUi(iMsgToUi);
+                .setiScanListener(iScanListener);
 
         bt2BtRecorder.build();
     }
