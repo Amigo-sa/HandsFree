@@ -18,7 +18,7 @@ import by.citech.handsfree.threading.IThreading;
 import timber.log.Timber;
 
 public class ContactEditorHelper
-        implements IContactsListener, IPrepareObject, IThreading {
+        implements IContactsListener, IThreading {
 
     private static final boolean debug = Settings.debug;
 
@@ -39,26 +39,6 @@ public class ContactEditorHelper
         contactToEditPosition = -1;
         contactToDeletePosition = -1;
         editorState = EEditorState.Inactive;
-    }
-
-    //--------------------- singleton
-
-    private static volatile ContactEditorHelper instance = null;
-
-    private ContactEditorHelper() {
-    }
-
-    public static ContactEditorHelper getInstance() {
-        if (instance == null) {
-            synchronized (ContactEditorHelper.class) {
-                if (instance == null) {
-                    instance = new ContactEditorHelper();
-                }
-            }
-        } else {
-            instance.prepareObject();
-        }
-        return instance;
     }
 
     //--------------------- getters and setters
