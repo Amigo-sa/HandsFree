@@ -35,7 +35,7 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.getVisibility;
 import static by.citech.handsfree.ui.helpers.ViewHelper.setColorAndText;
 import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
 import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
-import static by.citech.handsfree.ui.helpers.ContactHelper.setContactInfo;
+import static by.citech.handsfree.contact.ContactHelper.setContactInfo;
 import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
 import static by.citech.handsfree.call.fsm.ECallState.ReadyToWork;
 import static by.citech.handsfree.settings.EOpMode.Normal;

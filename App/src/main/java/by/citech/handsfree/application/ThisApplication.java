@@ -21,7 +21,8 @@ import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
 
 public class ThisApplication
-        extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
+        extends Application
+        implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
 
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;

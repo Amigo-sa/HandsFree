@@ -29,11 +29,7 @@ import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
 
 public class CallControl {
 
-    private static final String STAG = Tags.Caller;
     private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
-    static {objCount = 0;}
 
     //--------------------- preparation
 
@@ -47,8 +43,6 @@ public class CallControl {
     private EOpMode opMode;
 
     {
-        objCount++;
-        TAG = STAG + " " + objCount;
         opMode = Settings.Common.opMode;
     }
 
@@ -71,6 +65,11 @@ public class CallControl {
     }
 
     //--------------------- getters and setters
+
+    public CallControl setOpMode(EOpMode opMode) {
+        this.opMode = opMode;
+        return this;
+    }
 
     public CallControl setiNetInfoGetter(INetInfoGetter listener) {
         iNetInfoGetter = listener;

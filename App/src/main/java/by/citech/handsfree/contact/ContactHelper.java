@@ -1,8 +1,6 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.contact;
 
 import android.widget.TextView;
-
-import by.citech.handsfree.contact.Contact;
 
 import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
 

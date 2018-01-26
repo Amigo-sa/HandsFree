@@ -118,7 +118,7 @@ public class ContactEditorHelper
     }
 
     public void goToState(EEditorState toState, Contact contact, int position) {
-        if (debug) Timber.i("ContactEditorHelper goToState");
+        if (debug) Timber.i("goToState");
         editorState = toState;
         switch (editorState) {
             case Add:
