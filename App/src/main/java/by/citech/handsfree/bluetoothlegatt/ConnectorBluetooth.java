@@ -3,13 +3,11 @@ package by.citech.handsfree.bluetoothlegatt;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.util.Log;
 
 import by.citech.handsfree.application.ThisApplication;
-import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.call.fsm.ECallReport;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
@@ -20,7 +18,6 @@ import by.citech.handsfree.connection.fsm.EConnectionReport;
 import by.citech.handsfree.connection.fsm.EConnectionState;
 import by.citech.handsfree.connection.fsm.IConnectionFsmListener;
 import by.citech.handsfree.exchange.IRxComplex;
-import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.BLEController;
@@ -37,7 +34,6 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.call.fsm.ECallReport.CallFailedInt;
@@ -79,7 +75,7 @@ public class ConnectorBluetooth
     //////////////////////////////////////////
     // Слушатели событий всей  BLE  периферии
     //////////////////////////////////////////
-    private LeBroadcastReceiver leBroadcastReceiver;
+    //private BroadcastReceiverWrapper broadcastReceiverWrapper;
     private IBluetoothListener mIBluetoothListener;
     private IRxComplex iRxComplex;
     //для дебага
@@ -87,7 +83,6 @@ public class ConnectorBluetooth
 
     private volatile BluetoothLeState BLEState;
 
-    private IBroadcastReceiver iBroadcastReceiver;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
     private IBtList iBtList;
@@ -128,7 +123,7 @@ public class ConnectorBluetooth
 
     private ConnectorBluetooth() {
         BLEState = BluetoothLeState.DISCONECTED;
-        leBroadcastReceiver = new LeBroadcastReceiver();
+        //broadcastReceiverWrapper = new BroadcastReceiverWrapper();
         leScanner = new LeScanner();
 
         characteristics = new Characteristics();
@@ -183,7 +178,7 @@ public class ConnectorBluetooth
 
         leDataTransmitter.addIRxDataListener(iRxComplex);
         leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
-        leBroadcastReceiver.registerListener(this);
+        ThisApplication.registerBroadcastListener(this);
     }
 
     //--------------------- IBase
@@ -195,7 +190,7 @@ public class ConnectorBluetooth
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff).execute();
 
-        leBroadcastReceiver.clearListeners();
+        //broadcastReceiverWrapper.clearListeners();
         mBTDevice = null;
         mBTDeviceConn = null;
     }
@@ -222,14 +217,6 @@ public class ConnectorBluetooth
         return mBTDeviceConn;
     }
 
-    public BroadcastReceiver getBroadcastReceiver() {
-        return leBroadcastReceiver.getGattUpdateReceiver();
-    }
-
-    public LeBroadcastReceiver getLeBroadcastReceiver() {
-        return leBroadcastReceiver;
-    }
-
     public boolean isScanning() {
         return leScanner.isScanning();
     }
@@ -246,10 +233,10 @@ public class ConnectorBluetooth
         return this;
     }
 
-    public ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl){
-        this.iBtToUiCtrl = iBtToUiCtrl;
-        return this;
-    }
+//    public ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl){
+//        this.iBtToUiCtrl = iBtToUiCtrl;
+//        return this;
+//    }
 
     public ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi){
         this.iMsgToUi = iMsgToUi;
@@ -267,20 +254,15 @@ public class ConnectorBluetooth
         return this;
     }
 
-    public ConnectorBluetooth setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
-        this.iBroadcastReceiver = iBroadcastReceiver;
-        return this;
-    }
-
     public ConnectorBluetooth setiScanListener(IScanListener mIScanListener) {
         leScanner.setiScanListener(mIScanListener);
         return this;
     }
 
-    public ConnectorBluetooth setiBtList(IBtList iBtList) {
-        this.iBtList = iBtList;
-        return this;
-    }
+//    public ConnectorBluetooth setiBtList(IBtList iBtList) {
+//        this.iBtList = iBtList;
+//        return this;
+//    }
 
     //------------------ get Device from adapter-------------------------
 

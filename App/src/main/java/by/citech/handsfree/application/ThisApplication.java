@@ -9,7 +9,7 @@ import android.content.res.Configuration;
 
 import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.activity.fsm.IActivityFsmListenerRegister;
-import by.citech.handsfree.bluetoothlegatt.LeBroadcastReceiver;
+import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.connection.ChosenDeviceControl;
 import by.citech.handsfree.connection.ConnectionControl;
 import by.citech.handsfree.connection.fsm.ConnectionFsm;
@@ -21,8 +21,7 @@ import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
 
 public class ThisApplication
-        extends Application
-        implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
+        extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
 
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;
@@ -35,6 +34,7 @@ public class ThisApplication
     private static BluetoothDevice btConnectedDevice;
     private static String btConnectedAddr;
     private static Context appContext;
+    private static BroadcastReceiverWrapper broadcastReceiverWrapper;
 
     // Called when the application is starting, before any other application objects have been created.
     // Overriding this method is totally optional!
@@ -52,12 +52,13 @@ public class ThisApplication
         connectorBluetooth = ConnectorBluetooth.getInstance();
         connectionControl = ConnectionControl.getInstance();
         chosenDeviceControl = ChosenDeviceControl.getInstance();
+        broadcastReceiverWrapper = new BroadcastReceiverWrapper();
         registerActivityFsmListener(chosenDeviceControl, Tags.ChosenDeviceControl);
         registerActivityFsmListener(connectionControl, Tags.ConnectionControl);
         registerConnectionFsmListener(connectorBluetooth, Tags.ConnectorBluetooth);
         PreferencesProcessor.init(this);
         appContext = getApplicationContext();
-        registerReceiver(connectorBluetooth.getBroadcastReceiver(), LeBroadcastReceiver.makeGattUpdateIntentFilter());
+        registerReceiver(broadcastReceiverWrapper.getGattUpdateReceiver(), BroadcastReceiverWrapper.makeGattUpdateIntentFilter());
     }
 
     // Called by the system when the device configuration changes while your component is running.
@@ -80,5 +81,6 @@ public class ThisApplication
     public static BluetoothAdapter getBluetoothAdapter() {return bluetoothAdapter;}
     public static String getBtConnectedAddr() {return btConnectedAddr;}
     public static void setBtConnectedAddr(String btConnectedAddr) {ThisApplication.btConnectedAddr = btConnectedAddr;}
+    public static void registerBroadcastListener(ConnectAction connectAction) {broadcastReceiverWrapper.registerListener(connectAction);}
 
 }

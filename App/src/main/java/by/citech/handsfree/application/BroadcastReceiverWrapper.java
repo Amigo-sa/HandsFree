@@ -1,4 +1,4 @@
-package by.citech.handsfree.bluetoothlegatt;
+package by.citech.handsfree.application;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,20 +8,22 @@ import android.util.Log;
 
 import java.util.LinkedList;
 
+import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
+import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.settings.Settings;
 
 /**
  * Created by tretyak on 21.11.2017.
  */
 
-public class LeBroadcastReceiver {
+public class BroadcastReceiverWrapper {
 
     private final static String TAG = "WSD_BroadcastReceiver";
 
     private LinkedList<ConnectAction> listeners;
 
 
-    public LeBroadcastReceiver() {
+    public BroadcastReceiverWrapper() {
         listeners = new LinkedList<>();
     }
 

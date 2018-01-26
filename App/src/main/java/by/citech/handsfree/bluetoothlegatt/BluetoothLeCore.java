@@ -62,7 +62,7 @@ public class BluetoothLeCore
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    //Создаём сообщения для LeBroadcastReceiver-а которые будут отправляться в качестве Callback-а
+    //Создаём сообщения для BroadcastReceiverWrapper-а которые будут отправляться в качестве Callback-а
     public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
@@ -189,7 +189,7 @@ public class BluetoothLeCore
 
     };
 
-    // строку загружаем в Intent и передаём в LeBroadcastReceiver-у
+    // строку загружаем в Intent и передаём в BroadcastReceiverWrapper-у
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         //intent.putExtra(EXTRA_WDATA, wrData);

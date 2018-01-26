@@ -47,7 +47,6 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
 import by.citech.handsfree.call.CallControl;
-import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
@@ -91,7 +90,6 @@ public class CallActivity
                    LocationListener,
                    IGetView,
                    IThreading,
-                   IBroadcastReceiver,
                    IBtToUiCtrl,
                    ICallUi,
                    IMsgToUi,
@@ -193,7 +191,6 @@ public class CallActivity
                 .setOpMode(opMode)
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
-                .setiBroadcastReceiver(this)
                 .setiScanListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)

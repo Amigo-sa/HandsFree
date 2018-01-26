@@ -5,7 +5,6 @@ import android.os.Handler;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.bluetoothlegatt.IBtList;
-import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.network.ConnectorNet;
 import by.citech.handsfree.common.HandlerExtended;
 import by.citech.handsfree.ui.IBtToUiCtrl;
@@ -35,7 +34,6 @@ public class CallControl {
 
     private INetInfoGetter iNetInfoGetter;
     private IBluetoothListener iBluetoothListener;
-    private IBroadcastReceiver iBroadcastReceiver;
     private IScanListener iScanListener;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
@@ -78,11 +76,6 @@ public class CallControl {
 
     public CallControl setiBluetoothListener(IBluetoothListener listener) {
         iBluetoothListener = listener;
-        return this;
-    }
-
-    public CallControl setiBroadcastReceiver(IBroadcastReceiver iBroadcastReceiver) {
-        this.iBroadcastReceiver = iBroadcastReceiver;
         return this;
     }
 
@@ -144,7 +137,6 @@ public class CallControl {
         iNetInfoGetter = null;
         iBluetoothListener = null;
         opMode = null;
-        iBroadcastReceiver = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
         iBtList = null;
@@ -156,7 +148,6 @@ public class CallControl {
         if (debug) Timber.i("buildNormal");
         if (iNetInfoGetter == null
                 || iBluetoothListener == null
-                || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
@@ -173,11 +164,9 @@ public class CallControl {
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
-                .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiScanListener(iScanListener)
-                .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi)
-                .setiBtList(iBtList);
+                .setiMsgToUi(iMsgToUi);
+                //.setiBtList(iBtList)
 
         ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)
@@ -190,8 +179,7 @@ public class CallControl {
 
     private void build2Bt(EDataSource dataSource) {
         if (debug) Timber.i("build2Bt");
-        if (iBroadcastReceiver == null
-                || iBtToUiCtrl == null
+        if (       iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null
                 || dataSource == null) {
@@ -213,11 +201,9 @@ public class CallControl {
                 .setiBluetoothListener(iBluetoothListener)
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
-                .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiScanListener(iScanListener)
-                .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi)
-                .setiBtList(iBtList);
+                .setiMsgToUi(iMsgToUi);
+                //.setiBtList(iBtList)
 
         if (toBtLooper != null) {
             toBtLooper.build();
@@ -229,7 +215,6 @@ public class CallControl {
     private void buildBt2AudOut() {
         if (debug) Timber.i("buildBt2AudOut");
         if (iBluetoothListener == null
-                || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
@@ -243,11 +228,9 @@ public class CallControl {
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
-                .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiScanListener(iScanListener)
-                .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi)
-                .setiBtList(iBtList);
+                .setiMsgToUi(iMsgToUi);
+                //.setiBtList(iBtList)
 
         bt2AudOutLooper.build();
     }
@@ -266,7 +249,6 @@ public class CallControl {
     private void buildBt2Bt() {
         if (debug) Timber.i("buildBt2Bt");
         if (iBluetoothListener == null
-                || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
@@ -284,11 +266,8 @@ public class CallControl {
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageFromBt)
                 .setStorageToBt(storageToBt)
-                .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiScanListener(iScanListener)
-                .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi)
-                .setiBtList(iBtList);
+                .setiMsgToUi(iMsgToUi);
 
         bt2BtLooper.build();
     }
@@ -298,7 +277,6 @@ public class CallControl {
     private void buildRecord() {
         if (debug) Timber.i("buildRecord");
         if (iBluetoothListener == null
-                || iBroadcastReceiver == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null) {
@@ -316,11 +294,8 @@ public class CallControl {
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
-                .setiBroadcastReceiver(iBroadcastReceiver)
                 .setiScanListener(iScanListener)
-                .setiBtToUiCtrl(iBtToUiCtrl)
-                .setiMsgToUi(iMsgToUi)
-                .setiBtList(iBtList);
+                .setiMsgToUi(iMsgToUi);
 
         bt2BtRecorder.build();
     }

@@ -2,6 +2,7 @@ package by.citech.handsfree.bluetoothlegatt.ui;
 
 import android.bluetooth.BluetoothDevice;
 
+import by.citech.handsfree.application.ThisApplication;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
@@ -86,7 +87,7 @@ public class BluetoothUi implements IUiToBtListener,
     }
 
     public BluetoothUi registerListenerBroadcast() {
-        ConnectorBluetooth.getInstance().getLeBroadcastReceiver().registerListener(this);
+        ThisApplication.registerBroadcastListener(this);
         return this;
     }
 
@@ -121,12 +122,12 @@ public class BluetoothUi implements IUiToBtListener,
         }
     }
 
-
     @Override
     public void clickBtnListener() {
-        ConnectorBluetooth.getInstance().build();
+        ConnectorBluetooth.getInstance().build();// Todo: привязать к автомату
         ConnectorBluetooth.getInstance().startScan();
     }
+
 
     @Override
     public boolean isScanning() {
@@ -147,7 +148,6 @@ public class BluetoothUi implements IUiToBtListener,
 
     @Override
     public void actionConnected() {
-
         uiController.setCommand(connDialogOn).undo();
         uiController.setCommand(connDialogInfoOn).execute();
         uiController.setCommand(connDialogInfoOn).undo();
