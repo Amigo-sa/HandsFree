@@ -42,6 +42,7 @@ public class PreferencesProcessor {
         Presetter.setBt2BtPacketSize(getBt2btPacketSizePref());
         Presetter.setBt2NetFactor(getBt2NetFactorPref());
         Presetter.setBtLatencyMs(getBtLatencyMsPref());
+        Presetter.setBtChosenAddr(getBtChosenAddrPref());
         Presetter.setOpMode(processEnum(SettingsDefault.Common.opMode));
     }
 
@@ -104,34 +105,43 @@ public class PreferencesProcessor {
 
     //-------------------------- getting preferences
 
-    private static String getBtChosenAddrPref() {
+    public static EOpMode getOpModePref() {
+        return EOpMode.valueOf(prefs.getString(
+                SettingsDefault.TypeName.opMode,
+                SettingsDefault.Common.opMode.getSettingName()));
+    }
+
+    public static EAudioCodecType getAudioCodecTypePref() {
+        return EAudioCodecType.valueOf(prefs.getString(
+                SettingsDefault.TypeName.audioCodecType,
+                SettingsDefault.AudioCommon.audioCodecType.getSettingName()));
+    }
+
+    public static String getBtChosenAddrPref() {
         return prefs.getString(
                 SettingsDefault.TypeName.btChosenAddr,
                 SettingsDefault.Bluetooth.btChosenAddr);
     }
 
-    private static int getBtLatencyMsPref() {
-        return Integer.parseInt(
-                prefs.getString(
-                        SettingsDefault.TypeName.btLatencyMs,
-                        Integer.toString(SettingsDefault.Bluetooth.btLatencyMs)));
+    public static int getBtLatencyMsPref() {
+        return Integer.parseInt(prefs.getString(
+                SettingsDefault.TypeName.btLatencyMs,
+                Integer.toString(SettingsDefault.Bluetooth.btLatencyMs)));
     }
 
-    private static int getBt2btPacketSizePref() {
-        return Integer.parseInt(
-                prefs.getString(
-                        SettingsDefault.TypeName.bt2BtPacketSize,
-                        Integer.toString(SettingsDefault.Bluetooth.bt2BtPacketSize)));
+    public static int getBt2btPacketSizePref() {
+        return Integer.parseInt(prefs.getString(
+                SettingsDefault.TypeName.bt2BtPacketSize,
+                Integer.toString(SettingsDefault.Bluetooth.bt2BtPacketSize)));
     }
 
-    private static int getBt2NetFactorPref() {
-        return Integer.parseInt(
-                prefs.getString(
-                        SettingsDefault.TypeName.bt2NetFactor,
-                        Integer.toString(SettingsDefault.Common.bt2NetFactor)));
+    public static int getBt2NetFactorPref() {
+        return Integer.parseInt(prefs.getString(
+                SettingsDefault.TypeName.bt2NetFactor,
+                Integer.toString(SettingsDefault.Common.bt2NetFactor)));
     }
 
-    private static boolean getBtSinglePacketPref() {
+    public static boolean getBtSinglePacketPref() {
         return prefs.getBoolean(
                 SettingsDefault.TypeName.btSinglePacket,
                 SettingsDefault.Bluetooth.btSinglePacket);
@@ -151,8 +161,7 @@ public class PreferencesProcessor {
             if (debug) Timber.i("processEnum read: <%s>", read);
             for (T t : defaultT.getValues()) {
                 if (read.matches(t.getSettingNumber())) {
-                    if (debug)
-                        Timber.i("processEnum found matching setting: <%s>", t);
+                    if (debug) Timber.i("processEnum found matching setting: <%s>", t);
                     return t;
                 }
             }

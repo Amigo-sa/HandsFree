@@ -116,10 +116,9 @@ class Presetter {
     static void setBtChosenAddr(String btChosenAddr) {
         if (!BluetoothHelper.isValidAddr(btChosenAddr)) {
             Settings.Bluetooth.btChosenAddr = SettingsDefault.Bluetooth.btChosenAddr;
-            if (debug) Timber.e("setBt2BtPacketSize illegal value, set to default");
+            if (debug) Timber.e("setBtChosenAddr illegal value, set to default");
         } else Settings.Bluetooth.btChosenAddr = btChosenAddr;
-        if (debug) Timber.w("setBt2BtPacketSize set to %s", Settings.Bluetooth.btChosenAddr);
+        if (debug) Timber.w("setBtChosenAddr set to %s", Settings.Bluetooth.btChosenAddr);
     }
-
 
 }
