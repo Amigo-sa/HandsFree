@@ -12,7 +12,6 @@ import android.util.Log;
 import java.util.List;
 
 import by.citech.handsfree.application.ThisApplication;
-import by.citech.handsfree.ui.IScanListener;
 import by.citech.handsfree.settings.Settings;
 
 public class LeScanner {
@@ -28,14 +27,12 @@ public class LeScanner {
     private boolean mScanning;
 
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
-    private IScannListener iScannListener;
     private BluetoothAdapter bluetoothAdapter;
     private IScanListener iScanListener;
 
-    public LeScanner(IScannListener iScannListener) {
-        this.iScannListener = iScannListener;
-    }
+    public LeScanner() {
 
+    }
     //--------------------- getters and setters
 
     public void setHandler(Handler mHandler) {
@@ -113,7 +110,7 @@ public class LeScanner {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             //if (Settings.debug) Log.i(TAG, "onScanResult() ");
-            iScannListener.scanCallback(result.getDevice(), result.getRssi());
+            iScanListener.scanCallback(result.getDevice(), result.getRssi());
         }
 
         @Override

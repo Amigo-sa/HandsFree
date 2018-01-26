@@ -21,7 +21,7 @@ import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.ui.IScanListener;
+import by.citech.handsfree.bluetoothlegatt.IScanListener;
 import timber.log.Timber;
 
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;

@@ -1,6 +1,7 @@
 package by.citech.handsfree.activity;
 
 import android.Manifest;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,7 +31,6 @@ import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -44,13 +44,15 @@ import java.util.Locale;
 import java.util.Map;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
-import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
-import by.citech.handsfree.ui.IScanListener;
+import by.citech.handsfree.bluetoothlegatt.ui.LeDeviceListAdapter;
+import by.citech.handsfree.bluetoothlegatt.IScanListener;
+import by.citech.handsfree.ui.ISwipeListener;
 import by.citech.handsfree.ui.LinearLayoutTouchListener;
 import by.citech.handsfree.ui.helpers.IContactEditorHelper;
 import by.citech.handsfree.ui.helpers.EActiveContactState;
@@ -66,7 +68,7 @@ import by.citech.handsfree.ui.helpers.ActiveContactHelper;
 import by.citech.handsfree.ui.helpers.ChosenContactHelper;
 import by.citech.handsfree.ui.helpers.ContactEditorHelper;
 import by.citech.handsfree.ui.IGetView;
-import by.citech.handsfree.ui.IUiToBtListener;
+import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.call.ICallUi;
@@ -187,7 +189,7 @@ public class CallActivity
         setupContactEditor();
         setupContactor();
         getAllContacts();
-
+        if (debug) Log.w(TAG, "CallControl.getInstance()");
         CallControl.getInstance()
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
@@ -195,12 +197,14 @@ public class CallActivity
                 .setiScanListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
-                .setiBtList(deviceListAdapter);
+                .setiBtList(deviceListAdapter)
+                .build();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         IUiToBtListener = ConnectorBluetooth.getInstance().getUiBtListener();
-        linearLayoutTouchListener = new LinearLayoutTouchListener(IUiToBtListener);
+
+        linearLayoutTouchListener = new LinearLayoutTouchListener((ISwipeListener) IUiToBtListener);
         findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
 
         //IScanListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
@@ -296,10 +300,10 @@ public class CallActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                IUiToBtListener.scanItemSelectedListener();
+                IUiToBtListener.menuScanStartListener();
                 break;
             case R.id.menu_stop:
-                IUiToBtListener.stopItemSelectedListener();
+                IUiToBtListener.menuScanStopListener();
                 break;
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -319,7 +323,7 @@ public class CallActivity
             actionBar.setCustomView(null);
             if (getEditorState() != EEditorState.Inactive)
                 goToEditorState(EEditorState.Inactive);
-            IUiToBtListener.stopItemSelectedListener();
+            IUiToBtListener.menuScanStopListener();
             invalidateOptionsMenu();
         } else {
             finish();
@@ -498,12 +502,18 @@ public class CallActivity
         setVisibleList();
         listDevices.setAdapter(deviceListAdapter);
         listDevices.setOnTouchListener(linearLayoutTouchListener);
-        listDevices.setOnItemClickListener((parent, view1, position, id) -> IUiToBtListener.clickItemListListener(position));
-        IUiToBtListener.initListDevices();
+        listDevices.setOnItemClickListener((parent, view1, position, id) -> {
+                final BluetoothDevice device = deviceListAdapter.getDevice(position);
+                if (device == null) return;
+                    IUiToBtListener.clickItemList(device);
+                }
+
+        );
+
         if (debug) Log.i(TAG,"before caller getBluetoothAdapter");
         // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
         // останавливаем сканирование и запускаем новое Activity
-        IUiToBtListener.clickBtnChangeDeviceListenerTwo();
+        IUiToBtListener.clickBtnListener();
     }
 
     //--------------------- INetInfoGetter
@@ -547,22 +557,15 @@ public class CallActivity
         return getResources().getString(R.string.unknown_characteristic);
     }
 
-    private void swipeScanStart(){
-        if (!viewManager.isScanViewHidden()) {
-            IUiToBtListener.swipeScanStartListener();
-        }
-    }
-
-    private void swipeScanStop(){
-        if (!viewManager.isScanViewHidden()) {
-            IUiToBtListener.swipeScanStopListener();
-        }
-    }
-
     //------------------ IScanListener ---------------------
 
     @Override
     public void onStartScan() {
+        // initialize list device
+        if (deviceListAdapter != null)
+            deviceListAdapter.clear();
+        if (IUiToBtListener.isConnecting())
+            deviceListAdapter.addDevice(IUiToBtListener.getConnectDevice(), 200);
         actionBar.setCustomView(R.layout.actionbar);
     }
 
@@ -571,75 +574,13 @@ public class CallActivity
         actionBar.setCustomView(null);
     }
 
-//    public class LinearLayoutTouchListener
-//            implements View.OnTouchListener {
-//
-//            static final String logTag = "ActivitySwipeDetector";
-//            // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
-//            static final int MIN_DISTANCE = 100;
-//            private float downX, downY, upX, upY;
-//
-//            LinearLayoutTouchListener() {}
-//            void onRightToLeftSwipe() {if (debug) Log.i(logTag, "RightToLeftSwipe!");}
-//            void onLeftToRightSwipe() {if (debug) Log.i(logTag, "LeftToRightSwipe!");}
-//
-//             void onTopToBottomSwipe() {
-//                if (debug) Log.i(logTag, "onTopToBottomSwipe!");
-//                swipeScanStart();
-//            }
-//
-//             void onBottomToTopSwipe() {
-//                if (debug) Log.i(logTag, "onBottomToTopSwipe!");
-//                swipeScanStop();
-//            }
-//
-//        @Override
-//        public boolean onTouch(View view, MotionEvent motionEvent) {
-//            switch (motionEvent.getAction()) {
-//                case MotionEvent.ACTION_DOWN: {
-//                    downX = motionEvent.getX();
-//                    downY = motionEvent.getY();
-//                    return true;
-//                }
-//                case MotionEvent.ACTION_UP: {
-//                    upX = motionEvent.getX();
-//                    upY = motionEvent.getY();
-//                    float deltaX = downX - upX;
-//                    float deltaY = downY - upY;
-//                    if (Math.abs(deltaX) > MIN_DISTANCE) { // swipe horizontal?
-//                        if (deltaX < 0) { // left or right
-//                            this.onLeftToRightSwipe();
-//                            return true;
-//                        }
-//                        if (deltaX > 0) {
-//                            this.onRightToLeftSwipe();
-//                            return true;
-//                        }
-//                    } else {
-//                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
-//                        // return false; // We don't consume the event
-//                    }
-//                    if (Math.abs(deltaY) > MIN_DISTANCE) { // swipe vertical?
-//                        if (deltaY < 0) { // top or down
-//                            this.onTopToBottomSwipe();
-//                            return true;
-//                        }
-//                        if (deltaY > 0) {
-//                            this.onBottomToTopSwipe();
-//                            return true;
-//                        }
-//                    } else {
-//                        if (debug) Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
-//                    }
-//                    return false; // no swipe horizontally and no swipe vertically
-//                } // case MotionEvent.ACTION_UP:
-//            }
-//            return false;
-//        }
-//
-//    }
+    @Override
+    public void scanCallback(BluetoothDevice device, int rssi) {
+        if (deviceListAdapter != null)
+            deviceListAdapter.addDevice(device, rssi);
+    }
 
-    //--------------------- LocationListener
+       //--------------------- LocationListener
 
     @Override public void onLocationChanged(Location location) {}
     @Override public void onStatusChanged(String provider, int status, Bundle extras) {}

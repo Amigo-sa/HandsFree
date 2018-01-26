@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import by.citech.handsfree.application.ThisApplication;
+import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.call.fsm.ECallReport;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
@@ -22,36 +23,21 @@ import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.common.IBroadcastReceiver;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.ui.IBtToUiCtrl;
-import by.citech.handsfree.bluetoothlegatt.adapters.ControlAdapter;
-import by.citech.handsfree.bluetoothlegatt.adapters.LeDeviceListAdapter;
-import by.citech.handsfree.bluetoothlegatt.commands.adapter.AddConnectDeviceToAdapterCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.adapter.AddToListCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.BLEController;
-import by.citech.handsfree.bluetoothlegatt.commands.characteristics.CharacteristicsDisplayOnCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.button.ButtonChangeViewOffCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.button.ButtonChangeViewOnCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.adapter.ClearConnectDeviceFromAdapterCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.adapter.ClearListCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.BLEController;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.characteristics.CharacteristicsDisplayOnCommand;
 import by.citech.handsfree.bluetoothlegatt.commands.Command;
-import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ConnInfoDialogCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.connect.ConnectCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ConnectDialogCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.DataExchangeOffCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.DataExchangeOnCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dialogs.DisconnInfoDialogCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.connect.DisconnectCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dialogs.DisconnectDialogCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.adapter.InitListCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.dataexchange.ReceiveDataOn;
-import by.citech.handsfree.bluetoothlegatt.commands.dialogs.ReconnectDialogCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOffCommand;
-import by.citech.handsfree.bluetoothlegatt.commands.scanner.ScanOnCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.connect.ConnectCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.dataexchange.DataExchangeOffCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.dataexchange.DataExchangeOnCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.connect.DisconnectCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.dataexchange.ReceiveDataOn;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.scanner.ScanOffCommand;
+import by.citech.handsfree.bluetoothlegatt.commands.blecommands.scanner.ScanOnCommand;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.ui.IScanListener;
-import by.citech.handsfree.ui.IUiToBtListener;
+import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
 import by.citech.handsfree.settings.Settings;
 
 import static by.citech.handsfree.call.fsm.ECallReport.CallFailedInt;
@@ -61,8 +47,12 @@ import static by.citech.handsfree.call.fsm.ECallReport.SysIntError;
 import static by.citech.handsfree.call.fsm.ECallReport.SysIntReady;
 
 public class ConnectorBluetooth
-        implements StorageListener, ConnectAction, ICallFsmListener,
-        ICallFsmReporter, ICallFsmListenerRegister, IConnectionFsmListener {
+        implements StorageListener,
+                   ConnectAction,
+                   ICallFsmListener,
+                   ICallFsmReporter,
+                   ICallFsmListenerRegister,
+                   IConnectionFsmListener {
 
     private final static String STAG = Tags.ConnectorBluetooth;
 
@@ -82,8 +72,6 @@ public class ConnectorBluetooth
     // хранилища данных
     private volatile StorageData<byte[]> storageFromBt;
     private volatile StorageData<byte[][]> storageToBt;
-    // адаптер найденных устройств и управление для него
-    private ControlAdapter controlAdapter;
     // список сервисов и характеристик устройства
     private Characteristics characteristics;
     // приёмник/передатчик данных
@@ -110,10 +98,6 @@ public class ConnectorBluetooth
     private Command scanOn;
     private Command scanOff;
 
-    private AddToListCommand addToList;
-    private Command clearList;
-    private InitListCommand initList;
-
     private ConnectCommand connectDevice;
     private DisconnectCommand disconnectDevice;
 
@@ -128,19 +112,14 @@ public class ConnectorBluetooth
 //  private RegisterReceiverCommand registerReceiver;
 //  private UnregisterReceiverCommand unregisterReceiver;
 
-    private ConnectDialogCommand connDialogOn;
-    private DisconnectDialogCommand discDialogOn;
-    private ReconnectDialogCommand reconnDiaologOn;
-    private ConnInfoDialogCommand connDialogInfoOn;
-    private DisconnInfoDialogCommand disconnDialogInfoOn;
-
-    private ButtonChangeViewOnCommand buttonViewColorChangeOn;
-    private ButtonChangeViewOffCommand buttonViewColorChangeOff;
-
-    private AddConnectDeviceToAdapterCommand addConnDeviceToAdapter;
-    private ClearConnectDeviceFromAdapterCommand clrConnDeviceFromAdapter;
-
-
+//    private ConnectDialogCommand connDialogOn;
+//    private DisconnectDialogCommand discDialogOn;
+//    private ReconnectDialogCommand reconnDiaologOn;
+//    private ConnInfoDialogCommand connDialogInfoOn;
+//    private DisconnInfoDialogCommand disconnDialogInfoOn;
+//
+//    private ButtonChangeViewOnCommand buttonViewColorChangeOn;
+//    private ButtonChangeViewOffCommand buttonViewColorChangeOff;
 
     private CharacteristicsDisplayOnCommand characteristicDisplayOn;
     //--------------------- singleton
@@ -149,9 +128,8 @@ public class ConnectorBluetooth
 
     private ConnectorBluetooth() {
         BLEState = BluetoothLeState.DISCONECTED;
-        leBroadcastReceiver = new LeBroadcastReceiver(this);
-        controlAdapter = new ControlAdapter(this);
-        leScanner = new LeScanner(controlAdapter);
+        leBroadcastReceiver = new LeBroadcastReceiver();
+        leScanner = new LeScanner();
 
         characteristics = new Characteristics();
         leDataTransmitter = new LeDataTransmitter(characteristics);
@@ -169,21 +147,15 @@ public class ConnectorBluetooth
 //      registerReceiver = new RegisterReceiverCommand(this);
 //      unregisterReceiver = new UnregisterReceiverCommand(this);
 
-        buttonViewColorChangeOn = new ButtonChangeViewOnCommand();
-        buttonViewColorChangeOff = new ButtonChangeViewOffCommand();
+//      buttonViewColorChangeOn = new ButtonChangeViewOnCommand();
+//      buttonViewColorChangeOff = new ButtonChangeViewOffCommand();
+//
+//      discDialogOn = new DisconnectDialogCommand(this);
+//      reconnDiaologOn = new ReconnectDialogCommand(this);
+//      connDialogOn = new ConnectDialogCommand(this);
+//      disconnDialogInfoOn = new DisconnInfoDialogCommand();
+//      connDialogInfoOn = new ConnInfoDialogCommand();
 
-        discDialogOn = new DisconnectDialogCommand(this);
-        reconnDiaologOn = new ReconnectDialogCommand(this);
-        connDialogOn = new ConnectDialogCommand(this);
-        disconnDialogInfoOn = new DisconnInfoDialogCommand();
-        connDialogInfoOn = new ConnInfoDialogCommand();
-
-        addToList = new AddToListCommand(controlAdapter);
-        clearList = new ClearListCommand(controlAdapter);
-        initList = new InitListCommand(controlAdapter);
-
-        addConnDeviceToAdapter = new AddConnectDeviceToAdapterCommand(controlAdapter);
-        clrConnDeviceFromAdapter = new ClearConnectDeviceFromAdapterCommand(controlAdapter);
         // инициализация комманд
         scanOn = new ScanOnCommand(leScanner);
         scanOff = new ScanOffCommand(leScanner);
@@ -222,17 +194,12 @@ public class ConnectorBluetooth
             bluetoothAdapter.enable();
     }
 
-    private void build() {
+    public void build() {
         if (Settings.debug) Log.i(TAG, "build");
-        if (Settings.debug) Log.i(TAG, "mHandler = " + mHandler);
-        if (Settings.debug) Log.i(TAG, "mIBluetoothListener = " + mIBluetoothListener);
 
-        leScanner.setHandler(mHandler);
-        characteristics.setIBluetoothListener(mIBluetoothListener);
-        leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
         leDataTransmitter.addIRxDataListener(iRxComplex);
         leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
-
+        leBroadcastReceiver.registerListener(this);
         //-----------------set data for command -------------
 
 //      closeService.setBluetoothLeCore(mBluetoothLeCore);
@@ -243,15 +210,15 @@ public class ConnectorBluetooth
 //      registerReceiver.setiBroadcastReceiver(iBroadcastReceiver);
 //      unregisterReceiver.setiBroadcastReceiver(iBroadcastReceiver);
 
-        buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
-        buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
-        connDialogOn.setiMsgToUi(iMsgToUi);
-        discDialogOn.setiMsgToUi(iMsgToUi);
-        reconnDiaologOn.setiMsgToUi(iMsgToUi);
-        disconnDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
-        disconnDialogInfoOn.setiMsgToUi(iMsgToUi);
-        connDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
-        connDialogInfoOn.setiMsgToUi(iMsgToUi);
+//        buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
+//        buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
+//        connDialogOn.setiMsgToUi(iMsgToUi);
+//        discDialogOn.setiMsgToUi(iMsgToUi);
+//        reconnDiaologOn.setiMsgToUi(iMsgToUi);
+//        disconnDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
+//        disconnDialogInfoOn.setiMsgToUi(iMsgToUi);
+//        connDialogInfoOn.setiBtToUiCtrl(iBtToUiCtrl);
+//        connDialogInfoOn.setiMsgToUi(iMsgToUi);
     }
 
     //--------------------- IBase
@@ -263,16 +230,15 @@ public class ConnectorBluetooth
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff).execute();
 
-        iBtList = null;
         mBTDevice = null;
         mBTDeviceConn = null;
-        initList.setDevice(null);
-        addToList.setDevice(null);
     }
 
     //--------------------- getters and setters
 
     public ConnectorBluetooth setmHandler(Handler mHandler) {
+        if (Settings.debug) Log.i(TAG, "mHandler = " + mHandler);
+        leScanner.setHandler(mHandler);
         this.mHandler = mHandler;
         return this;
     }
@@ -286,11 +252,23 @@ public class ConnectorBluetooth
         this.mBTDevice = mBTDevice;
     }
 
+    public BluetoothDevice getConnectDevice() {
+        return mBTDeviceConn;
+    }
+
     public BroadcastReceiver getBroadcastReceiver() {
         return leBroadcastReceiver.getGattUpdateReceiver();
     }
 
     public IUiToBtListener getUiBtListener() {
+
+        BluetoothUi.getInstance().setiMsgToUi(iMsgToUi)
+                                 .setiBtToUiCtrl(iBtToUiCtrl)
+                                 .setmIBluetoothListener(mIBluetoothListener)
+                                 .build();
+
+        leBroadcastReceiver.registerListener(BluetoothUi.getInstance());
+
         return BluetoothUi.getInstance();
     }
 
@@ -298,11 +276,28 @@ public class ConnectorBluetooth
         return leScanner.isScanning();
     }
 
+    public boolean isConnecting() {
+        return getBLEState() != BluetoothLeState.DISCONECTED;
+    }
 
     public ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
+        if (Settings.debug) Log.i(TAG, "mIBluetoothListener = " + mIBluetoothListener);
+        characteristics.setIBluetoothListener(mIBluetoothListener);
+        leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
         this.mIBluetoothListener = mIBluetoothListener;
         return this;
     }
+
+    public ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl){
+        this.iBtToUiCtrl = iBtToUiCtrl;
+        return this;
+    }
+
+    public ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi){
+        this.iMsgToUi = iMsgToUi;
+        return this;
+    }
+
 
     public ConnectorBluetooth setStorageFromBt(StorageData<byte[]> storageFromBt) {
         this.storageFromBt = storageFromBt;
@@ -324,74 +319,29 @@ public class ConnectorBluetooth
         return this;
     }
 
-    public ConnectorBluetooth setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
-        this.iBtToUiCtrl = iBtToUiCtrl;
-        return this;
-    }
-
-    public ConnectorBluetooth setiMsgToUi(IMsgToUi iMsgToUi) {
-        this.iMsgToUi = iMsgToUi;
-        return this;
-    }
-
     public ConnectorBluetooth setiBtList(IBtList iBtList) {
         this.iBtList = iBtList;
         return this;
     }
 
-    public IBtList getiBtList() {
-        return iBtList;
-    }
+    //------------------ get Device from adapter-------------------------
 
-    //------------------------ init command when device is chosen -------
-
-    private void initCommandForDevice(BluetoothDevice device) {
-        // инициализация комманд работающих с устройством
-        //----------- установка устройства для команд --------------
-        if (Settings.debug) Log.i(TAG, "initCommandForDevice mBTDevice = " + device);
-        connDialogOn.setDevice(device);
-        discDialogOn.setDevice(device);
-        reconnDiaologOn.setDevice(device);
-        disconnDialogInfoOn.setDevice(device);
-        connDialogInfoOn.setDevice(device);
+    public void getDeviceForConnecting(BluetoothDevice device) {
+        setmBTDevice(device);
         //------------------ Команда соединения -----------
-
         connectDevice.setmBluetoothLeService(mBluetoothLeCore);
         disconnectDevice.setmBluetoothLeService(mBluetoothLeCore);
         connectDevice.setmBTDevice(device);
-        //------------------ Команды работы с адаптером -----------
-        initList.setDevice(device);
-        //clrConnDeviceFromAdapter.setBluetoothDevice(mBTDevice);
         //-------------------Команды для определения характеристик --------
         characteristicDisplayOn.setBluetoothLeService(mBluetoothLeCore);
-    }
-
-    //------------------ inittialization List-------------------------
-
-    void initListBTDevice() {
-        bleController.setCommand(initList).execute();
-    }
-
-    //------------------ inittialization List-------------------------
-
-    void clickItemList(int position) {
-        final BluetoothDevice device = ((LeDeviceListAdapter) iBtList).getDevice(position);
-        if (device == null) return;
-        setmBTDevice(device);
-        initCommandForDevice(device);
 
         bleController.setCommand(scanOff).execute();
         if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
         if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + mBTDeviceConn);
-        if (device.equals(mBTDeviceConn)) {
-            bleController.setCommand(discDialogOn).execute();
-        } else if (mBTDeviceConn != null) {
-            bleController.setCommand(reconnDiaologOn).execute();
-        } else {
+
+        if (!device.equals(mBTDeviceConn) && mBTDeviceConn == null) {
             start_time = System.currentTimeMillis();
-            bleController.setCommand(connDialogOn)
-                    .setCommand(connectDevice)
-                    .execute();
+            bleController.setCommand(connectDevice).execute();
         }
     }
 
@@ -401,30 +351,15 @@ public class ConnectorBluetooth
         setBLEState(getBLEState(), BluetoothLeState.CONNECTED);
         if (Settings.debug) Log.i(TAG, "mBTDevice = " + mBTDevice);
         mBTDeviceConn = mBTDevice;
-        addToList.setDevice(mBTDeviceConn);
 
         long end_time = System.currentTimeMillis();
         if (Settings.debug) Log.i(TAG, "Connecting await time = " + (end_time - start_time));
-
-        bleController.setCommand(connDialogOn).undo();
-
-        bleController.setCommand(connDialogInfoOn).execute();
-        bleController.setCommand(connDialogInfoOn).undo();
-
-        bleController.setCommand(buttonViewColorChangeOn)
-                .setCommand(addConnDeviceToAdapter)
-                .execute();
-
         setStorages();
     }
 
     @Override
     public void actionDisconnected() {
         if (Settings.debug) Log.i(TAG, "actionDisconnected()");
-        bleController.setCommand(connDialogOn).undo();
-        bleController.setCommand(disconnDialogInfoOn).execute();
-        bleController.setCommand(disconnDialogInfoOn).undo();
-        addToList.setDevice(null);
 
         if (BLEState != BluetoothLeState.DISCONECTED) {
             processState();
@@ -432,15 +367,8 @@ public class ConnectorBluetooth
 
             if (BLEState == BluetoothLeState.TRANSMIT_DATA) {
                 bleController.setCommand(exchangeDataOff).execute();
-
             }
-
-            bleController.setCommand(clrConnDeviceFromAdapter)
-                    .setCommand(buttonViewColorChangeOff)
-                    .setCommand(clearList)
-                    .setCommand(scanOn)
-                    .execute();
-
+            bleController.setCommand(scanOn).execute();
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
         switch (Settings.Common.opMode) {
@@ -479,19 +407,12 @@ public class ConnectorBluetooth
 
     //----------------------- Scanning ---------------------------
 
-    void startScan() {
+    public void startScan() {
         bleController.setCommand(scanOn).execute();
     }
 
-    void stopScan() {
+    public void stopScan() {
         bleController.setCommand(scanOff).execute();
-    }
-
-    void initList() {
-        bleController.setCommand(clearList)
-                .setCommand(addToList)
-                .setCommand(scanOn)
-                .execute();
     }
 
     //----------------- Connection/Disconnection ----------------
@@ -509,32 +430,6 @@ public class ConnectorBluetooth
     public void connecting() {
         bleController.setCommand(connectDevice).execute();
     }
-
-//    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName componentName, IBinder service) {
-//            if (Settings.debug) Log.i(TAG, "onServiceConnected()");
-//            mBluetoothLeCore = ((BluetoothLeService.LocalBinder) service).getService();
-//            if (!mBluetoothLeCore.initialize()) {
-//                if (Settings.debug) Log.e(TAG, "Unable to initialize Bluetooth");
-//                mIBluetoothListener.finishConnection();
-//            }
-////          Automatically connects to the device upon successful start-up initialization.
-////            if (mBluetoothLeCore != null && leBroadcastReceiver != null) {
-////                if (mBTDevice != null) {
-////                    bleController.setCommand(connectDevice).execute();
-////                }
-////            }
-//            if (leDataTransmitter != null)
-//                leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName componentName) {
-//            if (Settings.debug) Log.i(TAG, "onServiceDisconnected()");
-//            mBluetoothLeCore = null;
-//        }
-//    };
 
     //---------------------------- blecontroller states ------------------------------
 
@@ -653,7 +548,7 @@ public class ConnectorBluetooth
                     return;
                 }
                 enableBt();
-                build();// ToDo: перекинуть в то состояние, когда активити уже создано
+                //build(); ToDo:
 
 //                registerSuperDataConsumer(getTransmitter());
 //                leDataTransmitter.addIRxDataListener(getReceiver());

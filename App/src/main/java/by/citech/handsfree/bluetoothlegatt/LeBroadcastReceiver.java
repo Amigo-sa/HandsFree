@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import java.util.LinkedList;
+
 import by.citech.handsfree.settings.Settings;
 
 /**
@@ -16,14 +18,48 @@ public class LeBroadcastReceiver {
 
     private final static String TAG = "WSD_BroadcastReceiver";
 
-    private ConnectAction connectAction;
+    private LinkedList<ConnectAction> listeners;
 
-    public LeBroadcastReceiver(ConnectAction connectAction) {
-        this.connectAction = connectAction;
+
+    public LeBroadcastReceiver() {
+        listeners = new LinkedList<>();
     }
 
     public BroadcastReceiver getGattUpdateReceiver(){
         return mGattUpdateReceiver;
+    }
+
+    public void registerListener(ConnectAction connectAction){
+        if (listeners != null || connectAction != null) {
+            assert listeners != null;
+            listeners.add(connectAction);
+        }
+    }
+
+    public void clearListeners(){
+        if (listeners != null)
+            listeners.clear();
+    }
+
+    private void notifyConnectedListeners(){
+        if (listeners != null)
+            for (ConnectAction listener : listeners) {
+                listener.actionConnected();
+            }
+    }
+
+    private void notifyDisconnectedListeners(){
+        if (listeners != null)
+            for (ConnectAction listener : listeners) {
+                listener.actionDisconnected();
+            }
+    }
+
+    private void notifyServiceDiscovered(){
+        if (listeners != null)
+            for (ConnectAction listener : listeners) {
+                listener.actionServiceDiscovered();
+            }
     }
 
     // Handles various events fired by the Service.
@@ -39,11 +75,11 @@ public class LeBroadcastReceiver {
             //if (Settings.debug) Log.i(TAG, "onReceive");
             final String action = intent.getAction();
             if (BluetoothLeCore.ACTION_GATT_CONNECTED.equals(action)) {
-                connectAction.actionConnected();
+                notifyConnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_DISCONNECTED.equals(action)) {
-                connectAction.actionDisconnected();
+                notifyDisconnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                connectAction.actionServiceDiscovered();
+                notifyServiceDiscovered();
             } else if (BluetoothLeCore.ACTION_DATA_AVAILABLE.equals(action)) {
                 //if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));

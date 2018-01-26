@@ -4,6 +4,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
+
 /**
  * Created by tretyak on 09.01.2018.
  */
@@ -14,23 +16,24 @@ public class LinearLayoutTouchListener implements View.OnTouchListener {
     // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
     static final int MIN_DISTANCE = 100;
     private float downX, downY, upX, upY;
-    private IUiToBtListener iUiToBtListener;
+    private ISwipeListener iSwipeListener;
 
-    public LinearLayoutTouchListener(IUiToBtListener iUiToBtListener) {
-        this.iUiToBtListener = iUiToBtListener;
+    public LinearLayoutTouchListener(ISwipeListener iSwipeListener) {
+        this.iSwipeListener = iSwipeListener;
     }
     private void onRightToLeftSwipe() {
-        Log.i(logTag, "RightToLeftSwipe!");}
-    private void onLeftToRightSwipe() {Log.i(logTag, "LeftToRightSwipe!");}
+        iSwipeListener.onSwipe(ISwipeListener.SwipeDirection.LEFT);
+    }
+    private void onLeftToRightSwipe() {
+        iSwipeListener.onSwipe(ISwipeListener.SwipeDirection.RIGH);
+    }
 
     private void onTopToBottomSwipe() {
-        Log.i(logTag, "onTopToBottomSwipe!");
-        iUiToBtListener.swipeScanStartListener();
+        iSwipeListener.onSwipe(ISwipeListener.SwipeDirection.DOWN);
     }
 
     private void onBottomToTopSwipe() {
-        Log.i(logTag, "onBottomToTopSwipe!");
-        iUiToBtListener.swipeScanStopListener();
+        iSwipeListener.onSwipe(ISwipeListener.SwipeDirection.UP);
     }
 
     @Override

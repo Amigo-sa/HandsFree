@@ -13,6 +13,7 @@ import static by.citech.handsfree.activity.fsm.EActivityReport.PowerOffPressed;
 import static by.citech.handsfree.activity.fsm.EActivityReport.TurningOn;
 import static by.citech.handsfree.activity.fsm.EActivityState.Back;
 import static by.citech.handsfree.activity.fsm.EActivityState.BackArrow;
+import static by.citech.handsfree.activity.fsm.EActivityState.CallA;
 import static by.citech.handsfree.activity.fsm.EActivityState.Destroyed;
 import static by.citech.handsfree.activity.fsm.EActivityState.Home;
 import static by.citech.handsfree.activity.fsm.EActivityState.PowerOff;
@@ -149,7 +150,7 @@ public class ActivityFsm {
     private boolean processStateChange(EActivityState from, EActivityState to, EActivityReport why, boolean isForce) {
         if (currState == from || isForce) {
             if (EActivityState.availableFromAny().contains(to) || from.available().contains(to) || isForce) {
-              //  if (isActivity(from) && isTransition(why)) prevActivityState = from;
+                if (isActivity(from) && isTransition(why)) prevActivityState = from;
                 prevReport = why;
                 prevState = currState;
                 currState = to;
@@ -164,8 +165,8 @@ public class ActivityFsm {
         return report != PowerOffPressed && report != HomePressed;
     }
 
-//    private boolean isActivity(EActivityState state) {
-//        return state == ScanA || state == SettingsA || state == LightA;
-//    }
+    private boolean isActivity(EActivityState state) {
+        return state == CallA || state == SettingsA;
+    }
 
 }
