@@ -9,12 +9,6 @@
         android:title="Mode" />
 
     <EditTextPreference
-        android:key="@string/btChosenAddr"
-        android:inputType="text"
-        android:dialogTitle="MAC-address in form of XX:XX:XX:XX:XX:XX"
-        android:title="Chosen device" />
-
-    <EditTextPreference
         android:key="@string/btLatencyMs"
         android:inputType="number"
         android:dialogTitle="Choose sleep interval (ms)"

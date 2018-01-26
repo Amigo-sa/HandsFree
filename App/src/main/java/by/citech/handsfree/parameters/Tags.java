@@ -27,7 +27,7 @@ public class Tags {
     public static final String ChosenDeviceControl = PREFIX + "ChosenDeviceControl";
     public static final String ScanActivity = PREFIX + "ScanActivity";
     public static final String SettingsActivity = PREFIX + "SettingsActivity";
-    public static final String DeviceControlActivity = PREFIX + "CallActivity";
+    public static final String DeviceControlActivity = PREFIX + "ControlActivity";
     public static final String ClientConn = PREFIX + "ClientConn";
     public static final String Client = PREFIX + "Client";
     public static final String ServerOn = PREFIX + "ServerOn";

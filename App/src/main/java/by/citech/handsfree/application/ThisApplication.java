@@ -17,7 +17,6 @@ import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;
-import timber.log.Timber;
 
 public class ThisApplication
         extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
@@ -39,7 +38,6 @@ public class ThisApplication
     @Override
     public void onCreate() {
         super.onCreate();
-        Timber.plant(new Timber.DebugTree());
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
         threadingManager = ThreadingManager.getInstance();

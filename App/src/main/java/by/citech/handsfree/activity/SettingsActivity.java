@@ -15,6 +15,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,10 +24,13 @@ import android.view.ViewGroup;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.parameters.Colors;
-import by.citech.handsfree.settings.SettingsHelper;
+import by.citech.handsfree.settings.EOpMode;
+import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.SettingsDefault;
+import by.citech.handsfree.parameters.Tags;
 import timber.log.Timber;
 
 public class SettingsActivity
@@ -106,12 +110,11 @@ public class SettingsActivity
         public void onCreatePreferencesFix(@Nullable Bundle savedInstanceState, String rootKey) {
             if (debug) Timber.i("onCreatePreferencesFix");
             setPreferencesFromResource(R.xml.settings, rootKey);
-            SettingsHelper.prepareListPref    ((ListPreference    ) findPreference(getString(R.string.opMode         )), Settings.Common.opMode                                                       );
-            SettingsHelper.prepareListPref    ((ListPreference    ) findPreference(getString(R.string.audioCodecType )), Settings.AudioCommon.audioCodecType                                          );
-            SettingsHelper.prepareEditTextPref((EditTextPreference) findPreference(getString(R.string.btLatencyMs    )), Settings.Bluetooth.btLatencyMs     , SettingsDefault.TypeName.btLatencyMs    );
-            SettingsHelper.prepareEditTextPref((EditTextPreference) findPreference(getString(R.string.bt2NetFactor   )), Settings.Common.bt2NetFactor       , SettingsDefault.TypeName.bt2NetFactor   );
-            SettingsHelper.prepareEditTextPref((EditTextPreference) findPreference(getString(R.string.bt2BtPacketSize)), Settings.Bluetooth.bt2BtPacketSize , SettingsDefault.TypeName.bt2BtPacketSize);
-            SettingsHelper.prepareEditTextPref((EditTextPreference) findPreference(getString(R.string.btChosenAddr   )), Settings.Bluetooth.btChosenAddr    , SettingsDefault.TypeName.btChosenAddr   );
+            prepareOpModePref();
+            prepareAudioCodecTypePref();
+            prepareBtLatencyMsPref();
+            prepareBt2NetFactorPref();
+            prepareBt2btPacketSizePref();
         }
 
         @Override
@@ -123,20 +126,113 @@ public class SettingsActivity
             }
         }
 
+        //-------------------------- preferences preparation
+
+        private void prepareOpModePref() {
+            if (debug) Timber.i("prepareOpModePref");
+            ListPreference pref = (ListPreference) findPreference(getString(R.string.opMode));
+            if (pref == null) return;
+            pref.setDefaultValue(SettingsDefault.Common.opMode.getSettingName());
+            CharSequence[] entries = {
+
+            };
+            CharSequence[] entryValues = {
+                    EOpMode.Normal.getSettingNumber(),
+                    EOpMode.Bt2Bt.getSettingNumber(),
+                    EOpMode.DataGen2Bt.getSettingNumber(),
+                    EOpMode.AudIn2Bt.getSettingNumber(),
+                    EOpMode.Bt2AudOut.getSettingNumber(),
+                    EOpMode.AudIn2AudOut.getSettingNumber(),
+                    EOpMode.Record.getSettingNumber()
+            };
+            pref.setEntries(entries);
+            pref.setEntryValues(entryValues);
+            CharSequence entry = pref.getEntry();
+            if (entry == null || entry.length() == 0) {
+                if (debug) Timber.i("prepareOpModePref entry is null, set to default");
+                pref.setValue(SettingsDefault.Common.opMode.getSettingName());
+            }
+            pref.setSummary(pref.getEntry());
+        }
+
+        private void prepareAudioCodecTypePref() {
+            if (debug) Timber.i("prepareAudioCodecTypePref");
+            ListPreference pref = (ListPreference) findPreference(getString(R.string.audioCodecType));
+            if (pref == null) return;
+            pref.setDefaultValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
+            CharSequence[] entries = {
+                    EAudioCodecType.Sit_2_1_java.getSettingName(),
+                    EAudioCodecType.Sit_2_1_native.getSettingName(),
+                    EAudioCodecType.Sit_3_0_java.getSettingName(),
+                    EAudioCodecType.Sit_3_0_native.getSettingName()
+            };
+            CharSequence[] entryValues = {
+                    EAudioCodecType.Sit_2_1_java.getSettingNumber(),
+                    EAudioCodecType.Sit_2_1_native.getSettingNumber(),
+                    EAudioCodecType.Sit_3_0_java.getSettingNumber(),
+                    EAudioCodecType.Sit_3_0_native.getSettingNumber()
+            };
+            pref.setEntries(entries);
+            pref.setEntryValues(entryValues);
+            pref.setSummary(pref.getEntry());
+            CharSequence entry = pref.getEntry();
+            if (entry == null || entry.length() == 0) {
+                if (debug) Timber.i("prepareAudioCodecTypePref entry is null, set to default");
+                pref.setValue(SettingsDefault.AudioCommon.audioCodecType.getSettingName());
+            }
+            pref.setSummary(pref.getEntry());
+        }
+
+        private void prepareBt2NetFactorPref() {
+            if (debug) Timber.i("prepareBt2NetFactorPref");
+            EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.bt2NetFactor));
+            if (pref == null) return;
+            pref.setDefaultValue(SettingsDefault.Common.bt2NetFactor);
+            String entry = pref.getText();
+            if (entry == null || entry.length() == 0) {
+                pref.setText(String.valueOf(SettingsDefault.Common.bt2NetFactor));
+            }
+            pref.setSummary(pref.getText());
+        }
+
+        private void prepareBt2btPacketSizePref() {
+            if (debug) Timber.i("prepareBt2btPacketSizePref");
+            EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.bt2BtPacketSize));
+            if (pref == null) return;
+            pref.setDefaultValue(SettingsDefault.Bluetooth.bt2BtPacketSize);
+            String entry = pref.getText();
+            if (entry == null || entry.length() == 0) {
+                pref.setText(String.valueOf(SettingsDefault.Bluetooth.bt2BtPacketSize));
+            }
+            pref.setSummary(pref.getText());
+        }
+
+        private void prepareBtLatencyMsPref() {
+            if (debug) Timber.i("prepareBtLatencyMsPref");
+            EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.btLatencyMs));
+            if (pref == null) return;
+            pref.setDefaultValue(SettingsDefault.Bluetooth.btLatencyMs);
+            String entry = pref.getText();
+            if (entry == null || entry.length() == 0) {
+                pref.setText(String.valueOf(SettingsDefault.Bluetooth.btLatencyMs));
+            }
+            pref.setSummary(pref.getText());
+        }
+
         //-------------------------- on change refresh
 
         private String getRefreshedListPref(String prefName) {
+            if (debug) Timber.i("refreshListPref");
             ListPreference pref = (ListPreference) findPreference(prefName);
-            CharSequence newSummary = pref.getEntry();
-            if (debug) Timber.w("getRefreshedListPref %s set to %s", prefName, newSummary);
+            String newSummary = pref.getValue();
             pref.setSummary(newSummary);
-            return newSummary.toString();
+            return newSummary;
         }
 
         private String getRefreshedEditTextPref(String prefName) {
+            if (debug) Timber.i("refreshEditTextPref");
             EditTextPreference pref = (EditTextPreference) findPreference(prefName);
             String newSummary = pref.getText();
-            if (debug) Timber.w("getRefreshedEditTextPref %s set to %s", prefName, newSummary);
             pref.setSummary(newSummary);
             return newSummary;
         }
@@ -151,17 +247,23 @@ public class SettingsActivity
                 return;
             }
             switch (prefName) {
-                case SettingsDefault.TypeName.bt2NetFactor:
                 case SettingsDefault.TypeName.btLatencyMs:
+                    PreferencesProcessor.saveBtLatencyMsPref(Integer.parseInt(getRefreshedEditTextPref(prefName)));
+                    break;
                 case SettingsDefault.TypeName.btChosenAddr:
-                case SettingsDefault.TypeName.bt2BtPacketSize:
-                    getRefreshedEditTextPref(prefName);
+                    PreferencesProcessor.saveBtChosenAddrPref(getRefreshedEditTextPref(prefName));
                     break;
                 case SettingsDefault.TypeName.opMode:
+                    PreferencesProcessor.saveOpModePref(EOpMode.valueOf(getRefreshedListPref(prefName)));
+                    break;
                 case SettingsDefault.TypeName.audioCodecType:
-                    getRefreshedListPref(prefName);
+                    PreferencesProcessor.saveAudioCodecTypePref(EAudioCodecType.valueOf(getRefreshedListPref(prefName)));
+                    break;
+                case SettingsDefault.TypeName.bt2BtPacketSize:
+                    PreferencesProcessor.saveBt2btPacketSizePref(Integer.parseInt(getRefreshedEditTextPref(prefName)));
                     break;
                 case SettingsDefault.TypeName.btSinglePacket:
+                    PreferencesProcessor.saveBtSinglePacketPref();
                 default:
                     break;
             }
