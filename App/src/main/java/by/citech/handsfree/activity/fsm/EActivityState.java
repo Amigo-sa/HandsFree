@@ -43,7 +43,7 @@ public enum EActivityState {
         @Override public HashSet<EActivityState> available() {return s(BackArrow, Destroyed, Home, Back, PowerOff, SettingsA2CallA);}
     };
 
-    public String getName() {return this.toString();}
+    public String getName() {return this.name();}
     public abstract HashSet<EActivityState> available();
     public static HashSet<EActivityState> availableFromAny() {return s(TurnedOff);}
 

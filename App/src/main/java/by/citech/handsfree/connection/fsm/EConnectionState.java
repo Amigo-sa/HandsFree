@@ -61,7 +61,7 @@ public enum EConnectionState {
         @Override public HashSet<EConnectionState> available() {return s();}
     };
 
-    public String getName() {return this.toString();}
+    public String getName() {return this.name();}
     public abstract HashSet<EConnectionState> available();
     public static HashSet<EConnectionState> availableFromAny() {return s(Failure, TurnedOff);}
 

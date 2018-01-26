@@ -166,7 +166,7 @@ public class ActivityFsm {
     }
 
     private boolean isActivity(EActivityState state) {
-        return state == CallA || state == SettingsA;
+        return state == SettingsA || state == CallA;
     }
 
 }

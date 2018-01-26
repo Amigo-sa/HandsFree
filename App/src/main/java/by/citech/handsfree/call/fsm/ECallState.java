@@ -58,7 +58,7 @@ public enum ECallState {
         @Override public HashSet<ECallState> available() {return s(PhaseZero);}
     };
 
-    public String getName() {return this.toString();}
+    public String getName() {return this.name();}
     public abstract HashSet<ECallState> available();
     public static HashSet<ECallState> availableFromAny() {return s(TurnedOff);}
 
