@@ -439,13 +439,13 @@ public class ConnectorBluetooth
     public void onConnectionFsmStateChange(EConnectionState from, EConnectionState to, EConnectionReport why) {
         switch (why) {
             case TurningOn:
-                if (Settings.debug) Log.i(TAG, "TurningOn");
+                if (Settings.debug) Log.i(TAG, "ReportTurningOn");
                 if (!isBtSuppported()) {
 //                    reportToConnectionFsm(to, EConnectionReport.BtNotSupported, TAG);
                     return;
                 }
                 if (!isBleSupported()) {
-//                    reportToConnectionFsm(to, EConnectionReport.BtLeNotSupported, TAG);
+//                    reportToConnectionFsm(to, EConnectionReport.ReportBtLeNotSupported, TAG);
                     return;
                 }
                 enableBt();
@@ -458,25 +458,25 @@ public class ConnectorBluetooth
 //                reportToConnectionFsm(getConnectionFsmState(), EConnectionReport.BtPrepared, TAG);
                 break;
             case SearchStarted:
-                if (Settings.debug) Log.i(TAG, "SearchStarted");
+                if (Settings.debug) Log.i(TAG, "ReportSearchStart");
 //                startScan();
 //                state = STATE_SCANNING;
                 break;
             case SearchStopped:
-                if (Settings.debug) Log.i(TAG, "SearchStopped");
+                if (Settings.debug) Log.i(TAG, "ReportSearchStop");
 //                stopScan();
 //                state = STATE_SCANSTOPED;
                 break;
             case ConnectStarted:
-                if (Settings.debug) Log.i(TAG, "ConnectStarted");
+                if (Settings.debug) Log.i(TAG, "ReportConnectStart");
                 connecting();
                 break;
             case ConnectStopped:
-                if (Settings.debug) Log.i(TAG, "ConnectStopped");
+                if (Settings.debug) Log.i(TAG, "ReportConnectStop");
                 disconnect();
                 break;
             case TurningOff:
-                if (Settings.debug) Log.i(TAG, "TurningOff");
+                if (Settings.debug) Log.i(TAG, "ReportTurningOff");
                 onStop();
                 break;
             default:

@@ -7,14 +7,14 @@ import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.Settings;
 import timber.log.Timber;
 
-abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState, R extends IFsmReport> {
+abstract public class FsmCore {
 
-    private static final boolean debug = Settings.debug;
+    protected static final boolean debug = Settings.debug;
     private final String fsmName;
 
-    private Collection<L> listeners;
-    private S prevState, currState;
-    private R prevReport, currReport;
+    protected Collection<IFsmListener> listeners;
+    protected IFsmState prevState, currState;
+    protected IFsmReport prevReport, currReport;
 
     {
         listeners = new ConcurrentLinkedQueue<>();
@@ -24,38 +24,39 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
         this.fsmName = fsmName;
     }
 
+    //--------------------- abstract
+
+    abstract protected boolean implementedProcessFsmReport(IFsmReport report, IFsmState from);
+
     //--------------------- reporter
 
-    synchronized protected void onFsmStateChange(S from, S to, R why) {
-        if (debug) Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, why);
-        for (L listener : listeners) listener.onFsmStateChange(from, to, why);
-    }
-
-    synchronized S getFsmCurrentState() {
+    synchronized protected IFsmState getFsmCurrentState() {
         return currState;
     }
 
-    //--------------------- listener
-
-    synchronized boolean processFsmReport(R report, S from, String msg) {
+    synchronized protected boolean processFsmReport(IFsmReport report, IFsmState from, String msg) {
         if (debug) Timber.w("%s processFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
         if (report == null || from == null || msg == null) {
             if (debug) Timber.e("%s processFsmReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
             return false;
-        } else {
-            return true;
-        }
+        } else return true;
+    }
+
+    //--------------------- listener
+
+    synchronized protected void onFsmStateChange(IFsmState from, IFsmState to, IFsmReport why) {
+        if (debug) Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, why);
+        for (IFsmListener listener : listeners) listener.onFsmStateChange(from, to, why);
     }
 
     //--------------------- register and unregister
 
-    @SafeVarargs
-    final synchronized protected boolean registerFsmListener(L listener, String who, S... states) {
+    synchronized protected boolean registerFsmListener(IFsmListener listener, String who, IFsmState... states) {
         if (states == null || states.length == 0) return registerFsmListener(listener, who);
         else return false; // TODO: доделать логику слушателя только выбранных сообщений
     }
 
-    synchronized protected boolean registerFsmListener(L listener, String who) {
+    synchronized protected boolean registerFsmListener(IFsmListener listener, String who) {
         boolean isAdded;
         if (listener == null) {
             if (debug) Timber.w("%s register fail, null listener: <%s>", fsmName, who);
@@ -72,7 +73,7 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
         return isAdded;
     }
 
-    synchronized protected boolean unregisterFsmListener(L listener, String who) {
+    synchronized protected boolean unregisterFsmListener(IFsmListener listener, String who) {
         boolean isRemoved;
         isRemoved = listeners.remove(listener);
         if (isRemoved) {if (debug) Timber.w("%s unregister success: <%s>, count: <%d>", fsmName, who, listeners.size());}
@@ -82,11 +83,11 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
 
     //--------------------- processing
 
-    synchronized protected boolean processFsmStateTransition(S from, S to, R why) {
-        return processFsmStateTransition(from, to, why, false);
+    synchronized protected boolean processFsmStateChange(IFsmReport why, IFsmState from, IFsmState to) {
+        return processFsmStateChange(from, to, why, false);
     }
 
-    synchronized protected boolean processFsmStateTransition(S from, S to, R why, boolean isForce) {
+    synchronized protected boolean processFsmStateChange(IFsmState from, IFsmState to, IFsmReport why, boolean isForce) {
         if (currState == from || isForce) {
             if (from.availableFromAny().contains(to) || from.available().contains(to) || isForce) {
                 prevReport = currReport;

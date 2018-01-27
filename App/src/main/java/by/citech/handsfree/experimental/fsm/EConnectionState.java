@@ -1,7 +1,5 @@
 package by.citech.handsfree.experimental.fsm;
 
-import android.view.ViewDebug;
-
 import java.util.HashSet;
 
 import by.citech.handsfree.fsm.IFsmState;
@@ -10,62 +8,62 @@ import static by.citech.handsfree.util.CollectionHelper.s;
 
 public enum EConnectionState implements IFsmState {
 
-    TurnedOff {
-        @Override public HashSet<IFsmState> available() {return s(TurnedOn);}
+    StateTurnedOff {
+        @Override public HashSet<IFsmState> available() {return s(StateTurnedOn);}
     },
-    TurnedOn {
-        @Override public HashSet<IFsmState> available() {return s(BtPrepared, BtNotSupported);}
+    StateTurnedOn {
+        @Override public HashSet<IFsmState> available() {return s(StateBtPrepared, StateBtNotSupported);}
     },
-    BtPrepared {
-        @Override public HashSet<IFsmState> available() {return s(DeviceChosen, DeviceNotChosen);}
+    StateBtPrepared {
+        @Override public HashSet<IFsmState> available() {return s(StateDeviceChosen, StateDeviceNotChosen);}
     },
-    BtNotSupported {
+    StateBtNotSupported {
         @Override public HashSet<IFsmState> available() {return s();}
     },
-    DeviceChosen {
-        @Override public HashSet<IFsmState> available() {return s(Searching);}
+    StateDeviceChosen {
+        @Override public HashSet<IFsmState> available() {return s(StateSearching);}
     },
-    DeviceNotChosen {
-        @Override public HashSet<IFsmState> available() {return s(DeviceChosen);}
+    StateDeviceNotChosen {
+        @Override public HashSet<IFsmState> available() {return s(StateDeviceChosen);}
     },
-    Searching {
-        @Override public HashSet<IFsmState> available() {return s(Found, NotFound);}
+    StateSearching {
+        @Override public HashSet<IFsmState> available() {return s(StateFound, StateNotFound);}
     },
-    Found {
-        @Override public HashSet<IFsmState> available() {return s(Searching, Connecting);}
+    StateFound {
+        @Override public HashSet<IFsmState> available() {return s(StateSearching, StateConnecting);}
     },
-    NotFound {
-        @Override public HashSet<IFsmState> available() {return s(Searching);}
+    StateNotFound {
+        @Override public HashSet<IFsmState> available() {return s(StateSearching);}
     },
-    Connecting {
-        @Override public HashSet<IFsmState> available() {return s(Disconnected, Incompatible, Connected);}
+    StateConnecting {
+        @Override public HashSet<IFsmState> available() {return s(StateDisconnected, StateIncompatible, StateConnected);}
     },
-    Disconnected {
-        @Override public HashSet<IFsmState> available() {return s(Searching);}
+    StateDisconnected {
+        @Override public HashSet<IFsmState> available() {return s(StateSearching);}
     },
-    Incompatible {
-        @Override public HashSet<IFsmState> available() {return s(DeviceChosen);}
+    StateIncompatible {
+        @Override public HashSet<IFsmState> available() {return s(StateDeviceChosen);}
     },
-    Connected {
-        @Override public HashSet<IFsmState> available() {return s(Disconnected, GettingStatus);}
+    StateConnected {
+        @Override public HashSet<IFsmState> available() {return s(StateDisconnected, GettingStatus);}
     },
     GettingStatus {
-        @Override public HashSet<IFsmState> available() {return s(Disconnected, GotStatus, Connected);}
+        @Override public HashSet<IFsmState> available() {return s(StateDisconnected, GotStatus, StateConnected);}
     },
     GotStatus {
-        @Override public HashSet<IFsmState> available() {return s(Disconnected, GettingInitData);}
+        @Override public HashSet<IFsmState> available() {return s(StateDisconnected, GettingInitData);}
     },
     GettingInitData {
-        @Override public HashSet<IFsmState> available() {return s(Disconnected, GotStatus, GotInitData);}
+        @Override public HashSet<IFsmState> available() {return s(StateDisconnected, GotStatus, GotInitData);}
     },
     GotInitData {
-        @Override public HashSet<IFsmState> available() {return s(GettingInitData, Disconnected);}
+        @Override public HashSet<IFsmState> available() {return s(GettingInitData, StateDisconnected);}
     },
     Failure {
         @Override public HashSet<IFsmState> available() {return s();}
     };
 
     @Override public String getName() {return this.name();}
-    @Override public HashSet<IFsmState> availableFromAny() {return s(Failure, TurnedOff);}
+    @Override public HashSet<IFsmState> availableFromAny() {return s(Failure, StateTurnedOff);}
 
 }

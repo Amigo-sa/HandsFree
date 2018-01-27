@@ -52,10 +52,10 @@ public class ChosenDeviceControl
 //                if (isValidAddr(Settings.Bluetooth.btChosenAddr)) {
 //                    if (isValidAddr(getBtConnectedAddr())
 //                            && !Settings.Bluetooth.btChosenAddr.matches(getBtConnectedAddr())) {
-//                        reportToConnectionFsm(getConnectionFsmState(), SearchStopped, TAG);
-//                        reportToConnectionFsm(getConnectionFsmState(), ConnectStopped, TAG);
-//                    } else reportToConnectionFsm(getConnectionFsmState(), ChosenDevicePassedTheCheck, TAG);
-//                } else reportToConnectionFsm(getConnectionFsmState(), ChosenDeviceFailedTheCheck, TAG);
+//                        reportToConnectionFsm(getConnectionFsmState(), ReportSearchStop, TAG);
+//                        reportToConnectionFsm(getConnectionFsmState(), ReportConnectStop, TAG);
+//                    } else reportToConnectionFsm(getConnectionFsmState(), ReportChosenDeviceValid, TAG);
+//                } else reportToConnectionFsm(getConnectionFsmState(), ReportChosenDeviceInvalid, TAG);
 //                break;
             case SettingsA:
                 setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);

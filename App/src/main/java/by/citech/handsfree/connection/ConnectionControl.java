@@ -153,7 +153,7 @@ public class ConnectionControl
     public void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why) {
 //        if (to == LightA) {
 //            registerConnectionFsmListener(this, TAG);
-//            reportToConnectionFsm(getConnectionFsmState(), GettingInitDataStarted, TAG);
+//            reportToConnectionFsm(getConnectionFsmState(), GettingInitDataStart, TAG);
 //        } else if (why == LightA2ScanAPressed) {
 //            removeAll();
 //            unregisterConnectionFsmListener(this, TAG);
