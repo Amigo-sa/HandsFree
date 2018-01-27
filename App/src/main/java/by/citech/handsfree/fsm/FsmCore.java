@@ -24,23 +24,23 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
         this.fsmName = fsmName;
     }
 
+    //--------------------- reporter
+
     synchronized protected void onFsmStateChange(S from, S to, R why) {
         if (debug) Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, why);
         for (L listener : listeners) listener.onFsmStateChange(from, to, why);
     }
 
-    //--------------------- reporter
-
-    synchronized S getState() {
+    synchronized S getFsmCurrentState() {
         return currState;
     }
 
     //--------------------- listener
 
-    synchronized boolean processReport(R report, S from, String msg) {
-        if (debug) Timber.w("%s processReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
+    synchronized boolean processFsmReport(R report, S from, String msg) {
+        if (debug) Timber.w("%s processFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
         if (report == null || from == null || msg == null) {
-            if (debug) Timber.e("%s processReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
+            if (debug) Timber.e("%s processFsmReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
             return false;
         } else {
             return true;
@@ -50,12 +50,12 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
     //--------------------- register and unregister
 
     @SafeVarargs
-    final synchronized protected boolean register(L listener, String who, S... states) {
-        if (states == null || states.length == 0) return register(listener, who);
+    final synchronized protected boolean registerFsmListener(L listener, String who, S... states) {
+        if (states == null || states.length == 0) return registerFsmListener(listener, who);
         else return false; // TODO: доделать логику слушателя только выбранных сообщений
     }
 
-    synchronized protected boolean register(L listener, String who) {
+    synchronized protected boolean registerFsmListener(L listener, String who) {
         boolean isAdded;
         if (listener == null) {
             if (debug) Timber.w("%s register fail, null listener: <%s>", fsmName, who);
@@ -72,7 +72,7 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
         return isAdded;
     }
 
-    synchronized protected boolean unregister(L listener, String who) {
+    synchronized protected boolean unregisterFsmListener(L listener, String who) {
         boolean isRemoved;
         isRemoved = listeners.remove(listener);
         if (isRemoved) {if (debug) Timber.w("%s unregister success: <%s>, count: <%d>", fsmName, who, listeners.size());}
@@ -82,11 +82,11 @@ abstract public class FsmCore<L extends IFsmListener<S, R>, S extends IFsmState,
 
     //--------------------- processing
 
-    synchronized protected boolean process(S from, S to, R why) {
-        return process(from, to, why, false);
+    synchronized protected boolean processFsmStateTransition(S from, S to, R why) {
+        return processFsmStateTransition(from, to, why, false);
     }
 
-    synchronized protected boolean process(S from, S to, R why, boolean isForce) {
+    synchronized protected boolean processFsmStateTransition(S from, S to, R why, boolean isForce) {
         if (currState == from || isForce) {
             if (from.availableFromAny().contains(to) || from.available().contains(to) || isForce) {
                 prevReport = currReport;
