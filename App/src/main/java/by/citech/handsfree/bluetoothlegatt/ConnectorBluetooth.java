@@ -5,8 +5,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.util.Log;
 
+import by.citech.handsfree.activity.CallActivity;
 import by.citech.handsfree.application.ThisApplication;
 import by.citech.handsfree.call.fsm.ECallReport;
 import by.citech.handsfree.call.fsm.ECallState;
@@ -14,10 +14,13 @@ import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
 import by.citech.handsfree.call.fsm.ICallFsmReporter;
 import by.citech.handsfree.call.fsm.ICallFsmListener;
 import by.citech.handsfree.data.StorageListener;
-import by.citech.handsfree.connection.fsm.EConnectionReport;
-import by.citech.handsfree.connection.fsm.EConnectionState;
-import by.citech.handsfree.connection.fsm.IConnectionFsmListener;
+import by.citech.handsfree.experimental.fsm.EConnectionReport;
+import by.citech.handsfree.experimental.fsm.EConnectionState;
+import by.citech.handsfree.experimental.fsm.ConnectionFsm.IConnectionFsmListener;
+import by.citech.handsfree.experimental.fsm.ConnectionFsm.IConnectionFsmReporter;
 import by.citech.handsfree.exchange.IRxComplex;
+import by.citech.handsfree.fsm.IFsmReport;
+import by.citech.handsfree.fsm.IFsmState;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.BLEController;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.characteristics.CharacteristicsDisplayOnCommand;
@@ -33,12 +36,18 @@ import by.citech.handsfree.bluetoothlegatt.rwdata.Characteristics;
 import by.citech.handsfree.bluetoothlegatt.rwdata.LeDataTransmitter;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
-import static by.citech.handsfree.call.fsm.ECallReport.CallFailedInt;
-import static by.citech.handsfree.call.fsm.ECallReport.StopDebug;
-import static by.citech.handsfree.call.fsm.ECallReport.SysIntConnectedIncompatible;
-import static by.citech.handsfree.call.fsm.ECallReport.SysIntError;
-import static by.citech.handsfree.call.fsm.ECallReport.SysIntReady;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportConnect;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisconnect;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportEnable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportExchangeDisable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportExchangeEnable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportSearchStart;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportSearchStop;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportTurningOff;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportTurningOn;
 
 public class ConnectorBluetooth
         implements StorageListener,
@@ -46,7 +55,9 @@ public class ConnectorBluetooth
                    ICallFsmListener,
                    ICallFsmReporter,
                    ICallFsmListenerRegister,
-                   IConnectionFsmListener {
+                   IConnectionFsmListener,
+                   IConnectionFsmReporter,
+                   IScanListener{
 
     private final static String STAG = Tags.ConnectorBluetooth;
 
@@ -57,12 +68,13 @@ public class ConnectorBluetooth
 
     // обьявляем сервис для обработки соединения и передачи данных (клиент - сервер)
     private BluetoothLeCore mBluetoothLeCore;
-    private Handler mHandler;
     // BLE устройство, с которым будем соединяться
     private BluetoothDevice mBTDevice;
     private BluetoothDevice mBTDeviceConn;
     // сканер имеющихся по близости BLE устройств
     private LeScanner leScanner;
+    private boolean scanWithFilter;
+    private IScanListener mIScanListener;
     // хранилища данных
     private volatile StorageData<byte[]> storageFromBt;
     private volatile StorageData<byte[][]> storageToBt;
@@ -74,15 +86,11 @@ public class ConnectorBluetooth
     // Слушатели событий всей  BLE  периферии
     //////////////////////////////////////////
     //private BroadcastReceiverWrapper broadcastReceiverWrapper;
-    private IBluetoothListener mIBluetoothListener;
     private IRxComplex iRxComplex;
     //для дебага
     private long start_time;
-
     private volatile BluetoothLeState BLEState;
-
     private BLEController bleController;
-
     // команды
     private Command scanOn;
     private Command scanOff;
@@ -101,19 +109,13 @@ public class ConnectorBluetooth
 
     private ConnectorBluetooth() {
         BLEState = BluetoothLeState.DISCONECTED;
-        //broadcastReceiverWrapper = new BroadcastReceiverWrapper();
-        leScanner = new LeScanner();
 
+        leScanner = new LeScanner();
         characteristics = new Characteristics();
         leDataTransmitter = new LeDataTransmitter(characteristics);
         // инициализация контроллера команд
         bleController = new BLEController();
-
-        exchangeDataOn = new DataExchangeOnCommand(leDataTransmitter);
-        exchangeDataOff = new DataExchangeOffCommand(leDataTransmitter);
-        receiveDataOn = new ReceiveDataOn(leDataTransmitter);
-
-        // инициализация комманд
+        // инициализация комманд управления
         scanOn = new ScanOnCommand(leScanner);
         scanOff = new ScanOffCommand(leScanner);
 
@@ -121,6 +123,11 @@ public class ConnectorBluetooth
         disconnectDevice = new DisconnectCommand();
 
         characteristicDisplayOn = new CharacteristicsDisplayOnCommand(characteristics);
+
+        exchangeDataOn = new DataExchangeOnCommand(leDataTransmitter);
+        exchangeDataOff = new DataExchangeOffCommand(leDataTransmitter);
+        receiveDataOn = new ReceiveDataOn(leDataTransmitter);
+        // инициализация ядра BluetoothLe
         mBluetoothLeCore = BluetoothLeCore.getInstance();
     }
 
@@ -152,17 +159,17 @@ public class ConnectorBluetooth
     }
 
     public void build() {
-        if (Settings.debug) Log.i(TAG, "build");
+        if (Settings.debug) Timber.i(TAG, "build");
 
         leDataTransmitter.addIRxDataListener(iRxComplex);
         leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
         ThisApplication.registerBroadcastListener(this);
     }
 
-    //--------------------- IBase
+    //--------------------- IBase --------------------
 
-    public void onStop() {
-        if (Settings.debug) Log.i(TAG, "onStop");
+    private void onStop() {
+        if (Settings.debug) Timber.i(TAG, "onStop");
         unregisterCallerFsmListener(this, TAG);
 
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
@@ -175,9 +182,8 @@ public class ConnectorBluetooth
     //--------------------- getters and setters
 
     public ConnectorBluetooth setmHandler(Handler mHandler) {
-        if (Settings.debug) Log.i(TAG, "mHandler = " + mHandler);
+        if (Settings.debug) Timber.i(TAG, "mHandler = %s", mHandler);
         leScanner.setHandler(mHandler);
-        this.mHandler = mHandler;
         return this;
     }
 
@@ -203,10 +209,9 @@ public class ConnectorBluetooth
     }
 
     public ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
-        if (Settings.debug) Log.i(TAG, "mIBluetoothListener = " + mIBluetoothListener);
+        if (Settings.debug) Timber.i(TAG, "mIBluetoothListener = %s", mIBluetoothListener);
         characteristics.setIBluetoothListener(mIBluetoothListener);
         leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
-        this.mIBluetoothListener = mIBluetoothListener;
         return this;
     }
 
@@ -220,9 +225,16 @@ public class ConnectorBluetooth
         return this;
     }
 
-    public ConnectorBluetooth setiScanListener(IScanListener mIScanListener) {
-        leScanner.setiScanListener(mIScanListener);
+    public ConnectorBluetooth setiScanListener(IScanListener mIScanListener, boolean scanWithFilter) {
+        this.mIScanListener = mIScanListener;
+        setScanFilter(scanWithFilter);
         return this;
+    }
+
+    public void setScanFilter(boolean scanWithFilter){
+        this.scanWithFilter = scanWithFilter;
+        leScanner.setScanWithFilter(scanWithFilter);
+        leScanner.setiScanListener(scanWithFilter ? this : mIScanListener);
     }
 
     //------------------ get Device from adapter-------------------------
@@ -237,8 +249,8 @@ public class ConnectorBluetooth
         characteristicDisplayOn.setBluetoothLeService(mBluetoothLeCore);
 
         bleController.setCommand(scanOff).execute();
-        if (Settings.debug) Log.i(TAG, "mBTDevice = " + device);
-        if (Settings.debug) Log.i(TAG, "mBTDeviceConn = " + mBTDeviceConn);
+        if (Settings.debug) Timber.i(TAG, "mBTDevice = %s", device);
+        if (Settings.debug) Timber.i(TAG, "mBTDeviceConn = %s", mBTDeviceConn);
 
         if (!device.equals(mBTDeviceConn) && mBTDeviceConn == null) {
             start_time = System.currentTimeMillis();
@@ -246,21 +258,38 @@ public class ConnectorBluetooth
         }
     }
 
+    //--------------------------- Callbacks from Scanner
+
+    @Override
+    public void onStartScan() {
+
+    }
+
+    @Override
+    public void onStopScan() {
+
+    }
+
+    @Override
+    public void scanCallback(BluetoothDevice device, int rssi) {
+
+    }
+
     //--------------------------- Callbacks from BroadcastReceiver --------------------
     @Override
     public void actionConnected() {
         setBLEState(getBLEState(), BluetoothLeState.CONNECTED);
-        if (Settings.debug) Log.i(TAG, "mBTDevice = " + mBTDevice);
+        if (Settings.debug) Timber.i(TAG, "mBTDevice = %s", mBTDevice);
         mBTDeviceConn = mBTDevice;
 
         long end_time = System.currentTimeMillis();
-        if (Settings.debug) Log.i(TAG, "Connecting await time = " + (end_time - start_time));
+        if (Settings.debug) Timber.i(TAG, "Connecting await time = %s", (end_time - start_time));
         setStorages();
     }
 
     @Override
     public void actionDisconnected() {
-        if (Settings.debug) Log.i(TAG, "actionDisconnected()");
+        if (Settings.debug) Timber.i(TAG, "actionDisconnected()");
 
         if (BLEState != BluetoothLeState.DISCONECTED) {
             processState();
@@ -272,14 +301,9 @@ public class ConnectorBluetooth
             bleController.setCommand(scanOn).execute();
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
-        switch (Settings.Common.opMode) {
-            case Normal:
-                reportToCallerFsm(getCallerFsmState(), SysIntError, TAG);
-                break;
-            default:
-                reportToCallerFsm(getCallerFsmState(), StopDebug, TAG);
-                break;
-        }
+
+        reportToCallerFsm(getCallerFsmState(), ReportBtDisconnect, TAG);
+
     }
 
     private void processState() {
@@ -289,10 +313,10 @@ public class ConnectorBluetooth
                 if (reportToCallerFsm(callerState, CallFailedInt, TAG)) return;
                 else break;
             default:
-                if (Settings.debug) Log.e(TAG, "processState " + callerState);
+                if (Settings.debug) Timber.e(TAG, "processState %s", callerState);
                 return;
         }
-        if (Settings.debug) Log.w(TAG, "processState recursive call");
+        if (Settings.debug) Timber.w(TAG, "processState recursive call");
         processState();
     }
 
@@ -304,6 +328,11 @@ public class ConnectorBluetooth
             reportToCallerFsm(getCallerFsmState(), SysIntReady, TAG);
         } else
             reportToCallerFsm(getCallerFsmState(), SysIntConnectedIncompatible, TAG);
+    }
+
+    @Override
+    public void actionDescriptorWrite() {
+
     }
 
     //----------------------- Scanning ---------------------------
@@ -335,13 +364,13 @@ public class ConnectorBluetooth
     //---------------------------- blecontroller states ------------------------------
 
     private synchronized BluetoothLeState getBLEState() {
-        if (Settings.debug) Log.i(TAG, "getBLEState is " + BLEState.getName());
+        if (Settings.debug) Timber.i(TAG, "getBLEState is %s", BLEState.getName());
         return BLEState;
     }
 
     private synchronized boolean setBLEState(BluetoothLeState fromBLEState, BluetoothLeState toBLEState) {
         if (Settings.debug)
-            Log.w(TAG, String.format("setState from %s to %s", fromBLEState.getName(), toBLEState.getName()));
+            Timber.w(TAG, "setState from %s to %s", fromBLEState.getName(), toBLEState.getName());
         if (BLEState == fromBLEState) {
             if (fromBLEState.availableStates().contains(toBLEState)) {
                 BLEState = toBLEState;
@@ -351,11 +380,11 @@ public class ConnectorBluetooth
                 return true;
             } else {
                 if (Settings.debug)
-                    Log.e(TAG, String.format("setState: %s is not available from %s", toBLEState.getName(), fromBLEState.getName()));
+                    Timber.e(TAG, "setState: %s is not available from %s", toBLEState.getName(), fromBLEState.getName());
             }
         } else {
             if (Settings.debug)
-                Log.e(TAG, String.format("setState: current is not %s", fromBLEState.getName()));
+                Timber.e(TAG,  "setState: current is not %s", fromBLEState.getName());
         }
         return false;
     }
@@ -364,7 +393,7 @@ public class ConnectorBluetooth
 
     @Override
     public void setStorages() {
-        if (Settings.debug) Log.i(TAG, "setStorages()");
+        if (Settings.debug) Timber.i(TAG, "setStorages()");
         leDataTransmitter.setStorageFromBt((storageFromBt));
         leDataTransmitter.setStorageToBt(storageToBt);
         mBluetoothLeCore.setCallbackWriteListener(leDataTransmitter);
@@ -391,7 +420,7 @@ public class ConnectorBluetooth
 
     @Override
     public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
-        if (Settings.debug) Log.i(TAG, "onCallerStateChange");
+        if (Settings.debug) Timber.i(TAG, "onCallerStateChange");
         switch (why) {
             case InCallAcceptedByLocalUser:
             case OutCallAcceptedByRemoteUser:
@@ -436,51 +465,97 @@ public class ConnectorBluetooth
     }
 
     @Override
-    public void onConnectionFsmStateChange(EConnectionState from, EConnectionState to, EConnectionReport why) {
-        switch (why) {
-            case TurningOn:
-                if (Settings.debug) Log.i(TAG, "ReportTurningOn");
+    public void onFsmStateChange(IFsmState from, IFsmState to, IFsmReport report) {
+        switch (report) {
+            case ReportTurningOn:
+                if (Settings.debug) Timber.i(TAG, "ReportTurningOn");
                 if (!isBtSuppported()) {
-//                    reportToConnectionFsm(to, EConnectionReport.BtNotSupported, TAG);
+                    reportToConnectionFsm(to, EConnectionReport.BtNotSupported, TAG);
                     return;
                 }
                 if (!isBleSupported()) {
-//                    reportToConnectionFsm(to, EConnectionReport.ReportBtLeNotSupported, TAG);
+                    reportToConnectionFsm(to, EConnectionReport.ReportBtLeNotSupported, TAG);
                     return;
                 }
-                enableBt();
-                //build(); ToDo:
-
-//                registerSuperDataConsumer(getTransmitter());
-//                leDataTransmitter.addIRxDataListener(getReceiver());
 
                 mBluetoothLeCore.initialize();
-//                reportToConnectionFsm(getConnectionFsmState(), EConnectionReport.BtPrepared, TAG);
+//                registerSuperDataConsumer(getTransmitter());
+//                leDataTransmitter.addIRxDataListener(getReceiver());
+                reportToConnectionFsm((EConnectionState) to, EConnectionReport.ReportBtPrepared, TAG);
+
+            case ReportEnable:
+                enableBt();
+                if (ThisApplication.getBluetoothAdapter().isEnabled())
+                    reportToConnectionFsm(to, EConnectionReport.ReportBtEnabled, TAG);
+                else
+                    reportToConnectionFsm(to, EConnectionReport.ReportBtDisabled, TAG);
                 break;
-            case SearchStarted:
-                if (Settings.debug) Log.i(TAG, "ReportSearchStart");
-//                startScan();
+
+               // build(); //ToDo:
+
+            case ReportSearchStart:
+                if (Settings.debug) Timber.i(TAG, "ReportSearchStart");
+                if (scanWithFilter)
+                    searchDevice();
+                else
+                    startScan();
+
+//                ToDo: если нашел слать репорт и останавливать сканиорвание
+//                  reportToConnectionFsm(to, EConnectionReport.ReportBtFound, TAG);
+//                  stopScan();
+
 //                state = STATE_SCANNING;
                 break;
-            case SearchStopped:
-                if (Settings.debug) Log.i(TAG, "ReportSearchStop");
-//                stopScan();
-//                state = STATE_SCANSTOPED;
-                break;
-            case ConnectStarted:
-                if (Settings.debug) Log.i(TAG, "ReportConnectStart");
+
+            case ReportConnect:
+                if (Settings.debug) Timber.i(TAG, "ReportConnect");
                 connecting();
+//                Todo:  записать это в соответствующие калбэки
+//                reportToConnectionFsm(to, EConnectionReport.ReportBtDisconnected, TAG);
+//
+//                reportToConnectionFsm(to, EConnectionReport.ReportBtConnectedCompatible, TAG);
+//
+//                reportToConnectionFsm(to, EConnectionReport.ReportBtConnectedIncompatible, TAG);
+
                 break;
-            case ConnectStopped:
-                if (Settings.debug) Log.i(TAG, "ReportConnectStop");
+
+            case ReportExchangeEnable:
+                //Todo: добавить репорт для записи дескриптора
+                reportToConnectionFsm(to, EConnectionReport.ReportBtExchangeEnabled, TAG);
+                break;
+
+            case ReportExchangeDisable:
+                //Todo: добавить репорт для записи дескриптора
+                reportToConnectionFsm(to, EConnectionReport.ReportBtExchangeDisabled, TAG);
+                break;
+
+            case ReportSearchStop:
+                if (Settings.debug) Timber.i(TAG, "ReportSearchStop");
+                stopScan();
+//               state = STATE_SCANSTOPED;
+                break;
+
+            case ReportDisconnect:
+                if (Settings.debug) Timber.i(TAG, "ReportConnectStop");
                 disconnect();
                 break;
-            case TurningOff:
-                if (Settings.debug) Log.i(TAG, "ReportTurningOff");
+
+            case ReportDisable:
+                if (ThisApplication.getBluetoothAdapter().isEnabled())
+                    ThisApplication.getBluetoothAdapter().disable();
+                break;
+
+            case ReportTurningOff:
+                if (Settings.debug) Timber.i(TAG, "ReportTurningOff");
                 onStop();
                 break;
             default:
                 break;
         }
     }
+
+    private void searchDevice() {
+
+    }
+
 }

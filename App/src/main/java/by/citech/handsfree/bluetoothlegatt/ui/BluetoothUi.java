@@ -125,6 +125,7 @@ public class BluetoothUi implements IUiToBtListener,
     @Override
     public void clickBtnListener() {
         ConnectorBluetooth.getInstance().build();// Todo: привязать к автомату
+        ConnectorBluetooth.getInstance().setScanFilter(false);
         ConnectorBluetooth.getInstance().startScan();
     }
 
@@ -164,6 +165,11 @@ public class BluetoothUi implements IUiToBtListener,
 
     @Override
     public void actionServiceDiscovered() {
+
+    }
+
+    @Override
+    public void actionDescriptorWrite() {
 
     }
 

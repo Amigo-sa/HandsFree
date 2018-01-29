@@ -164,7 +164,7 @@ public class CallControl {
                 .setmHandler(handlerExtended)
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
-                .setiScanListener(iScanListener);
+                .setiScanListener(iScanListener, true);
 
         ConnectorNet.getInstance()
                 .setStorageToNet(storageBtToNet)
@@ -199,7 +199,7 @@ public class CallControl {
                 .setiBluetoothListener(iBluetoothListener)
                 .setStorageToBt(toBtStorage)
                 .setmHandler(new Handler())
-                .setiScanListener(iScanListener);
+                .setiScanListener(iScanListener, true);
 
         if (toBtLooper != null) {
             toBtLooper.build();
@@ -224,7 +224,7 @@ public class CallControl {
                 .setiBluetoothListener(iBluetoothListener)
                 .addIRxDataListener(bt2AudOutLooper)
                 .setmHandler(new Handler())
-                .setiScanListener(iScanListener);
+                .setiScanListener(iScanListener, true);
 
         bt2AudOutLooper.build();
     }
@@ -260,7 +260,7 @@ public class CallControl {
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageFromBt)
                 .setStorageToBt(storageToBt)
-                .setiScanListener(iScanListener);
+                .setiScanListener(iScanListener, true);
 
         bt2BtLooper.build();
     }
@@ -287,7 +287,7 @@ public class CallControl {
                 .setmHandler(new Handler())
                 .setStorageFromBt(storageBtToNet)
                 .setStorageToBt(storageNetToBt)
-                .setiScanListener(iScanListener);
+                .setiScanListener(iScanListener, true);
 
         bt2BtRecorder.build();
     }

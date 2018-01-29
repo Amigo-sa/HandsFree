@@ -64,6 +64,13 @@ public class BroadcastReceiverWrapper {
             }
     }
 
+    private void notifyEnabled(){
+        if (listeners != null)
+            for (ConnectAction listener : listeners) {
+                listener.actionDescriptorWrite();
+            }
+    }
+
     // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
     // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
@@ -83,6 +90,8 @@ public class BroadcastReceiverWrapper {
                 notifyDisconnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 notifyServiceDiscovered();
+            } else if (BluetoothLeCore.ACTION_DESCRIPTOR_WRITE.equals(action)) {
+                notifyEnabled();
             } else if (BluetoothLeCore.ACTION_DATA_AVAILABLE.equals(action)) {
                 //if (Settings.debug) Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
@@ -101,6 +110,7 @@ public class BroadcastReceiverWrapper {
         intentFilter.addAction(BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeCore.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BluetoothLeCore.ACTION_DATA_WRITE);
+        intentFilter.addAction(BluetoothLeCore.ACTION_DESCRIPTOR_WRITE);
         return intentFilter;
     }
 

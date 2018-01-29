@@ -8,4 +8,5 @@ public interface ConnectAction {
     void actionConnected();
     void actionDisconnected();
     void actionServiceDiscovered();
+    void actionDescriptorWrite();
 }

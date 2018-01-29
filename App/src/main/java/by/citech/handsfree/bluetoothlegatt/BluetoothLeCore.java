@@ -68,6 +68,7 @@ public class BluetoothLeCore
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String ACTION_DATA_WRITE = "com.example.bluetooth.le.ACTION_DATA_WRITE";
+    public final static String ACTION_DESCRIPTOR_WRITE = "com.example.bluetooth.le.ACTION_DESCRIPTOR_WRITE";
     public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
     public final static String EXTRA_WDATA = "com.example.bluetooth.le.EXTRA_WDATA";
 
@@ -184,7 +185,10 @@ public class BluetoothLeCore
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorWrite(gatt, descriptor, status);
             if (Settings.debug) Log.i(TAG, String.format("onDescriptorWrite() success, write status = %d", status));
-            if (status==BluetoothGatt.GATT_SUCCESS) mCallbackWriteListener.callbackDescriptorIsDone();
+            if (status==BluetoothGatt.GATT_SUCCESS){
+                mCallbackWriteListener.callbackDescriptorIsDone();
+                broadcastUpdate(ACTION_DESCRIPTOR_WRITE);
+            }
         }
 
     };

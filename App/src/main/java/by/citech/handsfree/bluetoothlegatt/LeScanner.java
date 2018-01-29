@@ -4,11 +4,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import by.citech.handsfree.application.ThisApplication;
@@ -25,15 +27,30 @@ public class LeScanner {
     private static final long SCAN_PERIOD = 10000;
     private Handler mHandler;
     private boolean mScanning;
+    private boolean scanWithFilter;
 
     // Класс BluetoothAdapter для связи софта с реальным железом BLE
     private BluetoothAdapter bluetoothAdapter;
     private IScanListener iScanListener;
 
+    private List<ScanFilter> scanFilters;
+    private ScanSettings scanSettings;
+    private String deviceAddress;
+
     public LeScanner() {
 
     }
     //--------------------- getters and setters
+
+    public void setDeviceAddress(String deviceAddress) {
+        this.deviceAddress = deviceAddress;
+        if (deviceAddress != null)
+            this.scanWithFilter = true;
+    }
+
+    public void setScanWithFilter(boolean scanWithFilter) {
+        this.scanWithFilter = scanWithFilter;
+    }
 
     public void setHandler(Handler mHandler) {
         this.mHandler = mHandler;
@@ -63,45 +80,41 @@ public class LeScanner {
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
         final BluetoothLeScanner leScanner = getBluetoothAdapter().getBluetoothLeScanner();
-
+        ScanFilter scanFilter;
+        ScanSettings scanSettings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setReportDelay(0)
+                .build();
         //scan specified devices only with ScanFilter  // С использованием фильтрации
+        if (scanWithFilter) {
+            scanFilter = new ScanFilter.Builder()
+                    .setDeviceAddress(deviceAddress)
+                    .build();
+            scanFilters = new ArrayList<ScanFilter>();
+            scanFilters.add(scanFilter);
+        }
 
-//        ScanFilter scanFilter = new ScanFilter.Builder()
-//                        .setManufacturerData()
-//                        .setDeviceAddress("")
-//                        .build();
-//        List<ScanFilter> scanFilters = new ArrayList<ScanFilter>();
-//        scanFilters.add(scanFilter);
-//        ScanSettings scanSettings = new ScanSettings.Builder().build();
 
         if (enable) {
             if (Settings.debug) Log.i(TAG, "start scanLeDevice()");
             // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(() -> {
-                if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
-                mScanning = false;
-                leScanner.stopScan(mScanCallback);
-                mHandler.post(() -> iScanListener.onStopScan());
-            }, SCAN_PERIOD);
+            if (!scanWithFilter)
+                mHandler.postDelayed(() -> {
+                    if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
+                    mScanning = false;
+                    leScanner.stopScan(mScanCallback);
+                    mHandler.post(() -> iScanListener.onStopScan());
+                }, SCAN_PERIOD);
 
-            mScanning = true;
-
-            //-------------- TEST START
-            //leScanner.startScan(scanFilters, scanSettings, mScanCallback // с использованием фильтрации
-            //leScanner.startScan(mScanCallback);
-            ScanSettings settings = new ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                    .setReportDelay(0)
-                    .build();
-            leScanner.startScan(null, settings, mScanCallback);
-            mHandler.post(() -> iScanListener.onStartScan());
-            //-------------- TEST STOP
+                leScanner.startScan((scanWithFilter) ? scanFilters : null, scanSettings, mScanCallback);
+                if (!scanWithFilter) mHandler.post(() -> iScanListener.onStartScan());
+                mScanning = true;
 
         } else {
             if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
             mScanning = false;
             leScanner.stopScan(mScanCallback);
-            mHandler.post(() -> iScanListener.onStopScan());
+            if (!scanWithFilter) mHandler.post(() -> iScanListener.onStopScan());
         }
     }
 
