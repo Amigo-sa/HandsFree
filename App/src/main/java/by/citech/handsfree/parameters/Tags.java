@@ -15,7 +15,7 @@ public class Tags {
     public static final String LightControl = PREFIX + "LightControl";
     public static final String AutBMsgAdaptor = PREFIX + "AutBMsgAdaptor";
     public static final String ActivityFsm = PREFIX + "ActivityFsm";
-    public static final String ConnectionFsm = PREFIX + "ConnectionFsm";
+    public static final String ConnectionFsm = PREFIX + "BtFsm";
     public static final String ThreadManager = PREFIX + "ThreadingManager";
     public static final String ConnectionControl = PREFIX + "ConnectionControl";
     public static final String LightHelper = PREFIX + "LightHelper";
@@ -81,7 +81,7 @@ public class Tags {
     public static final String ResourceManager = PREFIX + "ResourceManager";
     public static final String ViewKeeper = PREFIX + "ViewKeeper";
     public static final String HandlerExtended = PREFIX + "HandlerExtended";
-    public static final String CallerFsm = PREFIX + "CallFsm";
+    public static final String CallFsm = PREFIX + "CallFsm";
     public static final String Generator = PREFIX + "DataGenerator";
     public static final String FromDataGenerator = PREFIX + "FromDataGenerator";
     public static final String CircleGenerator = PREFIX + "CircleGenerator";
@@ -90,5 +90,6 @@ public class Tags {
     public static final String LeDataTransmitter = PREFIX + "LeDataTransmitter";
     public static final String NumberedTrafficAnalyzer = PREFIX + "NumberedAnalyzer";
     public static final String RssiReporter = PREFIX + "RssiReporter";
+    public static final String DebugFsm = PREFIX + "DebugFsm";
 
 }

@@ -7,13 +7,7 @@ import by.citech.handsfree.connection.fsm.IConnectionFsmReporter;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 
-import static by.citech.handsfree.application.ThisApplication.getBtConnectedAddr;
-import static by.citech.handsfree.application.ThisApplication.setBtConnectedAddr;
-import static by.citech.handsfree.connection.fsm.EConnectionReport.ChosenDeviceFailedTheCheck;
-import static by.citech.handsfree.connection.fsm.EConnectionReport.ChosenDevicePassedTheCheck;
-import static by.citech.handsfree.connection.fsm.EConnectionReport.ConnectStopped;
-import static by.citech.handsfree.connection.fsm.EConnectionReport.SearchStopped;
-import static by.citech.handsfree.util.BluetoothHelper.isValidAddr;
+import static by.citech.handsfree.application.ThisApp.setBtConnectedAddr;
 
 public class ChosenDeviceControl
     implements IActivityFsmListener, IConnectionFsmReporter {
@@ -52,10 +46,10 @@ public class ChosenDeviceControl
 //                if (isValidAddr(Settings.Bluetooth.btChosenAddr)) {
 //                    if (isValidAddr(getBtConnectedAddr())
 //                            && !Settings.Bluetooth.btChosenAddr.matches(getBtConnectedAddr())) {
-//                        reportToConnectionFsm(getConnectionFsmState(), ReportSearchStop, TAG);
-//                        reportToConnectionFsm(getConnectionFsmState(), ReportConnectStop, TAG);
-//                    } else reportToConnectionFsm(getConnectionFsmState(), ReportChosenDeviceValid, TAG);
-//                } else reportToConnectionFsm(getConnectionFsmState(), ReportChosenDeviceInvalid, TAG);
+//                        reportToBtFsm(getBtFsmState(), ReportSearchStop, TAG);
+//                        reportToBtFsm(getBtFsmState(), ReportConnectStop, TAG);
+//                    } else reportToBtFsm(getBtFsmState(), ReportChosenDeviceValid, TAG);
+//                } else reportToBtFsm(getBtFsmState(), ReportChosenDeviceInvalid, TAG);
 //                break;
             case SettingsA:
                 setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);

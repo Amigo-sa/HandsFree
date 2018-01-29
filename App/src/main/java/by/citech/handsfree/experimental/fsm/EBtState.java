@@ -6,7 +6,7 @@ import by.citech.handsfree.fsm.IFsmState;
 
 import static by.citech.handsfree.util.CollectionHelper.s;
 
-public enum EConnectionState implements IFsmState {
+public enum EBtState implements IFsmState {
 
     StateTurnedOff,
     StateTurnedOn,
@@ -30,10 +30,10 @@ public enum EConnectionState implements IFsmState {
     Failure;
 
     @Override public String getName() {return this.name();}
-    @Override public HashSet<IFsmState> availableFromAny() {return s(Failure, StateTurnedOff);}
     @Override public HashSet<IFsmState> available() {return availableSt(this);}
+    @Override public HashSet<IFsmState> availableFromAny() {return s(Failure, StateTurnedOff);}
 
-    public static HashSet<IFsmState> availableSt(EConnectionState state) {
+    public static HashSet<IFsmState> availableSt(EBtState state) {
         switch (state) {
             case StateTurnedOff:
                 return s(StateTurnedOn);

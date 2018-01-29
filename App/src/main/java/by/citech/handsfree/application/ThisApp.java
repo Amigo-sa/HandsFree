@@ -20,7 +20,7 @@ import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
 
-public class ThisApplication
+public class ThisApp
         extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
 
     private static BluetoothManager bluetoothManager;
@@ -80,7 +80,8 @@ public class ThisApplication
     public static BluetoothManager getBluetoothManager() {return bluetoothManager;}
     public static BluetoothAdapter getBluetoothAdapter() {return bluetoothAdapter;}
     public static String getBtConnectedAddr() {return btConnectedAddr;}
-    public static void setBtConnectedAddr(String btConnectedAddr) {ThisApplication.btConnectedAddr = btConnectedAddr;}
+    public static void setBtConnectedAddr(String btConnectedAddr) {
+        ThisApp.btConnectedAddr = btConnectedAddr;}
     public static void registerBroadcastListener(ConnectAction connectAction) {broadcastReceiverWrapper.registerListener(connectAction);}
 
 }

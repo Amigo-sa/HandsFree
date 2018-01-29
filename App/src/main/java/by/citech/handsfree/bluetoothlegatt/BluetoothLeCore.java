@@ -15,7 +15,7 @@ import android.util.Log;
 import java.util.List;
 import java.util.UUID;
 
-import by.citech.handsfree.application.ThisApplication;
+import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.rwdata.CallbackWriteListener;
 import by.citech.handsfree.bluetoothlegatt.rwdata.Requestable;
 import by.citech.handsfree.data.SampleGattAttributes;
@@ -197,14 +197,14 @@ public class BluetoothLeCore
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         //intent.putExtra(EXTRA_WDATA, wrData);
-        ThisApplication.getAppContext().sendBroadcast(intent);
+        ThisApp.getAppContext().sendBroadcast(intent);
     }
 
     // перегруженный метод broadcastUpdate в который помимо сообщения передаём и характеристику
     // и получаем данные
     private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
-        ThisApplication.getAppContext().sendBroadcast(intent);
+        ThisApp.getAppContext().sendBroadcast(intent);
     }
 
     @Override
@@ -222,14 +222,14 @@ public class BluetoothLeCore
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
         if (mBluetoothManager == null) {
-            mBluetoothManager = ThisApplication.getBluetoothManager();
+            mBluetoothManager = ThisApp.getBluetoothManager();
             if (mBluetoothManager == null) {
                 if (Settings.debug) Log.e(TAG, "Unable to initialize BluetoothManager.");
                 return false;
             }
         }
 
-        mBluetoothAdapter = ThisApplication.getBluetoothAdapter();
+        mBluetoothAdapter = ThisApp.getBluetoothAdapter();
         if (mBluetoothAdapter == null) {
             if (Settings.debug) Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
@@ -277,7 +277,7 @@ public class BluetoothLeCore
 
         //--------------- TEST START
         // mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        mBluetoothGatt = device.connectGatt(ThisApplication.getAppContext(), true, mGattCallback);
+        mBluetoothGatt = device.connectGatt(ThisApp.getAppContext(), true, mGattCallback);
         //--------------- TEST END
 
         mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);

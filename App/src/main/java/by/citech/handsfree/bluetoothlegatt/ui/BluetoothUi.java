@@ -2,7 +2,7 @@ package by.citech.handsfree.bluetoothlegatt.ui;
 
 import android.bluetooth.BluetoothDevice;
 
-import by.citech.handsfree.application.ThisApplication;
+import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
@@ -87,7 +87,7 @@ public class BluetoothUi implements IUiToBtListener,
     }
 
     public BluetoothUi registerListenerBroadcast() {
-        ThisApplication.registerBroadcastListener(this);
+        ThisApp.registerBroadcastListener(this);
         return this;
     }
 

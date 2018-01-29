@@ -2,7 +2,7 @@ package by.citech.handsfree.experimental.fsm;
 
 import by.citech.handsfree.fsm.IFsmReport;
 
-public enum EConnectionReport implements IFsmReport {
+public enum EBtReport implements IFsmReport {
 
     ReportTurningOn,
     ReportTurningOff,

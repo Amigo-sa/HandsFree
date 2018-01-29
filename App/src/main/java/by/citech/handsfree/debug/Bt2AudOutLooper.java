@@ -1,9 +1,8 @@
-package by.citech.handsfree.loopers;
+package by.citech.handsfree.debug;
 
 import android.util.Log;
 
-import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
-import by.citech.handsfree.call.fsm.ICallFsmReporter;
+import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IBuilding;
@@ -11,7 +10,6 @@ import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ICallFsmListener;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
@@ -19,7 +17,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 
 public class Bt2AudOutLooper
-        implements IRxComplex, ICallFsmReporter, ICallFsmListener, ICallFsmListenerRegister, IBuilding {
+        implements IRxComplex, CallFsm.ICallFsmReporter, CallFsm.ICallFsmListener, CallFsm.ICallFsmListenerRegister, IBuilding {
 
     private static final String STAG = Tags.Bt2AudOutLooper;
     private static final boolean debug = Settings.debug;
@@ -55,7 +53,7 @@ public class Bt2AudOutLooper
     @Override
     public void build() {
         if (debug) Log.i(TAG, "build");
-        registerCallerFsmListener(this, TAG);
+        registerCallFsmListener(this, TAG);
         try {
             iStreamer.prepareStream(this);
         } catch (Exception e) {
@@ -66,7 +64,7 @@ public class Bt2AudOutLooper
     @Override
     public void destroy() {
         if (debug) Log.i(TAG, "destroy");
-        unregisterCallerFsmListener(this, TAG);
+        unregisterCallFsmListener(this, TAG);
         stopDebug();
         iStreamer.finishStream();
         iStreamer = null;
@@ -80,10 +78,10 @@ public class Bt2AudOutLooper
     public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-            case StartDebug:
+            case RP_StartDebug:
                 startDebug();
                 break;
-            case StopDebug:
+            case RP_StopDebug:
                 stopDebug();
                 break;
             default:

@@ -1,21 +1,19 @@
-package by.citech.handsfree.loopers;
+package by.citech.handsfree.debug;
 
 import android.util.Log;
 
-import by.citech.handsfree.call.fsm.ICallFsmListener;
-import by.citech.handsfree.call.fsm.ICallFsmReporter;
+import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreading;
 
 public class Bt2BtRecorder
         implements IThreading, IBuilding,
-        ICallFsmListenerRegister, ICallFsmListener, ICallFsmReporter {
+        CallFsm.ICallFsmListenerRegister, CallFsm.ICallFsmListener, CallFsm.ICallFsmReporter {
 
     private static final String STAG = Tags.Bt2BtRecorder;
     private static final boolean debug = Settings.debug;
@@ -88,7 +86,7 @@ public class Bt2BtRecorder
     @Override
     public void build() {
         if (debug) Log.i(TAG, "baseStart");
-        registerCallerFsmListener(this, TAG);
+        registerCallFsmListener(this, TAG);
         isActive = true;
         addRunnable(main);
     }
@@ -96,7 +94,7 @@ public class Bt2BtRecorder
     @Override
     public void destroy() {
         if (debug) Log.i(TAG, "destroy");
-        unregisterCallerFsmListener(this, TAG);
+        unregisterCallFsmListener(this, TAG);
         stopDebug();
         isActive = false;
         dataBuff = null;
@@ -143,10 +141,10 @@ public class Bt2BtRecorder
     public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-            case StartDebug:
+            case RP_StartDebug:
                 startDebug();
                 break;
-            case StopDebug:
+            case RP_StopDebug:
                 stopDebug();
                 break;
             default:
@@ -156,11 +154,11 @@ public class Bt2BtRecorder
 
     private void startDebug() {
         if (debug) Log.i(TAG, "startDebug");
-        switch (getCallerFsmState()) {
-            case DebugPlay:
+        switch (getCallFsmState()) {
+            case ST_DebugPlay:
                 isPlaying = true;
                 break;
-            case DebugRecord:
+            case ST_DebugRecord:
                 isRecording = true;
                 break;
             default:

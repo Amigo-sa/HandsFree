@@ -1,44 +1,30 @@
 package by.citech.handsfree.call.fsm;
 
-public enum ECallReport {
+import by.citech.handsfree.fsm.IFsmReport;
 
-    UnconditionalTransition, // безусловный переход
-    TurningOff, // выключение
-    TurningOn, // включение
+public enum ECallReport implements IFsmReport {
 
-//  SysIntFail,  // BT failed
-//  SysIntDisconnected,  // BT disconnected
-//  SysIntConnected,  // BT connected
-//  SysIntConnectedCompatible,  // compatible BT device connected
-    SysIntConnectedIncompatible, // incompatible BT device connected (обработки нет, вывод в лог)
-    SysIntReady,  // BT ready
-    SysIntError,  // BT error
-//  SysExtFail,  // net failed
-    SysExtReady,  // net ready
-    SysExtError,  // net error
-
-    OutCallCanceledByLocalUser,  //
-    OutConnectionCanceledByLocalUser,  //
-    OutConnectionStartedByLocalUser,  //
-    InCallRejectedByLocalUser,  //
-
-    CallEndedByLocalUser,   // turn off BT + net data exchange
-    InCallAcceptedByLocalUser,  // turn on BT + net data exchange
-
-    OutConnectionConnected,
-    OutCallRejectedByRemoteUser,
-    OutConnectionFailed,
-    OutCallInvalidCoordinates,
-    InCallDetected,
-    InCallCanceledByRemoteUser,
-    InCallFailed,
-
-    OutCallAcceptedByRemoteUser,  // turn on BT + net data exchange
-    CallFailedExt,  // turn off BT + net data exchange
-    CallFailedInt,  // turn off BT + net data exchange (обработки нет, вывод в лог)
-    CallEndedByRemoteUser,  // turn off BT + net data exchange
-
-    StartDebug, //
-    StopDebug, //
+    RP_TurningOff,
+    RP_TurningOn,
+    RP_BtReady,
+    RP_BtError,
+    RP_NetReady,
+    RP_NetError,
+    RP_InConnected,
+    RP_InFailed,
+    RP_InCanceledRemote,
+    RP_InRejectedLocal,
+    RP_InAcceptedLocal,
+    RP_OutStartedLocal,
+    RP_OutInvalidCoordinates,
+    RP_OutFailed,
+    RP_OutCanceledLocal,
+    RP_OutConnected,
+    RP_OutRejectedRemote,
+    RP_OutAcceptedRemote,
+    RP_CallEndedLocal,
+    RP_CallEndedRemote,
+    RP_CallFailedExternally,
+    RP_CallFailedInternally,
 
 }

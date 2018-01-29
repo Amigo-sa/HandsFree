@@ -13,7 +13,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import by.citech.handsfree.application.ThisApplication;
+import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.settings.Settings;
 
 public class LeScanner {
@@ -63,7 +63,7 @@ public class LeScanner {
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
             if (Settings.debug) Log.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
-            bluetoothAdapter = ThisApplication.getBluetoothManager().getAdapter();
+            bluetoothAdapter = ThisApp.getBluetoothManager().getAdapter();
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
         return bluetoothAdapter;

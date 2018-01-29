@@ -34,9 +34,13 @@ abstract public class FsmCore {
         changeMap.put(report, state);
     }
 
+    protected IFsmState fromMap(IFsmReport report) {
+        return changeMap.get(report);
+    }
+
     //--------------------- abstract
 
-    abstract protected boolean implementedProcessFsmReport(IFsmReport report, IFsmState from);
+    abstract protected boolean processFsmReport(IFsmReport report, IFsmState from);
 
     //--------------------- reporter
 
@@ -44,10 +48,10 @@ abstract public class FsmCore {
         return currState;
     }
 
-    synchronized protected boolean processFsmReport(IFsmReport report, IFsmState from, String msg) {
-        if (debug) Timber.w("%s processFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
+    synchronized protected boolean checkFsmReport(IFsmReport report, IFsmState from, String msg) {
+        if (debug) Timber.w("%s checkFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
         if (report == null || from == null || msg == null) {
-            if (debug) Timber.e("%s processFsmReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
+            if (debug) Timber.e("%s checkFsmReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
             return false;
         } else return true;
     }

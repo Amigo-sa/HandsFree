@@ -1,21 +1,19 @@
-package by.citech.handsfree.loopers;
+package by.citech.handsfree.debug;
 
 import android.util.Log;
 
-import by.citech.handsfree.call.fsm.ICallFsmListener;
+import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ICallFsmReporter;
-import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreading;
 
 public class Bt2BtLooper
         implements IThreading, IBuilding,
-        ICallFsmReporter, ICallFsmListenerRegister, ICallFsmListener {
+        CallFsm.ICallFsmReporter, CallFsm.ICallFsmListenerRegister, CallFsm.ICallFsmListener {
 
     private static final String STAG = Tags.Bt2BtLooper;
     private static final boolean debug = Settings.debug;
@@ -73,7 +71,7 @@ public class Bt2BtLooper
     @Override
     public void build() {
         if (debug) Log.i(TAG, "build");
-        registerCallerFsmListener(this, TAG);
+        registerCallFsmListener(this, TAG);
         isRunning = false;
         isActive = true;
         addRunnable(looping);
@@ -82,7 +80,7 @@ public class Bt2BtLooper
     @Override
     public void destroy() {
         if (debug) Log.i(TAG, "destroy");
-        unregisterCallerFsmListener(this, TAG);
+        unregisterCallFsmListener(this, TAG);
         stopDebug();
         isActive = false;
         dataBuff = null;
@@ -93,10 +91,10 @@ public class Bt2BtLooper
     public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-            case StartDebug:
+            case RP_StartDebug:
                 startDebug();
                 break;
-            case StopDebug:
+            case RP_StopDebug:
                 stopDebug();
                 break;
             default:

@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
+import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ECallReport;
@@ -19,7 +19,6 @@ import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.IOnInfoUpdateListen
 import by.citech.handsfree.statistic.NumberedTrafficInfo;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IGetView;
-import by.citech.handsfree.call.fsm.ICallFsmListener;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
@@ -37,12 +36,12 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
 import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
 import static by.citech.handsfree.contact.ContactHelper.setContactInfo;
 import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
-import static by.citech.handsfree.call.fsm.ECallState.ReadyToWork;
+import static by.citech.handsfree.call.fsm.ECallState.ST_Ready;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallActivityViewManager
-        implements IOnInfoUpdateListener, IViewKeeper, ICallFsmListener,
-        ICallFsmListenerRegister, RssiReporter.IOnRssiUpdateListener {
+        implements IOnInfoUpdateListener, IViewKeeper, CallFsm.ICallFsmListener,
+        CallFsm.ICallFsmListenerRegister, RssiReporter.IOnRssiUpdateListener {
 
     private static final String STAG = Tags.ViewManager;
     private static final boolean debug = Settings.debug;
@@ -273,88 +272,88 @@ public class CallActivityViewManager
     private void processNormal(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "processNormal");
         switch (why) {
-            case SysExtError:
-            case SysIntError:
-            case SysIntConnectedIncompatible:
+            case RP_NetError:
+            case RP_BtError:
+            case RP_BtConnectedIncompatible:
                 disableGray(getBtnGreen(), "ERROR");
                 disableGray(getBtnRed(), "ERROR");
                 break;
-            case SysExtReady:
-            case SysIntReady:
-                if (to == ReadyToWork) {
+            case RP_NetReady:
+            case RP_BtReady:
+                if (to == ST_Ready) {
                     enableBtnCall(getBtnGreen(), "CALL");
                     disableGray(getBtnRed(), "IDLE");
                 }
                 break;
-            case CallFailedExt:
-            case CallFailedInt:
+            case RP_CallFailedExternally:
+            case RP_CallFailedInternally:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "FAILED");
                 break;
-            case CallEndedByRemoteUser:
+            case RP_CallEndedRemote:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "ENDED");
                 break;
-            case OutConnectionConnected:
+            case RP_OutConnected:
                 enableBtnCall(getBtnGreen(), "CALLING...");
                 enableBtnCall(getBtnRed(), "CANCEL");
                 break;
-            case OutCallAcceptedByRemoteUser:
+            case RP_OutAcceptedRemote:
                 disableGray(getBtnGreen(), "ON CALL");
                 enableBtnCall(getBtnRed(), "END CALL");
                 stopCallAnim();
                 break;
-            case OutCallRejectedByRemoteUser:
+            case RP_OutRejectedRemote:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "BUSY");
                 stopCallAnim();
                 break;
-            case OutConnectionFailed:
+            case RP_OutFailed:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "OFFLINE");
                 stopCallAnim();
                 break;
-            case OutCallInvalidCoordinates:
+            case RP_OutInvalidCoordinates:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "BAD IP");
                 stopCallAnim();
                 break;
-            case InCallDetected:
+            case RP_InConnected:
                 enableBtnCall(getBtnGreen(), "INCOMING...");
                 enableBtnCall(getBtnRed(), "REJECT");
                 startCallAnim();
                 break;
-            case InCallCanceledByRemoteUser:
+            case RP_InCanceledRemote:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "CANCELED");
                 stopCallAnim();
                 break;
-            case InCallFailed:
+            case RP_InFailed:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "INCOME FAIL");
                 stopCallAnim();
                 break;
-            case OutConnectionStartedByLocalUser:
+            case RP_OutStartedLocal:
                 disableGray(getBtnGreen(), "CALLING...");
                 enableBtnCall(getBtnRed(), "CANCEL");
                 startCallAnim();
                 break;
-            case CallEndedByLocalUser:
+            case RP_CallEndedLocal:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "ENDED");
                 break;
-            case OutCallCanceledByLocalUser:
-            case OutConnectionCanceledByLocalUser:
+            case RP_OutCanceledLocal:
+            case RP_OutConnectionCanceledLocal:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "CANCELED");
                 stopCallAnim();
                 break;
-            case InCallRejectedByLocalUser:
+            case RP_InRejectedLocal:
                 enableBtnCall(getBtnGreen(), "CALL");
                 disableGray(getBtnRed(), "REJECTED");
                 stopCallAnim();
                 break;
-            case InCallAcceptedByLocalUser:
+            case RP_InAcceptedLocal:
                 disableGray(getBtnGreen(), "ON CALL");
                 enableBtnCall(getBtnRed(), "END CALL");
                 stopCallAnim();
@@ -367,7 +366,7 @@ public class CallActivityViewManager
     private void processAbnormal(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "processAbnormal");
         switch (why) {
-            case StartDebug:
+            case RP_StartDebug:
                 switch (opMode) {
                     case DataGen2Bt:
                     case Bt2AudOut:
@@ -379,11 +378,11 @@ public class CallActivityViewManager
                         break;
                     case Record:
                         switch (to) {
-                            case DebugPlay:
+                            case ST_DebugPlay:
                                 disableGray(getBtnGreen(), "PLAYING");
                                 enableBtnCall(getBtnRed(), "STOP");
                                 break;
-                            case DebugRecord:
+                            case ST_DebugRecord:
                                 disableGray(getBtnGreen(), "RECORDING");
                                 enableBtnCall(getBtnRed(), "STOP");
                                 break;
@@ -397,7 +396,7 @@ public class CallActivityViewManager
                         break;
                 }
                 break;
-            case StopDebug:
+            case RP_StopDebug:
                 switch (opMode) {
                     case DataGen2Bt:
                     case Bt2AudOut:

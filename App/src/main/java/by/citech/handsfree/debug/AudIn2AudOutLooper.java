@@ -1,12 +1,10 @@
-package by.citech.handsfree.loopers;
+package by.citech.handsfree.debug;
 
 import android.util.Log;
 
 import java.util.Arrays;
 
-import by.citech.handsfree.call.fsm.ICallFsmListener;
-import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
-import by.citech.handsfree.call.fsm.ICallFsmReporter;
+import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IBuilding;
@@ -22,8 +20,8 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreading;
 
 public class AudIn2AudOutLooper
-        implements IRxComplex, IThreading, ICallFsmListenerRegister,
-        ICallFsmListener, ICallFsmReporter, IBuilding {
+        implements IRxComplex, IThreading, CallFsm.ICallFsmListenerRegister,
+        CallFsm.ICallFsmListener, CallFsm.ICallFsmReporter, IBuilding {
 
     private static final String STAG = Tags.AudIn2AudOutLooper;
     private static final boolean debug = Settings.debug;
@@ -71,7 +69,7 @@ public class AudIn2AudOutLooper
     @Override
     public void build() {
         if (debug) Log.i(TAG, "build");
-        registerCallerFsmListener(this, TAG);
+        registerCallFsmListener(this, TAG);
         try {
             toCtrl.prepareStream(null);
             fromCtrl.prepareStream(this);
@@ -83,7 +81,7 @@ public class AudIn2AudOutLooper
     @Override
     public void destroy() {
         if (debug) Log.i(TAG, "destroy");
-        unregisterCallerFsmListener(this, TAG);
+        unregisterCallFsmListener(this, TAG);
         stopDebug();
         fromCtrl.finishStream();
         toCtrl.finishStream();
@@ -100,10 +98,10 @@ public class AudIn2AudOutLooper
     public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-            case StartDebug:
+            case RP_StartDebug:
                 startDebug();
                 break;
-            case StopDebug:
+            case RP_StopDebug:
                 stopDebug();
                 break;
             default:

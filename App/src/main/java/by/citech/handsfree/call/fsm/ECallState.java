@@ -2,64 +2,52 @@ package by.citech.handsfree.call.fsm;
 
 import java.util.HashSet;
 
+import by.citech.handsfree.fsm.IFsmState;
+
 import static by.citech.handsfree.util.CollectionHelper.s;
 
-public enum ECallState {
+public enum ECallState implements IFsmState {
 
-    TurnedOff {
-        @Override public HashSet<ECallState> available() {return s(TurnedOn);}
-    },
-    TurnedOn {
-        @Override public HashSet<ECallState> available() {return s(Failure, DebugLoop, DebugRecord, PhaseReadyExt, PhaseReadyInt);}
-    },
-    PhaseZero {
-        @Override public HashSet<ECallState> available() {return s(Failure, DebugLoop, DebugRecord, PhaseReadyExt, PhaseReadyInt);}
-    },
-    PhaseReadyExt {
-        @Override public HashSet<ECallState> available() {return s(Failure, PhaseZero, PhaseReadyInt, ReadyToWork);}
-    },
-    PhaseReadyInt {
-        @Override public HashSet<ECallState> available() {return s(Failure, PhaseZero, PhaseReadyExt, ReadyToWork);}
-    },
-    ReadyToWork {
-        @Override public HashSet<ECallState> available() {return s(Failure, PhaseReadyExt, PhaseReadyInt, OutStarted, InDetected);}
-    },
-    OutStarted {
-        @Override public HashSet<ECallState> available() {return s(Failure, Error, ReadyToWork, PhaseReadyExt, PhaseReadyInt, OutConnected);}
-    },
-    OutConnected {
-        @Override public HashSet<ECallState> available() {return s(Failure, Error, ReadyToWork, PhaseReadyExt, PhaseReadyInt, Call);}
-    },
-    InDetected {
-        @Override public HashSet<ECallState> available() {return s(Failure, Error, ReadyToWork, PhaseReadyExt, PhaseReadyInt, Call);}
-    },
-    Call {
-        @Override public HashSet<ECallState> available() {return s(Failure, Error, ReadyToWork, PhaseReadyExt, PhaseReadyInt);}
-    },
-    Error {
-        @Override public HashSet<ECallState> available() {return s(ReadyToWork);}
-    },
-    Failure {
-        @Override public HashSet<ECallState> available() {return s(PhaseZero);}
-    },
-
-    //--------------------- debug
-
-    DebugRecord {
-        @Override public HashSet<ECallState> available() {return s(DebugRecorded);}
-    },
-    DebugRecorded {
-        @Override public HashSet<ECallState> available() {return s(DebugPlay);}
-    },
-    DebugPlay {
-        @Override public HashSet<ECallState> available() {return s(DebugRecorded);}
-    },
-    DebugLoop {
-        @Override public HashSet<ECallState> available() {return s(PhaseZero);}
-    };
+    ST_TurnedOff,
+    ST_TurnedOn,
+    ST_NetReady,
+    ST_BtReady,
+    ST_Ready,
+    ST_OutStarted,
+    ST_OutConnected,
+    ST_InConnected,
+    ST_Call,
+    ST_Failure;
 
     public String getName() {return this.name();}
-    public abstract HashSet<ECallState> available();
-    public static HashSet<ECallState> availableFromAny() {return s(TurnedOff);}
+    @Override public HashSet<IFsmState> available(){return availableSt(this);};
+    @Override public HashSet<IFsmState> availableFromAny() {return s(ST_TurnedOff, ST_Failure);}
+
+    public static HashSet<IFsmState> availableSt(ECallState state) {
+        switch (state) {
+            case ST_TurnedOff:
+                return s(ST_TurnedOn);
+            case ST_TurnedOn:
+                return s(ST_NetReady, ST_BtReady);
+            case ST_NetReady:
+                return s(ST_TurnedOn, ST_BtReady, ST_Ready);
+            case ST_BtReady:
+                return s(ST_TurnedOn, ST_NetReady, ST_Ready);
+            case ST_Ready:
+                return s(ST_NetReady, ST_BtReady, ST_OutStarted, ST_InConnected);
+            case ST_OutStarted:
+                return s(ST_Ready, ST_NetReady, ST_BtReady, ST_OutConnected);
+            case ST_OutConnected:
+                return s(ST_Ready, ST_NetReady, ST_BtReady, ST_Call);
+            case ST_InConnected:
+                return s(ST_Ready, ST_NetReady, ST_BtReady, ST_Call);
+            case ST_Call:
+                return s(ST_Ready, ST_NetReady, ST_BtReady);
+            case ST_Failure:
+                return s(ST_TurnedOn);
+            default:
+                return s();
+        }
+    }
 
 }

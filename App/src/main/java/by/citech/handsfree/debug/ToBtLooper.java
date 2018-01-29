@@ -1,11 +1,10 @@
-package by.citech.handsfree.loopers;
+package by.citech.handsfree.debug;
 
 import android.util.Log;
 
 import java.util.Arrays;
 
-import by.citech.handsfree.call.fsm.ICallFsmListener;
-import by.citech.handsfree.call.fsm.ICallFsmReporter;
+import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IBuilding;
@@ -14,7 +13,6 @@ import by.citech.handsfree.exchange.producers.FromGenerator;
 import by.citech.handsfree.generator.EDataType;
 import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ICallFsmListenerRegister;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.data.StorageData;
@@ -28,7 +26,7 @@ import by.citech.handsfree.threading.IThreading;
 
 public class ToBtLooper
         implements IRxComplex, IThreading, IBuilding,
-        ICallFsmReporter, ICallFsmListener, ICallFsmListenerRegister {
+        CallFsm.ICallFsmReporter, CallFsm.ICallFsmListener, CallFsm.ICallFsmListenerRegister {
 
     private static final String STAG = Tags.ToBtLooper;
     private static final boolean debug = Settings.debug;
@@ -75,7 +73,7 @@ public class ToBtLooper
     @Override
     public void build() {
         if (debug) Log.i(TAG, "build");
-        registerCallerFsmListener(this, TAG);
+        registerCallFsmListener(this, TAG);
         try {
             source.prepareStream(this);
             destination.prepareStream(null);
@@ -87,7 +85,7 @@ public class ToBtLooper
     @Override
     public void destroy() {
         if (debug) Log.i(TAG, "destroy");
-        unregisterCallerFsmListener(this, TAG);
+        unregisterCallFsmListener(this, TAG);
         stopDebug();
         destination.finishStream();
         source.finishStream();
@@ -102,10 +100,10 @@ public class ToBtLooper
     public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
         if (debug) Log.i(TAG, "onCallerStateChange");
         switch (why) {
-            case StartDebug:
+            case RP_StartDebug:
                 startDebug();
                 break;
-            case StopDebug:
+            case RP_StopDebug:
                 stopDebug();
                 break;
             default:
