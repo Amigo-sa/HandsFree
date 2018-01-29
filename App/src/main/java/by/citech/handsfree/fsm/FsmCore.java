@@ -1,6 +1,7 @@
 package by.citech.handsfree.fsm;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -13,17 +14,24 @@ abstract public class FsmCore {
     protected static final boolean debug = Settings.debug;
     private final String fsmName;
 
-    protected Map<IFsmReport, IFsmState> map;
+    protected Map<IFsmReport, IFsmState> changeMap;
     protected Collection<IFsmListener> listeners;
     protected IFsmState prevState, currState;
     protected IFsmReport prevReport, currReport;
 
     {
+        changeMap = new HashMap<>();
         listeners = new ConcurrentLinkedQueue<>();
     }
 
     public FsmCore(String fsmName) {
         this.fsmName = fsmName;
+    }
+
+    //--------------------- transitions map
+
+    protected void toMap(IFsmReport report, IFsmState state) {
+        changeMap.put(report, state);
     }
 
     //--------------------- abstract

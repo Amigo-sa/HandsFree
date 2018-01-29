@@ -2,8 +2,6 @@ package by.citech.handsfree.experimental.fsm;
 
 import android.support.annotation.CallSuper;
 
-import java.util.HashMap;
-
 import by.citech.handsfree.fsm.FsmCore;
 import by.citech.handsfree.fsm.IFsmListener;
 import by.citech.handsfree.fsm.IFsmReport;
@@ -56,44 +54,40 @@ import static by.citech.handsfree.experimental.fsm.EConnectionState.StateTurnedO
 
 public class ConnectionFsm extends FsmCore {
 
-    //--------------------- preparation
-
-    {
-        map = new HashMap<>();
-
-        map.put(ReportTurningOn,               StateTurnedOn);
-        map.put(ReportTurningOff,              StateTurnedOff);
-        map.put(ReportBtLeNotSupported,        StateBtPrepareFail);
-        map.put(ReportBtNotSupported,          StateBtPrepareFail);
-        map.put(ReportBtPrepared,              StateBtPrepared);
-        map.put(ReportEnable,                  StateBtEnabling);
-        map.put(ReportDisable,                 StateBtDisabled);
-        map.put(ReportBtEnabled,               StateBtEnabled);
-        map.put(ReportBtDisabled,              StateBtDisabled);
-        map.put(ReportChosenValid,             StateDeviceChosen);
-        map.put(ReportChosenInvalid,           StateDeviceNotChosen);
-        map.put(ReportSearchStart,             StateSearching);
-        map.put(ReportSearchStop,              StateDeviceChosen);
-        map.put(ReportBtFound,                 StateFound);
-        map.put(ReportConnect,                 StateConnecting);
-        map.put(ReportDisconnect,              StateDisconnecting);
-        map.put(ReportBtConnectedCompatible,   StateConnected);
-        map.put(ReportBtConnectedIncompatible, StateIncompatible);
-        map.put(ReportBtDisconnected,          StateDisconnected);
-        map.put(ReportExchangeEnable,          StateExchangeEnabling);
-        map.put(ReportBtExchangeEnabled,       StateExchangeEnabled);
-        map.put(ReportExchangeDisable,         StateExchangeDisabling);
-        map.put(ReportBtExchangeDisabled,      StateConnected);
-
-        currState = StateTurnedOff;
-        processReport(ReportTurningOn, StateTurnedOff, Tags.ConnectionFsm);
-    }
-
     //--------------------- singleton
 
     private static volatile ConnectionFsm instance = null;
 
-    private ConnectionFsm() {super(Tags.ConnectionFsm);}
+    private ConnectionFsm() {
+        super(Tags.ConnectionFsm);
+
+        toMap(ReportTurningOn,               StateTurnedOn);
+        toMap(ReportTurningOff,              StateTurnedOff);
+        toMap(ReportBtLeNotSupported,        StateBtPrepareFail);
+        toMap(ReportBtNotSupported,          StateBtPrepareFail);
+        toMap(ReportBtPrepared,              StateBtPrepared);
+        toMap(ReportEnable,                  StateBtEnabling);
+        toMap(ReportDisable,                 StateBtDisabled);
+        toMap(ReportBtEnabled,               StateBtEnabled);
+        toMap(ReportBtDisabled,              StateBtDisabled);
+        toMap(ReportChosenValid,             StateDeviceChosen);
+        toMap(ReportChosenInvalid,           StateDeviceNotChosen);
+        toMap(ReportSearchStart,             StateSearching);
+        toMap(ReportSearchStop,              StateDeviceChosen);
+        toMap(ReportBtFound,                 StateFound);
+        toMap(ReportConnect,                 StateConnecting);
+        toMap(ReportDisconnect,              StateDisconnecting);
+        toMap(ReportBtConnectedCompatible,   StateConnected);
+        toMap(ReportBtConnectedIncompatible, StateIncompatible);
+        toMap(ReportBtDisconnected,          StateDisconnected);
+        toMap(ReportExchangeEnable,          StateExchangeEnabling);
+        toMap(ReportBtExchangeEnabled,       StateExchangeEnabled);
+        toMap(ReportExchangeDisable,         StateExchangeDisabling);
+        toMap(ReportBtExchangeDisabled,      StateConnected);
+
+        currState = StateTurnedOff;
+        processReport(ReportTurningOn, StateTurnedOff, Tags.ConnectionFsm);
+    }
 
     public static ConnectionFsm getInstance() {
         if (instance == null) {
@@ -111,9 +105,9 @@ public class ConnectionFsm extends FsmCore {
     //--------------------- processing
 
     @Override
-    synchronized protected boolean implementedProcessFsmReport(IFsmReport report, IFsmState from) {
-        if (debug) Timber.i("processConnectionReport");
-        return true;
+    synchronized protected boolean implementedProcessFsmReport(IFsmReport why, IFsmState from) {
+        if (debug) Timber.i("implementedProcessFsmReport");
+        return processFsmStateChange(why, from, changeMap.get(why));
     }
 
     //--------------------- interfaces
