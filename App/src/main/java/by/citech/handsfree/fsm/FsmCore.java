@@ -1,6 +1,7 @@
 package by.citech.handsfree.fsm;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.parameters.StatusMessages;
@@ -12,6 +13,7 @@ abstract public class FsmCore {
     protected static final boolean debug = Settings.debug;
     private final String fsmName;
 
+    protected Map<IFsmReport, IFsmState> map;
     protected Collection<IFsmListener> listeners;
     protected IFsmState prevState, currState;
     protected IFsmReport prevReport, currReport;

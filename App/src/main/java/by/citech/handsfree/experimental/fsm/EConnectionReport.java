@@ -4,52 +4,28 @@ import by.citech.handsfree.fsm.IFsmReport;
 
 public enum EConnectionReport implements IFsmReport {
 
-    ReportUnconditional,
-
-    ReportTurningOff,
     ReportTurningOn,
-
+    ReportTurningOff,
     ReportBtLeNotSupported,
     ReportBtNotSupported,
     ReportBtPrepared,
-
-    ReportEnableStart,
-    ReportBtEnabling,
+    ReportEnable,
+    ReportDisable,
     ReportBtEnabled,
-    ReportEnableStop,
-
-    ReportDisableStart,
-    ReportBtDisabling,
     ReportBtDisabled,
-    ReportDisableStop,
-
-    ReportSearchStart,
-    ReportBtDeviceSearching,
-    ReportBtFound,
-    ReportSearchStop,
-
-    ReportConnectStart,
-    ReportBtConnecting,
-    ReportBtConnectedCompatible,
-    ReportBtConnectedIncompatible,
-    ReportConnectStop,
-
-    ReportDisconnectStart,
-    ReportBtDisconnecting,
-    ReportBtDisconnected,
-    ReportDisconnectStop,
-
-    ReportNotificationEnableStart,
-    ReportBtNotificationEnabling,
-    ReportBtNotificationEnabled,
-    ReportNotificationEnableStop,
-
-    ReportNotificationDisableStart,
-    ReportBtNotificationDisabling,
-    ReportBtNotificationDisabled,
-    ReportNotificationDisableStop,
-
     ReportChosenValid,
     ReportChosenInvalid,
+    ReportSearchStart,
+    ReportSearchStop,
+    ReportBtFound,
+    ReportConnect,
+    ReportDisconnect,
+    ReportBtConnectedCompatible,
+    ReportBtConnectedIncompatible,
+    ReportBtDisconnected,
+    ReportExchangeEnable,
+    ReportBtExchangeEnabled,
+    ReportExchangeDisable,
+    ReportBtExchangeDisabled,
 
 }

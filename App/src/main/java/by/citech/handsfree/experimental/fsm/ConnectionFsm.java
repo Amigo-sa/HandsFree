@@ -2,6 +2,8 @@ package by.citech.handsfree.experimental.fsm;
 
 import android.support.annotation.CallSuper;
 
+import java.util.HashMap;
+
 import by.citech.handsfree.fsm.FsmCore;
 import by.citech.handsfree.fsm.IFsmListener;
 import by.citech.handsfree.fsm.IFsmReport;
@@ -11,50 +13,43 @@ import timber.log.Timber;
 
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtConnectedCompatible;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtConnectedIncompatible;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtConnecting;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtDisabled;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtDisabling;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtDisconnected;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtDisconnecting;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtEnabled;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtEnabling;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtFound;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtLeNotSupported;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtDeviceSearching;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtNotSupported;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtNotificationDisabled;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtNotificationDisabling;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtNotificationEnabled;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtNotificationEnabling;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtExchangeDisabled;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtExchangeEnabled;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportBtPrepared;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportChosenInvalid;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportChosenValid;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportConnectStart;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportConnectStop;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisableStart;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisableStop;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisconnectStop;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportEnableStart;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportEnableStop;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportNotificationDisableStart;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportNotificationDisableStop;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportNotificationEnableStart;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportNotificationEnableStop;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportConnect;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportDisconnect;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportEnable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportExchangeDisable;
+import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportExchangeEnable;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportSearchStart;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportSearchStop;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportTurningOff;
 import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportTurningOn;
-import static by.citech.handsfree.experimental.fsm.EConnectionReport.ReportUnconditional;
-import static by.citech.handsfree.experimental.fsm.EConnectionState.StateBtNotSupported;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateBtDisabled;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateBtEnabled;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateBtEnabling;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateBtPrepareFail;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateBtPrepared;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateConnected;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateConnecting;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateDeviceChosen;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateDeviceNotChosen;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateDisconnected;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateDisconnecting;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateExchangeDisabling;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateExchangeEnabled;
+import static by.citech.handsfree.experimental.fsm.EConnectionState.StateExchangeEnabling;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateFound;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateIncompatible;
-import static by.citech.handsfree.experimental.fsm.EConnectionState.StateNotFound;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateSearching;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateTurnedOff;
 import static by.citech.handsfree.experimental.fsm.EConnectionState.StateTurnedOn;
@@ -64,6 +59,32 @@ public class ConnectionFsm extends FsmCore {
     //--------------------- preparation
 
     {
+        map = new HashMap<>();
+
+        map.put(ReportTurningOn,               StateTurnedOn);
+        map.put(ReportTurningOff,              StateTurnedOff);
+        map.put(ReportBtLeNotSupported,        StateBtPrepareFail);
+        map.put(ReportBtNotSupported,          StateBtPrepareFail);
+        map.put(ReportBtPrepared,              StateBtPrepared);
+        map.put(ReportEnable,                  StateBtEnabling);
+        map.put(ReportDisable,                 StateBtDisabled);
+        map.put(ReportBtEnabled,               StateBtEnabled);
+        map.put(ReportBtDisabled,              StateBtDisabled);
+        map.put(ReportChosenValid,             StateDeviceChosen);
+        map.put(ReportChosenInvalid,           StateDeviceNotChosen);
+        map.put(ReportSearchStart,             StateSearching);
+        map.put(ReportSearchStop,              StateDeviceChosen);
+        map.put(ReportBtFound,                 StateFound);
+        map.put(ReportConnect,                 StateConnecting);
+        map.put(ReportDisconnect,              StateDisconnecting);
+        map.put(ReportBtConnectedCompatible,   StateConnected);
+        map.put(ReportBtConnectedIncompatible, StateIncompatible);
+        map.put(ReportBtDisconnected,          StateDisconnected);
+        map.put(ReportExchangeEnable,          StateExchangeEnabling);
+        map.put(ReportBtExchangeEnabled,       StateExchangeEnabled);
+        map.put(ReportExchangeDisable,         StateExchangeDisabling);
+        map.put(ReportBtExchangeDisabled,      StateConnected);
+
         currState = StateTurnedOff;
         processReport(ReportTurningOn, StateTurnedOff, Tags.ConnectionFsm);
     }
@@ -92,71 +113,7 @@ public class ConnectionFsm extends FsmCore {
     @Override
     synchronized protected boolean implementedProcessFsmReport(IFsmReport report, IFsmState from) {
         if (debug) Timber.i("processConnectionReport");
-
-        if (report == ReportTurningOn)
-            return processFsmStateChange(report, from, StateTurnedOn);
-        if (report == ReportTurningOff)
-            return processFsmStateChange(report, from, StateTurnedOff);
-
-        if (report == ReportBtNotSupported
-                || report == ReportBtLeNotSupported)
-            return processFsmStateChange(report, from, StateBtNotSupported);
-        if (report == ReportBtPrepared)
-            return processFsmStateChange(report, from, StateBtPrepared);
-
-        if (report == ReportChosenValid)
-            return processFsmStateChange(report, from, StateDeviceChosen);
-        if (report == ReportChosenInvalid)
-            return processFsmStateChange(report, from, StateDeviceNotChosen);
-
-        if (report == ReportSearchStart)
-            return processFsmStateChange(report, from, StateSearching);
-        if (report == ReportSearchStop)
-            return processFsmStateChange(report, from, StateNotFound);
-        if (report == ReportBtFound)
-            return processFsmStateChange(report, from, StateFound);
-
-        if (report == ReportConnectStart)
-            return processFsmStateChange(report, from, StateConnecting);
-        if (report == ReportBtConnectedIncompatible)
-            return processFsmStateChange(report, from, StateIncompatible);
-        if (report == ReportBtConnectedCompatible)
-            return processFsmStateChange(report, from, StateConnected);
-
-        if (report == ReportBtDisconnected
-                || report == ReportConnectStop)
-            return processFsmStateChange(report, from, StateDisconnected);
-
-        if (report == ReportUnconditional
-                || report == ReportBtConnecting
-                || report == ReportBtDeviceSearching
-
-                || report == ReportEnableStart
-                || report == ReportBtEnabling
-                || report == ReportBtEnabled
-                || report == ReportEnableStop
-
-                || report == ReportDisableStart
-                || report == ReportBtDisabling
-                || report == ReportBtDisabled
-                || report == ReportDisableStop
-
-                || report == ReportBtDisconnecting
-                || report == ReportDisconnectStop
-
-                || report == ReportNotificationEnableStart
-                || report == ReportBtNotificationEnabling
-                || report == ReportBtNotificationEnabled
-                || report == ReportNotificationEnableStop
-
-                || report == ReportNotificationDisableStart
-                || report == ReportBtNotificationDisabling
-                || report == ReportBtNotificationDisabled
-                || report == ReportNotificationDisableStop
-                )
-            return true;
-        else
-            return true;
+        return true;
     }
 
     //--------------------- interfaces
