@@ -307,4 +307,54 @@ public class DialogProcessor {
         dialog.show();
     }
 
+
+//    private void dialogDelete(final Map<EDialogState, Runnable> toDoMap) {
+//        if (debug) Log.i(TAG, "dialogDelete");
+//
+//        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+//                .setOnDismissListener((dialog) -> {
+//                    if (debug) Log.i(TAG, "dialogDelete onDismiss");
+//                    switch (currentState) {
+//                        case Cancel:
+//                            if (debug) Log.i(TAG, "dialogDelete cancel");
+//                            toDoMap.get(EDialogState.Cancel).run();
+//                            break;
+//                        case Proceed:
+//                            if (debug) Log.i(TAG, "dialogDelete delete");
+//                            toDoMap.get(EDialogState.Proceed).run();
+//                            break;
+//                        case Idle:
+//                            if (debug) Log.i(TAG, "dialogDelete just dismiss");
+//                            toDoMap.get(EDialogState.Cancel).run();
+//                            break;
+//                        default:
+//                            Log.e(TAG, "dialogDelete currentState default");
+//                            break;
+//                    }
+//                    onDialogEnd();
+//                });
+//
+//        AlertDialog dialog = builder.create();
+//        currentDialog = dialog;
+//
+//        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_proceed, null);
+//
+//        dialogView.findViewById(R.id.btnProceed).setOnClickListener((v) -> {
+//            currentState = EDialogState.Proceed;
+//            dialog.dismiss();
+//        });
+//
+//        dialogView.findViewById(R.id.btnCancel).setOnClickListener((v) -> {
+//            currentState = EDialogState.Cancel;
+//            dialog.dismiss();
+//        });
+//
+//        dialog.setView(dialogView);
+//        dialog.show();
+//    }
+
+
+
+
+
 }

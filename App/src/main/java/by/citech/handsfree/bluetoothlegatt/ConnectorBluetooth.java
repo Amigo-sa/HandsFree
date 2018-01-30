@@ -291,6 +291,7 @@ public class ConnectorBluetooth
         bleController.setCommand(characteristicDisplayOn).execute();
         if (characteristics.getNotifyCharacteristic() != null && characteristics.getWriteCharacteristic() != null) {
             toBtFsm(RP_BtConnectedCompatible);
+            PreferencesProcessor.saveBtChosenAddrPref(mBTDevice.getAddress());
         } else
             toBtFsm(RP_BtConnectedIncompatible);
     }
@@ -387,6 +388,7 @@ public class ConnectorBluetooth
     //--------------------- ICallFsmListener
 
     private void searchDevice() {
+
         leScanner.setDeviceAddress(PreferencesProcessor.getBtChosenAddrPref());
         startScan();
     }
@@ -430,12 +432,16 @@ public class ConnectorBluetooth
                     toBtFsm(RP_BtDisabled, to);
                 break;
 
+            case RP_BtEnabled:
+                if (BluetoothAdapter.checkBluetoothAddress(PreferencesProcessor.getBtChosenAddrPref()))
+                    toBtFsm(RP_BtChosenValid, to);
+                else
+                    toBtFsm(RP_BtChosenInvalid, to);
+                break;
+
             case RP_SearchStart:
                 if (Settings.debug) Timber.i(TAG, "RP_SearchStart");
-                if (scanWithFilter)
-                    searchDevice();
-                else
-                    startScan();
+                searchDevice();
                 break;
 
             case RP_Connect:
