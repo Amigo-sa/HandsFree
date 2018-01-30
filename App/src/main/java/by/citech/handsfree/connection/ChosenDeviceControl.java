@@ -1,8 +1,8 @@
 package by.citech.handsfree.connection;
 
+import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.activity.fsm.EActivityReport;
 import by.citech.handsfree.activity.fsm.EActivityState;
-import by.citech.handsfree.activity.fsm.IActivityFsmListener;
 import by.citech.handsfree.connection.fsm.IConnectionFsmReporter;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
@@ -10,7 +10,7 @@ import by.citech.handsfree.settings.Settings;
 import static by.citech.handsfree.application.ThisApp.setBtConnectedAddr;
 
 public class ChosenDeviceControl
-    implements IActivityFsmListener, IConnectionFsmReporter {
+    implements ActivityFsm.IActivityFsmListener, IConnectionFsmReporter {
 
     private static final String STAG = Tags.ChosenDeviceControl;
     private static final boolean debug = Settings.debug;

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import by.citech.handsfree.activity.fsm.ActivityFsm;
-import by.citech.handsfree.activity.fsm.IActivityFsmListenerRegister;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.connection.ChosenDeviceControl;
 import by.citech.handsfree.connection.ConnectionControl;
@@ -21,7 +20,7 @@ import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
 
 public class ThisApp
-        extends Application implements IConnectionFsmListenerRegister, IActivityFsmListenerRegister {
+        extends Application implements IConnectionFsmListenerRegister, ActivityFsm.IActivityFsmListenerRegister {
 
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;

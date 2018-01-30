@@ -1,5 +1,7 @@
 package by.citech.handsfree.call.fsm;
 
+import android.support.annotation.CallSuper;
+
 import java.util.EnumMap;
 
 import by.citech.handsfree.fsm.FsmCore;
@@ -82,27 +84,25 @@ public class CallFsm extends FsmCore<ECallReport, ECallState> {
     //--------------------- interfaces
 
     public interface ICallFsmReporter {
-
+        @CallSuper
         default ECallState getCallFsmState() {
             return getInstance().getFsmCurrentState();
         }
-
-        default boolean reportToCallFsm(ECallReport whatHappened, ECallState fromWhichState, String fromWho) {
-            return getInstance().processReport(whatHappened, fromWhichState, fromWho);
+        @CallSuper
+        default boolean reportToCallFsm(ECallReport report, ECallState from, String message) {
+            return getInstance().processReport(report, from, message);
         }
-
     }
 
     public interface ICallFsmListenerRegister {
-
+        @CallSuper
         default boolean registerCallFsmListener(ICallFsmListener listener, String who) {
             return getInstance().registerFsmListener(listener, who);
         }
-
+        @CallSuper
         default boolean unregisterCallFsmListener(ICallFsmListener listener, String who) {
             return getInstance().unregisterFsmListener(listener, who);
         }
-
     }
 
     public interface ICallFsmListener extends IFsmListener<ECallReport, ECallState> {}

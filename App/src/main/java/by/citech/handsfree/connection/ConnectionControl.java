@@ -2,9 +2,9 @@ package by.citech.handsfree.connection;
 
 import android.os.Handler;
 
+import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.activity.fsm.EActivityReport;
 import by.citech.handsfree.activity.fsm.EActivityState;
-import by.citech.handsfree.activity.fsm.IActivityFsmListener;
 import by.citech.handsfree.connection.fsm.EConnectionReport;
 import by.citech.handsfree.connection.fsm.EConnectionState;
 import by.citech.handsfree.connection.fsm.IConnectionFsmListener;
@@ -30,7 +30,7 @@ import static by.citech.handsfree.connection.fsm.EConnectionState.GotInitData;
 
 public class ConnectionControl
         implements IConnectionFsmListener, IConnectionFsmListenerRegister, IConnectionFsmReporter,
-        IThreading, IActivityFsmListener {
+        IThreading, ActivityFsm.IActivityFsmListener {
 
     private static final String STAG = Tags.ConnectionControl;
     private static final boolean debug = Settings.debug;

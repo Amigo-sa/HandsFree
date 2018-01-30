@@ -13,8 +13,6 @@ import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm.IBtFsmListener;
 import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm.IBtFsmReporter;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.bluetoothlegatt.fsm.EBtReport;
-import by.citech.handsfree.fsm.IFsmReport;
-import by.citech.handsfree.fsm.IFsmState;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.BLEController;
 import by.citech.handsfree.bluetoothlegatt.commands.blecommands.characteristics.CharacteristicsDisplayOnCommand;
@@ -254,7 +252,7 @@ public class ConnectorBluetooth
 
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
-        toBtFsm(EBtReport.ReportBtFound);
+        toBtFsm(EBtReport.RP_BtFound);
         stopScan();
     }
 
@@ -284,7 +282,7 @@ public class ConnectorBluetooth
             bleController.setCommand(scanOn).execute();
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
-        toBtFsm(ReportBtDisconnected);
+        toBtFsm(RP_BtDisconnected);
     }
 
     @Override
@@ -292,17 +290,17 @@ public class ConnectorBluetooth
         setBLEState(getBLEState(), BluetoothLeState.SERVICES_DISCOVERED);
         bleController.setCommand(characteristicDisplayOn).execute();
         if (characteristics.getNotifyCharacteristic() != null && characteristics.getWriteCharacteristic() != null) {
-            toBtFsm(ReportBtConnectedCompatible);
+            toBtFsm(RP_BtConnectedCompatible);
         } else
-            toBtFsm(ReportBtConnectedIncompatible);
+            toBtFsm(RP_BtConnectedIncompatible);
     }
 
     @Override
     public void actionDescriptorWrite() {
         if (BLEState == BluetoothLeState.TRANSMIT_DATA)
-            toBtFsm(ReportBtExchangeEnabled);
+            toBtFsm(RP_BtExchangeEnabled);
         else
-            toBtFsm(ReportBtExchangeDisabled);
+            toBtFsm(RP_BtExchangeDisabled);
 
     }
 
@@ -404,74 +402,74 @@ public class ConnectorBluetooth
     @Override
     public void onFsmStateChange(EBtState from, EBtState to, EBtReport report) {
         switch (report) {
-            case ReportTurningOn:
+            case RP_TurningOn:
 
-                if (Settings.debug) Timber.i(TAG, "ReportTurningOn");
+                if (Settings.debug) Timber.i(TAG, "RP_TurningOn");
 
                 if (!isBtSuppported()) {
-                    toBtFsm(ReportBtNotSupported, to);
+                    toBtFsm(RP_BtNotSupported, to);
                     return;
                 }
 
                 if (!isBleSupported()) {
-                    toBtFsm(ReportBtLeNotSupported, to);
+                    toBtFsm(RP_BtLeNotSupported, to);
                     return;
                 }
 
                 mBluetoothLeCore.initialize();
                 build();
-                toBtFsm(ReportBtPrepared, to);
+                toBtFsm(RP_BtPrepared, to);
                 break;
 
-            case ReportEnable:
-                if (Settings.debug) Timber.i(TAG, "ReportEnable");
+            case RP_Enable:
+                if (Settings.debug) Timber.i(TAG, "RP_Enable");
                 enableBt();
                 if (ThisApp.getBluetoothAdapter().isEnabled())
-                    toBtFsm(ReportBtEnabled, to);
+                    toBtFsm(RP_BtEnabled, to);
                 else
-                    toBtFsm(ReportBtDisabled, to);
+                    toBtFsm(RP_BtDisabled, to);
                 break;
 
-            case ReportSearchStart:
-                if (Settings.debug) Timber.i(TAG, "ReportSearchStart");
+            case RP_SearchStart:
+                if (Settings.debug) Timber.i(TAG, "RP_SearchStart");
                 if (scanWithFilter)
                     searchDevice();
                 else
                     startScan();
                 break;
 
-            case ReportConnect:
-                if (Settings.debug) Timber.i(TAG, "ReportConnect");
+            case RP_Connect:
+                if (Settings.debug) Timber.i(TAG, "RP_Connect");
                 connecting();
                 break;
 
-            case ReportExchangeEnable:
-                if (Settings.debug) Timber.i(TAG, "ReportExchangeEnable");
+            case RP_ExchangeEnable:
+                if (Settings.debug) Timber.i(TAG, "RP_ExchangeEnable");
                 enableTransmitData();
                 break;
 
-            case ReportExchangeDisable:
-                if (Settings.debug) Timber.i(TAG, "ReportExchangeDisable");
+            case RP_ExchangeDisable:
+                if (Settings.debug) Timber.i(TAG, "RP_ExchangeDisable");
                 disableTransmitData();
                 break;
 
-            case ReportSearchStop:
-                if (Settings.debug) Timber.i(TAG, "ReportSearchStop");
+            case RP_SearchStop:
+                if (Settings.debug) Timber.i(TAG, "RP_SearchStop");
                 stopScan();
                 break;
 
-            case ReportDisconnect:
+            case RP_Disconnect:
                 if (Settings.debug) Timber.i(TAG, "ReportConnectStop");
                 disconnect();
                 break;
 
-            case ReportDisable:
+            case RP_Disable:
                 if (ThisApp.getBluetoothAdapter().isEnabled())
                     ThisApp.getBluetoothAdapter().disable();
                 break;
 
-            case ReportTurningOff:
-                if (Settings.debug) Timber.i(TAG, "ReportTurningOff");
+            case RP_TurningOff:
+                if (Settings.debug) Timber.i(TAG, "RP_TurningOff");
                 onStop();
                 break;
 

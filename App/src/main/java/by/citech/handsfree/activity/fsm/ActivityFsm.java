@@ -1,5 +1,7 @@
 package by.citech.handsfree.activity.fsm;
 
+import android.support.annotation.CallSuper;
+
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -169,4 +171,47 @@ public class ActivityFsm {
         return state == SettingsA || state == CallA;
     }
 
+    //--------------------- interfaces
+
+    public static interface IActivityFsmListener {
+        void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why);
+    }
+
+    public static interface IActivityFsmListenerRegister {
+
+        @CallSuper
+        default boolean registerActivityFsmListener(IActivityFsmListener listener, String who) {
+            return getInstance().registerListener(listener, who);
+        }
+
+        @CallSuper
+        default boolean unregisterActivityFsmListener(IActivityFsmListener listener, String who) {
+            return getInstance().unregisterListener(listener, who);
+        }
+
+    }
+
+    public static interface IActivityFsmReporter {
+
+        @CallSuper
+        default EActivityState getActivityFsmPrevActivityState() {
+            return getInstance().getPrevActivityState();
+        }
+
+        @CallSuper
+        default EActivityState getActivityFsmPrevState() {
+            return getInstance().getPrevState();
+        }
+
+        @CallSuper
+        default EActivityState getActivityFsmCurrState() {
+            return getInstance().getCurrState();
+        }
+
+        @CallSuper
+        default boolean reportToActivityFsm(EActivityState fromWhichState, EActivityReport whatHappened, String fromWho) {
+            return getInstance().processReport(whatHappened, fromWhichState, fromWho);
+        }
+
+    }
 }

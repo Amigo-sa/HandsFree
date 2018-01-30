@@ -22,7 +22,7 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
         super(Tags.ConnectionFsm);
         reportToStateMap = new EnumMap<>(EBtReport.class);
         currState = ST_TurnedOff;
-        processReport(ReportTurningOn, getFsmCurrentState(), Tags.ConnectionFsm);
+        processReport(RP_TurningOn, getFsmCurrentState(), Tags.ConnectionFsm);
     }
 
     public static BtFsm getInstance() {
@@ -49,31 +49,25 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
     //--------------------- interfaces
 
     public interface IBtFsmReporter {
-
         @CallSuper
         default EBtState getBtFsmState() {
             return getInstance().getFsmCurrentState();
         }
-
         @CallSuper
         default boolean reportToBtFsm(EBtReport whatHappened, EBtState fromWhichState, String fromWho) {
             return getInstance().processReport(whatHappened, fromWhichState, fromWho);
         }
-
     }
 
     public interface IBtFsmListenerRegister {
-
         @CallSuper
         default boolean registerBtFsmListener(IBtFsmListener listener, String who) {
             return getInstance().registerFsmListener(listener, who);
         }
-
         @CallSuper
         default boolean unregisterBtFsmListener(IBtFsmListener listener, String who) {
             return getInstance().unregisterFsmListener(listener, who);
         }
-
     }
 
     public interface IBtFsmListener extends IFsmListener<EBtReport, EBtState> {}

@@ -1,12 +1,13 @@
 package by.citech.handsfree.debug.fsm;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 
 import by.citech.handsfree.fsm.IFsmState;
 
-import static by.citech.handsfree.util.CollectionHelper.hSet;
+import static by.citech.handsfree.util.CollectionHelper.eCopy;
+import static by.citech.handsfree.util.CollectionHelper.eSet;
 
-public enum EDebugState implements IFsmState {
+public enum EDebugState implements IFsmState<EDebugState> {
 
     ST_TurnedOff,
     ST_TurnedOn,
@@ -15,27 +16,32 @@ public enum EDebugState implements IFsmState {
     ST_DebugPlay,
     ST_DebugLoop;
 
-    public String getName() {return this.name();}
-    @Override public HashSet<IFsmState> available() {return availableSt(this);};
-    @Override public HashSet<IFsmState> availableFromAny() {return hSet(ST_TurnedOff);}
-
-    public static HashSet<IFsmState> availableSt(EDebugState state) {
-        switch (state) {
-            case ST_TurnedOff:
-                return hSet(ST_TurnedOn);
-            case ST_TurnedOn:
-                return hSet(ST_DebugLoop, ST_DebugRecord);
-            case ST_DebugRecord:
-                return hSet(ST_DebugRecorded);
-            case ST_DebugRecorded:
-                return hSet(ST_DebugPlay);
-            case ST_DebugPlay:
-                return hSet(ST_DebugRecorded);
-            case ST_DebugLoop:
-                return hSet(ST_TurnedOn);
-            default:
-                return hSet();
-        }
+    static {
+        availableFromAny = s(ST_TurnedOff);
+        ST_TurnedOff    .a(ST_TurnedOn);
+        ST_TurnedOn     .a(ST_DebugLoop, ST_DebugRecord);
+        ST_DebugRecord  .a(ST_DebugRecorded);
+        ST_DebugRecorded.a(ST_DebugPlay);
+        ST_DebugPlay    .a(ST_DebugRecorded);
+        ST_DebugLoop    .a(ST_TurnedOn);
     }
+
+    //--------------------- constructor
+
+    EDebugState(EDebugState... states) {a(states);}
+    private static EnumSet<EDebugState> availableFromAny;
+    private EnumSet<EDebugState> available;
+    void a(EDebugState... states) {available = s(states);}
+
+    //--------------------- IFsmState
+
+    @Override public String getName() {return this.name();}
+    @Override public EnumSet<EDebugState> available() {return c(available);}
+    @Override public EnumSet<EDebugState> availableFromAny() {return c(availableFromAny);}
+
+    //--------------------- additional
+
+    private static EnumSet<EDebugState> s(EDebugState... states) {return eSet(EDebugState.class, states);}
+    private static EnumSet<EDebugState> c(EnumSet<EDebugState> set) {return eCopy(set);}
 
 }

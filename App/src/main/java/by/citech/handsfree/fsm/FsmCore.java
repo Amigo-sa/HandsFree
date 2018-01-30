@@ -58,40 +58,40 @@ abstract public class FsmCore<
 
     //--------------------- listener
 
-    synchronized protected void onFsmStateChange(S from, S to, R why) {
-        if (debug) Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, why);
-        for (IFsmListener<R, S> listener : listeners) listener.onFsmStateChange(from, to, why);
+    synchronized protected void onFsmStateChange(S from, S to, R report) {
+        if (debug) Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, report);
+        for (IFsmListener<R, S> listener : listeners) listener.onFsmStateChange(from, to, report);
     }
 
     //--------------------- register and unregister
 
-    synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String who, S... states) {
-        if (states == null || states.length == 0) return registerFsmListener(listener, who);
+    synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String message, S... states) {
+        if (states == null || states.length == 0) return registerFsmListener(listener, message);
         else return false; // TODO: доделать логику слушателя только выбранных сообщений
     }
 
-    synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String who) {
+    synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String message) {
         boolean isAdded;
         if (listener == null) {
-            if (debug) Timber.w("%s register fail, null listener: <%s>", fsmName, who);
+            if (debug) Timber.w("%s register fail, null listener: <%s>", fsmName, message);
             return false;
         } else if (listeners.contains(listener)) {
-            if (debug) Timber.w("%s register fail, already registered: <%s>", fsmName, who);
+            if (debug) Timber.w("%s register fail, already registered: <%s>", fsmName, message);
             isAdded = true;
         } else {
             isAdded = listeners.add(listener);
-            if (isAdded) {if (debug) Timber.i("%s register success: <%s>, count: <%d>", fsmName, who, listeners.size());}
-            else         {if (debug) Timber.e("%s register fail: <%s>, count: still <%d>", fsmName, who, listeners.size());}
+            if (isAdded) {if (debug) Timber.i("%s register success: <%s>, count: <%d>", fsmName, message, listeners.size());}
+            else         {if (debug) Timber.e("%s register fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
         }
         if (isAdded) listener.onFsmStateChange(prevState, currState, prevReport);
         return isAdded;
     }
 
-    synchronized protected boolean unregisterFsmListener(IFsmListener<R, S> listener, String who) {
+    synchronized protected boolean unregisterFsmListener(IFsmListener<R, S> listener, String message) {
         boolean isRemoved;
         isRemoved = listeners.remove(listener);
-        if (isRemoved) {if (debug) Timber.w("%s unregister success: <%s>, count: <%d>", fsmName, who, listeners.size());}
-        else           {if (debug) Timber.e("%s unregister fail: <%s>, count: still <%d>", fsmName, who, listeners.size());}
+        if (isRemoved) {if (debug) Timber.w("%s unregister success: <%s>, count: <%d>", fsmName, message, listeners.size());}
+        else           {if (debug) Timber.e("%s unregister fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
         return isRemoved;
     }
 
@@ -101,14 +101,15 @@ abstract public class FsmCore<
         return processFsmStateChange(from, to, why, false);
     }
 
-    synchronized protected boolean processFsmStateChange(S from, S to, R why, boolean isForce) {
+    synchronized protected boolean processFsmStateChange(S from, S to, R report, boolean isForce) {
+        if (from == null || to == null || report == null) return false;
         if (currState == from || isForce) {
             if (from.availableFromAny().contains(to) || from.available().contains(to) || isForce) {
                 prevReport = currReport;
-                currReport = why;
+                currReport = report;
                 prevState = currState;
                 currState = to;
-                onFsmStateChange(from, to, why);
+                onFsmStateChange(from, to, report);
                 return true;
             } else if (debug) Timber.e("%s process: <%s> not available from <%s>", fsmName, to, from);
         } else if (debug) Timber.e("%s process: currState is <%s>, not <%s>", fsmName, currState, from);
