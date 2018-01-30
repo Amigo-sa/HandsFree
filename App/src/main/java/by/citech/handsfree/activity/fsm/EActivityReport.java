@@ -6,18 +6,18 @@ import static by.citech.handsfree.activity.fsm.EActivityState.*;
 
 public enum EActivityReport implements IFsmReport<EActivityState> {
 
-    TurningOn             (ST_TurnedOn),
-    TurningOff            (ST_TurnedOff),
-    BackArrowPressed      (ST_BackArrow),
-    HomePressed           (ST_Home),
-    BackPressed           (ST_Back),
-    PowerOffPressed       (ST_PowerOff),
-    PowerOnPressed        (ST_PowerOn),
-    CallA2SettingsAPressed(ST_CallA2SettingsA),
-    SettingsA2CallAPressed(ST_SettingsA2CallA),
-    onDestroy             (ST_Destroyed),
-    CallAOnCreate         (ST_CallA),
-    SettingsAOnCreate     (ST_SettingsA);
+    RP_TurningOn(ST_TurnedOn),
+    RP_TurningOff(ST_TurnedOff),
+    RP_BackArrowPressed(ST_BackArrow),
+    RP_HomePressed(ST_Home),
+    RP_BackPressed(ST_Back),
+    RP_PowerOffPressed(ST_PowerOff),
+    RP_PowerOnPressed(ST_PowerOn),
+    RP_CallA2SettingsAPressed(ST_CallA2SettingsA),
+    RP_SettingsA2CallAPressed(ST_SettingsA2CallA),
+    RP_onDestroy(ST_Destroyed),
+    RP_CallAOnCreate(ST_CallA),
+    RP_SettingsAOnCreate(ST_SettingsA);
 
     private EActivityState destination;
     @Override public EActivityState getDestination() {return destination;}
