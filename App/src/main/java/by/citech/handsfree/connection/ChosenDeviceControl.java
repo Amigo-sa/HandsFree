@@ -51,7 +51,7 @@ public class ChosenDeviceControl
 //                    } else reportToBtFsm(getBtFsmState(), ReportChosenDeviceValid, TAG);
 //                } else reportToBtFsm(getBtFsmState(), ReportChosenDeviceInvalid, TAG);
 //                break;
-            case SettingsA:
+            case ST_SettingsA:
                 setBtConnectedAddr(Settings.Bluetooth.btChosenAddr);
                 break;
 //            case ScanA:

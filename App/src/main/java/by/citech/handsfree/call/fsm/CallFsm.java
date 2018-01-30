@@ -22,7 +22,7 @@ public class CallFsm extends FsmCore<ECallReport, ECallState> {
         super(Tags.CallFsm);
         reportToStateMap = new EnumMap<>(ECallReport.class);
         currState = ST_TurnedOff;
-        processReport(RP_TurningOn, getFsmCurrentState(), Tags.ConnectionFsm);
+        processReport(RP_TurningOn, getFsmCurrentState(), Tags.CallFsm);
     }
 
     public static CallFsm getInstance() {

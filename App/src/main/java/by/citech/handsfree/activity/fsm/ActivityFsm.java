@@ -2,165 +2,63 @@ package by.citech.handsfree.activity.fsm;
 
 import android.support.annotation.CallSuper;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.EnumMap;
 
-import by.citech.handsfree.parameters.StatusMessages;
+import by.citech.handsfree.fsm.FsmCore;
+import by.citech.handsfree.fsm.IFsmListener;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.settings.Settings;
 import timber.log.Timber;
 
-import static by.citech.handsfree.activity.fsm.EActivityReport.HomePressed;
-import static by.citech.handsfree.activity.fsm.EActivityReport.PowerOffPressed;
-import static by.citech.handsfree.activity.fsm.EActivityReport.TurningOn;
-import static by.citech.handsfree.activity.fsm.EActivityState.Back;
-import static by.citech.handsfree.activity.fsm.EActivityState.BackArrow;
-import static by.citech.handsfree.activity.fsm.EActivityState.CallA;
-import static by.citech.handsfree.activity.fsm.EActivityState.Destroyed;
-import static by.citech.handsfree.activity.fsm.EActivityState.Home;
-import static by.citech.handsfree.activity.fsm.EActivityState.PowerOff;
-import static by.citech.handsfree.activity.fsm.EActivityState.PowerOn;
-import static by.citech.handsfree.activity.fsm.EActivityState.SettingsA;
-import static by.citech.handsfree.activity.fsm.EActivityState.TurnedOff;
-import static by.citech.handsfree.activity.fsm.EActivityState.TurnedOn;
+import static by.citech.handsfree.activity.fsm.EActivityReport.*;
+import static by.citech.handsfree.activity.fsm.EActivityState.*;
 
-public class ActivityFsm {
+public class ActivityFsm extends FsmCore<EActivityReport, EActivityState> {
 
-    private static final String STAG = Tags.ActivityFsm;
-    private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
-    static {objCount = 0;}
-
-    //--------------------- preparation
-
-    private Collection<IActivityFsmListener> listeners;
-    private volatile EActivityState currState, prevState, prevActivityState;
-    private volatile EActivityReport prevReport;
-
-    {
-        objCount++;
-        TAG = STAG + " " + objCount;
-        listeners = new ConcurrentLinkedQueue<>();
-        currState = TurnedOff;
-        processReport(TurningOn, currState, TAG);
-    }
+    private volatile EActivityState prevActivityState;
 
     //--------------------- singleton
 
     private static volatile ActivityFsm instance = null;
 
     private ActivityFsm() {
+        super(Tags.ActivityFsm);
+        reportToStateMap = new EnumMap<>(EActivityReport.class);
+        currState = ST_TurnedOff;
+        processReport(TurningOn, getFsmCurrentState(), Tags.ActivityFsm);
     }
 
     public static ActivityFsm getInstance() {
         if (instance == null) {
             synchronized (ActivityFsm.class) {
-                if (instance == null) {
-                    instance = new ActivityFsm();
-                }
-            }
-        }
+                if (instance == null) {instance = new ActivityFsm();}}}
         return instance;
     }
 
-    //--------------------- IFsmListenerRegister register and unregister
+    //--------------------- ICallFsmReporter
 
-    synchronized boolean registerListener(IActivityFsmListener listener, String who) {
-        boolean isAdded;
-        if (listener == null) {
-            if (debug) Timber.tag(TAG).w("register fail, null listener: <%s>", who);
-            return false;
-        } else if (listeners.contains(listener)) {
-            if (debug) Timber.tag(TAG).w("register fail, already registered: <%s>", who);
-            isAdded = true;
-        } else {
-            isAdded = listeners.add(listener);
-            if (isAdded) {if (debug) Timber.tag(TAG).i("register success: <%s>, count: <%d>", who, listeners.size());}
-            else         {if (debug) Timber.tag(TAG).e("register fail: <%s>, count: still <%d>", who, listeners.size());}
-        }
-        if (isAdded) listener.onActivityFsmStateChange(prevState, currState, prevReport);
-        return isAdded;
-    }
-
-    synchronized boolean unregisterListener(IActivityFsmListener listener, String who) {
-        boolean isRemoved;
-        isRemoved = listeners.remove(listener);
-        if (isRemoved) {if (debug) Timber.tag(TAG).w("unregister success: <%s>, count: <%d>", who, listeners.size());}
-        else           {if (debug) Timber.tag(TAG).e("unregister fail: <%s>, count: still <%d>", who, listeners.size());}
-        return isRemoved;
-    }
-
-    //--------------------- IActivityFsmListener onConnectionFsmStateChange
-
-    synchronized private void onStateChange(EActivityState from, EActivityState to, EActivityReport why) {
-        if (debug) Timber.tag(TAG).w("onStateChange: <%s> ==> <%s>, report: <%s>", from, to, why);
-        for (IActivityFsmListener listener : listeners) listener.onActivityFsmStateChange(from, to, why);
-    }
-
-    //--------------------- IConnectionFsmReporter
-
-    synchronized EActivityState getCurrState() {return currState;}
     synchronized EActivityState getPrevActivityState() {return prevActivityState;}
-    synchronized EActivityState getPrevState() {return prevState;}
 
     synchronized boolean processReport(EActivityReport report, EActivityState from, String msg) {
-        if (debug) Timber.tag(TAG).w("processReport: report <%s> from <%s>, message: <%s>", report, from, msg);
-        if (report == null || from == null || msg == null) {
-            if (debug) Timber.e("processReport %s", StatusMessages.ERR_PARAMETERS);
-            return false;
-        }
-        return processReportNormal(report, from);
+        return checkFsmReport(report, from, msg) && processFsmReport(report, from);
     }
 
     //--------------------- processing
 
-    private boolean processReportNormal(EActivityReport report, EActivityState from) {
-        if (debug) Timber.tag(TAG).i("processReportNormal");
-        switch (report) {
-            case CallAOnCreate:
-            case CallA2SettingsAPressed:
-            case SettingsA2CallAPressed:
-                return processStateChange(from, BackArrow, report);
-            case BackArrowPressed:
-                return processStateChange(from, BackArrow, report);
-            case onDestroy:
-                return processStateChange(from, Destroyed, report);
-            case TurningOn:
-                return processStateChange(from, TurnedOn, report);
-            case TurningOff:
-                return processStateChange(from, TurnedOff, report);
-            case SettingsAOnCreate:
-                return processStateChange(from, SettingsA, report);
-            case BackPressed:
-                return processStateChange(from, Back, report);
-            case HomePressed:
-                return processStateChange(from, Home, report);
-            case PowerOnPressed:
-                return processStateChange(from, PowerOn, report);
-            case PowerOffPressed:
-                return processStateChange(from, PowerOff, report);
-            default:
-                return true;
+    @Override
+    protected boolean processFsmReport(EActivityReport report, EActivityState from) {
+        if (debug) Timber.i("processFsmReport");
+        return processFsmStateChange(report, from, report.getDestination());
+    }
+
+    //--------------------- processing
+
+    @Override
+    protected boolean processFsmStateChange(EActivityState from, EActivityState to, EActivityReport why, boolean isForce) {
+        if (!super.processFsmStateChange(from, to, why, isForce)) return false;
+        else {
+            if (isActivity(from) && isTransition(why)) prevActivityState = from;
+            return true;
         }
-    }
-
-    synchronized private boolean processStateChange(EActivityState from, EActivityState to, EActivityReport why) {
-        return processStateChange(from, to, why, false);
-    }
-
-    private boolean processStateChange(EActivityState from, EActivityState to, EActivityReport why, boolean isForce) {
-        if (currState == from || isForce) {
-            if (EActivityState.availableFromAny().contains(to) || from.available().contains(to) || isForce) {
-                if (isActivity(from) && isTransition(why)) prevActivityState = from;
-                prevReport = why;
-                prevState = currState;
-                currState = to;
-                onStateChange(from, to, why);
-                return true;
-            } else if (debug) Timber.tag(TAG).e("processStateChange: <%s> not available from <%s>", to, from);
-        } else if (debug) Timber.tag(TAG).e("processStateChange: current currState is <%s>, not <%s>", currState, from);
-        return false;
     }
 
     private boolean isTransition(EActivityReport report) {
@@ -168,50 +66,41 @@ public class ActivityFsm {
     }
 
     private boolean isActivity(EActivityState state) {
-        return state == SettingsA || state == CallA;
+        return state == ST_SettingsA || state == ST_CallA;
     }
 
     //--------------------- interfaces
 
-    public static interface IActivityFsmListener {
-        void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why);
-    }
-
-    public static interface IActivityFsmListenerRegister {
-
+    public interface IActivityFsmReporter {
         @CallSuper
-        default boolean registerActivityFsmListener(IActivityFsmListener listener, String who) {
-            return getInstance().registerListener(listener, who);
+        default EActivityState getActivityFsmCurrState() {
+            return getInstance().getFsmCurrentState();
         }
-
         @CallSuper
-        default boolean unregisterActivityFsmListener(IActivityFsmListener listener, String who) {
-            return getInstance().unregisterListener(listener, who);
+        default EActivityState getActivityFsmPrevState() {
+            return getInstance().getFsmPreviousState();
         }
-
-    }
-
-    public static interface IActivityFsmReporter {
-
         @CallSuper
         default EActivityState getActivityFsmPrevActivityState() {
             return getInstance().getPrevActivityState();
         }
-
-        @CallSuper
-        default EActivityState getActivityFsmPrevState() {
-            return getInstance().getPrevState();
-        }
-
-        @CallSuper
-        default EActivityState getActivityFsmCurrState() {
-            return getInstance().getCurrState();
-        }
-
         @CallSuper
         default boolean reportToActivityFsm(EActivityState fromWhichState, EActivityReport whatHappened, String fromWho) {
             return getInstance().processReport(whatHappened, fromWhichState, fromWho);
         }
-
     }
+
+    public interface IActivityFsmListenerRegister {
+        @CallSuper
+        default boolean registerActivityFsmListener(IActivityFsmListener listener, String who) {
+            return getInstance().registerFsmListener(listener, who);
+        }
+        @CallSuper
+        default boolean unregisterActivityFsmListener(IActivityFsmListener listener, String who) {
+            return getInstance().registerFsmListener(listener, who);
+        }
+    }
+
+    public interface IActivityFsmListener extends IFsmListener<EActivityReport, EActivityState> {}
+
 }

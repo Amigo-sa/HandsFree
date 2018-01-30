@@ -44,9 +44,10 @@ abstract public class FsmCore<
 
     //--------------------- reporter
 
-    synchronized protected S getFsmCurrentState() {
-        return currState;
-    }
+    synchronized protected S getFsmCurrentState() {return currState;}
+    synchronized protected S getFsmPreviousState() {return prevState;}
+    synchronized protected R getFsmCurrentReport() {return currReport;}
+    synchronized protected R getFsmPreviousReport() {return prevReport;}
 
     synchronized protected boolean checkFsmReport(R report, S from, String msg) {
         if (debug) Timber.w("%s checkFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
