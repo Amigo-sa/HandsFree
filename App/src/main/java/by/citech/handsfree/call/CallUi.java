@@ -10,9 +10,7 @@ import by.citech.handsfree.parameters.Tags;
 import timber.log.Timber;
 
 import static by.citech.handsfree.call.fsm.ECallReport.*;
-import static by.citech.handsfree.debug.fsm.EDebugReport.RP_StartDebug;
-import static by.citech.handsfree.debug.fsm.EDebugReport.RP_StopDebug;
-import static by.citech.handsfree.debug.fsm.EDebugState.ST_DebugLoop;
+import static by.citech.handsfree.debug.fsm.EDebugReport.*;
 import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmReporter {
@@ -61,7 +59,7 @@ public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmRepor
     }
 
     private void onClickBtnGreenNormal() {
-        ECallState state = (ECallState) getCallFsmState();
+        ECallState state = getCallFsmState();
         if (debug) Timber.w("onClickBtnGreenNormal opMode is %s, state is %s", opMode, state);
         switch (state) {
             case ST_Ready:
@@ -119,7 +117,7 @@ public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmRepor
     }
 
     private void onClickBtnRedNormal() {
-        ECallState state = (ECallState) getCallFsmState();
+        ECallState state = getCallFsmState();
         if (debug) Timber.w("onClickBtnRedNormal opMode is %s, state is %s", opMode, state);
         switch (state) {
             case ST_Call:
@@ -137,7 +135,7 @@ public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmRepor
     }
 
     private void onClickBtnRedAbnormal() {
-        EDebugState state = (EDebugState) getDebugFsmState();
+        EDebugState state = getDebugFsmState();
         if (debug) Timber.w("onClickBtnRedAbnormal opMode is %s, state is %s", opMode, state);
         switch (opMode) {
             case AudIn2Bt:
@@ -147,7 +145,7 @@ public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmRepor
             case Bt2Bt:
                 switch (state) {
                     case ST_DebugLoop:
-                        if (reportToCallFsm(RP_StopDebug, state, TAG)) return; else break;
+                        if (reportToDebugFsm(RP_StopDebug, state, TAG)) return; else break;
                     default:
                         onMethodWrongState(state, onClickBtnRed); return;
                 }
@@ -156,7 +154,7 @@ public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmRepor
                 switch (state) {
                     case ST_DebugPlay:
                     case ST_DebugRecord:
-                        if (reportToCallFsm(RP_StopDebug, state, TAG)) return; else break;
+                        if (reportToDebugFsm(RP_StopDebug, state, TAG)) return; else break;
                     default:
                         onMethodWrongState(state, onClickBtnRed); return;
                 }

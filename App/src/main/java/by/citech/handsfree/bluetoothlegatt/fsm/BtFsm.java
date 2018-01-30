@@ -2,17 +2,17 @@ package by.citech.handsfree.bluetoothlegatt.fsm;
 
 import android.support.annotation.CallSuper;
 
+import java.util.EnumMap;
+
 import by.citech.handsfree.fsm.FsmCore;
 import by.citech.handsfree.fsm.IFsmListener;
-import by.citech.handsfree.fsm.IFsmReport;
-import by.citech.handsfree.fsm.IFsmState;
 import by.citech.handsfree.parameters.Tags;
 import timber.log.Timber;
 
 import static by.citech.handsfree.bluetoothlegatt.fsm.EBtReport.*;
 import static by.citech.handsfree.bluetoothlegatt.fsm.EBtState.*;
 
-public class BtFsm extends FsmCore {
+public class BtFsm extends FsmCore<EBtReport, EBtState> {
 
     //--------------------- singleton
 
@@ -20,32 +20,8 @@ public class BtFsm extends FsmCore {
 
     private BtFsm() {
         super(Tags.ConnectionFsm);
-
-        toMap(ReportTurningOn,               StateTurnedOn);
-        toMap(ReportTurningOff,              StateTurnedOff);
-        toMap(ReportBtLeNotSupported,        StateBtPrepareFail);
-        toMap(ReportBtNotSupported,          StateBtPrepareFail);
-        toMap(ReportBtPrepared,              StateBtPrepared);
-        toMap(ReportEnable,                  StateBtEnabling);
-        toMap(ReportDisable,                 StateBtDisabled);
-        toMap(ReportBtEnabled,               StateBtEnabled);
-        toMap(ReportBtDisabled,              StateBtDisabled);
-        toMap(ReportChosenValid,             StateDeviceChosen);
-        toMap(ReportChosenInvalid,           StateDeviceNotChosen);
-        toMap(ReportSearchStart,             StateSearching);
-        toMap(ReportSearchStop,              StateDeviceChosen);
-        toMap(ReportBtFound,                 StateFound);
-        toMap(ReportConnect,                 StateConnecting);
-        toMap(ReportDisconnect,              StateDisconnecting);
-        toMap(ReportBtConnectedCompatible,   StateConnected);
-        toMap(ReportBtConnectedIncompatible, StateIncompatible);
-        toMap(ReportBtDisconnected,          StateDisconnected);
-        toMap(ReportExchangeEnable,          StateExchangeEnabling);
-        toMap(ReportBtExchangeEnabled,       StateExchangeEnabled);
-        toMap(ReportExchangeDisable,         StateExchangeDisabling);
-        toMap(ReportBtExchangeDisabled,      StateConnected);
-
-        currState = StateTurnedOff;
+        reportToStateMap = new EnumMap<>(EBtReport.class);
+        currState = ST_TurnedOff;
         processReport(ReportTurningOn, getFsmCurrentState(), Tags.ConnectionFsm);
     }
 
@@ -58,16 +34,16 @@ public class BtFsm extends FsmCore {
 
     //--------------------- IConnectionFsmReporter
 
-    synchronized boolean processReport(IFsmReport report, IFsmState from, String msg) {
+    synchronized boolean processReport(EBtReport report, EBtState from, String msg) {
         return checkFsmReport(report, from, msg) && processFsmReport(report, from);
     }
 
     //--------------------- processing
 
     @Override
-    synchronized protected boolean processFsmReport(IFsmReport why, IFsmState from) {
+    synchronized protected boolean processFsmReport(EBtReport why, EBtState from) {
         if (debug) Timber.i("processFsmReport");
-        return processFsmStateChange(why, from, fromMap(why));
+        return processFsmStateChange(why, from, why.getDestination());
     }
 
     //--------------------- interfaces
@@ -76,7 +52,7 @@ public class BtFsm extends FsmCore {
 
         @CallSuper
         default EBtState getBtFsmState() {
-            return (EBtState) getInstance().getFsmCurrentState();
+            return getInstance().getFsmCurrentState();
         }
 
         @CallSuper
@@ -100,6 +76,6 @@ public class BtFsm extends FsmCore {
 
     }
 
-    public interface IBtFsmListener extends IFsmListener {}
+    public interface IBtFsmListener extends IFsmListener<EBtReport, EBtState> {}
 
 }

@@ -96,12 +96,12 @@ public class DebugFsm extends FsmCore {
     public interface IDebugFsmReporter {
 
         @CallSuper
-        default IFsmState getDebugFsmState() {
-            return getInstance().getFsmCurrentState();
+        default EDebugState getDebugFsmState() {
+            return (EDebugState) getInstance().getFsmCurrentState();
         }
 
         @CallSuper
-        default boolean reportToDebugFsm(IFsmReport whatHappened, IFsmState fromWhichState, String fromWho) {
+        default boolean reportToDebugFsm(EDebugReport whatHappened, EDebugState fromWhichState, String fromWho) {
             return getInstance().processReport(whatHappened, fromWhichState, fromWho);
         }
 

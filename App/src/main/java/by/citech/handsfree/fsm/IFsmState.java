@@ -1,9 +1,9 @@
 package by.citech.handsfree.fsm;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 
-public interface IFsmState {
+public interface IFsmState<S extends Enum<S>> {
     String getName();
-    HashSet<IFsmState> available();
-    HashSet<IFsmState> availableFromAny();
+    EnumSet<S> available();
+    EnumSet<S> availableFromAny();
 }

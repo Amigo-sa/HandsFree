@@ -1,83 +1,75 @@
 package by.citech.handsfree.bluetoothlegatt.fsm;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 
 import by.citech.handsfree.fsm.IFsmState;
 
-import static by.citech.handsfree.util.CollectionHelper.s;
+import static by.citech.handsfree.util.CollectionHelper.eCopy;
+import static by.citech.handsfree.util.CollectionHelper.eSet;
 
-public enum EBtState implements IFsmState {
+public enum EBtState implements IFsmState<EBtState> {
 
-    StateTurnedOff,
-    StateTurnedOn,
-    StateBtPrepared,
-    StateBtPrepareFail,
-    StateBtEnabling,
-    StateBtEnabled,
-    StateBtDisabled,
-    StateDeviceChosen,
-    StateDeviceNotChosen,
-    StateSearching,
-    StateFound,
-    StateConnecting,
-    StateDisconnecting,
-    StateDisconnected,
-    StateIncompatible,
-    StateConnected,
-    StateExchangeDisabling,
-    StateExchangeEnabling,
-    StateExchangeEnabled,
-    Failure;
+    ST_TurnedOff,
+    ST_TurnedOn,
+    ST_BtPrepared,
+    ST_BtPrepareFail,
+    ST_BtEnabling,
+    ST_BtEnabled,
+    ST_BtDisabled,
+    ST_DeviceChosen,
+    ST_DeviceNotChosen,
+    ST_Searching,
+    ST_Found,
+    ST_Connecting,
+    ST_Disconnecting,
+    ST_Disconnected,
+    ST_Incompatible,
+    ST_Connected,
+    ST_ExchangeDisabling,
+    ST_ExchangeEnabling,
+    ST_ExchangeEnabled,
+    ST_Failure;
+
+    static {
+        availableFromAny = s(ST_Failure, ST_TurnedOff);
+        ST_TurnedOff        .a(ST_TurnedOn);
+        ST_TurnedOn         .a(ST_BtPrepared, ST_BtPrepareFail);
+        ST_BtPrepared       .a(ST_BtEnabling);
+        ST_BtPrepareFail    .a();
+        ST_BtEnabling       .a(ST_BtEnabling, ST_BtEnabled, ST_BtDisabled);
+        ST_BtEnabled        .a(ST_DeviceChosen, ST_DeviceNotChosen);
+        ST_BtDisabled       .a(ST_BtEnabling);
+        ST_DeviceChosen     .a(ST_DeviceChosen);
+        ST_DeviceNotChosen  .a(ST_DeviceChosen);
+        ST_Searching        .a(ST_DeviceChosen, ST_Found);
+        ST_Found            .a(ST_Searching, ST_Connecting);
+        ST_Connecting       .a(ST_Disconnected, ST_Incompatible, ST_Connected);
+        ST_Disconnecting    .a(ST_Disconnected, ST_Disconnecting, ST_Searching);
+        ST_Disconnected     .a(ST_Searching, ST_Connecting);
+        ST_Incompatible     .a(ST_DeviceChosen);
+        ST_Connected        .a(ST_Disconnected, ST_Disconnecting, ST_ExchangeEnabling);
+        ST_ExchangeEnabling .a(ST_Disconnected, ST_Disconnecting, ST_Connected, ST_ExchangeEnabling, ST_ExchangeEnabled);
+        ST_ExchangeDisabling.a(ST_Disconnected, ST_Disconnecting, ST_Connected, ST_ExchangeDisabling);
+        ST_ExchangeEnabled  .a(ST_Disconnected, ST_Disconnecting, ST_Connected, ST_ExchangeDisabling);
+        ST_Failure          .a();
+    }
+
+    //--------------------- constructor
+
+    EBtState(EBtState... states) {a(states);}
+    private static EnumSet<EBtState> availableFromAny;
+    private EnumSet<EBtState> available;
+    void a(EBtState... states) {available = s(states);}
+
+    //--------------------- IFsmState
 
     @Override public String getName() {return this.name();}
-    @Override public HashSet<IFsmState> available() {return availableSt(this);}
-    @Override public HashSet<IFsmState> availableFromAny() {return s(Failure, StateTurnedOff);}
+    @Override public EnumSet<EBtState> available() {return c(available);}
+    @Override public EnumSet<EBtState> availableFromAny() {return c(availableFromAny);}
 
-    public static HashSet<IFsmState> availableSt(EBtState state) {
-        switch (state) {
-            case StateTurnedOff:
-                return s(StateTurnedOn);
-            case StateTurnedOn:
-                return s(StateBtPrepared, StateBtPrepareFail);
-            case StateBtPrepared:
-                return s(StateBtEnabling);
-            case StateBtPrepareFail:
-                return s();
-            case StateBtEnabling:
-                return s(StateBtEnabling, StateBtEnabled, StateBtDisabled);
-            case StateBtEnabled:
-                return s(StateDeviceChosen, StateDeviceNotChosen);
-            case StateBtDisabled:
-                return s(StateBtEnabling);
-            case StateDeviceChosen:
-                return s(StateDeviceChosen);
-            case StateDeviceNotChosen:
-                return s(StateDeviceChosen);
-            case StateSearching:
-                return s(StateDeviceChosen, StateFound);
-            case StateFound:
-                return s(StateSearching, StateConnecting);
-            case StateConnecting:
-                return s(StateDisconnected, StateIncompatible, StateConnected);
-            case StateIncompatible:
-                return s(StateDeviceChosen);
-            case StateDisconnected:
-                return s(StateSearching, StateConnecting);
-            case StateConnected:
-                return s(StateDisconnected, StateDisconnecting, StateExchangeEnabling);
-            case StateDisconnecting:
-                return s(StateDisconnected, StateDisconnecting, StateSearching);
-            case StateExchangeEnabling:
-                return s(StateDisconnected, StateDisconnecting, StateConnected, StateExchangeEnabling, StateExchangeEnabled);
-            case StateExchangeEnabled:
-                return s(StateDisconnected, StateDisconnecting, StateConnected, StateExchangeDisabling);
-            case StateExchangeDisabling:
-                return s(StateDisconnected, StateDisconnecting, StateConnected, StateExchangeDisabling);
-            case Failure:
-                return s();
-            default:
-                return s();
-        }
-    }
+    //--------------------- additional
+
+    private static EnumSet<EBtState> s(EBtState... states) {return eSet(EBtState.class, states);}
+    private static EnumSet<EBtState> c(EnumSet<EBtState> set) {return eCopy(set);}
 
 }
