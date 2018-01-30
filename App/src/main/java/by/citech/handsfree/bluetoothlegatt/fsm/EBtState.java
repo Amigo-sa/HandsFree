@@ -1,4 +1,4 @@
-package by.citech.handsfree.experimental.fsm;
+package by.citech.handsfree.bluetoothlegatt.fsm;
 
 import java.util.HashSet;
 

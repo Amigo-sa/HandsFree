@@ -1,4 +1,4 @@
-package by.citech.handsfree.experimental.fsm;
+package by.citech.handsfree.bluetoothlegatt.fsm;
 
 import android.support.annotation.CallSuper;
 
@@ -9,8 +9,8 @@ import by.citech.handsfree.fsm.IFsmState;
 import by.citech.handsfree.parameters.Tags;
 import timber.log.Timber;
 
-import static by.citech.handsfree.experimental.fsm.EBtReport.*;
-import static by.citech.handsfree.experimental.fsm.EBtState.*;
+import static by.citech.handsfree.bluetoothlegatt.fsm.EBtReport.*;
+import static by.citech.handsfree.bluetoothlegatt.fsm.EBtState.*;
 
 public class BtFsm extends FsmCore {
 
@@ -72,34 +72,34 @@ public class BtFsm extends FsmCore {
 
     //--------------------- interfaces
 
-    public interface IConnectionFsmReporter {
+    public interface IBtFsmReporter {
 
         @CallSuper
-        default IFsmState getBtFsmState() {
-            return getInstance().getFsmCurrentState();
+        default EBtState getBtFsmState() {
+            return (EBtState) getInstance().getFsmCurrentState();
         }
 
         @CallSuper
-        default boolean reportToBtFsm(IFsmReport whatHappened, IFsmState fromWhichState, String fromWho) {
+        default boolean reportToBtFsm(EBtReport whatHappened, EBtState fromWhichState, String fromWho) {
             return getInstance().processReport(whatHappened, fromWhichState, fromWho);
         }
 
     }
 
-    public interface IConnectionFsmListenerRegister {
+    public interface IBtFsmListenerRegister {
 
         @CallSuper
-        default boolean registerConnectionFsmListener(IConnectionFsmListener listener, String who) {
+        default boolean registerBtFsmListener(IBtFsmListener listener, String who) {
             return getInstance().registerFsmListener(listener, who);
         }
 
         @CallSuper
-        default boolean unregisterConnectionFsmListener(IConnectionFsmListener listener, String who) {
+        default boolean unregisterBtFsmListener(IBtFsmListener listener, String who) {
             return getInstance().unregisterFsmListener(listener, who);
         }
 
     }
 
-    public interface IConnectionFsmListener extends IFsmListener {}
+    public interface IBtFsmListener extends IFsmListener {}
 
 }

@@ -15,6 +15,7 @@ import java.util.List;
 
 import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 public class LeScanner {
 
@@ -62,7 +63,7 @@ public class LeScanner {
 
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
-            if (Settings.debug) Log.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
+            if (Settings.debug) Timber.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
             bluetoothAdapter = ThisApp.getBluetoothManager().getAdapter();
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
@@ -96,11 +97,11 @@ public class LeScanner {
 
 
         if (enable) {
-            if (Settings.debug) Log.i(TAG, "start scanLeDevice()");
+            if (Settings.debug) Timber.i(TAG, "start scanLeDevice()");
             // Stops scanning after a pre-defined scan period.
             if (!scanWithFilter)
                 mHandler.postDelayed(() -> {
-                    if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
+                    if (Settings.debug) Timber.i(TAG, "stop scanLeDevice()");
                     mScanning = false;
                     leScanner.stopScan(mScanCallback);
                     mHandler.post(() -> iScanListener.onStopScan());
@@ -111,7 +112,7 @@ public class LeScanner {
                 mScanning = true;
 
         } else {
-            if (Settings.debug) Log.i(TAG, "stop scanLeDevice()");
+            if (Settings.debug) Timber.i(TAG, "stop scanLeDevice()");
             mScanning = false;
             leScanner.stopScan(mScanCallback);
             if (!scanWithFilter) mHandler.post(() -> iScanListener.onStopScan());
@@ -129,13 +130,13 @@ public class LeScanner {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            if (Settings.debug) Log.i(TAG, "onBatchScanResults() ");
+            if (Settings.debug) Timber.i(TAG, "onBatchScanResults() ");
         }
 
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            if (Settings.debug) Log.i(TAG, "onScanFailed() " + errorCode);
+            if (Settings.debug) Timber.i(TAG, "onScanFailed() " + errorCode);
         }
     };
 
