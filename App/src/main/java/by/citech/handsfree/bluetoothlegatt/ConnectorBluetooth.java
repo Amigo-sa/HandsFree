@@ -397,14 +397,13 @@ public class ConnectorBluetooth
         return reportToBtFsm(report, getBtFsmState(), TAG);
     }
 
-    private boolean toBtFsm(EBtReport report, IFsmState from) {
-        return reportToBtFsm(report, (EBtState) from, TAG);
+    private boolean toBtFsm(EBtReport report, EBtState from) {
+        return reportToBtFsm(report, from, TAG);
     }
 
     @Override
-    public void onFsmStateChange(IFsmState from, IFsmState to, IFsmReport report) {
-        EBtReport reportCasted = (EBtReport) report;
-        switch (reportCasted) {
+    public void onFsmStateChange(EBtState from, EBtState to, EBtReport report) {
+        switch (report) {
             case ReportTurningOn:
 
                 if (Settings.debug) Timber.i(TAG, "ReportTurningOn");
@@ -480,5 +479,4 @@ public class ConnectorBluetooth
                 break;
         }
     }
-
 }
