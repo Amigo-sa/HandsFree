@@ -8,12 +8,9 @@ import android.os.Handler;
 
 import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.fsm.EBtState;
-import by.citech.handsfree.call.fsm.CallFsm;
-import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.data.StorageListener;
 import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm.IBtFsmListener;
 import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm.IBtFsmReporter;
-import by.citech.handsfree.debug.fsm.DebugFsm;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.bluetoothlegatt.fsm.EBtReport;
 import by.citech.handsfree.fsm.IFsmReport;
@@ -36,7 +33,6 @@ import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
 import timber.log.Timber;
 
-import static by.citech.handsfree.call.fsm.ECallReport.RP_CallFailedInternally;
 import static by.citech.handsfree.bluetoothlegatt.fsm.EBtReport.*;
 
 public class ConnectorBluetooth
@@ -258,7 +254,8 @@ public class ConnectorBluetooth
 
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
-
+        toBtFsm(EBtReport.ReportBtFound);
+        stopScan();
     }
 
     //--------------------------- Callbacks from BroadcastReceiver --------------------
@@ -287,9 +284,6 @@ public class ConnectorBluetooth
             bleController.setCommand(scanOn).execute();
             setBLEState(BLEState, BluetoothLeState.DISCONECTED);
         }
-
-        //TODO: репорт в BtConnectionFsm вместо репорта в CallFsm
-//      reportToCallFsm(getCallFsmState(), ReportBtDisconnect, TAG);
         toBtFsm(ReportBtDisconnected);
     }
 
@@ -298,17 +292,17 @@ public class ConnectorBluetooth
         setBLEState(getBLEState(), BluetoothLeState.SERVICES_DISCOVERED);
         bleController.setCommand(characteristicDisplayOn).execute();
         if (characteristics.getNotifyCharacteristic() != null && characteristics.getWriteCharacteristic() != null) {
-            //TODO: репорт в BtConnectionFsm вместо репорта в CallFsm
-//          reportToCallFsm(getCallFsmState(), RP_BtReady, TAG);
             toBtFsm(ReportBtConnectedCompatible);
         } else
-            //TODO: репорт в BtConnectionFsm вместо репорта в CallFsm
-//          reportToCallFsm(getCallFsmState(), RP_BtConnectedIncompatible, TAG);
             toBtFsm(ReportBtConnectedIncompatible);
     }
 
     @Override
     public void actionDescriptorWrite() {
+        if (BLEState == BluetoothLeState.TRANSMIT_DATA)
+            toBtFsm(ReportBtExchangeEnabled);
+        else
+            toBtFsm(ReportBtExchangeDisabled);
 
     }
 
@@ -327,11 +321,10 @@ public class ConnectorBluetooth
     public void disconnect() {
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff)
-                    .setCommand(disconnectDevice)
-                    .execute();
+                         .setCommand(disconnectDevice)
+                         .execute();
         else
-            bleController.setCommand(disconnectDevice)
-                    .execute();
+            bleController.setCommand(disconnectDevice).execute();
     }
 
     public void connecting() {
@@ -395,7 +388,6 @@ public class ConnectorBluetooth
 
     //--------------------- ICallFsmListener
 
-
     private void searchDevice() {
         leScanner.setDeviceAddress(PreferencesProcessor.getBtChosenAddrPref());
         startScan();
@@ -414,20 +406,23 @@ public class ConnectorBluetooth
         EBtReport reportCasted = (EBtReport) report;
         switch (reportCasted) {
             case ReportTurningOn:
+
                 if (Settings.debug) Timber.i(TAG, "ReportTurningOn");
+
                 if (!isBtSuppported()) {
                     toBtFsm(ReportBtNotSupported, to);
                     return;
                 }
+
                 if (!isBleSupported()) {
                     toBtFsm(ReportBtLeNotSupported, to);
                     return;
                 }
 
                 mBluetoothLeCore.initialize();
-//                registerSuperDataConsumer(getTransmitter());
-//                leDataTransmitter.addIRxDataListener(getReceiver());
+                build();
                 toBtFsm(ReportBtPrepared, to);
+                break;
 
             case ReportEnable:
                 if (Settings.debug) Timber.i(TAG, "ReportEnable");
@@ -438,48 +433,32 @@ public class ConnectorBluetooth
                     toBtFsm(ReportBtDisabled, to);
                 break;
 
-            // build(); //ToDo:
-
             case ReportSearchStart:
                 if (Settings.debug) Timber.i(TAG, "ReportSearchStart");
                 if (scanWithFilter)
                     searchDevice();
                 else
                     startScan();
-
-//                ToDo: если нашел слать репорт и останавливать сканиорвание
-//                  reportToBtFsm(to, EBtReport.ReportBtFound, TAG);
-//                  stopScan();
-
-//                state = STATE_SCANNING;
                 break;
 
             case ReportConnect:
                 if (Settings.debug) Timber.i(TAG, "ReportConnect");
                 connecting();
-//                Todo:  записать это в соответствующие калбэки
-//                reportToBtFsm(to, EBtReport.ReportBtDisconnected, TAG);
-//
-//                reportToBtFsm(to, EBtReport.ReportBtConnectedCompatible, TAG);
-//
-//                reportToBtFsm(to, EBtReport.ReportBtConnectedIncompatible, TAG);
-
                 break;
 
             case ReportExchangeEnable:
-                //Todo: добавить репорт для записи дескриптора
-                toBtFsm(ReportBtExchangeEnabled, to);
+                if (Settings.debug) Timber.i(TAG, "ReportExchangeEnable");
+                enableTransmitData();
                 break;
 
             case ReportExchangeDisable:
-                //Todo: добавить репорт для записи дескриптора
-                toBtFsm(ReportBtExchangeDisabled, to);
+                if (Settings.debug) Timber.i(TAG, "ReportExchangeDisable");
+                disableTransmitData();
                 break;
 
             case ReportSearchStop:
                 if (Settings.debug) Timber.i(TAG, "ReportSearchStop");
                 stopScan();
-//               state = STATE_SCANSTOPED;
                 break;
 
             case ReportDisconnect:
@@ -496,13 +475,10 @@ public class ConnectorBluetooth
                 if (Settings.debug) Timber.i(TAG, "ReportTurningOff");
                 onStop();
                 break;
+
             default:
                 break;
         }
     }
-
-
-
-
 
 }
