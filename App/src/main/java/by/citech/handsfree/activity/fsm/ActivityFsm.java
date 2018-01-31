@@ -24,7 +24,7 @@ public class ActivityFsm extends FsmCore<EActivityReport, EActivityState> {
         super(Tags.ActivityFsm);
         reportToStateMap = new EnumMap<>(EActivityReport.class);
         currState = ST_TurnedOff;
-        processReport(TurningOn, getFsmCurrentState(), Tags.ActivityFsm);
+        processReport(RP_TurningOn, getFsmCurrentState(), Tags.ActivityFsm);
     }
 
     public static ActivityFsm getInstance() {
@@ -54,15 +54,16 @@ public class ActivityFsm extends FsmCore<EActivityReport, EActivityState> {
 
     @Override
     protected boolean processFsmStateChange(EActivityState from, EActivityState to, EActivityReport why, boolean isForce) {
-        if (!super.processFsmStateChange(from, to, why, isForce)) return false;
-        else {
+        if (!super.processFsmStateChange(from, to, why, isForce)) {
+            return false;
+        } else {
             if (isActivity(from) && isTransition(why)) prevActivityState = from;
             return true;
         }
     }
 
     private boolean isTransition(EActivityReport report) {
-        return report != PowerOffPressed && report != HomePressed;
+        return report != RP_PowerOffPressed && report != RP_HomePressed;
     }
 
     private boolean isActivity(EActivityState state) {
