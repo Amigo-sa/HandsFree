@@ -124,42 +124,19 @@ public class ConnectorBluetooth
         return instance;
     }
 
-    private boolean isBleSupported(){
-        return ThisApp.getAppContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+    //--------------------- getters and setters ----------------
+
+    public BluetoothDevice getConnectedDevice() {
+        return mBTDeviceConn;
     }
 
-    private boolean isBtSuppported(){
-        BluetoothManager bluetoothManager = ThisApp.getBluetoothManager();
-        BluetoothAdapter bluetoothAdapter = ThisApp.getBluetoothAdapter();
-        return !(bluetoothManager == null || bluetoothAdapter == null);
+    public boolean isScanning() {
+        return leScanner.isScanning();
     }
 
-    private void enableBt(){
-        BluetoothAdapter bluetoothAdapter = ThisApp.getBluetoothAdapter();
-        if (!bluetoothAdapter.isEnabled())
-            bluetoothAdapter.enable();
+    public boolean isConnected() {
+        return getBLEState() != BluetoothLeState.DISCONECTED;
     }
-
-    public void build() {
-        if (Settings.debug) Timber.i(TAG, "build");
-
-        leDataTransmitter.addIRxDataListener(iRxComplex);
-        leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
-        ThisApp.registerBroadcastListener(this);
-    }
-
-    //--------------------- IBase --------------------
-
-    private void onStop() {
-        if (Settings.debug) Timber.i(TAG, "onStop");
-        if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
-            bleController.setCommand(exchangeDataOff).execute();
-
-        mBTDevice = null;
-        mBTDeviceConn = null;
-    }
-
-    //--------------------- getters and setters
 
     public ConnectorBluetooth setmHandler(Handler mHandler) {
         if (Settings.debug) Timber.i(TAG, "mHandler = %s", mHandler);
@@ -170,22 +147,6 @@ public class ConnectorBluetooth
     public ConnectorBluetooth addIRxDataListener(IRxComplex iRxComplex) {
         this.iRxComplex = iRxComplex;
         return this;
-    }
-
-    private void setmBTDevice(BluetoothDevice mBTDevice) {
-        this.mBTDevice = mBTDevice;
-    }
-
-    public BluetoothDevice getConnectDevice() {
-        return mBTDeviceConn;
-    }
-
-    public boolean isScanning() {
-        return leScanner.isScanning();
-    }
-
-    public boolean isConnecting() {
-        return getBLEState() != BluetoothLeState.DISCONECTED;
     }
 
     public ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
@@ -215,6 +176,47 @@ public class ConnectorBluetooth
         this.scanWithFilter = scanWithFilter;
         leScanner.setScanWithFilter(scanWithFilter);
         leScanner.setiScanListener(scanWithFilter ? this : mIScanListener);
+    }
+
+    //------------------ internal methods -------------------------
+
+    private void setmBTDevice(BluetoothDevice mBTDevice) {
+        this.mBTDevice = mBTDevice;
+    }
+
+    private boolean isBleSupported(){
+        return ThisApp.getAppContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+    }
+
+    private boolean isBtSuppported(){
+        BluetoothManager bluetoothManager = ThisApp.getBluetoothManager();
+        BluetoothAdapter bluetoothAdapter = ThisApp.getBluetoothAdapter();
+        return !(bluetoothManager == null || bluetoothAdapter == null);
+    }
+
+    private void enableBt(){
+        BluetoothAdapter bluetoothAdapter = ThisApp.getBluetoothAdapter();
+        if (!bluetoothAdapter.isEnabled())
+            bluetoothAdapter.enable();
+    }
+
+    private void build() {
+        if (Settings.debug) Timber.i(TAG, "build");
+
+        leDataTransmitter.addIRxDataListener(iRxComplex);
+        leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
+        ThisApp.registerBroadcastListener(this);
+    }
+
+    private void onStop() {
+        if (Settings.debug) Timber.i(TAG, "onStop");
+        if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
+            bleController.setCommand(exchangeDataOff)
+                         .setCommand(disconnectDevice)
+                         .execute();
+
+        mBTDevice = null;
+        mBTDeviceConn = null;
     }
 
     //------------------ get Device from adapter-------------------------
