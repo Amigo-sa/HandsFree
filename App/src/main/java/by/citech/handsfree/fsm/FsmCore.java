@@ -91,7 +91,7 @@ abstract public class FsmCore<
     synchronized protected boolean unregisterFsmListener(IFsmListener<R, S> listener, String message) {
         boolean isRemoved;
         isRemoved = listeners.remove(listener);
-        if (isRemoved) {if (debug) Timber.w("%s unregister success: <%s>, count: <%d>", fsmName, message, listeners.size());}
+        if (isRemoved) {if (debug) Timber.i("%s unregister success: <%s>, count: <%d>", fsmName, message, listeners.size());}
         else           {if (debug) Timber.e("%s unregister fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
         return isRemoved;
     }

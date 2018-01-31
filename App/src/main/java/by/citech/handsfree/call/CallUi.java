@@ -167,4 +167,17 @@ public class CallUi implements CallFsm.ICallFsmReporter, DebugFsm.IDebugFsmRepor
         onClickBtnRedAbnormal();
     }
 
+    //--------------------- ICallUi
+
+    public interface ICallUi {
+
+        default void onClickBtnRed() {
+            getInstance().onClickBtnRed();
+        }
+
+        default void onClickBtnGreen() {
+            getInstance().onClickBtnGreen();
+        }
+
+    }
 }

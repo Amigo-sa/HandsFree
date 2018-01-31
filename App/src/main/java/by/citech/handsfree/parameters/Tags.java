@@ -17,7 +17,7 @@ public class Tags {
     public static final String ActivityFsm = PREFIX + "ActivityFsm";
     public static final String ConnectionFsm = PREFIX + "BtFsm";
     public static final String ThreadManager = PREFIX + "ThreadingManager";
-    public static final String ConnectionControl = PREFIX + "ConnectionControl";
+    public static final String ConnectionControl = PREFIX + "CallControl";
     public static final String LightHelper = PREFIX + "LightHelper";
     public static final String ToolbarHelper = PREFIX + "ToolbarHelper";
     public static final String LightActivityViewManager = PREFIX + "LightViewManager";
@@ -39,7 +39,7 @@ public class Tags {
     public static final String ConnectorNet = PREFIX + "ConnectorNet";
     public static final String Network = PREFIX + "Network";
     public static final String DECODE = PREFIX + "DECODE";
-    public static final String Caller = PREFIX + "CallControl";
+    public static final String Caller = PREFIX + "ThisAppBuilder";
     public static final String CallUi = PREFIX + "CallUi";
     public static final String RedirectToNet = PREFIX + "RedirectToNet";
     public static final String RedirectFromNet = PREFIX + "RedirectFromNet";

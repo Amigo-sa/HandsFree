@@ -28,7 +28,6 @@ import android.text.TextWatcher;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,7 +45,8 @@ import java.util.Map;
 import by.citech.handsfree.R;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
-import by.citech.handsfree.call.CallControl;
+import by.citech.handsfree.application.ThisAppBuilder;
+import by.citech.handsfree.call.CallUi;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
@@ -69,7 +69,6 @@ import by.citech.handsfree.ui.helpers.ContactEditorHelper;
 import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
-import by.citech.handsfree.call.ICallUi;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
@@ -91,7 +90,7 @@ public class CallActivity
                    IGetView,
                    IThreading,
                    IBtToUiCtrl,
-                   ICallUi,
+        CallUi.ICallUi,
                    IMsgToUi,
                    IScanListener {
 
@@ -187,7 +186,7 @@ public class CallActivity
         setupContactEditor();
         setupContactor();
 
-        CallControl.getInstance()
+        ThisAppBuilder.getInstance()
                 .setOpMode(opMode)
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
