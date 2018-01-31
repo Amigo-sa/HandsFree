@@ -10,6 +10,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.util.InetAddress;
 import by.citech.handsfree.util.Name;
+import timber.log.Timber;
 
 
 public class Contact
@@ -39,33 +40,33 @@ public class Contact
         state = EContactState.Null;
         this.name = name;
         this.ip = ip;
-        if (debug) Log.d(TAG, toString() + " contactTrunkCount is: " + (++contactTrunkCount));
+        if (debug) Timber.d(toString() + " contactTrunkCount is: " + (++contactTrunkCount));
     }
 
     public Contact(long id, String name, String ip) {
         this(name, ip);
         this.id = id;
-        if (debug) Log.d(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
+        if (debug) Timber.d(toString() + " contactFullCount is: " + (++contactFullCount));
     }
 
     public Contact(long id, Contact contact) {
         this(contact.getName(), contact.getIp());
         this.id = id;
-        if (debug) Log.d(TAG, toString() + " contactFullCount is: " + (++contactFullCount));
+        if (debug) Timber.d(toString() + " contactFullCount is: " + (++contactFullCount));
     }
 
     public static boolean checkForEqual(Contact toCheck1, Contact toCheck2) {
-        if (debug) Log.i(TAG, "checkForEqual");
+        if (debug) Timber.i("checkForEqual");
         return toCheck1.ip.equals(toCheck2.ip);
     }
 
     public static boolean checkForValid(Contact contact) {
-        if (debug) Log.i(TAG, "checkForValid");
+        if (debug) Timber.i("checkForValid");
         boolean isIpValid = InetAddress.checkForValidityIpAddr(contact.getIp());
         boolean isNameValid = Name.checkForValidityContactName(contact.getName());
-        if (debug) Log.i(TAG, String.format("checkForValid ip is %s, name is %s",
-                isIpValid ? VALID : INVALID,
-                isNameValid ? VALID : INVALID));
+        if (debug) Timber.i("checkForValid ip is %s, name is %s",
+                isIpValid   ? VALID : INVALID,
+                isNameValid ? VALID : INVALID);
         return isIpValid && isNameValid;
     }
 
@@ -119,7 +120,7 @@ public class Contact
         clone.ip = this.ip;
         clone.id = this.id;
         clone.state = EContactState.valueOf(this.state.name());
-        if (debug) Log.w(TAG, "original is " + this.toString() + "\nclone is " + clone.toString());
+        if (debug) Timber.tag(TAG).w("original is " + this.toString() + "\nclone is " + clone.toString());
         return clone;
     }
 

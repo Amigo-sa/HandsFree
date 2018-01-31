@@ -32,7 +32,7 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
         return instance;
     }
 
-    //--------------------- IConnectionFsmReporter
+    //--------------------- IBtFsmReporter
 
     synchronized boolean processReport(EBtReport report, EBtState from, String msg) {
         return checkFsmReport(report, from, msg) && processFsmReport(report, from);
@@ -41,9 +41,9 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
     //--------------------- processing
 
     @Override
-    synchronized protected boolean processFsmReport(EBtReport why, EBtState from) {
+    synchronized protected boolean processFsmReport(EBtReport report, EBtState from) {
         if (debug) Timber.i("processFsmReport");
-        return processFsmStateChange(why, from, why.getDestination());
+        return processFsmStateChange(report, from, report.getDestination());
     }
 
     //--------------------- interfaces
@@ -54,19 +54,19 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
             return getInstance().getFsmCurrentState();
         }
         @CallSuper
-        default boolean reportToBtFsm(EBtReport whatHappened, EBtState fromWhichState, String fromWho) {
-            return getInstance().processReport(whatHappened, fromWhichState, fromWho);
+        default boolean reportToBtFsm(EBtReport report, EBtState from, String message) {
+            return getInstance().processReport(report, from, message);
         }
     }
 
     public interface IBtFsmListenerRegister {
         @CallSuper
-        default boolean registerBtFsmListener(IBtFsmListener listener, String who) {
-            return getInstance().registerFsmListener(listener, who);
+        default boolean registerBtFsmListener(IBtFsmListener listener, String message) {
+            return getInstance().registerFsmListener(listener, message);
         }
         @CallSuper
-        default boolean unregisterBtFsmListener(IBtFsmListener listener, String who) {
-            return getInstance().unregisterFsmListener(listener, who);
+        default boolean unregisterBtFsmListener(IBtFsmListener listener, String message) {
+            return getInstance().unregisterFsmListener(listener, message);
         }
     }
 

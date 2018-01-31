@@ -11,7 +11,6 @@ import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
-import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
@@ -46,7 +45,6 @@ public class ThisApp
         connectorBluetooth = ConnectorBluetooth.getInstance();
         callControl = CallControl.getInstance();
         broadcastReceiverWrapper = new BroadcastReceiverWrapper();
-        registerActivityFsmListener(callControl, Tags.ConnectionControl);
         PreferencesProcessor.init(this);
         appContext = getApplicationContext();
         registerReceiver(broadcastReceiverWrapper.getGattUpdateReceiver(), BroadcastReceiverWrapper.makeGattUpdateIntentFilter());

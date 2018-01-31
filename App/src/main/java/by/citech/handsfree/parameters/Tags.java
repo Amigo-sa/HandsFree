@@ -91,5 +91,6 @@ public class Tags {
     public static final String NumberedTrafficAnalyzer = PREFIX + "NumberedAnalyzer";
     public static final String RssiReporter = PREFIX + "RssiReporter";
     public static final String DebugFsm = PREFIX + "DebugFsm";
+    public static final String NetFsm = PREFIX + "NetFsm";
 
 }
