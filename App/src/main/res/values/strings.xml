@@ -17,6 +17,7 @@
     <string name="label_buttonChDevice">Change</string>
     <string name="label_buttonReturn">Return</string>
     <string name="label_list_devices">Available devices</string>
+    <string name="label_btnScanDevice">Scan</string>
     <string name="label_device_address">Device\'s address: </string>
     <string name="label_device_name">Device\' name: </string>
     <string name="label_state">State:</string>

@@ -176,6 +176,16 @@
             android:background="@color/colorWhite">
         </ListView>
 
+        <Button
+            android:id="@+id/btnScanDevice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#008080"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:text="@string/label_btnScanDevice"
+            android:textSize="16sp" />
+
     </LinearLayout>
 
 </FrameLayout>

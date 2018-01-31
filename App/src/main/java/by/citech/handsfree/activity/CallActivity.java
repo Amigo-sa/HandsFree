@@ -208,7 +208,9 @@ public class CallActivity
         IUiToBtListener = BluetoothUi.getInstance();
         iMenuListener = (IMenuListener) IUiToBtListener;
         linearLayoutTouchListener = new LinearLayoutTouchListener((ISwipeListener) IUiToBtListener);
+        findViewById(R.id.btnScanDevice).setOnClickListener((v) -> IUiToBtListener.clickBtnScanListener());
         findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
+
         //IScanListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 

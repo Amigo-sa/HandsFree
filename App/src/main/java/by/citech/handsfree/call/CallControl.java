@@ -2,54 +2,47 @@ package by.citech.handsfree.call;
 
 import android.os.Handler;
 
-import by.citech.handsfree.activity.fsm.ActivityFsm;
-import by.citech.handsfree.activity.fsm.EActivityReport;
-import by.citech.handsfree.activity.fsm.EActivityState;
-import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm;
-import by.citech.handsfree.bluetoothlegatt.fsm.EBtReport;
-import by.citech.handsfree.bluetoothlegatt.fsm.EBtState;
-
-import by.citech.handsfree.call.fsm.CallFsm;
-import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
+import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
+import by.citech.handsfree.bluetoothlegatt.IBtList;
+import by.citech.handsfree.network.ConnectorNet;
+import by.citech.handsfree.common.HandlerExtended;
+import by.citech.handsfree.ui.IBtToUiCtrl;
+import by.citech.handsfree.data.StorageData;
+import by.citech.handsfree.debug.Bt2AudOutLooper;
+import by.citech.handsfree.debug.Bt2BtLooper;
+import by.citech.handsfree.debug.Bt2BtRecorder;
+import by.citech.handsfree.debug.AudIn2AudOutLooper;
+import by.citech.handsfree.debug.ToBtLooper;
+import by.citech.handsfree.ui.IMsgToUi;
+import by.citech.handsfree.network.INetInfoGetter;
+import by.citech.handsfree.settings.EDataSource;
+import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.threading.IThreading;
+import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.bluetoothlegatt.IScanListener;
 import timber.log.Timber;
 
-public class CallControl
-        implements IThreading,
-        ActivityFsm.IActivityFsmListener,
-        BtFsm.IBtFsmListener,
-        CallFsm.ICallFsmListener {
+import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
+import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
 
-    private static final String STAG = Tags.ConnectionControl;
+public class CallControl {
+
     private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
-    static {objCount = 0;}
-    {objCount++;TAG = STAG + " " + objCount;}
 
-    private Runnable checkIfFound = () -> {
-        if (debug) Timber.tag(TAG).i("checkIfFound");
-        EConnectionState state = getConnectionFsmState();
-        if (state != Found) reportToConnectionFsm(state, SearchStopped, TAG);
-    };
-    private Runnable checkIfConnected = () -> {
-        if (debug) Timber.tag(TAG).i("checkIfConnected");
-        EConnectionState state = getConnectionFsmState();
-        if (state != Connected) reportToConnectionFsm(state, ConnectStopped, TAG);
-    };
-    private Runnable checkIfGotStatus = () -> {
-        if (debug) Timber.tag(TAG).i("checkIfGotStatus");
-        EConnectionState state = getConnectionFsmState();
-        if (state != EConnectionState.GotStatus) reportToConnectionFsm(state, GettingStatusStopped, TAG);
-    };
-    private Runnable checkIfGotInitData = () -> {
-        if (debug) Timber.tag(TAG).i("checkIfGotInitData");
-        EConnectionState state = getConnectionFsmState();
-        if (state != GotInitData) reportToConnectionFsm(state, GettingInitDataStopped, TAG);
-    };
+    //--------------------- preparation
 
-    private Handler handler;
+    private INetInfoGetter iNetInfoGetter;
+    private IBluetoothListener iBluetoothListener;
+    private IScanListener iScanListener;
+    private IBtToUiCtrl iBtToUiCtrl;
+    private IMsgToUi iMsgToUi;
+    private IBtList iBtList;
+    private EOpMode opMode;
+
+    {
+        opMode = Settings.Common.opMode;
+    }
 
     //--------------------- singleton
 
@@ -71,80 +64,238 @@ public class CallControl
 
     //--------------------- getters and setters
 
-    public void setHandler(Handler handler) {
-        this.handler = handler;
+    public CallControl setOpMode(EOpMode opMode) {
+        this.opMode = opMode;
+        return this;
     }
 
-    //--------------------- IActivityFsmListener
+    public CallControl setiNetInfoGetter(INetInfoGetter listener) {
+        iNetInfoGetter = listener;
+        return this;
+    }
 
-    @Override
-    public void onBtFsmStateChange(EBtState from, EBtState to, EBtReport why) {
-        switch (to) {
-            case DeviceChosen:
-                reportToConnectionFsm(to, SearchStarted, TAG); break;
-            case Searching:
-                add(checkIfFound, 5000); break;
-            case NotFound:
-                reportToConnectionFsm(to, SearchStarted, TAG); break;
-            case Found:
-                remove(checkIfFound);
-                reportToConnectionFsm(to, ConnectStarted, TAG); break;
-            case Connecting:
-                add(checkIfConnected, 20000); break;
-            case Connected:
-                remove(checkIfConnected);
-                reportToConnectionFsm(to, GettingStatusStarted, TAG); break;
-            case GotStatus:
-                remove(checkIfGotStatus);
-                reportToConnectionFsm(to, GettingInitDataStarted, TAG); break;
-            case Disconnected:
-                reportToConnectionFsm(to, SearchStarted, TAG); break;
-            case GettingStatus:
-                add(checkIfGotStatus, 5000); break;
-            case GettingInitData:
-                add(checkIfGotInitData, 5000); break;
-            case GotInitData:
-                remove(checkIfGotInitData); break;
-            case BtNotSupported:
-            case BtPrepared:
-            case DeviceNotChosen:
-            case Incompatible:
-            case TurnedOn:
-            case Failure:
-            default: break;
+    public CallControl setiBluetoothListener(IBluetoothListener listener) {
+        iBluetoothListener = listener;
+        return this;
+    }
+
+    public CallControl setiScanListener(IScanListener iScanListener) {
+        this.iScanListener = iScanListener;
+        return this;
+    }
+
+    public CallControl setiBtToUiCtrl(IBtToUiCtrl iBtToUiCtrl) {
+        this.iBtToUiCtrl = iBtToUiCtrl;
+        return this;
+    }
+
+    public CallControl setiMsgToUi(IMsgToUi iMsgToUi) {
+        this.iMsgToUi = iMsgToUi;
+        return this;
+    }
+
+    public CallControl setiBtList(IBtList iBtList) {
+        this.iBtList = iBtList;
+        return this;
+    }
+
+    //--------------------- main
+
+    public void build() {
+        if (debug) Timber.i("build");
+        switch (opMode) {
+            case Bt2Bt:
+                buildBt2Bt();
+                break;
+            case Net2Net:
+                buildNet2Net();
+                break;
+            case Record:
+                buildRecord();
+                break;
+            case Bt2AudOut:
+                buildBt2AudOut();
+                break;
+            case AudIn2AudOut:
+                buildAudIn2AudOut();
+                break;
+            case AudIn2Bt:
+                build2Bt(MICROPHONE);
+                break;
+            case DataGen2Bt:
+                build2Bt(DATAGENERATOR);
+                break;
+            case Normal:
+            default:
+                buildNormal();
+                break;
         }
     }
 
-    //--------------------- add and remove delayed
-
-    private void add(Runnable r, long delay) {
-        if (handler != null) handler.postDelayed(r, delay);
+    public void destroy() {
+        if (debug) Timber.i("destroy");
+        iNetInfoGetter = null;
+        iBluetoothListener = null;
+        opMode = null;
+        iBtToUiCtrl = null;
+        iMsgToUi = null;
+        iBtList = null;
     }
 
-    private void remove(Runnable r) {
-        if (handler != null) handler.removeCallbacks(r);
+    //--------------------- data from bluetooth redirects to network and vice versa
+
+    private void buildNormal() {
+        if (debug) Timber.i("buildNormal");
+        if (iNetInfoGetter == null
+                || iBluetoothListener == null
+                || iBtToUiCtrl == null
+                || iMsgToUi == null
+                || iBtList == null) {
+            if (debug) Timber.e("buildNormal illegal parameters");
+            return;
+        }
+
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
+        HandlerExtended handlerExtended = new HandlerExtended(ConnectorNet.getInstance());
+
+        ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(handlerExtended)
+                .setStorageFromBt(storageBtToNet)
+                .setStorageToBt(storageNetToBt)
+                .setiScanListener(iScanListener, true);
+
+        ConnectorNet.getInstance()
+                .setStorageToNet(storageBtToNet)
+                .setStorageFromNet(storageNetToBt)
+                .setiNetInfoGetter(iNetInfoGetter)
+                .setHandler(handlerExtended);
     }
 
-    private void removeAll() {
-        if (handler != null) {
-            handler.removeCallbacks(checkIfFound);
-            handler.removeCallbacks(checkIfConnected);
-            handler.removeCallbacks(checkIfGotStatus);
-            handler.removeCallbacks(checkIfGotInitData);
+    //--------------------- data from data source redirects to bluetooth
+
+    private void build2Bt(EDataSource dataSource) {
+        if (debug) Timber.i("build2Bt");
+        if (       iBtToUiCtrl == null
+                || iMsgToUi == null
+                || iBtList == null
+                || dataSource == null) {
+            if (debug) Timber.e("build2Bt illegal parameters");
+            return;
+        }
+
+        StorageData<byte[][]> toBtStorage = new StorageData<>(Tags.TO_BT_STORE);
+
+        ToBtLooper toBtLooper = null;
+
+        try {
+            toBtLooper = new ToBtLooper(toBtStorage, dataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setStorageToBt(toBtStorage)
+                .setmHandler(new Handler())
+                .setiScanListener(iScanListener, true);
+
+        if (toBtLooper != null) {
+            toBtLooper.build();
         }
     }
 
-    //--------------------- IActivityFsmListener
+    //--------------------- data from bluetooth redirects to dynamic
 
-    @Override
-    public void onActivityFsmStateChange(EActivityState from, EActivityState to, EActivityReport why) {
-//        if (to == LightA) {
-//            registerConnectionFsmListener(this, TAG);
-//            reportToBtFsm(getBtFsmState(), GettingInitDataStart, TAG);
-//        } else if (why == LightA2ScanAPressed) {
-//            removeAll();
-//            unregisterConnectionFsmListener(this, TAG);
-//        }
+    private void buildBt2AudOut() {
+        if (debug) Timber.i("buildBt2AudOut");
+        if (iBluetoothListener == null
+                || iBtToUiCtrl == null
+                || iMsgToUi == null
+                || iBtList == null) {
+            if (debug) Timber.e("buildBt2AudOut illegal parameters");
+            return;
+        }
+
+        Bt2AudOutLooper bt2AudOutLooper = new Bt2AudOutLooper();
+
+        ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .addIRxDataListener(bt2AudOutLooper)
+                .setmHandler(new Handler())
+                .setiScanListener(iScanListener, true);
+
+        bt2AudOutLooper.build();
+    }
+
+    //--------------------- data from microphone redirects to dynamic
+
+    private void buildAudIn2AudOut() {
+        if (debug) Timber.i("buildAudIn2AudOut");
+
+        AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper(true);
+        audIn2AudOutLooper.build();
+    }
+
+    //--------------------- data from bluetooth loops back to bluetooth
+
+    private void buildBt2Bt() {
+        if (debug) Timber.i("buildBt2Bt");
+        if (iBluetoothListener == null
+                || iBtToUiCtrl == null
+                || iMsgToUi == null
+                || iBtList == null) {
+            if (debug) Timber.e("buildBt2Bt illegal parameters");
+            return;
+        }
+
+        StorageData<byte[]> storageFromBt = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageToBt = new StorageData<>(Tags.TO_BT_STORE);
+
+        Bt2BtLooper bt2BtLooper = new Bt2BtLooper(storageFromBt, storageToBt);
+
+        ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(new Handler())
+                .setStorageFromBt(storageFromBt)
+                .setStorageToBt(storageToBt)
+                .setiScanListener(iScanListener, true);
+
+        bt2BtLooper.build();
+    }
+
+    //--------------------- data from bluetooth recorded and looped back to bluetooth
+
+    private void buildRecord() {
+        if (debug) Timber.i("buildRecord");
+        if (iBluetoothListener == null
+                || iBtToUiCtrl == null
+                || iMsgToUi == null
+                || iBtList == null) {
+            if (debug) Timber.e("buildBt2Bt illegal parameters");
+            return;
+        }
+
+        StorageData<byte[]> storageBtToNet = new StorageData<>(Tags.FROM_BT_STORE);
+        StorageData<byte[][]> storageNetToBt = new StorageData<>(Tags.TO_BT_STORE);
+
+        Bt2BtRecorder bt2BtRecorder = new Bt2BtRecorder(storageBtToNet, storageNetToBt);
+
+        ConnectorBluetooth.getInstance()
+                .setiBluetoothListener(iBluetoothListener)
+                .setmHandler(new Handler())
+                .setStorageFromBt(storageBtToNet)
+                .setStorageToBt(storageNetToBt)
+                .setiScanListener(iScanListener, true);
+
+        bt2BtRecorder.build();
+    }
+
+    //--------------------- data from network looped back to network
+
+    private void buildNet2Net() {
+        if (debug) Timber.i("buildNet2Net");
     }
 
 }
