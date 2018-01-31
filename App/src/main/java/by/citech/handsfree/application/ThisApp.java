@@ -11,6 +11,7 @@ import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
+import by.citech.handsfree.network.ConnectorNet;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
@@ -23,6 +24,7 @@ public class ThisApp
     private static BluetoothAdapter bluetoothAdapter;
     private static ThreadingManager threadingManager;
     private static ConnectorBluetooth connectorBluetooth;
+    private static ConnectorNet connectorNet;
     private static ActivityFsm activityFsm;
     private static CallControl callControl;
     private static BluetoothDevice btConnectedDevice;
@@ -43,6 +45,7 @@ public class ThisApp
         appContext = getApplicationContext();
         activityFsm = ActivityFsm.getInstance();
         connectorBluetooth = ConnectorBluetooth.getInstance();
+        connectorNet = ConnectorNet.getInstance();
         callControl = CallControl.getInstance();
         broadcastReceiverWrapper = new BroadcastReceiverWrapper();
         PreferencesProcessor.init(this);
@@ -65,6 +68,8 @@ public class ThisApp
         super.onLowMemory();
     }
 
+    public static ConnectorNet getConnectorNet() {return connectorNet;}
+    public static ConnectorBluetooth getConnectorBluetooth() {return connectorBluetooth;}
     public static Context getAppContext() {return appContext;}
     public static BluetoothManager getBluetoothManager() {return bluetoothManager;}
     public static BluetoothAdapter getBluetoothAdapter() {return bluetoothAdapter;}

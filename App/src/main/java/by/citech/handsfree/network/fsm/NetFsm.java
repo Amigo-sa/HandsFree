@@ -48,9 +48,9 @@ public class NetFsm extends FsmCore<ENetReport, ENetState> {
 
     //--------------------- interfaces
 
-    public interface IBtFsmReporter {
+    public interface INetFsmReporter {
         @CallSuper
-        default ENetState getBtFsmState() {
+        default ENetState getNetFsmState() {
             return getInstance().getFsmCurrentState();
         }
         @CallSuper
@@ -59,13 +59,13 @@ public class NetFsm extends FsmCore<ENetReport, ENetState> {
         }
     }
 
-    public interface IBtFsmListenerRegister {
+    public interface INetFsmListenerRegister {
         @CallSuper
-        default boolean registerBtFsmListener(INetFsmListener listener, String message) {
+        default boolean registerNetFsmListener(INetFsmListener listener, String message) {
             return getInstance().registerFsmListener(listener, message);
         }
         @CallSuper
-        default boolean unregisterBtFsmListener(INetFsmListener listener, String message) {
+        default boolean unregisterNetFsmListener(INetFsmListener listener, String message) {
             return getInstance().unregisterFsmListener(listener, message);
         }
     }

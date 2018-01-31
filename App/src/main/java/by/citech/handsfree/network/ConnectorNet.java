@@ -21,6 +21,7 @@ import by.citech.handsfree.network.control.Disconnect;
 import by.citech.handsfree.exchange.SendMessage;
 import by.citech.handsfree.exchange.IStreamerRegister;
 import by.citech.handsfree.exchange.RedirectToNet;
+import by.citech.handsfree.network.fsm.NetFsm;
 import by.citech.handsfree.network.server.ServerOff;
 import by.citech.handsfree.network.server.ServerOn;
 import by.citech.handsfree.network.server.IServerCtrl;
@@ -38,8 +39,8 @@ import static by.citech.handsfree.call.fsm.ECallReport.*;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class ConnectorNet
-        implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, CallFsm.ICallFsmListener,
-        IMessageResult, IServerOff, IDisc, INetListener, CallFsm.ICallFsmReporter, IThreading, CallFsm.ICallFsmListenerRegister {
+        implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, IThreading, IMessageResult,
+        IServerOff, IDisc, INetListener, NetFsm.INetFsmListener, NetFsm.INetFsmReporter {
 
     private static final String STAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
@@ -149,13 +150,11 @@ public class ConnectorNet
 
     public void build() {
         if (debug) Timber.i("build");
-        registerCallFsmListener(this, TAG);
         startServer();
     }
 
     public void destroy() {
         if (debug) Timber.i("destroy");
-        unregisterCallFsmListener(this, TAG);
         isBaseStopInProcess = true;
         iNetInfoGetter = null;
         handler = null;

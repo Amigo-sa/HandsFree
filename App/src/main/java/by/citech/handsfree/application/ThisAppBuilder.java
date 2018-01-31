@@ -54,11 +54,7 @@ public class ThisAppBuilder {
     public static ThisAppBuilder getInstance() {
         if (instance == null) {
             synchronized (ThisAppBuilder.class) {
-                if (instance == null) {
-                    instance = new ThisAppBuilder();
-                }
-            }
-        }
+                if (instance == null) {instance = new ThisAppBuilder();}}}
         return instance;
     }
 
