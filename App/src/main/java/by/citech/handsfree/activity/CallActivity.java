@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -115,7 +116,7 @@ public class CallActivity
     // список найденных устройств
     private ListView listDevices;
     private LeDeviceListAdapter deviceListAdapter;
-
+    private Button btnScan;
     // ддя списка контактов
     private DialogProcessor dialogProcessor;
     private RecyclerView viewRecyclerContacts;
@@ -172,6 +173,8 @@ public class CallActivity
         editTextContactName = findViewById(R.id.editTextContactName);
         editTextContactIp = findViewById(R.id.editTextContactIp);
 
+        btnScan = findViewById(R.id.btnScanDevice);
+        btnScan.setOnClickListener((v) -> IUiToBtListener.clickBtnScanListener());
         findViewById(R.id.btnChangeDevice).setOnClickListener((v) -> clickBtnChangeDevice());
         findViewById(R.id.btnClearContact).setOnClickListener((v) -> clickBtnClearContact());
         findViewById(R.id.btnAddContact).setOnClickListener((v) -> clickBtnStartEditorAdd());
@@ -208,7 +211,6 @@ public class CallActivity
         IUiToBtListener = BluetoothUi.getInstance();
         iMenuListener = (IMenuListener) IUiToBtListener;
         linearLayoutTouchListener = new LinearLayoutTouchListener((ISwipeListener) IUiToBtListener);
-        findViewById(R.id.btnScanDevice).setOnClickListener((v) -> IUiToBtListener.clickBtnScanListener());
         findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
 
         //IScanListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
@@ -290,13 +292,13 @@ public class CallActivity
     private void onCreateScanMenu(Menu menu) {
         if (debug) Timber.tag(TAG).i("onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        if (!IUiToBtListener.isScanning()) {
-            menu.findItem(R.id.menu_stop).setVisible(false);
-            menu.findItem(R.id.menu_scan).setVisible(true);
-        } else {
-            menu.findItem(R.id.menu_stop).setVisible(true);
-            menu.findItem(R.id.menu_scan).setVisible(false);
-        }
+//        if (!IUiToBtListener.isScanning()) {
+//            menu.findItem(R.id.menu_stop).setVisible(false);
+//            menu.findItem(R.id.menu_scan).setVisible(true);
+//        } else {
+//            menu.findItem(R.id.menu_stop).setVisible(true);
+//            menu.findItem(R.id.menu_scan).setVisible(false);
+//        }
     }
 
     @Override
@@ -572,12 +574,14 @@ public class CallActivity
             deviceListAdapter.clear();
         if (IUiToBtListener.isConnecting())
             deviceListAdapter.addDevice(IUiToBtListener.getConnectDevice(), 200);
+        btnScan.setText(getResources().getString(R.string.menu_scan));
         actionBar.setCustomView(R.layout.actionbar);
         invalidateOptionsMenu();
     }
 
     @Override
     public void onStopScan() {
+        btnScan.setText(getResources().getString(R.string.menu_stop));
         actionBar.setCustomView(null);
         invalidateOptionsMenu();
     }

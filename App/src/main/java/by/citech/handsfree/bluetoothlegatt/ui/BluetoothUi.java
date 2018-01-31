@@ -130,8 +130,10 @@ public class BluetoothUi implements IUiToBtListener,
 
     @Override
     public void clickBtnScanListener() {
-
-        ConnectorBluetooth.getInstance().startScan();
+        if (isScanning())
+            ConnectorBluetooth.getInstance().startScan();
+        else
+            ConnectorBluetooth.getInstance().stopScan();
     }
 
     @Override
