@@ -47,9 +47,13 @@ public class CallHandshake implements
     //--------------------- transmitter
 
     @Override
-    public void registerRx(IRx<String> receiver) {this.receiver = receiver;}
+    public void registerRx(IRx<String> receiver) {
+        this.receiver = receiver;
+    }
     @Override
-    public void unregisterRx(IRx<String> receiver) {this.receiver = null;}
+    public void unregisterRx(IRx<String> receiver) {
+        if (this.receiver == receiver) this.receiver = null;
+    }
 
     //--------------------- ICallFsmReporter
 

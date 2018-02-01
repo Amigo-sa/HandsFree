@@ -14,6 +14,7 @@ public enum ENetReport implements IFsmReport<ENetState> {
     RP_NetConnectedIn   (ST_Connected),
     RP_NetOutFail       (ST_NetPrepared),
     RP_ConnectOut       (ST_Connecting),
+    RP_NetAddrInvalid   (ST_NetPrepared),
     RP_Disconnect       (ST_Disconnecting),
     RP_NetDisconnected  (ST_NetPrepared),
     RP_ExchangeEnable   (ST_Exchange),

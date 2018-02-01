@@ -39,7 +39,7 @@ public class Tags {
     public static final String ConnectorNet = PREFIX + "ConnectorNet";
     public static final String Network = PREFIX + "Network";
     public static final String DECODE = PREFIX + "DECODE";
-    public static final String Caller = PREFIX + "ThisAppBuilder";
+    public static final String ThisAppBuilder = PREFIX + "ThisAppBuilder";
     public static final String CallUi = PREFIX + "CallUi";
     public static final String RedirectToNet = PREFIX + "RedirectToNet";
     public static final String RedirectFromNet = PREFIX + "RedirectFromNet";

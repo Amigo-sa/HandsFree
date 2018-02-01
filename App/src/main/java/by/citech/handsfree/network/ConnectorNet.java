@@ -5,9 +5,7 @@ import android.os.Handler;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import by.citech.handsfree.call.fsm.CallFsm;
-import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ECallState;
+import by.citech.handsfree.exchange.IRx;
 import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.exchange.RedirectFromNet;
@@ -21,13 +19,14 @@ import by.citech.handsfree.network.control.Disconnect;
 import by.citech.handsfree.exchange.SendMessage;
 import by.citech.handsfree.exchange.IStreamerRegister;
 import by.citech.handsfree.exchange.RedirectToNet;
+import by.citech.handsfree.network.fsm.ENetReport;
+import by.citech.handsfree.network.fsm.ENetState;
 import by.citech.handsfree.network.fsm.NetFsm;
 import by.citech.handsfree.network.server.ServerOff;
 import by.citech.handsfree.network.server.ServerOn;
 import by.citech.handsfree.network.server.IServerCtrl;
 import by.citech.handsfree.network.server.IServerCtrlReg;
 import by.citech.handsfree.network.server.IServerOff;
-import by.citech.handsfree.parameters.Messages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
@@ -35,27 +34,18 @@ import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.util.InetAddress;
 import timber.log.Timber;
 
-import static by.citech.handsfree.call.fsm.ECallReport.*;
+import static by.citech.handsfree.network.fsm.ENetReport.*;
 import static by.citech.handsfree.util.Network.getIpAddr;
 
-public class ConnectorNet
-        implements IServerCtrlReg, IStreamerRegister, IClientCtrlReg, IThreading, IMessageResult,
-        IServerOff, IDisc, INetListener, NetFsm.INetFsmListener, NetFsm.INetFsmReporter {
+public class ConnectorNet implements
+        IServerCtrlReg, IStreamerRegister, IClientCtrlReg, IDisc,
+        IThreading, IMessageResult, IServerOff, INetListener,
+        NetFsm.INetFsmListener,
+        NetFsm.INetFsmReporter {
 
-    private static final String STAG = Tags.ConnectorNet;
+    private static final String TAG = Tags.ConnectorNet;
     private static final boolean debug = Settings.debug;
     private static final EDataSource dataSource = Settings.Common.dataSource;
-
-    private static int objCount;
-    private final String TAG;
-    static {objCount = 0;}
-
-
-    {
-        objCount++;
-        TAG = STAG + " " + objCount;
-        transmitterCtrls = new ConcurrentLinkedQueue<>();
-    }
 
     private String remAddr;
     private String remPort;
@@ -68,38 +58,52 @@ public class ConnectorNet
     private StorageData<byte[]> storageToNet;
     private StorageData<byte[][]> storageFromNet;
     private boolean isBaseStopInProcess;
+    private boolean isClientConnected;
+    private boolean isServerConnected;
+
+    //--------------------- producer
+
+    private IRx<String> consumerToSetString;
+    private IRx<byte[]> consumerToSetBytes;
+
+    //--------------------- consumer
+
+    IRx<String> consumerToGiveString = new IRx<String>() {
+        @Override
+        public void onRx(String received) {sendMessage(received);}
+        @Override
+        public void onRxFinished() {}
+    };
+
+    IRx<byte[]> consumerToGiveBytes = new IRx<byte[]>() {
+        @Override
+        public void onRx(byte[] received) {} //TODO: реализовать логику
+        @Override
+        public void onRxFinished() {}
+    };
 
     //--------------------- runnables
 
-    private Runnable startServerDelayed = new Runnable() {
-        @Override
-        public void run() {
-            if (debug) Timber.i("startServerDelayed run");
-            while (isBaseStopInProcess) try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            handler.post(() -> startServer());
+    private Runnable startServerDelayed = () -> {
+        if (debug) Timber.i("startServerDelayed run");
+        while (isBaseStopInProcess) try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        handler.post(this::startServer);
     };
 
-    private Runnable stopStreaming = new Runnable() {
-        @Override
-        public void run() {
-            if (debug) Timber.i("stopStreaming run");
-            stopStream();
-        }
+    private Runnable stopStreaming = () -> {
+        if (debug) Timber.i("stopStreaming run");
+        stopStream();
     };
 
-    private Runnable stopNetworking = new Runnable() {
-        @Override
-        public void run() {
-            if (debug) Timber.i("stopNetworking run");
-            stopStream();
-            disconnect(iConnCtrl);
-            stopServer();
-        }
+    private Runnable stopNetworking = () -> {
+        if (debug) Timber.i("stopNetworking run");
+        stopStream();
+        disconnect(iConnCtrl);
+        stopServer();
     };
 
     //--------------------- singleton
@@ -107,20 +111,36 @@ public class ConnectorNet
     private static volatile ConnectorNet instance = null;
 
     private ConnectorNet() {
+        transmitterCtrls = new ConcurrentLinkedQueue<>();
     }
 
     public static ConnectorNet getInstance() {
         if (instance == null) {
             synchronized (ConnectorNet.class) {
-                if (instance == null) {
-                    instance = new ConnectorNet();
-                }
-            }
-        }
+                if (instance == null) {instance = new ConnectorNet();}}}
         return instance;
     }
 
     //--------------------- getters and setters
+
+
+    public IRx<String> getConsumerToGiveString() {
+        return consumerToGiveString;
+    }
+
+    public IRx<byte[]> getConsumerToGiveBytes() {
+        return consumerToGiveBytes;
+    }
+
+    public ConnectorNet setConsumerToTakeString(IRx<String> consumerToSetString) {
+        this.consumerToSetString = consumerToSetString;
+        return this;
+    }
+
+    public ConnectorNet setConsumerToTakeBytes(IRx<byte[]> consumerToSetBytes) {
+        this.consumerToSetBytes = consumerToSetBytes;
+        return this;
+    }
 
     public ConnectorNet setHandler(Handler handler) {
         this.handler = handler;
@@ -140,10 +160,6 @@ public class ConnectorNet
     public ConnectorNet setStorageFromNet(StorageData<byte[][]> storageNetToBt) {
         this.storageFromNet = storageNetToBt;
         return this;
-    }
-
-    private void setiConnCtrl(IConnCtrl iConnCtrl) {
-        this.iConnCtrl = iConnCtrl;
     }
 
     //--------------------- main
@@ -188,32 +204,28 @@ public class ConnectorNet
         ServerStopped
     }
 
-    //--------------------- ICallFsmListener
+    //--------------------- INetFsmListener
 
     @Override
-    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
-        if (debug) Timber.i("onCallerStateChange");
+    public void onFsmStateChange(ENetState from, ENetState to, ENetReport why) {
+        if (debug) Timber.i("onNetFsmStateChange");
         switch (why) {
-            case RP_BtError:
-            case RP_CallFailedInternally:
-            case RP_CallEndedLocal:
+            case RP_TurningOn:
+                break;
+            case RP_ConnectOut:
+                if (!isValidCoordinates()) toNet(ENetReport.RP_NetAddrInvalid);
+                else connect();
+                break;
+            case RP_TurningOff:
+            case RP_Disconnect:
                 exchangeStop();
                 disconnect(iConnCtrl);
                 break;
-            case RP_OutCanceledLocal:
-                disconnect(iClientCtrl);
-                break;
-            case RP_InAcceptedLocal:
-                setiConnCtrl(iServerCtrl);
-                responseAccept();
+            case RP_ExchangeEnable:
                 exchangeStart();
                 break;
-            case RP_InRejectedLocal:
-                disconnect(iServerCtrl);
-                break;
-            case RP_OutStartedLocal:
-                if (!isValidCoordinates()) reportToCallFsm(to, RP_OutInvalidCoordinates, TAG);
-                else connect();
+            case RP_ExchangeDisable:
+                exchangeStop();
                 break;
             default:
                 break;
@@ -224,161 +236,64 @@ public class ConnectorNet
 
     @Override
     public void srvOnOpen() {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("srvOnOpen callerState is %s", callerState);
-        switch (callerState) {
-            case ST_Ready:
-                if (reportToCallFsm(callerState, RP_InConnected, TAG)) return; else break;
-            default:
-                if (debug) Timber.i("srvOnOpen %s", callerState);
-                disconnect(iServerCtrl); // TODO: обрываем, если не ждём звонка?
-                return;
+        if (isClientConnected) {
+            disconnect(iServerCtrl);
+        } else {
+            toNet(RP_NetConnectedIn);
+            isServerConnected = true;
         }
-        if (debug) Timber.i("srvOnOpen recursive call");
-        srvOnOpen();
     }
 
     @Override
     public void srvOnFailure() {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("srvOnFailure callerState is %s", callerState);
-        switch (callerState) {
-            case ST_InConnected:
-                if (reportToCallFsm(callerState, RP_InFailed, TAG)) return; else break;
-            case ST_Call:
-                if (reportToCallFsm(callerState, RP_CallFailedExternally, TAG)) {
-                    exchangeStop();
-                    return;
-                }
-                else break;
-            default:
-                if (debug) Timber.i("srvOnFailure %s", callerState); return;
+        if (isServerConnected) {
+            isServerConnected = false;
+            toNet(RP_NetDisconnected);
         }
-        if (debug) Timber.i("srvOnFailure recursive call");
-        srvOnFailure();
     }
 
     @Override
     public void srvOnClose() {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("srvOnClose callerState is %s", callerState);
-        switch (callerState) {
-            case ST_InConnected:
-                if (reportToCallFsm(callerState, RP_InCanceledRemote, TAG)) return; else break;
-            case ST_Call:
-                if (reportToCallFsm(callerState, RP_CallEndedRemote, TAG)) {
-                    exchangeStop();
-                    return;
-                }
-                else break;
-            default:
-                if (debug) Timber.i("srvOnClose %s", callerState); return;
+        if (isServerConnected) {
+            isServerConnected = false;
+            toNet(RP_NetDisconnected);
         }
-        if (debug) Timber.i("srvOnClose recursive call");
-        srvOnClose();
     }
 
     @Override
     public void cltOnOpen() {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("cltOnOpen callerState is %s", callerState);
-        switch (callerState) {
-            case ST_OutStarted:
-                if (reportToCallFsm(callerState, RP_OutConnected, TAG)) return; else break;
-            default:
-                if (debug) Timber.i("cltOnOpen %s", callerState);
-                disconnect(iClientCtrl); // TODO: обрываем, если не звонили?
-                return;
-        }
-        if (debug) Timber.i("cltOnOpen recursive call");
-        cltOnOpen();
+        toNet(RP_NetConnectedOut);
+        isClientConnected = true;
     }
 
     @Override
     public void cltOnFailure() {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("cltOnFailure callerState is %s", callerState);
-        switch (callerState) {
-            case ST_OutConnected:
-                if (reportToCallFsm(callerState, RP_OutRejectedRemote, TAG)) return; else break;
-            case ST_OutStarted:
-                if (reportToCallFsm(callerState, RP_OutFailed, TAG)) return; else break;
-            case ST_Call:
-                if (reportToCallFsm(callerState, RP_CallFailedExternally, TAG)) {
-                    exchangeStop();
-                    return;
-                }
-                else break;
-            default:
-                if (debug) Timber.i("cltOnFailure %s", callerState); return;
-        }
-        if (debug) Timber.i("cltOnFailure recursive call");
-        cltOnFailure();
+        toNet(RP_NetDisconnected);
     }
 
     @Override
     public void cltOnMessageText(String message) {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("cltOnMessageText callerState is %s", callerState);
-        switch (callerState) {
-            case ST_OutConnected:
-                if (message.equals(Messages.RESPONSE_ACCEPT)) {
-                    if (reportToCallFsm(callerState, RP_OutAcceptedRemote, TAG)) {
-                        setiConnCtrl(iClientCtrl);
-                        exchangeStart();
-                    } else {
-                        break;
-                    }
-                } else if (message.equals(Messages.RESPONSE_REJECT)) {
-                    if (reportToCallFsm(callerState, RP_OutRejectedRemote, TAG)) {
-                        disconnect(iClientCtrl);
-                    } else {
-                        break;
-                    }
-                }
-                return;
-            default:
-                if (debug) Timber.i("cltOnMessageText %s", callerState); return;
-        }
-        if (debug) Timber.i("cltOnMessageText recursive call");
-        cltOnMessageText(message);
+        if (consumerToSetString != null) consumerToSetString.onRx(message);
     }
 
     @Override
     public void cltOnClose() {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("cltOnClose callerState is %s", callerState);
-        switch (callerState) {
-            case ST_OutConnected:
-                if (reportToCallFsm(callerState, RP_OutRejectedRemote, TAG)) return; else break;
-            case ST_Call:
-                if (reportToCallFsm(callerState, RP_CallEndedRemote, TAG)) return; else break;
-            default:
-                if (debug) Timber.i("cltOnClose %s", callerState); return;
+        if (isClientConnected) {
+            isClientConnected = false;
+            toNet(RP_NetDisconnected);
         }
-        if (debug) Timber.i("cltOnClose recursive call");
-        cltOnClose();
     }
 
     //--------------------- IServerCtrlReg
 
     @Override
     public void registerServerCtrl(IServerCtrl iServerCtrl) {
-        ECallState callerState = getCallFsmState();
-        if (debug) Timber.i("registerServerCtrl callerState is %s", callerState);
-        switch (callerState) {
-            case ST_BtReady:
-            case ST_TurnedOn:
-                if (iServerCtrl == null) {
-                    reportToCallFsm(callerState, RP_NetError, TAG);
-                    startServer();
-                } else {
-                    reportToCallFsm(callerState, RP_NetReady, TAG);
-                    this.iServerCtrl = iServerCtrl;
-                }
-                return;
-            default:
-                if (debug) Timber.i("registerServerCtrl %s", callerState); return;
+        if (iServerCtrl == null) {
+            startServer();
+            toNet(RP_NetPrepareFail);
+        } else {
+            this.iServerCtrl = iServerCtrl;
+            toNet(RP_NetPrepared);
         }
     }
 
@@ -419,22 +334,12 @@ public class ConnectorNet
     private void startServer() {
         if (debug) Timber.i("startServer");
         if (isBaseStopInProcess) {
-            if (debug) Timber.i("startServer base stop in applyPrefsToSettings, waiting");
+            if (debug) Timber.i("startServer base stop in process, waiting");
             addRunnable(startServerDelayed);
         } else {
-            if (debug) Timber.i("startServer base stop is finisfed, starting server");
+            if (debug) Timber.i("startServer base stop is finished, starting server");
             new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
         }
-    }
-
-    private void responseAccept() {
-        if (debug) Timber.i("responseAccept");
-        new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_ACCEPT);
-    }
-
-    private void responseReject() {
-        if (debug) Timber.i("responseAccept");
-        new SendMessage(this, iServerCtrl.getTransmitter()).execute(Messages.RESPONSE_REJECT);
     }
 
     private void connect() {
@@ -499,6 +404,22 @@ public class ConnectorNet
             transmitterCtrls.remove(transmitterCtrl);
         }
         if (debug) Timber.i("stopStream done");
+    }
+
+    //--------------------- misc
+
+    private boolean toNet(ENetReport report) {
+        return reportToNetFsm(report, getNetFsmState(), TAG);
+    }
+
+    private void sendMessage(String message) {
+        if (debug) Timber.i("sendMessage %s", message);
+        new SendMessage(this, iConnCtrl.getTransmitter()).execute(message);
+    }
+
+
+    private void setiConnCtrl(IConnCtrl iConnCtrl) {
+        this.iConnCtrl = iConnCtrl;
     }
 
 }

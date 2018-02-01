@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
 import by.citech.handsfree.application.ThisAppBuilder;
@@ -85,15 +86,8 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 
 public class CallActivity
         extends AppCompatActivity
-        implements INetInfoGetter,
-                   IBluetoothListener,
-                   LocationListener,
-                   IGetView,
-                   IThreading,
-                   IBtToUiCtrl,
-        CallUi.ICallUi,
-                   IMsgToUi,
-                   IScanListener {
+        implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
+        IThreading, IBtToUiCtrl, CallUi.ICallUi, IMsgToUi, IScanListener {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -189,8 +183,7 @@ public class CallActivity
         setupContactEditor();
         setupContactor();
 
-        ThisAppBuilder.getInstance()
-                .setOpMode(opMode)
+        ThisApp.getThisAppBuilder()
                 .setiNetInfoGetter(this)
                 .setiBluetoothListener(this)
                 .setiScanListener(this)

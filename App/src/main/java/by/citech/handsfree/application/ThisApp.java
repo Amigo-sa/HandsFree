@@ -11,6 +11,7 @@ import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
+import by.citech.handsfree.call.CallHandshake;
 import by.citech.handsfree.network.ConnectorNet;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;
@@ -20,6 +21,7 @@ public class ThisApp
         extends Application
         implements ActivityFsm.IActivityFsmListenerRegister {
 
+    private static ThisAppBuilder thisAppBuilder;
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;
     private static ThreadingManager threadingManager;
@@ -27,6 +29,7 @@ public class ThisApp
     private static ConnectorNet connectorNet;
     private static ActivityFsm activityFsm;
     private static CallControl callControl;
+    private static CallHandshake callHandshake;
     private static BluetoothDevice btConnectedDevice;
     private static String btConnectedAddr;
     private static Context appContext;
@@ -40,6 +43,7 @@ public class ThisApp
         Timber.plant(new Timber.DebugTree());
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
+        thisAppBuilder = new ThisAppBuilder(PreferencesProcessor.getOpModePref());
         threadingManager = ThreadingManager.getInstance();
         threadingManager.activate();
         appContext = getApplicationContext();
@@ -47,6 +51,7 @@ public class ThisApp
         connectorBluetooth = ConnectorBluetooth.getInstance();
         connectorNet = ConnectorNet.getInstance();
         callControl = CallControl.getInstance();
+        callHandshake = CallHandshake.getInstance();
         broadcastReceiverWrapper = new BroadcastReceiverWrapper();
         PreferencesProcessor.init(this);
         appContext = getApplicationContext();
@@ -68,6 +73,11 @@ public class ThisApp
         super.onLowMemory();
     }
 
+    public static ThisAppBuilder getThisAppBuilder() {return thisAppBuilder;}
+    public static CallHandshake getCallHandshake() {return callHandshake;}
+    public static ActivityFsm getActivityFsm() {return activityFsm;}
+    public static CallControl getCallControl() {return callControl;}
+    public static ThreadingManager getThreadingManager() {return threadingManager;}
     public static ConnectorNet getConnectorNet() {return connectorNet;}
     public static ConnectorBluetooth getConnectorBluetooth() {return connectorBluetooth;}
     public static Context getAppContext() {return appContext;}

@@ -54,7 +54,7 @@ public class NetFsm extends FsmCore<ENetReport, ENetState> {
             return getInstance().getFsmCurrentState();
         }
         @CallSuper
-        default boolean reportToBtFsm(ENetReport report, ENetState from, String message) {
+        default boolean reportToNetFsm(ENetReport report, ENetState from, String message) {
             return getInstance().processReport(report, from, message);
         }
     }

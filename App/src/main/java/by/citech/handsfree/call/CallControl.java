@@ -1,24 +1,29 @@
 package by.citech.handsfree.call;
 
-import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm;
 import by.citech.handsfree.bluetoothlegatt.fsm.EBtReport;
 import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.call.fsm.ECallReport;
+import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.network.fsm.ENetReport;
 import by.citech.handsfree.network.fsm.NetFsm;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
+
+import static by.citech.handsfree.application.ThisApp.getCallHandshake;
+import static by.citech.handsfree.application.ThisApp.getConnectorBluetooth;
+import static by.citech.handsfree.application.ThisApp.getConnectorNet;
 
 public class CallControl implements
         NetFsm.INetFsmReporter,
         NetFsm.INetFsmListenerRegister,
         BtFsm.IBtFsmReporter,
         BtFsm.IBtFsmListenerRegister,
+        CallFsm.ICallFsmListener,
         CallFsm.ICallFsmReporter {
 
-    private static final boolean debug = Settings.debug;
     private static final String TAG = Tags.CallControl;
+    private static final boolean debug = Settings.debug;
 
     //--------------------- singleton
 
@@ -34,13 +39,48 @@ public class CallControl implements
         return instance;
     }
 
-    //--------------------- getters
-
-    public BtFsm.IBtFsmListener getBtFsmListener() {return btFsmListener;}
-    public NetFsm.INetFsmListener getNetFsmListener() {return netFsmListener;}
-    public CallFsm.ICallFsmListener getCallListener() {return callFsmListener;}
-
     //--------------------- listeners
+
+    @Override
+    public void onFsmStateChange(ECallState from, ECallState to, ECallReport report) {
+        switch (report) {
+            case RP_OutRejectedRemote:
+            case RP_OutCanceledLocal:
+            case RP_InRejectedLocal:
+                toNet(ENetReport.RP_Disconnect);
+                break;
+            case RP_OutStartedLocal:
+                toNet(ENetReport.RP_ConnectOut);
+                break;
+            case RP_OutAcceptedRemote:
+            case RP_InAcceptedLocal:
+                toBt(EBtReport.RP_ExchangeEnable);
+                toNet(ENetReport.RP_ExchangeEnable);
+                break;
+            case RP_CallEndedLocal:
+                toBt(EBtReport.RP_ExchangeDisable);
+                toNet(ENetReport.RP_ExchangeDisable);
+                break;
+            case RP_TurningOn:
+                registerBtFsmListener(getConnectorBluetooth(), Tags.ConnectorBluetooth);
+                registerNetFsmListener(getConnectorNet(), Tags.ConnectorNet);
+                registerBtFsmListener(btFsmListener, TAG);
+                registerNetFsmListener(netFsmListener, TAG);
+                getCallHandshake().registerRx(getConnectorNet().getConsumerToGiveString());
+                getConnectorNet().setConsumerToTakeString(getCallHandshake());
+                break;
+            case RP_TurningOff:
+                unregisterBtFsmListener(getConnectorBluetooth(), Tags.ConnectorBluetooth);
+                unregisterNetFsmListener(getConnectorNet(), Tags.ConnectorNet);
+                unregisterBtFsmListener(btFsmListener, TAG);
+                unregisterNetFsmListener(netFsmListener, TAG);
+                getCallHandshake().unregisterRx(getConnectorNet().getConsumerToGiveString());
+                getConnectorNet().setConsumerToTakeString(null);
+                break;
+            default:
+                break;
+        }
+    }
 
     private BtFsm.IBtFsmListener btFsmListener = (from, to, report) -> {
         switch (report) {
@@ -67,6 +107,8 @@ public class CallControl implements
             case RP_BtDisconnected:
                 toCall(ECallReport.RP_BtError);
                 toBt(EBtReport.RP_Connect);
+                break;
+            default:
                 break;
         }
     };
@@ -100,35 +142,7 @@ public class CallControl implements
             case RP_NetOutFail:
                 toCall(ECallReport.RP_OutFailed);
                 break;
-        }
-    };
-
-    private CallFsm.ICallFsmListener callFsmListener = (from, to, report) -> {
-        switch (report) {
-            case RP_OutRejectedRemote:
-            case RP_OutCanceledLocal:
-            case RP_InRejectedLocal:
-                toNet(ENetReport.RP_Disconnect);
-                break;
-            case RP_OutStartedLocal:
-                toNet(ENetReport.RP_ConnectOut);
-                break;
-            case RP_OutAcceptedRemote:
-            case RP_InAcceptedLocal:
-                toBt(EBtReport.RP_ExchangeEnable);
-                toNet(ENetReport.RP_ExchangeEnable);
-                break;
-            case RP_CallEndedLocal:
-                toBt(EBtReport.RP_ExchangeDisable);
-                toNet(ENetReport.RP_ExchangeDisable);
-                break;
-            case RP_TurningOn:
-                registerBtFsmListener(ThisApp.getConnectorBluetooth(), Tags.ConnectorBluetooth);
-                registerNetFsmListener(ThisApp.getConnectorNet(), Tags.ConnectorNet);
-                break;
-            case RP_TurningOff:
-                unregisterBtFsmListener(ThisApp.getConnectorBluetooth(), Tags.ConnectorBluetooth);
-                unregisterNetFsmListener(ThisApp.getConnectorNet(), Tags.ConnectorNet);
+            default:
                 break;
         }
     };
@@ -138,7 +152,7 @@ public class CallControl implements
     }
 
     private boolean toNet(ENetReport report) {
-        return reportToBtFsm(report, getNetFsmState(), TAG);
+        return reportToNetFsm(report, getNetFsmState(), TAG);
     }
 
     private boolean toCall(ECallReport report) {

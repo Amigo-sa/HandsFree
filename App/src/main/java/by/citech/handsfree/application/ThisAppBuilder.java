@@ -2,11 +2,16 @@ package by.citech.handsfree.application;
 
 import android.os.Handler;
 
+import by.citech.handsfree.activity.fsm.ActivityFsm;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.bluetoothlegatt.IBtList;
+import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm;
+import by.citech.handsfree.call.fsm.CallFsm;
+import by.citech.handsfree.debug.fsm.DebugFsm;
 import by.citech.handsfree.network.ConnectorNet;
 import by.citech.handsfree.common.HandlerExtended;
+import by.citech.handsfree.network.fsm.NetFsm;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.Bt2AudOutLooper;
@@ -26,8 +31,14 @@ import timber.log.Timber;
 import static by.citech.handsfree.settings.EDataSource.DATAGENERATOR;
 import static by.citech.handsfree.settings.EDataSource.MICROPHONE;
 
-public class ThisAppBuilder {
+public class ThisAppBuilder implements
+        CallFsm.ICallFsmListenerRegister,
+        BtFsm.IBtFsmListenerRegister,
+        NetFsm.INetFsmListenerRegister,
+        ActivityFsm.IActivityFsmListenerRegister,
+        DebugFsm.IDebugFsmListenerRegister {
 
+    private static final String TAG = Tags.ThisAppBuilder;
     private static final boolean debug = Settings.debug;
 
     //--------------------- preparation
@@ -48,22 +59,11 @@ public class ThisAppBuilder {
 
     private static volatile ThisAppBuilder instance = null;
 
-    private ThisAppBuilder() {
-    }
-
-    public static ThisAppBuilder getInstance() {
-        if (instance == null) {
-            synchronized (ThisAppBuilder.class) {
-                if (instance == null) {instance = new ThisAppBuilder();}}}
-        return instance;
+    public ThisAppBuilder(EOpMode opMode) {
+        this.opMode = opMode;
     }
 
     //--------------------- getters and setters
-
-    public ThisAppBuilder setOpMode(EOpMode opMode) {
-        this.opMode = opMode;
-        return this;
-    }
 
     public ThisAppBuilder setiNetInfoGetter(INetInfoGetter listener) {
         iNetInfoGetter = listener;
@@ -100,31 +100,15 @@ public class ThisAppBuilder {
     public void build() {
         if (debug) Timber.i("build");
         switch (opMode) {
-            case Bt2Bt:
-                buildBt2Bt();
-                break;
-            case Net2Net:
-                buildNet2Net();
-                break;
-            case Record:
-                buildRecord();
-                break;
-            case Bt2AudOut:
-                buildBt2AudOut();
-                break;
-            case AudIn2AudOut:
-                buildAudIn2AudOut();
-                break;
-            case AudIn2Bt:
-                build2Bt(MICROPHONE);
-                break;
-            case DataGen2Bt:
-                build2Bt(DATAGENERATOR);
-                break;
+            case Bt2Bt:        buildBt2Bt(); break;
+            case Net2Net:      buildNet2Net(); break;
+            case Record:       buildRecord(); break;
+            case Bt2AudOut:    buildBt2AudOut(); break;
+            case AudIn2AudOut: buildAudIn2AudOut(); break;
+            case AudIn2Bt:     build2Bt(MICROPHONE); break;
+            case DataGen2Bt:   build2Bt(DATAGENERATOR); break;
             case Normal:
-            default:
-                buildNormal();
-                break;
+            default:           buildNormal(); break;
         }
     }
 
@@ -142,6 +126,7 @@ public class ThisAppBuilder {
 
     private void buildNormal() {
         if (debug) Timber.i("buildNormal");
+
         if (iNetInfoGetter == null
                 || iBluetoothListener == null
                 || iBtToUiCtrl == null
@@ -167,6 +152,8 @@ public class ThisAppBuilder {
                 .setStorageFromNet(storageNetToBt)
                 .setiNetInfoGetter(iNetInfoGetter)
                 .setHandler(handlerExtended);
+
+        registerCallFsmListener(ThisApp.getCallControl(), Tags.CallControl);
     }
 
     //--------------------- data from data source redirects to bluetooth

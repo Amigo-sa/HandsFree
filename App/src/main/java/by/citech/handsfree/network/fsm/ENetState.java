@@ -13,8 +13,8 @@ public enum ENetState implements IFsmState<ENetState> {
     ST_TurnedOn,
     ST_NetPrepareFail,
     ST_NetPrepared,
-    ST_Disconnecting,
     ST_Connecting,
+    ST_Disconnecting,
     ST_Connected,
     ST_Exchange,
     ST_Failure;
@@ -23,9 +23,9 @@ public enum ENetState implements IFsmState<ENetState> {
         availableFromAny = s(ST_Failure, ST_TurnedOff);
         ST_TurnedOff     .a(ST_TurnedOn);
         ST_TurnedOn      .a(ST_NetPrepareFail, ST_NetPrepared);
-        ST_NetPrepareFail.a();
+        ST_NetPrepareFail.a(ST_NetPrepared);
         ST_NetPrepared   .a(ST_Connecting);
-        ST_Connecting    .a(ST_Connecting, ST_Disconnecting, ST_Connected);
+        ST_Connecting    .a(ST_Connecting, ST_Disconnecting, ST_Connected, ST_NetPrepared);
         ST_Disconnecting .a(ST_NetPrepared);
         ST_Connected     .a(ST_NetPrepared, ST_Disconnecting, ST_Exchange);
         ST_Exchange      .a(ST_NetPrepared, ST_Disconnecting, ST_Connected);
