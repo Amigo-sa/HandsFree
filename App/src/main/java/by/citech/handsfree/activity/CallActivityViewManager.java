@@ -1,7 +1,6 @@
 package by.citech.handsfree.activity;
 
 import android.support.annotation.IdRes;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Button;
@@ -11,10 +10,11 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm;
 import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.call.fsm.ECallState;
-import by.citech.handsfree.call.fsm.ECallReport;
+import by.citech.handsfree.debug.fsm.DebugFsm;
+import by.citech.handsfree.network.fsm.NetFsm;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.IOnInfoUpdateListener;
 import by.citech.handsfree.statistic.NumberedTrafficInfo;
 import by.citech.handsfree.statistic.RssiReporter;
@@ -24,6 +24,7 @@ import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.ui.helpers.IViewKeeper;
+import timber.log.Timber;
 
 import static by.citech.handsfree.ui.helpers.ViewHelper.clearAnimation;
 import static by.citech.handsfree.ui.helpers.ViewHelper.disableGray;
@@ -37,35 +38,26 @@ import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
 import static by.citech.handsfree.contact.ContactHelper.setContactInfo;
 import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
 import static by.citech.handsfree.call.fsm.ECallState.ST_Ready;
-import static by.citech.handsfree.settings.EOpMode.Normal;
 
 public class CallActivityViewManager
-        implements IOnInfoUpdateListener, IViewKeeper, CallFsm.ICallFsmListener,
-        CallFsm.ICallFsmListenerRegister, RssiReporter.IOnRssiUpdateListener {
+        implements IOnInfoUpdateListener, IViewKeeper,
+        RssiReporter.IOnRssiUpdateListener {
 
-    private static final String STAG = Tags.ViewManager;
+    private static final String STAG = Tags.CallActivityViewManager;
     private static final boolean debug = Settings.debug;
 
     private static int objCount;
     private final String TAG;
     static {objCount = 0;}
+    {objCount++;TAG = STAG + " " + objCount;}
 
     private static final int DARKCYAN = Colors.DARKCYAN;
     private static final int DARKKHAKI = Colors.DARKKHAKI;
 
     //--------------------- preparation
 
-    private EOpMode opMode;
-
-    {
-        objCount++;
-        TAG = STAG + " " + objCount;
-        opMode = Settings.Common.opMode;
-    }
-
-    //--------------------- non-settings
-
     private IGetView iGetter;
+    private EOpMode opMode;
     private TextView textViewRssi;
     private TextView textViewPacketSize;
     private TextView textViewLastLostPacketsAmount;
@@ -99,16 +91,186 @@ public class CallActivityViewManager
     private Animation animCall;
     private boolean isCallAnim;
 
+    //--------------------- listeners
+
+    CallFsm.ICallFsmListener callFsmListener = (from, to, report) -> {
+        switch (report) {
+            case RP_NetError:
+            case RP_BtError:
+                disableGray(getBtnGreen(), "ERROR");
+                disableGray(getBtnRed(), "ERROR");
+                break;
+            case RP_NetReady:
+            case RP_BtReady:
+                if (to == ST_Ready) {
+                    enableBtnCall(getBtnGreen(), "CALL");
+                    disableGray(getBtnRed(), "IDLE");
+                }
+                break;
+            case RP_CallFailedExternally:
+            case RP_CallFailedInternally:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "FAILED");
+                break;
+            case RP_CallEndedRemote:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "ENDED");
+                break;
+            case RP_OutConnected:
+                enableBtnCall(getBtnGreen(), "CALLING...");
+                enableBtnCall(getBtnRed(), "CANCEL");
+                break;
+            case RP_OutAcceptedRemote:
+                disableGray(getBtnGreen(), "ON CALL");
+                enableBtnCall(getBtnRed(), "END CALL");
+                stopCallAnim();
+                break;
+            case RP_OutRejectedRemote:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "BUSY");
+                stopCallAnim();
+                break;
+            case RP_OutFailed:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "OFFLINE");
+                stopCallAnim();
+                break;
+            case RP_OutInvalidCoordinates:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "BAD IP");
+                stopCallAnim();
+                break;
+            case RP_InConnected:
+                enableBtnCall(getBtnGreen(), "INCOMING...");
+                enableBtnCall(getBtnRed(), "REJECT");
+                startCallAnim();
+                break;
+            case RP_InCanceledRemote:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "CANCELED");
+                stopCallAnim();
+                break;
+            case RP_OutStartedLocal:
+                disableGray(getBtnGreen(), "CALLING...");
+                enableBtnCall(getBtnRed(), "CANCEL");
+                startCallAnim();
+                break;
+            case RP_CallEndedLocal:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "ENDED");
+                break;
+            case RP_OutCanceledLocal:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "CANCELED");
+                stopCallAnim();
+                break;
+            case RP_InRejectedLocal:
+                enableBtnCall(getBtnGreen(), "CALL");
+                disableGray(getBtnRed(), "REJECTED");
+                stopCallAnim();
+                break;
+            case RP_InAcceptedLocal:
+                disableGray(getBtnGreen(), "ON CALL");
+                enableBtnCall(getBtnRed(), "END CALL");
+                stopCallAnim();
+                break;
+            default:
+                break;
+        }
+    };
+
+    BtFsm.IBtFsmListener btFsmListener = (from, to, report) -> {
+        //TODO: прикрутить отображение
+    };
+
+    NetFsm.INetFsmListener netFsmListener = (from, to, report) -> {
+        //TODO: прикрутить отображение
+    };
+
+    DebugFsm.IDebugFsmListener debugFsmListener = (from, to, report) -> {
+        switch (report) {
+            case RP_StartDebug:
+                switch (opMode) {
+                    case DataGen2Bt:
+                    case Bt2AudOut:
+                    case AudIn2Bt:
+                    case AudIn2AudOut:
+                    case Bt2Bt:
+                        disableGray(getBtnGreen());
+                        enableBtnCall(getBtnRed());
+                        break;
+                    case Record:
+                        switch (to) {
+                            case ST_DebugPlay:
+                                disableGray(getBtnGreen(), "PLAYING");
+                                enableBtnCall(getBtnRed(), "STOP");
+                                break;
+                            case ST_DebugRecord:
+                                disableGray(getBtnGreen(), "RECORDING");
+                                enableBtnCall(getBtnRed(), "STOP");
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case Net2Net:
+                    default:
+                        break;
+                }
+                break;
+            case RP_StopDebug:
+                switch (opMode) {
+                    case DataGen2Bt:
+                    case Bt2AudOut:
+                    case AudIn2Bt:
+                    case AudIn2AudOut:
+                    case Bt2Bt:
+                        enableGreen(getBtnGreen());
+                        disableGray(getBtnRed());
+                        break;
+                    case Record:
+                        enableBtnCall(getBtnGreen(), "PLAY");
+                        disableGray(getBtnRed(), "RECORDED");
+                        break;
+                    case Net2Net:
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+    };
+
+    //--------------------- constructor
+
+    CallActivityViewManager(EOpMode opMode, IGetView iGetter) {
+        this.iGetter = iGetter;
+        this.opMode = opMode;
+    }
+
     //--------------------- getters and setters
 
-    public void setiGetter(IGetView iGetter) {
-        this.iGetter = iGetter;
+    public CallFsm.ICallFsmListener getCallFsmListener() {
+        return callFsmListener;
+    }
+
+    public BtFsm.IBtFsmListener getBtFsmListener() {
+        return btFsmListener;
+    }
+
+    public NetFsm.INetFsmListener getNetFsmListener() {
+        return netFsmListener;
+    }
+
+    public DebugFsm.IDebugFsmListener getDebugFsmListener() {
+        return debugFsmListener;
     }
 
     //--------------------- main
 
     void setDefaultView() {
-        if (debug) Log.i(TAG, "setDefaultView");
+        if (debug) Timber.tag(TAG).i("setDefaultView");
 
         setVisibility(getViewTraffic(), View.GONE);
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
@@ -267,169 +429,6 @@ public class CallActivityViewManager
         enableGreen(getBtnSaveContact(), getBtnCancelContact());
     }
 
-    //--------------------- ICallNetListener
-
-    private void processNormal(ECallState from, ECallState to, ECallReport why) {
-        if (debug) Log.i(TAG, "processNormal");
-        switch (why) {
-            case RP_NetError:
-            case RP_BtError:
-            case RP_BtConnectedIncompatible:
-                disableGray(getBtnGreen(), "ERROR");
-                disableGray(getBtnRed(), "ERROR");
-                break;
-            case RP_NetReady:
-            case RP_BtReady:
-                if (to == ST_Ready) {
-                    enableBtnCall(getBtnGreen(), "CALL");
-                    disableGray(getBtnRed(), "IDLE");
-                }
-                break;
-            case RP_CallFailedExternally:
-            case RP_CallFailedInternally:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "FAILED");
-                break;
-            case RP_CallEndedRemote:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "ENDED");
-                break;
-            case RP_OutConnected:
-                enableBtnCall(getBtnGreen(), "CALLING...");
-                enableBtnCall(getBtnRed(), "CANCEL");
-                break;
-            case RP_OutAcceptedRemote:
-                disableGray(getBtnGreen(), "ON CALL");
-                enableBtnCall(getBtnRed(), "END CALL");
-                stopCallAnim();
-                break;
-            case RP_OutRejectedRemote:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "BUSY");
-                stopCallAnim();
-                break;
-            case RP_OutFailed:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "OFFLINE");
-                stopCallAnim();
-                break;
-            case RP_OutInvalidCoordinates:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "BAD IP");
-                stopCallAnim();
-                break;
-            case RP_InConnected:
-                enableBtnCall(getBtnGreen(), "INCOMING...");
-                enableBtnCall(getBtnRed(), "REJECT");
-                startCallAnim();
-                break;
-            case RP_InCanceledRemote:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "CANCELED");
-                stopCallAnim();
-                break;
-            case RP_InFailed:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "INCOME FAIL");
-                stopCallAnim();
-                break;
-            case RP_OutStartedLocal:
-                disableGray(getBtnGreen(), "CALLING...");
-                enableBtnCall(getBtnRed(), "CANCEL");
-                startCallAnim();
-                break;
-            case RP_CallEndedLocal:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "ENDED");
-                break;
-            case RP_OutCanceledLocal:
-            case RP_OutConnectionCanceledLocal:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "CANCELED");
-                stopCallAnim();
-                break;
-            case RP_InRejectedLocal:
-                enableBtnCall(getBtnGreen(), "CALL");
-                disableGray(getBtnRed(), "REJECTED");
-                stopCallAnim();
-                break;
-            case RP_InAcceptedLocal:
-                disableGray(getBtnGreen(), "ON CALL");
-                enableBtnCall(getBtnRed(), "END CALL");
-                stopCallAnim();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void processAbnormal(ECallState from, ECallState to, ECallReport why) {
-        if (debug) Log.i(TAG, "processAbnormal");
-        switch (why) {
-            case RP_StartDebug:
-                switch (opMode) {
-                    case DataGen2Bt:
-                    case Bt2AudOut:
-                    case AudIn2Bt:
-                    case AudIn2AudOut:
-                    case Bt2Bt:
-                        disableGray(getBtnGreen());
-                        enableBtnCall(getBtnRed());
-                        break;
-                    case Record:
-                        switch (to) {
-                            case ST_DebugPlay:
-                                disableGray(getBtnGreen(), "PLAYING");
-                                enableBtnCall(getBtnRed(), "STOP");
-                                break;
-                            case ST_DebugRecord:
-                                disableGray(getBtnGreen(), "RECORDING");
-                                enableBtnCall(getBtnRed(), "STOP");
-                                break;
-                            default:
-                                if (debug) Log.e(TAG, "startDebug " + to);
-                                break;
-                        }
-                        break;
-                    case Net2Net:
-                    default:
-                        break;
-                }
-                break;
-            case RP_StopDebug:
-                switch (opMode) {
-                    case DataGen2Bt:
-                    case Bt2AudOut:
-                    case AudIn2Bt:
-                    case AudIn2AudOut:
-                    case Bt2Bt:
-                        enableGreen(getBtnGreen());
-                        disableGray(getBtnRed());
-                        break;
-                    case Record:
-                        enableBtnCall(getBtnGreen(), "PLAY");
-                        disableGray(getBtnRed(), "RECORDED");
-                        break;
-                    case Net2Net:
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
-        if (debug) Log.i(TAG, "onCallerStateChange");
-        if (opMode == Normal) {
-            processNormal(from, to, why);
-        } else {
-            processAbnormal(from, to, why);
-        }
-    }
-
     //--------------------- call buttons
 
     private int getColorBtnCall(Button button) {
@@ -438,7 +437,7 @@ public class CallActivityViewManager
         } else if (button == getBtnRed()) {
             return Colors.RED;
         } else {
-            if (debug) Log.e(TAG, "enableBtnCall color not defined");
+            if (debug) Timber.tag(TAG).e("enableBtnCall color not defined");
             return Colors.GRAY;
         }
     }
@@ -452,13 +451,13 @@ public class CallActivityViewManager
     }
 
     private void startCallAnim() {
-        if (debug && !isCallAnim) Log.i(TAG, "startCallAnim");
+        if (debug && !isCallAnim) Timber.tag(TAG).i("startCallAnim");
         startAnimation(getBtnGreen(), getAnimCall());
         isCallAnim = true;
     }
 
     private void stopCallAnim() {
-        if (debug) Log.i(TAG, "stopCallAnim");
+        if (debug) Timber.tag(TAG).i("stopCallAnim");
         clearAnimation(getBtnGreen());
         isCallAnim = false;
     }
@@ -479,8 +478,8 @@ public class CallActivityViewManager
         Animation a = null;
         if (iGetter != null) {
             a = iGetter.getAnimation(id);
-            if (a == null) {if (debug) Log.w(TAG, "getAnimFromGetter anim is still null, return");}
-        } else {if (debug) Log.e(TAG, "getAnimFromGetter iGetter is null, return");}
+            if (a == null) {if (debug) Timber.tag(TAG).w("getAnimFromGetter anim is still null, return");}
+        } else {if (debug) Timber.tag(TAG).e("getAnimFromGetter iGetter is null, return");}
         return a;
     }
 
@@ -488,8 +487,8 @@ public class CallActivityViewManager
         T t = null;
         if (iGetter != null) {
             t = iGetter.getView(id);
-            if (t == null) {if (debug) Log.w(TAG, "getViewFromGetter view is still null, return");}
-        } else {if (debug) Log.e(TAG, "getViewFromGetter iGetter is null, return");}
+            if (t == null) {if (debug) Timber.tag(TAG).w("getViewFromGetter view is still null, return");}
+        } else {if (debug) Timber.tag(TAG).e("getViewFromGetter iGetter is null, return");}
         return t;
     }
 

@@ -1,23 +1,25 @@
 package by.citech.handsfree.debug;
 
-import android.util.Log;
-
-import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
+import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.codec.audio.ICodec;
 import by.citech.handsfree.common.IBuilding;
+import by.citech.handsfree.debug.fsm.DebugFsm;
+import by.citech.handsfree.debug.fsm.EDebugReport;
+import by.citech.handsfree.debug.fsm.EDebugState;
 import by.citech.handsfree.exchange.IRxComplex;
 import by.citech.handsfree.exchange.IStreamer;
-import by.citech.handsfree.call.fsm.ECallState;
-import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.parameters.StatusMessages;
-import by.citech.handsfree.codec.audio.EAudioCodecType;
 import by.citech.handsfree.exchange.consumers.ToAudioOut;
-import by.citech.handsfree.settings.Settings;
+import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 public class Bt2AudOutLooper
-        implements IRxComplex, CallFsm.ICallFsmReporter, CallFsm.ICallFsmListener, CallFsm.ICallFsmListenerRegister, IBuilding {
+        implements IRxComplex, IBuilding,
+        DebugFsm.IDebugFsmListenerRegister,
+        DebugFsm.IDebugFsmListener,
+        DebugFsm.IDebugFsmReporter {
 
     private static final String STAG = Tags.Bt2AudOutLooper;
     private static final boolean debug = Settings.debug;
@@ -52,8 +54,8 @@ public class Bt2AudOutLooper
 
     @Override
     public void build() {
-        if (debug) Log.i(TAG, "build");
-        registerCallFsmListener(this, TAG);
+        if (debug) Timber.tag(TAG).i("build");
+        registerDebugFsmListener(this, TAG);
         try {
             iStreamer.prepareStream(this);
         } catch (Exception e) {
@@ -63,8 +65,8 @@ public class Bt2AudOutLooper
 
     @Override
     public void destroy() {
-        if (debug) Log.i(TAG, "destroy");
-        unregisterCallFsmListener(this, TAG);
+        if (debug) Timber.tag(TAG).i("destroy");
+        unregisterDebugFsmListener(this, TAG);
         stopDebug();
         iStreamer.finishStream();
         iStreamer = null;
@@ -75,8 +77,8 @@ public class Bt2AudOutLooper
 
     //--------------------- ICallFsmListener
 
-    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
-        if (debug) Log.i(TAG, "onCallerStateChange");
+    public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
+        if (debug) Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -90,14 +92,14 @@ public class Bt2AudOutLooper
     }
 
     private void startDebug() {
-        if (debug) Log.i(TAG, "startDebug");
+        if (debug) Timber.tag(TAG).i("startDebug");
         iStreamer.streamOn();
         codec.initiateEncoder();
         codec.initiateDecoder();
     }
 
     private void stopDebug() {
-        if (debug) Log.i(TAG, "stopDebug");
+        if (debug) Timber.tag(TAG).i("stopDebug");
         iStreamer.streamOff();
         isSession = false;
     }
@@ -107,7 +109,7 @@ public class Bt2AudOutLooper
     @Override
     public void sendData(byte[] data) {
         if (data == null || data.length != codecType.getEncodedBytesSize()) {
-            if (debug) Log.w(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
+            if (debug) Timber.w("sendData byte[]%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         short[] dataDecoded = codec.getDecodedData(data);
@@ -120,7 +122,7 @@ public class Bt2AudOutLooper
 //              dataDecoded.length,
 //              Arrays.toString(dataDecoded)));
         if (!isSession) {
-            if (debug) Log.i(TAG, "sendData byte[], first sendData on session");
+            if (debug) Timber.tag(TAG).i("sendData byte[], first sendData on session");
             isSession = true;
         }
         iRxComplex.sendData(dataDecoded);

@@ -65,7 +65,7 @@ public class Tags {
     public static final String ElementsMemCtrl = PREFIX + "ElementsMemCtrl";
     public static final String PreferencesProcessor = PREFIX + "PrefProcessor";
     public static final String ChosenContactHelper = PREFIX + "ChosenContactHelper";
-    public static final String ViewManager = PREFIX + "ViewManager";
+    public static final String CallActivityViewManager = PREFIX + "CallActivityViewManager";
     public static final String ContactEditorHelper = PREFIX + "ContactEditorHelper";
     public static final String ViewHelper = PREFIX + "ViewHelper";
     public static final String ActiveContactHelper = PREFIX + "ActiveContactHelper";

@@ -1,19 +1,20 @@
 package by.citech.handsfree.debug;
 
-import android.util.Log;
-
-import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.data.StorageData;
-import by.citech.handsfree.call.fsm.ECallState;
-import by.citech.handsfree.call.fsm.ECallReport;
+import by.citech.handsfree.debug.fsm.DebugFsm;
+import by.citech.handsfree.debug.fsm.EDebugReport;
+import by.citech.handsfree.debug.fsm.EDebugState;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.threading.IThreading;
+import timber.log.Timber;
 
 public class Bt2BtLooper
         implements IThreading, IBuilding,
-        CallFsm.ICallFsmReporter, CallFsm.ICallFsmListenerRegister, CallFsm.ICallFsmListener {
+        DebugFsm.IDebugFsmListenerRegister,
+        DebugFsm.IDebugFsmListener,
+        DebugFsm.IDebugFsmReporter {
 
     private static final String STAG = Tags.Bt2BtLooper;
     private static final boolean debug = Settings.debug;
@@ -70,8 +71,8 @@ public class Bt2BtLooper
 
     @Override
     public void build() {
-        if (debug) Log.i(TAG, "build");
-        registerCallFsmListener(this, TAG);
+        if (debug) Timber.tag(TAG).i("build");
+        registerDebugFsmListener(this, TAG);
         isRunning = false;
         isActive = true;
         addRunnable(looping);
@@ -79,8 +80,8 @@ public class Bt2BtLooper
 
     @Override
     public void destroy() {
-        if (debug) Log.i(TAG, "destroy");
-        unregisterCallFsmListener(this, TAG);
+        if (debug) Timber.tag(TAG).i("destroy");
+        unregisterDebugFsmListener(this, TAG);
         stopDebug();
         isActive = false;
         dataBuff = null;
@@ -88,8 +89,9 @@ public class Bt2BtLooper
 
     //--------------------- ICallFsmListener
 
-    public void onCallerStateChange(ECallState from, ECallState to, ECallReport why) {
-        if (debug) Log.i(TAG, "onCallerStateChange");
+    @Override
+    public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
+        if (debug) Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -103,14 +105,14 @@ public class Bt2BtLooper
     }
 
     private void startDebug() {
-        if (debug) Log.i(TAG, "startDebug");
+        if (debug) Timber.tag(TAG).i("startDebug");
         storageBtToNet.setWriteLocked(false);
         storageNetToBt.setWriteLocked(false);
         isRunning = true;
     }
 
     private void stopDebug() {
-        if (debug) Log.i(TAG, "stopDebug");
+        if (debug) Timber.tag(TAG).i("stopDebug");
         isRunning = false;
         storageBtToNet.setWriteLocked(true);
         storageNetToBt.setWriteLocked(true);
@@ -121,7 +123,7 @@ public class Bt2BtLooper
     //--------------------- looping
 
     private void looping() {
-        if (debug) Log.i(TAG, "looping");
+        if (debug) Timber.tag(TAG).i("looping");
         int btCount = 0;
         while (isRunning) {
             if (dataBuff == null) {
@@ -136,10 +138,10 @@ public class Bt2BtLooper
                 }
             }
             dataBuff[btCount] = storageBtToNet.getData();
-            if (debug) Log.i(TAG, String.format("looping output buffer got array number %d, which have length of %d", btCount, dataBuff[btCount].length));
+            if (debug) Timber.tag(TAG).i("looping output buffer got array number %d, which have length of %d", btCount, dataBuff[btCount].length);
             btCount++;
             if (btCount == btFactor) {
-                if (debug) Log.i(TAG, "looping output buffer contains enough data, putting in storage");
+                if (debug) Timber.tag(TAG).i("looping output buffer contains enough data, putting in storage");
                 btCount = 0;
                 storageNetToBt.putData(dataBuff);
                 dataBuff = null;

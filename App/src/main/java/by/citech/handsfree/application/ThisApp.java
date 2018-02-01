@@ -41,6 +41,7 @@ public class ThisApp
     public void onCreate() {
         super.onCreate();
         Timber.plant(new Timber.DebugTree());
+        PreferencesProcessor.init(this);
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
         thisAppBuilder = new ThisAppBuilder(PreferencesProcessor.getOpModePref());
@@ -53,7 +54,6 @@ public class ThisApp
         callControl = CallControl.getInstance();
         callHandshake = CallHandshake.getInstance();
         broadcastReceiverWrapper = new BroadcastReceiverWrapper();
-        PreferencesProcessor.init(this);
         appContext = getApplicationContext();
         registerReceiver(broadcastReceiverWrapper.getGattUpdateReceiver(), BroadcastReceiverWrapper.makeGattUpdateIntentFilter());
     }

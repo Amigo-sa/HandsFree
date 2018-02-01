@@ -47,8 +47,9 @@ import by.citech.handsfree.R;
 import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
-import by.citech.handsfree.application.ThisAppBuilder;
 import by.citech.handsfree.call.CallUi;
+import by.citech.handsfree.call.fsm.CallFsm;
+import by.citech.handsfree.debug.fsm.DebugFsm;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.ui.IBtToUiCtrl;
@@ -87,7 +88,9 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class CallActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IThreading, IBtToUiCtrl, CallUi.ICallUi, IMsgToUi, IScanListener {
+        IThreading, IBtToUiCtrl, CallUi.ICallUi, IMsgToUi, IScanListener,
+        CallFsm.ICallFsmListenerRegister,
+        DebugFsm.IDebugFsmListenerRegister {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -136,10 +139,10 @@ public class CallActivity
         setContentView(R.layout.activity_call);
 
         PreferencesProcessor.applyPrefsToSettings(this);
-        opMode = Settings.Common.opMode;
+        opMode = PreferencesProcessor.getOpModePref();
         if (debug) Timber.tag(TAG).w("onCreate opMode is %s", opMode);
 
-        viewManager = new CallActivityViewManager();
+        viewManager = new CallActivityViewManager(opMode,this);
         enPermissions();
 
         //---------------- TEST START
@@ -154,8 +157,13 @@ public class CallActivity
                 .setInterval(1000);
         //---------------- TEST END
 
-        viewManager.setiGetter(this);
         viewManager.setDefaultView();
+
+        if (opMode == EOpMode.Normal) {
+            registerCallFsmListener(viewManager.getCallFsmListener(), Tags.CallActivityViewManager);
+        } else {
+            registerDebugFsmListener(viewManager.getDebugFsmListener(), Tags.CallActivityViewManager);
+        }
 
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
         dialogProcessor = new DialogProcessor(this);
