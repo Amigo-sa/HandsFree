@@ -5,9 +5,7 @@ import by.citech.handsfree.bluetoothlegatt.fsm.BtFsm;
 import by.citech.handsfree.bluetoothlegatt.fsm.EBtReport;
 import by.citech.handsfree.call.fsm.CallFsm;
 import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ECallState;
 import by.citech.handsfree.network.fsm.ENetReport;
-import by.citech.handsfree.network.fsm.ENetState;
 import by.citech.handsfree.network.fsm.NetFsm;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
@@ -46,21 +44,45 @@ public class CallControl implements
 
     private BtFsm.IBtFsmListener btFsmListener = (from, to, report) -> {
         switch (report) {
-            case RP_BtFound:
-            case RP_BtEnabled:
-            case RP_BtDisabled:
-            case RP_BtPrepared:
-            case RP_BtChosenValid:
-            case RP_BtChosenInvalid:
-            case RP_BtDisconnected:
             case RP_BtNotSupported:
             case RP_BtLeNotSupported:
+                toCall(ECallReport.RP_BtError);
+                break;
+            case RP_BtFound:
+                toBt(EBtReport.RP_Connect);
+                break;
             case RP_BtConnectedCompatible:
+                toCall(ECallReport.RP_BtReady);
+                break;
+            case RP_BtChosenValid:
+                toBt(EBtReport.RP_SearchStart);
+                break;
+            case RP_BtPrepared:
+                toBt(EBtReport.RP_Enable);
+                break;
+            case RP_DisconnectManual:
+                toCall(ECallReport.RP_BtError);
+                break;
+            case RP_BtDisconnected:
+                toCall(ECallReport.RP_BtError);
+                toBt(EBtReport.RP_Connect);
+                break;
             case RP_BtExchangeEnabled:
+                break;
             case RP_BtExchangeDisabled:
+                break;
             case RP_BtConnectedIncompatible:
+                break;
+            case RP_BtChosenInvalid:
+                break;
+            case RP_BtEnabled:
+                break;
+            case RP_BtDisabled:
+                break;
             case RP_TurningOn:
+                break;
             case RP_TurningOff:
+                break;
         }
     };
 
@@ -92,6 +114,10 @@ public class CallControl implements
                 }
             case RP_NetOutFail:
                 toCall(ECallReport.RP_OutFailed);
+                break;
+            case RP_TurningOff:
+                break;
+            case RP_TurningOn:
                 break;
         }
     };
