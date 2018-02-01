@@ -58,6 +58,7 @@ public class CallControl implements
                 toBt(EBtReport.RP_SearchStart);
                 break;
             case RP_BtPrepared:
+            case RP_BtDisabled:
                 toBt(EBtReport.RP_Enable);
                 break;
             case RP_DisconnectManual:
@@ -66,22 +67,6 @@ public class CallControl implements
             case RP_BtDisconnected:
                 toCall(ECallReport.RP_BtError);
                 toBt(EBtReport.RP_Connect);
-                break;
-            case RP_BtExchangeEnabled:
-                break;
-            case RP_BtExchangeDisabled:
-                break;
-            case RP_BtConnectedIncompatible:
-                break;
-            case RP_BtChosenInvalid:
-                break;
-            case RP_BtEnabled:
-                break;
-            case RP_BtDisabled:
-                break;
-            case RP_TurningOn:
-                break;
-            case RP_TurningOff:
                 break;
         }
     };
@@ -114,10 +99,6 @@ public class CallControl implements
                 }
             case RP_NetOutFail:
                 toCall(ECallReport.RP_OutFailed);
-                break;
-            case RP_TurningOff:
-                break;
-            case RP_TurningOn:
                 break;
         }
     };
