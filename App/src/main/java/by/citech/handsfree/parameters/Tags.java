@@ -93,4 +93,5 @@ public class Tags {
     public static final String DebugFsm = PREFIX + "DebugFsm";
     public static final String NetFsm = PREFIX + "NetFsm";
     public static final String CallControl = PREFIX + "CallControl";
+    public static String CallHandshake = PREFIX + "CallHandshake";
 }

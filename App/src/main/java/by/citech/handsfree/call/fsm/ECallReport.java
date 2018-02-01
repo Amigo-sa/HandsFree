@@ -12,7 +12,6 @@ public enum ECallReport implements IFsmReport<ECallState> {
     RP_NetReady(null),
     RP_NetError(null),
     RP_InConnected(ST_InConnected),
-    RP_InFailed(ST_Ready),
     RP_InCanceledRemote(ST_Ready),
     RP_InRejectedLocal(ST_Ready),
     RP_InAcceptedLocal(ST_Call),
