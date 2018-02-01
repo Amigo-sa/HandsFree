@@ -390,9 +390,10 @@ public class ConnectorBluetooth
     //--------------------- ICallFsmListener
 
     private void searchDevice() {
-
-        leScanner.setDeviceAddress(PreferencesProcessor.getBtChosenAddrPref());
-        startScan();
+        if (PreferencesProcessor.getBtChosenAddrPref() != null && PreferencesProcessor.getBtChosenAddrPref().length() > 0) {
+            leScanner.setDeviceAddress(PreferencesProcessor.getBtChosenAddrPref());
+            startScan();
+        }
     }
 
     private boolean toBtFsm(EBtReport report) {
