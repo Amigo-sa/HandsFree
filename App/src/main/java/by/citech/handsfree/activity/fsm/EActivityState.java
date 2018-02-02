@@ -1,5 +1,6 @@
 package by.citech.handsfree.activity.fsm;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 
 import by.citech.handsfree.fsm.IFsmState;
@@ -40,7 +41,6 @@ public enum EActivityState implements IFsmState<EActivityState> {
 
     //--------------------- constructor
 
-    EActivityState(EActivityState... states) {a(states);}
     private static EnumSet<EActivityState> availableFromAny;
     private EnumSet<EActivityState> available;
     void a(EActivityState... states) {available = s(states);}

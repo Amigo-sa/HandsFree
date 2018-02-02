@@ -56,7 +56,6 @@ public enum EBtState implements IFsmState<EBtState> {
 
     //--------------------- constructor
 
-    EBtState(EBtState... states) {a(states);}
     private static EnumSet<EBtState> availableFromAny;
     private EnumSet<EBtState> available;
     void a(EBtState... states) {available = s(states);}

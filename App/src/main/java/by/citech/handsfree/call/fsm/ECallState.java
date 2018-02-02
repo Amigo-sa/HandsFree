@@ -36,7 +36,6 @@ public enum ECallState implements IFsmState<ECallState> {
 
     //--------------------- constructor
 
-    ECallState(ECallState... states) {a(states);}
     private static EnumSet<ECallState> availableFromAny;
     private EnumSet<ECallState> available;
     void a(ECallState... states) {available = s(states);}

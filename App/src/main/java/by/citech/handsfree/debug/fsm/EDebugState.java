@@ -28,7 +28,6 @@ public enum EDebugState implements IFsmState<EDebugState> {
 
     //--------------------- constructor
 
-    EDebugState(EDebugState... states) {a(states);}
     private static EnumSet<EDebugState> availableFromAny;
     private EnumSet<EDebugState> available;
     void a(EDebugState... states) {available = s(states);}

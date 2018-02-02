@@ -8,21 +8,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import by.citech.handsfree.activity.fsm.ActivityFsm;
-import by.citech.handsfree.activity.fsm.EActivityReport;
-import by.citech.handsfree.activity.fsm.EActivityState;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
-import by.citech.handsfree.bluetoothlegatt.fsm.EBtReport;
-import by.citech.handsfree.bluetoothlegatt.fsm.EBtState;
-import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
+import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.call.CallHandshake;
-import by.citech.handsfree.call.fsm.ECallReport;
-import by.citech.handsfree.call.fsm.ECallState;
-import by.citech.handsfree.debug.fsm.EDebugReport;
-import by.citech.handsfree.debug.fsm.EDebugState;
 import by.citech.handsfree.network.ConnectorNet;
-import by.citech.handsfree.network.fsm.ENetReport;
-import by.citech.handsfree.network.fsm.ENetState;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
@@ -44,14 +34,6 @@ public class ThisApp
     private static String btConnectedAddr;
     private static Context appContext;
     private static BroadcastReceiverWrapper broadcastReceiverWrapper;
-
-    static {
-
-    }
-
-    private enum Test {
-        A, B, C
-    }
 
     // Called when the application is starting, before any other application objects have been created.
     // Overriding this method is totally optional!

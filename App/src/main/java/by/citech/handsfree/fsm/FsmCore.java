@@ -66,7 +66,8 @@ abstract public class FsmCore<
 
     //--------------------- register and unregister
 
-    synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String message, S... states) {
+    @SafeVarargs
+    final synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String message, S... states) {
         if (states == null || states.length == 0) return registerFsmListener(listener, message);
         else return false; // TODO: доделать логику слушателя только выбранных сообщений
     }

@@ -218,6 +218,10 @@ public class ConnectorNet implements
                 else connect();
                 break;
             case RP_TurningOff:
+                exchangeStop();
+                disconnect(iConnCtrl);
+                stopServer();
+                break;
             case RP_Disconnect:
                 exchangeStop();
                 disconnect(iConnCtrl);

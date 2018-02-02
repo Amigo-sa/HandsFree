@@ -34,7 +34,6 @@ public enum ENetState implements IFsmState<ENetState> {
 
     //--------------------- constructor
 
-    ENetState(ENetState... states) {a(states);}
     private static EnumSet<ENetState> availableFromAny;
     private EnumSet<ENetState> available;
     void a(ENetState... states) {available = s(states);}

@@ -7,6 +7,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 
+import by.citech.handsfree.activity.fsm.EActivityState;
+
 public class CollectionHelper {
 
     public static <T> List<T> getArrayListInitiatedWithNulls(int from, int amount) {
@@ -30,8 +32,8 @@ public class CollectionHelper {
     @SafeVarargs
     public static <T extends Enum<T>> EnumSet<T> eSet(Class<T> clazz, T... states) {
         if (states == null || states.length == 0) {
-//          return EnumSet.noneOf(clazz);
-            return null;
+            if (clazz == null) return null;
+            return EnumSet.noneOf(clazz);
         } else if (states.length == 1) {
             return EnumSet.of(states[0]);
         } else {
