@@ -6,4 +6,5 @@
     <color name="colorWhite"> #FFFFFF</color>
     <color name="colorBlack"> #000000</color>
     <color name="colorDarkGreen"> #004D40</color>
+    <color name="reddivider"> #3F51B5</color>
 </resources>

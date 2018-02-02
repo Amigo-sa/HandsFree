@@ -113,9 +113,9 @@ public class BluetoothUi implements IUiToBtListener,
         disconnDialogInfoOn.setDevice(device);
         connDialogInfoOn.setDevice(device);
 
-        if (device.equals(getConnectDevice())) {
+        if (device.equals(getConnectedDevice())) {
             uiController.setCommand(discDialogOn).execute();
-        } else if (getConnectDevice() != null) {
+        } else if (getConnectedDevice() != null) {
             uiController.setCommand(reconnDiaologOn).execute();
         } else {
             uiController.setCommand(connDialogOn).execute();
@@ -142,12 +142,12 @@ public class BluetoothUi implements IUiToBtListener,
     }
 
     @Override
-    public boolean isConnecting() {
+    public boolean isConnected() {
         return ConnectorBluetooth.getInstance().isConnected();
     }
 
     @Override
-    public BluetoothDevice getConnectDevice() {
+    public BluetoothDevice getConnectedDevice() {
         return ConnectorBluetooth.getInstance().getConnectedDevice();
     }
 

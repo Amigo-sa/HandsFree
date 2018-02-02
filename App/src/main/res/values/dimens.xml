@@ -9,4 +9,5 @@
     <dimen name="horisontal_space">5dp</dimen>
     <dimen name="ip_info_margin">4dp</dimen>
     <dimen name="ip_info_vertical">10dp</dimen>
+    <dimen name="twodp">2dp</dimen>
     </resources>

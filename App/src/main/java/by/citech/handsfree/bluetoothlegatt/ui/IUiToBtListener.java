@@ -8,10 +8,10 @@ import android.bluetooth.BluetoothDevice;
 
 public interface IUiToBtListener {
     void clickItemList(BluetoothDevice device);
-    BluetoothDevice getConnectDevice();
+    BluetoothDevice getConnectedDevice();
     void clickBtnListener();
     void clickBtnScanListener();
 
     boolean isScanning();
-    boolean isConnecting();
+    boolean isConnected();
 }
