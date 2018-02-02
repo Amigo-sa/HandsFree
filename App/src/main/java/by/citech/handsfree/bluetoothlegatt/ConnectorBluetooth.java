@@ -392,7 +392,7 @@ public class ConnectorBluetooth
 
     private void searchDevice() {
         if (chosenAddr != null && chosenAddr.length() > 0) {
-            leScanner.setDeviceAddress(PreferencesProcessor.getBtChosenAddrPref());
+            leScanner.setDeviceAddress(chosenAddr);
             startScan();
         }
     }
