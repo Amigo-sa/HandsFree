@@ -1,14 +1,9 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.contact;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import by.citech.handsfree.activity.CallActivityViewManager;
-import by.citech.handsfree.common.IPrepareObject;
-import by.citech.handsfree.contact.Contact;
-import by.citech.handsfree.contact.EContactState;
-import by.citech.handsfree.contact.ContactsAdapter;
-import by.citech.handsfree.contact.IContactsListener;
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.element.IElement;
@@ -17,7 +12,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreading;
 import timber.log.Timber;
 
-public class ContactEditorHelper
+public class ContactEditor
         implements IContactsListener, IThreading {
 
     private static final boolean debug = Settings.debug;
@@ -30,7 +25,7 @@ public class ContactEditorHelper
     private EEditorState editorState;
     private CallActivityViewManager viewManager;
     private ContactsAdapter.SwipeCrutch swipeCrutch;
-    private ActiveContactHelper activeContactHelper;
+    private ActiveContact activeContact;
     private IElement<Contact> iContact;
     private ContactsAdapter contactsAdapter;
     private IMsgToUi iMsgToUi;
@@ -43,32 +38,32 @@ public class ContactEditorHelper
 
     //--------------------- getters and setters
 
-    public ContactEditorHelper setViewManager(CallActivityViewManager viewManager) {
+    public ContactEditor setViewManager(CallActivityViewManager viewManager) {
         this.viewManager = viewManager;
         return this;
     }
 
-    public ContactEditorHelper setSwipeCrutch(ContactsAdapter.SwipeCrutch swipeCrutch) {
+    public ContactEditor setSwipeCrutch(ContactsAdapter.SwipeCrutch swipeCrutch) {
         this.swipeCrutch = swipeCrutch;
         return this;
     }
 
-    public ContactEditorHelper setActiveContactHelper(ActiveContactHelper activeContactHelper) {
-        this.activeContactHelper = activeContactHelper;
+    public ContactEditor setActiveContactHelper(ActiveContact activeContact) {
+        this.activeContact = activeContact;
         return this;
     }
 
-    public ContactEditorHelper setiMsgToUi(IMsgToUi iMsgToUi) {
+    public ContactEditor setiMsgToUi(IMsgToUi iMsgToUi) {
         this.iMsgToUi = iMsgToUi;
         return this;
     }
 
-    public ContactEditorHelper setiContact(IElement<Contact> iContact) {
+    public ContactEditor setiContact(IElement<Contact> iContact) {
         this.iContact = iContact;
         return this;
     }
 
-    public ContactEditorHelper setContactsAdapter(ContactsAdapter contactsAdapter) {
+    public ContactEditor setContactsAdapter(ContactsAdapter contactsAdapter) {
         this.contactsAdapter = contactsAdapter;
         return this;
     }
@@ -148,14 +143,14 @@ public class ContactEditorHelper
                 isEditPending = false;
                 isDeleted = false;
                 isEdited = false;
-                activeContactHelper.goToState(EActiveContactState.Default);
+                activeContact.goToState(EActiveContactState.Default);
                 return;
             default:
                 if (debug) Timber.e("goToState editorState default");
                 return;
         }
         viewManager.showEditor();
-        activeContactHelper.goToState(EActiveContactState.FromEditor);
+        activeContact.goToState(EActiveContactState.FromEditor);
     }
 
     //--------------------- commands
@@ -200,13 +195,13 @@ public class ContactEditorHelper
             case Add:
                 freezeState();
                 isAddPending = true;
-                contactToAdd = activeContactHelper.getContact();
+                contactToAdd = activeContact.getContact();
                 addRunnable(() -> iContact.addElement(contactToAdd));
                 break;
             case Edit:
                 freezeState();
                 isEditPending = true;
-                addRunnable(() -> iContact.updateElement(contactToEdit, activeContactHelper.getContact()));
+                addRunnable(() -> iContact.updateElement(contactToEdit, activeContact.getContact()));
                 break;
             case Inactive:
                 if (debug) Timber.e("saveInEditor editorState Inactive");

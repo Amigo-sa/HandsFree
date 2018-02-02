@@ -1,20 +1,19 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.contact;
 
 import by.citech.handsfree.activity.CallActivityViewManager;
-import by.citech.handsfree.contact.Contact;
 import by.citech.handsfree.settings.Settings;
 import timber.log.Timber;
 
-public class ActiveContactHelper {
+public class ActiveContact {
 
     private static final boolean debug = Settings.debug;
 
     private EActiveContactState currState;
-    private ChosenContactHelper chosenContactHelper;
+    private ChosenContact chosenContact;
     private CallActivityViewManager viewManager;
 
-    public ActiveContactHelper(ChosenContactHelper chosenContactHelper, CallActivityViewManager viewManager) {
-        this.chosenContactHelper = chosenContactHelper;
+    public ActiveContact(ChosenContact chosenContact, CallActivityViewManager viewManager) {
+        this.chosenContact = chosenContact;
         this.viewManager = viewManager;
         currState = EActiveContactState.IpFromSearch;
     }
@@ -28,12 +27,10 @@ public class ActiveContactHelper {
             case FromEditor:
                 return new Contact(getName(), getIp());
             case FromChosen:
-                return chosenContactHelper.getContact();
-            case Null:
+                return chosenContact.getContact();
             default:
-                break;
+                return null;
         }
-        return null;
     }
 
     public String getName() {
@@ -43,7 +40,6 @@ public class ActiveContactHelper {
                 return getContact().getName();
             case FromEditor:
                 return viewManager.getEditorContactNameText();
-            case IpFromSearch:
             default:
                 return "";
         }
@@ -72,19 +68,12 @@ public class ActiveContactHelper {
     public void goToState(EActiveContactState toState) {
         if (debug) Timber.i("goToState %s from %s", toState, currState);
         currState = toState;
-        switch (currState) {
-            case Default:
-                if (chosenContactHelper.isChosen())
-                    currState = EActiveContactState.FromChosen;
-                else
-                    currState = EActiveContactState.IpFromSearch;
-                break;
-            case FromChosen:
-            case Null:
-            case IpFromSearch:
-            case FromEditor:
-            default:
-                break;
+        if (currState == EActiveContactState.Default) {
+            if (chosenContact.isChosen()) {
+                currState = EActiveContactState.FromChosen;
+            } else {
+                currState = EActiveContactState.IpFromSearch;
+            }
         }
     }
 

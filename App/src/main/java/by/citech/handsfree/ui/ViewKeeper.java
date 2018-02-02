@@ -1,4 +1,4 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.ui;
 
 import android.widget.TextView;
 
@@ -18,31 +18,24 @@ public class ViewKeeper {
 
     private Map<String, Pair<TextView[], boolean[]>> pairMap;
 
-    {
-        pairMap = new HashMap<>();
-    }
-
     //--------------------- singleton
 
     private static volatile ViewKeeper instance = null;
 
     private ViewKeeper() {
+        pairMap = new HashMap<>();
     }
 
     public static ViewKeeper getInstance() {
         if (instance == null) {
             synchronized (ViewKeeper.class) {
-                if (instance == null) {
-                    instance = new ViewKeeper();
-                }
-            }
-        }
+                if (instance == null) {instance = new ViewKeeper();}}}
         return instance;
     }
 
     //--------------------- main
 
-    public void freezeState(String key, TextView... textViews) {
+    private void freezeState(String key, TextView... textViews) {
         if (key == null || textViews == null || textViews.length < 1) {
             if (debug) Timber.e("freezeState %s", StatusMessages.ERR_PARAMETERS);
             return;
@@ -56,7 +49,7 @@ public class ViewKeeper {
         ViewHelper.disableGray(textViews);
     }
 
-    public void releaseState(String key) {
+    private void releaseState(String key) {
         if (key == null) {
             if (debug) Timber.e("releaseState %s", StatusMessages.ERR_PARAMETERS);
             return;
@@ -76,4 +69,17 @@ public class ViewKeeper {
         pairMap.remove(key);
     }
 
+    //--------------------- interfaces
+
+    public interface IViewKeeper {
+
+        default void freezeState(String key, TextView... textViews) {
+            getInstance().freezeState(key, textViews);
+        }
+
+        default void releaseState(String key) {
+            getInstance().releaseState(key);
+        }
+
+    }
 }

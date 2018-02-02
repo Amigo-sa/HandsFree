@@ -1,4 +1,4 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.ui;
 
 import android.text.Editable;
 import android.util.Log;

@@ -64,11 +64,11 @@ public class Tags {
     public static final String DialogProcessor = PREFIX + "DialogProcessor";
     public static final String ElementsMemCtrl = PREFIX + "ElementsMemCtrl";
     public static final String PreferencesProcessor = PREFIX + "PrefProcessor";
-    public static final String ChosenContactHelper = PREFIX + "ChosenContactHelper";
+    public static final String ChosenContactHelper = PREFIX + "ChosenContact";
     public static final String CallActivityViewManager = PREFIX + "CallActivityViewManager";
-    public static final String ContactEditorHelper = PREFIX + "ContactEditorHelper";
+    public static final String ContactEditorHelper = PREFIX + "ContactEditor";
     public static final String ViewHelper = PREFIX + "ViewHelper";
-    public static final String ActiveContactHelper = PREFIX + "ActiveContactHelper";
+    public static final String ActiveContactHelper = PREFIX + "ActiveContact";
     public static final String Presetter = PREFIX + "Presetter";
     public static final String IBase = PREFIX + "IBase";
     public static final String ITransmitter = PREFIX + "IRxComplex";

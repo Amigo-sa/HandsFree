@@ -1,9 +1,9 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.statistic;
 
 import by.citech.handsfree.statistic.TrafficAnalyzer;
 import by.citech.handsfree.statistic.TrafficInfo;
 
-public class TrafficHelper implements TrafficAnalyzer.ITrafficReporter {
+public class TrafficPublisher implements TrafficAnalyzer.ITrafficReporter {
     @Override
     public void publishTrafficInfo(TrafficInfo trafficInfo) {}
     @Override

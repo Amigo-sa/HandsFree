@@ -1,4 +1,4 @@
-package by.citech.handsfree.ui.helpers;
+package by.citech.handsfree.contact;
 
 public enum EEditorState {
     Add,

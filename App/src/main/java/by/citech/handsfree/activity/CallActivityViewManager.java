@@ -23,24 +23,24 @@ import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.ui.helpers.IViewKeeper;
+import by.citech.handsfree.ui.ViewKeeper;
 import timber.log.Timber;
 
-import static by.citech.handsfree.ui.helpers.ViewHelper.clearAnimation;
-import static by.citech.handsfree.ui.helpers.ViewHelper.disableGray;
-import static by.citech.handsfree.ui.helpers.ViewHelper.enable;
-import static by.citech.handsfree.ui.helpers.ViewHelper.enableGreen;
-import static by.citech.handsfree.ui.helpers.ViewHelper.getText;
-import static by.citech.handsfree.ui.helpers.ViewHelper.getVisibility;
-import static by.citech.handsfree.ui.helpers.ViewHelper.setColorAndText;
-import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
-import static by.citech.handsfree.ui.helpers.ViewHelper.setVisibility;
+import static by.citech.handsfree.ui.ViewHelper.clearAnimation;
+import static by.citech.handsfree.ui.ViewHelper.disableGray;
+import static by.citech.handsfree.ui.ViewHelper.enable;
+import static by.citech.handsfree.ui.ViewHelper.enableGreen;
+import static by.citech.handsfree.ui.ViewHelper.getText;
+import static by.citech.handsfree.ui.ViewHelper.getVisibility;
+import static by.citech.handsfree.ui.ViewHelper.setColorAndText;
+import static by.citech.handsfree.ui.ViewHelper.setText;
+import static by.citech.handsfree.ui.ViewHelper.setVisibility;
 import static by.citech.handsfree.contact.ContactHelper.setContactInfo;
-import static by.citech.handsfree.ui.helpers.ViewHelper.startAnimation;
+import static by.citech.handsfree.ui.ViewHelper.startAnimation;
 import static by.citech.handsfree.call.fsm.ECallState.ST_Ready;
 
 public class CallActivityViewManager
-        implements IOnInfoUpdateListener, IViewKeeper,
+        implements IOnInfoUpdateListener, ViewKeeper.IViewKeeper,
         RssiReporter.IOnRssiUpdateListener,
         CallFsm.ICallFsmListenerRegister,
         DebugFsm.IDebugFsmListenerRegister {

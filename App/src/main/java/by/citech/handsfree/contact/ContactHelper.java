@@ -2,7 +2,7 @@ package by.citech.handsfree.contact;
 
 import android.widget.TextView;
 
-import static by.citech.handsfree.ui.helpers.ViewHelper.setText;
+import static by.citech.handsfree.ui.ViewHelper.setText;
 
 public class ContactHelper {
 
