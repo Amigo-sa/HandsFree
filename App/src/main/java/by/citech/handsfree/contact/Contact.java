@@ -2,7 +2,6 @@ package by.citech.handsfree.contact;
 
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import by.citech.handsfree.common.ICopy;
 import by.citech.handsfree.common.IIdentifier;
@@ -12,9 +11,8 @@ import by.citech.handsfree.util.InetAddress;
 import by.citech.handsfree.util.Name;
 import timber.log.Timber;
 
-
 public class Contact
-        implements Comparable<Contact>, IIdentifier, ICopy<Contact>, IContactState, Cloneable {
+        implements Comparable<Contact>, ICopy<Contact>, IContactStateGetter, Cloneable, IIdentifier {
 
     private static final String TAG = Tags.Contact;
     private static final boolean debug = Settings.debug;

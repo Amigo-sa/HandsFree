@@ -1,5 +1,5 @@
 package by.citech.handsfree.contact;
 
-public interface IContactState {
+public interface IContactStateGetter {
     EContactState getState();
 }

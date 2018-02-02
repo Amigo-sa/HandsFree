@@ -58,7 +58,7 @@ import by.citech.handsfree.contact.ContactEditor;
 import by.citech.handsfree.contact.Contactor;
 import by.citech.handsfree.contact.ContactsAdapter;
 import by.citech.handsfree.contact.EActiveContactState;
-import by.citech.handsfree.contact.EEditorState;
+import by.citech.handsfree.contact.EContactEditorState;
 import by.citech.handsfree.dialog.DialogProcessor;
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
@@ -316,7 +316,7 @@ public class CallActivity
             if (debug) Timber.tag(TAG).i("onBackPressed showMainView");
             viewManager.showMainView();
             actionBar.setCustomView(null);
-            contactEditor.goToState(EEditorState.Inactive);
+            contactEditor.goToState(EContactEditorState.Inactive);
             iMenuListener.menuScanStopListener();
             invalidateOptionsMenu();
         } else {
@@ -478,14 +478,10 @@ public class CallActivity
 
     //--------------------- actions
 
-    private void clickBtnCancelInEditor() {
-        contactEditor.cancelContact();}
-    private void clickBtnSaveInEditor() {
-        contactEditor.saveContact();}
-    private void clickBtnStartEditorAdd() {
-        contactEditor.startEditorAdd();}
-    private void clickBtnDeleteFromEditor() {
-        contactEditor.deleteContact();}
+    private void clickBtnCancelInEditor() {contactEditor.cancelContact();}
+    private void clickBtnSaveInEditor() {contactEditor.saveContact();}
+    private void clickBtnStartEditorAdd() {contactEditor.startEditorAdd();}
+    private void clickBtnDeleteFromEditor() {contactEditor.deleteContact();}
 
     void clickBtnClearContact() {
         if (debug) Timber.tag(TAG).i("clickBtnClearContact");

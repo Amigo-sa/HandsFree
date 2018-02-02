@@ -13,7 +13,7 @@ import by.citech.handsfree.threading.IThreading;
 import timber.log.Timber;
 
 public class ContactEditor
-        implements IContactsListener, IThreading {
+        implements IContactsChangeListener, IThreading {
 
     private static final boolean debug = Settings.debug;
 
@@ -22,7 +22,7 @@ public class ContactEditor
     private Contact contactToEdit, contactToAdd;
     private int contactToEditPosition, contactToDeletePosition;
     private boolean isEditPending, isAddPending, isDeletePending, isEdited, isDeleted, isSwipedIn;
-    private EEditorState editorState;
+    private EContactEditorState editorState;
     private CallActivityViewManager viewManager;
     private ContactsAdapter.SwipeCrutch swipeCrutch;
     private ActiveContact activeContact;
@@ -33,7 +33,7 @@ public class ContactEditor
     {
         contactToEditPosition = -1;
         contactToDeletePosition = -1;
-        editorState = EEditorState.Inactive;
+        editorState = EContactEditorState.Inactive;
     }
 
     //--------------------- getters and setters
@@ -68,12 +68,11 @@ public class ContactEditor
         return this;
     }
 
-
     public void setEditorSwipedIn() {
         isSwipedIn = true;
     }
 
-    public EEditorState getState() {
+    public EContactEditorState getState() {
         return editorState;
     }
 
@@ -95,24 +94,24 @@ public class ContactEditor
 
     public void startEditorEdit(Contact contact, int position) {
         if (debug) Timber.i("startEditorEdit");
-        goToState(EEditorState.Edit, contact, position);
+        goToState(EContactEditorState.Edit, contact, position);
     }
 
     public void startEditorAdd() {
         if (debug) Timber.i("startEditorAdd");
-        goToState(EEditorState.Add);
+        goToState(EContactEditorState.Add);
     }
 
     //--------------------- states
 
-    public void goToState(EEditorState toState) {
-        if (toState != EEditorState.Edit)
+    public void goToState(EContactEditorState toState) {
+        if (toState != EContactEditorState.Edit)
             goToState(toState, null, -1);
         else
             if (debug) Timber.e("goToState editorState illegal");
     }
 
-    public void goToState(EEditorState toState, Contact contact, int position) {
+    public void goToState(EContactEditorState toState, Contact contact, int position) {
         if (debug) Timber.i("goToState");
         editorState = toState;
         switch (editorState) {
@@ -164,10 +163,10 @@ public class ContactEditor
         if (debug) Timber.i("cancelContact");
         switch (editorState) {
             case Edit:
-                goToState(EEditorState.Edit, contactToEdit, contactToEditPosition);
+                goToState(EContactEditorState.Edit, contactToEdit, contactToEditPosition);
                 break;
             case Add:
-                goToState(EEditorState.Add);
+                goToState(EContactEditorState.Add);
                 break;
             case Inactive:
                 if (debug) Timber.e("cancelInEditor editorState Inactive");
@@ -221,14 +220,14 @@ public class ContactEditor
         contactsAdapter.notifyItemRemoved(contactToDeletePosition);
         contactToEdit = null;
         contactToDeletePosition = -1;
-        goToState(EEditorState.Add);
+        goToState(EContactEditorState.Add);
     }
 
     private void onContactAddSucc(int position) {
         if (debug) Timber.i("onContactAddSucc");
         isAddPending = false;
         contactToEditPosition = position;
-        goToState(EEditorState.Edit, contactToAdd, position);
+        goToState(EContactEditorState.Edit, contactToAdd, position);
         contactToAdd = null;
     }
 
@@ -237,7 +236,7 @@ public class ContactEditor
         isEditPending = false;
         isEdited = true;
         contactToEditPosition = position;
-        goToState(EEditorState.Edit, contactToEdit, position);
+        goToState(EContactEditorState.Edit, contactToEdit, position);
     }
 
     private void onContactDelFail() {
@@ -276,14 +275,14 @@ public class ContactEditor
         viewManager.setEditorButtonsRelease();
     }
 
-    //--------------------- IContactsListener
+    //--------------------- IContactsChangeListener
 
     @Override
     public void onContactsChange(final Contact... contacts) {
         if (debug) Timber.i("onContactsChange");
         if (contacts == null || contacts[0] == null) {
             Timber.e("onContactsChange returned contact is null");
-            goToState(EEditorState.Inactive);
+            goToState(EContactEditorState.Inactive);
             return;
         }
         Contact contact = contacts[0];

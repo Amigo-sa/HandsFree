@@ -1,6 +1,6 @@
 package by.citech.handsfree.contact;
 
-public enum EEditorState {
+public enum EContactEditorState {
     Add,
     Edit,
     Inactive

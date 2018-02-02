@@ -51,7 +51,7 @@ public class Contactor
     //--------------------- non-settings
 
     private ContactsDbCtrl dbCtrl;
-    private IContactsListener listener;
+    private IContactsChangeListener listener;
     private ElementsMemCtrl<Contact> memCtrl;
     private List<Contact> contacts;
     private IMsgToUi iMsgToUi;
@@ -89,7 +89,7 @@ public class Contactor
         }
     }
 
-    public Contactor setListener(IContactsListener listener) {
+    public Contactor setListener(IContactsChangeListener listener) {
         this.listener = listener;
         return this;
     }
