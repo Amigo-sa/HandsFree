@@ -448,7 +448,6 @@ public class CallActivity
             @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
         });
         Contactor.getInstance()
-                .setContext(this)
                 .setiMsgToUi(this)
                 .setListener(contactEditor);
         contactEditor.getAllContacts();

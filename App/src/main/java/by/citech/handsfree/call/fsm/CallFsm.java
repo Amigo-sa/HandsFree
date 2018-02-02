@@ -42,7 +42,6 @@ public class CallFsm extends FsmCore<ECallReport, ECallState> {
 
     @Override
     protected boolean processFsmReport(ECallReport report, ECallState from) {
-        if (debug) Timber.i("processFsmReport");
         switch (report) {
             case RP_BtError:
                 switch (from) {

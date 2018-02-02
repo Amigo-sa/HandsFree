@@ -42,7 +42,6 @@ public class NetFsm extends FsmCore<ENetReport, ENetState> {
 
     @Override
     protected boolean processFsmReport(ENetReport report, ENetState from) {
-        if (debug) Timber.i("processFsmReport");
         return processFsmStateChange(report, from, report.getDestination());
     }
 

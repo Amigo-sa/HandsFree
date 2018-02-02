@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import java.util.Locale;
 
 import by.citech.handsfree.R;
+import by.citech.handsfree.application.OpModeProcessor;
 import by.citech.handsfree.parameters.Colors;
 import by.citech.handsfree.settings.SettingsHelper;
 import by.citech.handsfree.settings.Settings;
@@ -158,6 +159,8 @@ public class SettingsActivity
                     getRefreshedEditTextPref(prefName);
                     break;
                 case SettingsDefault.TypeName.opMode:
+                    OpModeProcessor.onOpModeChange();
+                    break;
                 case SettingsDefault.TypeName.audioCodecType:
                     getRefreshedListPref(prefName);
                     break;

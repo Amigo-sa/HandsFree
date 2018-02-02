@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import by.citech.handsfree.activity.CallActivityViewManager;
+import by.citech.handsfree.element.IElementsChangeListener;
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
 import by.citech.handsfree.element.IElement;
@@ -13,7 +14,7 @@ import by.citech.handsfree.threading.IThreading;
 import timber.log.Timber;
 
 public class ContactEditor
-        implements IContactsChangeListener, IThreading {
+        implements IElementsChangeListener<Contact>, IThreading {
 
     private static final boolean debug = Settings.debug;
 
@@ -78,15 +79,15 @@ public class ContactEditor
 
     //--------------------- status
 
-    public boolean isUpdPending(Contact contact) {
+    private boolean isUpdPending(Contact contact) {
         return ((contactToEdit == contact) && isEditPending);
     }
 
-    public boolean isAddPending(Contact contact) {
+    private boolean isAddPending(Contact contact) {
         return ((contactToAdd == contact) && isAddPending);
     }
 
-    public boolean isDelPending(Contact contact) {
+    private boolean isDelPending(Contact contact) {
         return ((contactToEdit == contact) && isDeletePending);
     }
 
@@ -105,10 +106,7 @@ public class ContactEditor
     //--------------------- states
 
     public void goToState(EContactEditorState toState) {
-        if (toState != EContactEditorState.Edit)
-            goToState(toState, null, -1);
-        else
-            if (debug) Timber.e("goToState editorState illegal");
+        goToState(toState, null, -1);
     }
 
     public void goToState(EContactEditorState toState, Contact contact, int position) {
@@ -168,11 +166,7 @@ public class ContactEditor
             case Add:
                 goToState(EContactEditorState.Add);
                 break;
-            case Inactive:
-                if (debug) Timber.e("cancelInEditor editorState Inactive");
-                break;
             default:
-                if (debug) Timber.e("cancelInEditor editorState default");
                 break;
         }
     }
@@ -202,11 +196,7 @@ public class ContactEditor
                 isEditPending = true;
                 addRunnable(() -> iContact.updateElement(contactToEdit, activeContact.getContact()));
                 break;
-            case Inactive:
-                if (debug) Timber.e("saveInEditor editorState Inactive");
-                break;
             default:
-                if (debug) Timber.e("saveInEditor editorState default");
                 break;
         }
     }
@@ -275,14 +265,14 @@ public class ContactEditor
         viewManager.setEditorButtonsRelease();
     }
 
-    //--------------------- IContactsChangeListener
+    //--------------------- IElementsChangeListener
 
     @Override
-    public void onContactsChange(final Contact... contacts) {
-        if (debug) Timber.i("onContactsChange");
-        if (contacts == null || contacts[0] == null) {
-            if (debug) Timber.e("onContactsChange returned contact is null");
-            goToState(EContactEditorState.Inactive);
+    public void onChange(Contact... contacts) {
+        if (debug) Timber.i("onChange");
+        if (contacts == null || contacts.length == 0 || contacts[0] == null) {
+            if (debug) Timber.e("onChange returned contact is null");
+//          goToState(EContactEditorState.Inactive); //TODO: разобраться, зачем это тут было
             return;
         }
         Contact contact = contacts[0];
@@ -292,7 +282,7 @@ public class ContactEditor
             contactsAdapter.notifyDataSetChanged();
         } else {
             int position = contactsAdapter.getItemPosition(contact);
-            if (debug) Timber.w("onContactsChange: state is %s, pos is %d, contact is %s",
+            if (debug) Timber.w("onChange: state is %s, pos is %d, contact is %s",
                     state.getMessage(), position, contact.toString());
             switch (state) {
                 case FailDelete:
@@ -324,11 +314,7 @@ public class ContactEditor
                     break;
                 case FailToAdd:
                     if (isAddPending(contact)) onContactAddFail();
-                case Null:
-                    if (debug) Timber.e("onContactsChange state Null");
-                    break;
                 default:
-                    if (debug) Timber.e("onContactsChange state default");
                     break;
             }
         }

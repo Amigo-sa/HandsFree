@@ -46,7 +46,6 @@ public class ActivityFsm extends FsmCore<EActivityReport, EActivityState> {
 
     @Override
     protected boolean processFsmReport(EActivityReport report, EActivityState from) {
-        if (debug) Timber.i("processFsmReport");
         return processFsmStateChange(report, from, report.getDestination());
     }
 

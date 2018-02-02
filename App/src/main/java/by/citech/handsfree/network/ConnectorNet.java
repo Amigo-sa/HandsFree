@@ -208,7 +208,6 @@ public class ConnectorNet implements
 
     @Override
     public void onFsmStateChange(ENetState from, ENetState to, ENetReport why) {
-        if (debug) Timber.i("onNetFsmStateChange");
         switch (why) {
             case RP_TurningOn:
                 startServer();

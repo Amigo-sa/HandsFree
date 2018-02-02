@@ -42,7 +42,6 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
 
     @Override
     synchronized protected boolean processFsmReport(EBtReport report, EBtState from) {
-        if (debug) Timber.i("processFsmReport");
         return processFsmStateChange(report, from, report.getDestination());
     }
 

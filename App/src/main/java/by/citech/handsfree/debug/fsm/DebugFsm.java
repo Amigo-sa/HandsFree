@@ -47,7 +47,6 @@ public class DebugFsm extends FsmCore<EDebugReport, EDebugState> {
 
     @Override
     protected boolean processFsmReport(EDebugReport report, EDebugState from) {
-        if (debug) Timber.i("processFsmReport");
         switch (report) {
             case RP_StopDebug:
                 switch (opMode) {

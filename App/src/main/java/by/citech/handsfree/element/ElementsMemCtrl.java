@@ -5,14 +5,12 @@ import java.util.List;
 
 import by.citech.handsfree.common.ICopy;
 import by.citech.handsfree.common.IIdentifier;
-import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 import timber.log.Timber;
 
 public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> {
 
     private static final boolean debug = Settings.debug;
-    private static final String TAG = Tags.ElementsMemCtrl;
 
     private List<T> elements;
 
