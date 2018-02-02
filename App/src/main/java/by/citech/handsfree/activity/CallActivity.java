@@ -88,9 +88,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class CallActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IThreading, IBtToUiCtrl, CallUi.ICallUi, IMsgToUi, IScanListener,
-        CallFsm.ICallFsmListenerRegister,
-        DebugFsm.IDebugFsmListenerRegister {
+        IThreading, IBtToUiCtrl, CallUi.ICallUi, IMsgToUi, IScanListener {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -139,7 +137,7 @@ public class CallActivity
         setContentView(R.layout.activity_call);
 
         PreferencesProcessor.applyPrefsToSettings(this);
-        opMode = PreferencesProcessor.getOpModePref();
+        opMode = Settings.Common.opMode;
         if (debug) Timber.tag(TAG).w("onCreate opMode is %s", opMode);
 
         viewManager = new CallActivityViewManager(opMode,this);
@@ -158,12 +156,6 @@ public class CallActivity
         //---------------- TEST END
 
         viewManager.setDefaultView();
-
-        if (opMode == EOpMode.Normal) {
-            registerCallFsmListener(viewManager.getCallFsmListener(), Tags.CallActivityViewManager);
-        } else {
-            registerDebugFsmListener(viewManager.getDebugFsmListener(), Tags.CallActivityViewManager);
-        }
 
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
         dialogProcessor = new DialogProcessor(this);

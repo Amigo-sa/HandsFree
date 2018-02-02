@@ -41,7 +41,9 @@ import static by.citech.handsfree.call.fsm.ECallState.ST_Ready;
 
 public class CallActivityViewManager
         implements IOnInfoUpdateListener, IViewKeeper,
-        RssiReporter.IOnRssiUpdateListener {
+        RssiReporter.IOnRssiUpdateListener,
+        CallFsm.ICallFsmListenerRegister,
+        DebugFsm.IDebugFsmListenerRegister {
 
     private static final String STAG = Tags.CallActivityViewManager;
     private static final boolean debug = Settings.debug;
@@ -249,24 +251,6 @@ public class CallActivityViewManager
         this.opMode = opMode;
     }
 
-    //--------------------- getters and setters
-
-    CallFsm.ICallFsmListener getCallFsmListener() {
-        return callFsmListener;
-    }
-
-    BtFsm.IBtFsmListener getBtFsmListener() {
-        return btFsmListener;
-    }
-
-    NetFsm.INetFsmListener getNetFsmListener() {
-        return netFsmListener;
-    }
-
-    DebugFsm.IDebugFsmListener getDebugFsmListener() {
-        return debugFsmListener;
-    }
-
     //--------------------- main
 
     void setDefaultView() {
@@ -274,6 +258,12 @@ public class CallActivityViewManager
 
         setVisibility(getViewTraffic(), View.GONE);
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
+
+        if (opMode == EOpMode.Normal) {
+            registerCallFsmListener(callFsmListener, Tags.CallActivityViewManager);
+        } else {
+            registerDebugFsmListener(debugFsmListener, Tags.CallActivityViewManager);
+        }
 
         switch (opMode) {
             case Bt2AudOut:
