@@ -281,7 +281,7 @@ public class ContactEditor
     public void onContactsChange(final Contact... contacts) {
         if (debug) Timber.i("onContactsChange");
         if (contacts == null || contacts[0] == null) {
-            Timber.e("onContactsChange returned contact is null");
+            if (debug) Timber.e("onContactsChange returned contact is null");
             goToState(EContactEditorState.Inactive);
             return;
         }

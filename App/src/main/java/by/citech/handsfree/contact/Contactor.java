@@ -14,39 +14,12 @@ import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class Contactor
         implements IElement<Contact>, IPrepareObject {
 
-    private static final String STAG = Tags.Contactor;
     private static final boolean debug = Settings.debug;
-    private static int objCount;
-    private final String TAG;
-
-    static {
-        objCount = 0;
-    }
-
-    //--------------------- preparation
-
-    {
-        objCount++;
-        TAG = STAG + " " + objCount;
-        prepareObject();
-    }
-
-    @Override
-    public boolean prepareObject() {
-        if (isObjectPrepared()) return true;
-        contacts = Collections.synchronizedList(new ArrayList<>());
-        memCtrl = new ElementsMemCtrl<>(contacts);
-        return isObjectPrepared();
-    }
-
-    @Override
-    public boolean isObjectPrepared() {
-        return contacts != null && memCtrl != null;
-    }
 
     //--------------------- non-settings
 
@@ -55,34 +28,30 @@ public class Contactor
     private ElementsMemCtrl<Contact> memCtrl;
     private List<Contact> contacts;
     private IMsgToUi iMsgToUi;
-    private boolean isReady;
+    private boolean isInitiated;
 
     //--------------------- singleton
 
     private static volatile Contactor instance = null;
 
     private Contactor() {
+        contacts = Collections.synchronizedList(new ArrayList<>());
+        memCtrl = new ElementsMemCtrl<>(contacts);
     }
 
     public static Contactor getInstance() {
         if (instance == null) {
             synchronized (Contactor.class) {
-                if (instance == null) {
-                    instance = new Contactor();
-                }
-            }
-        } else {
-            instance.prepareObject();
-        }
+                if (instance == null) {instance = new Contactor();}}}
         return instance;
     }
 
     //--------------------- getters and setters
 
     public List<Contact> getContacts() {
-        if (debug) Log.i(TAG, "getContacts");
+        if (debug) Timber.i("getContacts");
         if (!prepareObject()) {
-            Log.e(TAG, "getContacts object not prepared, return");
+            Timber.e("getContacts object not prepared, return");
             return null;
         } else {
             return memCtrl.getList();
@@ -108,17 +77,13 @@ public class Contactor
 
     @Override
     public boolean initiateElements() {
-        if (debug) Log.i(TAG, "getAllContacts");
-        if (!isReady) {
-            Log.e(TAG, "getAllContacts not ready");
-            return false;
-        }
+        if (debug) Timber.i("getAllContacts");
         dbCtrl.test(); //TODO: remove, test
         if (!dbCtrl.downloadAllContacts(contacts)) {
-            Log.e(TAG, "getAllContacts downloadAllContacts fail");
+            Timber.e("getAllContacts downloadAllContacts fail");
             return false;
         } else if (contacts.isEmpty()) {
-            if (debug) Log.i(TAG, "getAllContacts contacts is empty");
+            if (debug) Timber.i("getAllContacts contacts is empty");
             return false;
         }
         memCtrl.sort();
@@ -126,7 +91,7 @@ public class Contactor
             if (contact != null) {
                 contact.setState(EContactState.SuccessAdd);
             } else {
-                Log.e(TAG, "getAllContacts one of contacts is null, deleting");
+                Timber.e("getAllContacts one of contacts is null, deleting");
                 contacts.remove(null);
             }
         }
@@ -135,7 +100,7 @@ public class Contactor
     }
 
     private boolean check(Contact toUpdate, Contact toCopy) {
-        if (debug) Log.i(TAG, "check if copy");
+        if (debug) Timber.i("check if copy");
         if (toUpdate != null) {
             if (toCopy == null) {
                 toUpdate.setState(EContactState.FailUpdate);
@@ -154,7 +119,7 @@ public class Contactor
      }
 
     private boolean check(Contact contact) {
-        if (debug) Log.i(TAG, "check");
+        if (debug) Timber.i("check");
         if (contact != null) {
             if (!Contact.checkForValid(contact)) {
                 contact.setState(EContactState.FailInvalid);
@@ -169,11 +134,11 @@ public class Contactor
     }
 
     private void reportContact(Contact... toReport) {
-        if (debug) Log.i(TAG, "reportContact");
+        if (debug) Timber.i("reportContact");
         if (listener != null && iMsgToUi != null) {
             iMsgToUi.sendToUiRunnable(false, () -> listener.onContactsChange(toReport));
         } else {
-            Log.e(TAG, "reportContact" + StatusMessages.ERR_PARAMETERS);
+            Timber.e("reportContact%s", StatusMessages.ERR_PARAMETERS);
         }
     }
 
@@ -181,45 +146,37 @@ public class Contactor
 
     @Override
     public void addElement(Contact toAdd) {
-        if (debug) Log.i(TAG, "addElement");
-        if (!isReady) {
-            Log.e(TAG, "addElement not ready");
-            return;
-        }
+        if (debug) Timber.i("addElement");
         if (check(toAdd)) {
-            if (debug) Log.w(TAG, "addElement toAdd is " + toAdd.toString());
+            if (debug) Timber.tag(TAG).w("addElement toAdd is %s", toAdd.toString());
             long contactId = dbCtrl.add(toAdd);
             if (contactId == -1) {
                 toAdd.setState(EContactState.FailToAdd);
-                Log.e(TAG, "addElement to db fail");
+                Timber.e("addElement to db fail");
             } else {
                 toAdd.setId(contactId);
                 if (!memCtrl.add(toAdd)) {
                     toAdd.setState(EContactState.FailToAdd);
-                    Log.e(TAG, "addElement to memory fail");
+                    Timber.e("addElement to memory fail");
                 } else {
                     toAdd.setState(EContactState.SuccessAdd);
                 }
             }
             reportContact(toAdd);
-            if (debug) Log.w(TAG, "addElement added is " + toAdd.toString());
+            if (debug) Timber.tag(TAG).w("addElement added is %s", toAdd.toString());
         }
     }
 
     @Override
     public void deleteElement(Contact toDelete) {
-        if (debug) Log.i(TAG, "deleteElement");
-        if (!isReady) {
-            Log.e(TAG, "deleteElement not ready");
-            return;
-        }
+        if (debug) Timber.i("deleteElement");
         if (toDelete != null) {
             if (!dbCtrl.delete(toDelete)) {
                 toDelete.setState(EContactState.FailDelete);
-                Log.e(TAG, "deleteElement db fail");
+                Timber.e("deleteElement db fail");
             } else if (!memCtrl.delete(toDelete)) {
                 toDelete.setState(EContactState.FailDelete);
-                Log.e(TAG, "deleteElement memory fail");
+                Timber.e("deleteElement memory fail");
             } else {
                 toDelete.setState(EContactState.SuccessDelete);
             }
@@ -229,25 +186,21 @@ public class Contactor
 
     @Override
     public void updateElement(Contact toUpdate, Contact toCopy) {
-        if (debug) Log.i(TAG, "updateElement");
-        if (!isReady) {
-            Log.e(TAG, "updateElement not ready");
-            return;
-        }
+        if (debug) Timber.i("updateElement");
         if (check(toUpdate, toCopy)) {
-            if (debug) Log.w(TAG, "updateElement toCopy is " + toCopy.toString());
-            if (debug) Log.w(TAG, "updateElement toUpdate is " + toUpdate.toString());
+            if (debug) Timber.tag(TAG).w("updateElement toCopy is %s", toCopy.toString());
+            if (debug) Timber.tag(TAG).w("updateElement toUpdate is %s", toUpdate.toString());
             if (!dbCtrl.update(toUpdate, toCopy)) {
                 toUpdate.setState(EContactState.FailUpdate);
-                Log.e(TAG, "updateElement db fail");
+                Timber.e("updateElement db fail");
             } else if (!memCtrl.update(toUpdate, toCopy)) {
                 toUpdate.setState(EContactState.FailUpdate);
-                Log.e(TAG, "updateElement memory fail");
+                Timber.e("updateElement memory fail");
             } else {
                 toUpdate.setState(EContactState.SuccessUpdate);
             }
             reportContact(toUpdate);
-            if (debug) Log.w(TAG, "updateElement updated is " + toUpdate.toString());
+            if (debug) Timber.tag(TAG).w("updateElement updated is %s", toUpdate.toString());
         }
     }
 
