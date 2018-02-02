@@ -1,6 +1,7 @@
 package by.citech.handsfree.bluetoothlegatt.ui;
 
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
 import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
@@ -9,6 +10,7 @@ import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.UiController;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.button.ButtonChangeViewOffCommand;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.button.ButtonChangeViewOnCommand;
+import by.citech.handsfree.bluetoothlegatt.ui.uicommands.dialogs.ChoseDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.dialogs.ConnInfoDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.dialogs.ConnectDialogCommand;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.dialogs.DisconnInfoDialogCommand;
@@ -33,12 +35,14 @@ public class BluetoothUi implements IUiToBtListener,
     private ReconnectDialogCommand reconnDiaologOn;
     private ConnInfoDialogCommand connDialogInfoOn;
     private DisconnInfoDialogCommand disconnDialogInfoOn;
+    private ChoseDialogCommand choseDialogCommand;
 
     private ButtonChangeViewOnCommand buttonViewColorChangeOn;
     private ButtonChangeViewOffCommand buttonViewColorChangeOff;
     private IMsgToUi iMsgToUi;
     private IBtToUiCtrl iBtToUiCtrl;
     private IBluetoothListener mIBluetoothListener;
+    private BluetoothDevice mBtDevice;
 
     //--------------------- singleton
 
@@ -50,6 +54,7 @@ public class BluetoothUi implements IUiToBtListener,
         buttonViewColorChangeOn = new ButtonChangeViewOnCommand();
         buttonViewColorChangeOff = new ButtonChangeViewOffCommand();
 
+        choseDialogCommand = new ChoseDialogCommand(this);
         discDialogOn = new DisconnectDialogCommand(ConnectorBluetooth.getInstance());
         reconnDiaologOn = new ReconnectDialogCommand(ConnectorBluetooth.getInstance());
         connDialogOn = new ConnectDialogCommand(ConnectorBluetooth.getInstance());
@@ -94,6 +99,7 @@ public class BluetoothUi implements IUiToBtListener,
     public BluetoothUi build() {
         buttonViewColorChangeOn.setiBluetoothListener(mIBluetoothListener);
         buttonViewColorChangeOff.setBluetoothListener(mIBluetoothListener);
+        choseDialogCommand.setiMsgToUi(iMsgToUi);
         connDialogOn.setiMsgToUi(iMsgToUi);
         discDialogOn.setiMsgToUi(iMsgToUi);
         reconnDiaologOn.setiMsgToUi(iMsgToUi);
@@ -106,7 +112,8 @@ public class BluetoothUi implements IUiToBtListener,
 
     @Override
     public void clickItemList(BluetoothDevice device) {
-        ConnectorBluetooth.getInstance().getDeviceForConnecting(device);
+        mBtDevice = device;
+        choseDialogCommand.setDevice(device);
         connDialogOn.setDevice(device);
         discDialogOn.setDevice(device);
         reconnDiaologOn.setDevice(device);
@@ -114,11 +121,14 @@ public class BluetoothUi implements IUiToBtListener,
         connDialogInfoOn.setDevice(device);
 
         if (device.equals(getConnectedDevice())) {
+            Log.i("BluetoothUi", "discDialogOn");
             uiController.setCommand(discDialogOn).execute();
         } else if (getConnectedDevice() != null) {
+            Log.i("BluetoothUi", "reconnDiaologOn");
             uiController.setCommand(reconnDiaologOn).execute();
         } else {
-            uiController.setCommand(connDialogOn).execute();
+            Log.i("BluetoothUi", "choseDialogCommand");
+            uiController.setCommand(choseDialogCommand).execute();
         }
     }
 
@@ -134,6 +144,12 @@ public class BluetoothUi implements IUiToBtListener,
             ConnectorBluetooth.getInstance().startScan();
         else
             ConnectorBluetooth.getInstance().stopScan();
+    }
+
+    public void clickBtnChoseProceed() {
+        Log.i("BluetoothUi", "clickBtnChoseProceed");
+        uiController.setCommand(connDialogOn).execute();
+        ConnectorBluetooth.getInstance().getDeviceForConnecting(mBtDevice);
     }
 
     @Override

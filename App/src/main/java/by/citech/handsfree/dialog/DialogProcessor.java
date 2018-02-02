@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.Map;
 
@@ -292,7 +293,6 @@ public class DialogProcessor {
                 });
 
         AlertDialog dialog = builder.create();
-        currentDialog = dialog;
 
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_proceed, null);
 
@@ -308,11 +308,13 @@ public class DialogProcessor {
 
         dialog.setView(dialogView);
         dialog.show();
+        currentDialog = dialog;
     }
 
 
     private void dialogChose(final Map<EDialogState, Runnable> toDoMap, String deviceName) {
         if (debug) Timber.i(TAG, "dialogChose");
+        TextView title;
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
@@ -320,15 +322,15 @@ public class DialogProcessor {
                     switch (currentState) {
                         case Cancel:
                             if (debug) Timber.i(TAG, "dialogChose cancel");
-                            toDoMap.get(EDialogState.Cancel).run();
+                            //toDoMap.get(EDialogState.Cancel).run();
                             break;
                         case Proceed:
-                            if (debug) Timber.i(TAG, "dialogChose delete");
+                            if (debug) Timber.i(TAG, "dialogChose to connect");
                             toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
                             if (debug) Timber.i(TAG, "dialogChose just dismiss");
-                            toDoMap.get(EDialogState.Cancel).run();
+                           // toDoMap.get(EDialogState.Cancel).run();
                             break;
                         default:
                             Timber.e(TAG, "dialogChose currentState default");
@@ -342,7 +344,8 @@ public class DialogProcessor {
 
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_chose, null);
 
-        dialogView.findViewById(R.id.dialogTitle).createAccessibilityNodeInfo().setText(deviceName);
+        title = dialogView.findViewById(R.id.dialogTitle);
+        title.setText(String.format("Connect to device %s", deviceName));
 
         dialogView.findViewById(R.id.btnProceed).setOnClickListener((v) -> {
             currentState = EDialogState.Proceed;
