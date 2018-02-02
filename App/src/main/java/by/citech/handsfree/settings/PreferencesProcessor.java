@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import android.support.v7.preference.PreferenceManagerFix;
+import android.util.Log;
 
 import by.citech.handsfree.R;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
@@ -106,15 +107,11 @@ public class PreferencesProcessor {
     //-------------------------- getting preferences
 
     public static EOpMode getOpModePref() {
-        return EOpMode.valueOf(prefs.getString(
-                SettingsDefault.TypeName.opMode,
-                SettingsDefault.Common.opMode.getSettingName()));
+        return processEnum(SettingsDefault.Common.opMode);
     }
 
     public static EAudioCodecType getAudioCodecTypePref() {
-        return EAudioCodecType.valueOf(prefs.getString(
-                SettingsDefault.TypeName.audioCodecType,
-                SettingsDefault.AudioCommon.audioCodecType.getSettingName()));
+        return processEnum(SettingsDefault.AudioCommon.audioCodecType);
     }
 
     public static String getBtChosenAddrPref() {

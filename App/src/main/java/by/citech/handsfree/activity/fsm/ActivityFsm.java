@@ -53,11 +53,11 @@ public class ActivityFsm extends FsmCore<EActivityReport, EActivityState> {
     //--------------------- processing
 
     @Override
-    protected boolean processFsmStateChange(EActivityState from, EActivityState to, EActivityReport why, boolean isForce) {
-        if (!super.processFsmStateChange(from, to, why, isForce)) {
+    protected boolean processFsmStateChange(EActivityReport report, EActivityState from, EActivityState to, boolean isForce) {
+        if (!super.processFsmStateChange(report, from, to, isForce)) {
             return false;
         } else {
-            if (isActivity(from) && isTransition(why)) prevActivityState = from;
+            if (isActivity(from) && isTransition(report)) prevActivityState = from;
             return true;
         }
     }

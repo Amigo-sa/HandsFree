@@ -6,7 +6,7 @@ import static by.citech.handsfree.network.fsm.ENetState.*;
 
 public enum ENetReport implements IFsmReport<ENetState> {
 
-    RP_TurningOn        (ST_TurnedOff),
+    RP_TurningOn        (ST_TurnedOn),
     RP_TurningOff       (ST_TurnedOff),
     RP_NetPrepared      (ST_NetPrepared),
     RP_NetPrepareFail   (ST_NetPrepareFail),

@@ -93,7 +93,7 @@ public class CallActivityViewManager
 
     //--------------------- listeners
 
-    CallFsm.ICallFsmListener callFsmListener = (from, to, report) -> {
+    private CallFsm.ICallFsmListener callFsmListener = (from, to, report) -> {
         switch (report) {
             case RP_NetError:
             case RP_BtError:
@@ -179,15 +179,15 @@ public class CallActivityViewManager
         }
     };
 
-    BtFsm.IBtFsmListener btFsmListener = (from, to, report) -> {
+    private BtFsm.IBtFsmListener btFsmListener = (from, to, report) -> {
         //TODO: прикрутить отображение
     };
 
-    NetFsm.INetFsmListener netFsmListener = (from, to, report) -> {
+    private NetFsm.INetFsmListener netFsmListener = (from, to, report) -> {
         //TODO: прикрутить отображение
     };
 
-    DebugFsm.IDebugFsmListener debugFsmListener = (from, to, report) -> {
+    private DebugFsm.IDebugFsmListener debugFsmListener = (from, to, report) -> {
         switch (report) {
             case RP_StartDebug:
                 switch (opMode) {
@@ -251,19 +251,19 @@ public class CallActivityViewManager
 
     //--------------------- getters and setters
 
-    public CallFsm.ICallFsmListener getCallFsmListener() {
+    CallFsm.ICallFsmListener getCallFsmListener() {
         return callFsmListener;
     }
 
-    public BtFsm.IBtFsmListener getBtFsmListener() {
+    BtFsm.IBtFsmListener getBtFsmListener() {
         return btFsmListener;
     }
 
-    public NetFsm.INetFsmListener getNetFsmListener() {
+    NetFsm.INetFsmListener getNetFsmListener() {
         return netFsmListener;
     }
 
-    public DebugFsm.IDebugFsmListener getDebugFsmListener() {
+    DebugFsm.IDebugFsmListener getDebugFsmListener() {
         return debugFsmListener;
     }
 

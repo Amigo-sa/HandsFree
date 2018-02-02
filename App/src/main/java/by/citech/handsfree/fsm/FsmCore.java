@@ -84,7 +84,7 @@ abstract public class FsmCore<
             if (isAdded) {if (debug) Timber.i("%s register success: <%s>, count: <%d>", fsmName, message, listeners.size());}
             else         {if (debug) Timber.e("%s register fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
         }
-        if (isAdded) listener.onFsmStateChange(prevState, currState, prevReport);
+        if (isAdded) listener.onFsmStateChange(prevState, currState, currReport);
         return isAdded;
     }
 
@@ -98,11 +98,11 @@ abstract public class FsmCore<
 
     //--------------------- processing
 
-    synchronized protected boolean processFsmStateChange(R why, S from, S to) {
-        return processFsmStateChange(from, to, why, false);
+    synchronized protected boolean processFsmStateChange(R report, S from, S to) {
+        return processFsmStateChange(report, from, to, false);
     }
 
-    synchronized protected boolean processFsmStateChange(S from, S to, R report, boolean isForce) {
+    synchronized protected boolean processFsmStateChange(R report, S from, S to, boolean isForce) {
         if (from == null || to == null || report == null) return false;
         if (currState == from || isForce) {
             if (from.availableFromAny().contains(to) || from.available().contains(to) || isForce) {

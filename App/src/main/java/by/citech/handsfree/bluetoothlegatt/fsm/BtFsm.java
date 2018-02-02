@@ -19,7 +19,7 @@ public class BtFsm extends FsmCore<EBtReport, EBtState> {
     private static volatile BtFsm instance = null;
 
     private BtFsm() {
-        super(Tags.ConnectionFsm);
+        super(Tags.BtFsm);
         reportToStateMap = new EnumMap<>(EBtReport.class);
         currState = ST_TurnedOff;
         processReport(RP_TurningOn, getFsmCurrentState(), Tags.ConnectionFsm);

@@ -30,7 +30,8 @@ public class CollectionHelper {
     @SafeVarargs
     public static <T extends Enum<T>> EnumSet<T> eSet(Class<T> clazz, T... states) {
         if (states == null || states.length == 0) {
-            return EnumSet.noneOf(clazz);
+//          return EnumSet.noneOf(clazz);
+            return null;
         } else if (states.length == 1) {
             return EnumSet.of(states[0]);
         } else {

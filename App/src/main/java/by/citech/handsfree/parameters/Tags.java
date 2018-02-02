@@ -2,7 +2,7 @@ package by.citech.handsfree.parameters;
 
 public class Tags {
 
-    private static final String PREFIX = "WSD ";
+    private static final String PREFIX = "SIT ";
 
     public static final String LightActivity = PREFIX + "LightActivity";
     public static final String MsgDecodingReceiver = PREFIX + "MsgDecodingReceiver";
@@ -93,5 +93,6 @@ public class Tags {
     public static final String DebugFsm = PREFIX + "DebugFsm";
     public static final String NetFsm = PREFIX + "NetFsm";
     public static final String CallControl = PREFIX + "CallControl";
-    public static String CallHandshake = PREFIX + "CallHandshake";
+    public static final String CallHandshake = PREFIX + "CallHandshake";
+    public static final String BtFsm = PREFIX + "BtFsm";
 }

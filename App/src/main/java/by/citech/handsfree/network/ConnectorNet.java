@@ -211,6 +211,7 @@ public class ConnectorNet implements
         if (debug) Timber.i("onNetFsmStateChange");
         switch (why) {
             case RP_TurningOn:
+                startServer();
                 break;
             case RP_ConnectOut:
                 if (!isValidCoordinates()) toNet(ENetReport.RP_NetAddrInvalid);
@@ -344,8 +345,8 @@ public class ConnectorNet implements
 
     private void connect() {
         if (debug) Timber.i("connect");
-        new ClientConn(this, handler).execute(String.format(
-                "ws://%s:%s", remAddr, remPort));
+        new ClientConn(this, handler).execute(
+                String.format("ws://%s:%s", remAddr, remPort));
     }
 
     private void disconnect(IConnCtrl iConnCtrl) {
