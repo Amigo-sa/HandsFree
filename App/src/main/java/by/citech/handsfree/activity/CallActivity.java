@@ -34,7 +34,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -45,38 +44,38 @@ import java.util.Map;
 
 import by.citech.handsfree.R;
 import by.citech.handsfree.application.ThisApp;
+import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
+import by.citech.handsfree.bluetoothlegatt.IScanListener;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
-import by.citech.handsfree.call.CallUi;
-import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
-import by.citech.handsfree.statistic.RssiReporter;
-import by.citech.handsfree.ui.IBtToUiCtrl;
+import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
 import by.citech.handsfree.bluetoothlegatt.ui.LeDeviceListAdapter;
-import by.citech.handsfree.bluetoothlegatt.IScanListener;
-import by.citech.handsfree.ui.ISwipeListener;
-import by.citech.handsfree.ui.LinearLayoutTouchListener;
-import by.citech.handsfree.ui.helpers.EActiveContactState;
+import by.citech.handsfree.call.CallUi;
+import by.citech.handsfree.contact.ActiveContact;
+import by.citech.handsfree.contact.ChosenContact;
 import by.citech.handsfree.contact.Contact;
+import by.citech.handsfree.contact.ContactEditor;
 import by.citech.handsfree.contact.Contactor;
 import by.citech.handsfree.contact.ContactsAdapter;
-import by.citech.handsfree.ui.helpers.EEditorState;
+import by.citech.handsfree.contact.EActiveContactState;
+import by.citech.handsfree.contact.EEditorState;
 import by.citech.handsfree.dialog.DialogProcessor;
 import by.citech.handsfree.dialog.EDialogState;
 import by.citech.handsfree.dialog.EDialogType;
-import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.ui.helpers.ActiveContactHelper;
-import by.citech.handsfree.ui.helpers.ChosenContactHelper;
-import by.citech.handsfree.ui.helpers.ContactEditorHelper;
-import by.citech.handsfree.ui.IGetView;
-import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
-import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
 import by.citech.handsfree.network.INetInfoGetter;
 import by.citech.handsfree.parameters.Colors;
+import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EOpMode;
 import by.citech.handsfree.settings.PreferencesProcessor;
 import by.citech.handsfree.settings.Settings;
-import by.citech.handsfree.parameters.Tags;
+import by.citech.handsfree.statistic.NumberedTrafficAnalyzer;
+import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.threading.IThreading;
+import by.citech.handsfree.ui.IBtToUiCtrl;
+import by.citech.handsfree.ui.IGetView;
+import by.citech.handsfree.ui.IMsgToUi;
+import by.citech.handsfree.ui.ISwipeListener;
+import by.citech.handsfree.ui.LinearLayoutTouchListener;
 import by.citech.handsfree.util.Keyboard;
 import timber.log.Timber;
 
@@ -115,9 +114,9 @@ public class CallActivity
     private EditText editTextSearch, editTextContactName, editTextContactIp;
     private ContactsAdapter contactsAdapter;
     private ContactsAdapter.SwipeCrutch swipeCrutch;
-    private ActiveContactHelper activeContactHelper;
-    private ChosenContactHelper chosenContactHelper;
-    private ContactEditorHelper contactEditorHelper;
+    private ActiveContact activeContact;
+    private ChosenContact chosenContact;
+    private ContactEditor contactEditor;
     private LinearLayoutTouchListener linearLayoutTouchListener;
 
     // для включения разрешения местоположения
@@ -158,7 +157,7 @@ public class CallActivity
 
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
         dialogProcessor = new DialogProcessor(this);
-        contactEditorHelper = new ContactEditorHelper();
+        contactEditor = new ContactEditor();
 
         listDevices = findViewById(R.id.listDevices);
         viewRecyclerContacts = findViewById(R.id.viewRecyclerContacts);
@@ -199,14 +198,12 @@ public class CallActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         bluetoothUi = BluetoothUi.getInstance();
-        IUiToBtListener = (IUiToBtListener) bluetoothUi;
-        iMenuListener = (IMenuListener) bluetoothUi;
-        iSwipeListener = (ISwipeListener) bluetoothUi;
+        IUiToBtListener = bluetoothUi;
+        iMenuListener = bluetoothUi;
+        iSwipeListener = bluetoothUi;
 
         linearLayoutTouchListener = new LinearLayoutTouchListener(iSwipeListener);
         findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
-
-        //IScanListener = ConnectorBluetooth.getInstance().getIbtToUiListener();
     }
 
     @Override
@@ -319,7 +316,7 @@ public class CallActivity
             if (debug) Timber.tag(TAG).i("onBackPressed showMainView");
             viewManager.showMainView();
             actionBar.setCustomView(null);
-            contactEditorHelper.goToState(EEditorState.Inactive);
+            contactEditor.goToState(EEditorState.Inactive);
             iMenuListener.menuScanStopListener();
             invalidateOptionsMenu();
         } else {
@@ -423,19 +420,20 @@ public class CallActivity
 
     private void setupContactEditor() {
         if (debug) Timber.tag(TAG).i("setupContactEditor");
-        chosenContactHelper = new ChosenContactHelper(viewManager);
-        activeContactHelper = new ActiveContactHelper(chosenContactHelper, viewManager);
-        contactEditorHelper
+        chosenContact = new ChosenContact(viewManager);
+        activeContact = new ActiveContact(chosenContact, viewManager);
+        contactEditor
                 .setViewManager(viewManager)
                 .setSwipeCrutch(swipeCrutch)
-                .setActiveContactHelper(activeContactHelper)
+                .setActiveContactHelper(activeContact)
                 .setiMsgToUi(this)
                 .setiContact(Contactor.getInstance())
                 .setContactsAdapter(contactsAdapter);
         TextWatcher textWatcher = new TextWatcher() {
             @Override public void afterTextChanged(Editable arg0) {}
             @Override public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
-            @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {contactEditorHelper.contactFieldChanged();}
+            @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+                contactEditor.contactFieldChanged();}
         };
         editTextContactIp.addTextChangedListener(textWatcher);
         editTextContactName.addTextChangedListener(textWatcher);
@@ -452,8 +450,8 @@ public class CallActivity
         Contactor.getInstance()
                 .setContext(this)
                 .setiMsgToUi(this)
-                .setListener(contactEditorHelper);
-        contactEditorHelper.getAllContacts();
+                .setListener(contactEditor);
+        contactEditor.getAllContacts();
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
@@ -467,8 +465,8 @@ public class CallActivity
                 swipeCrutch.designateSwipe(viewHolder.itemView, position);
                 switch (swipeDir) {
                     case ItemTouchHelper.RIGHT:
-                        contactEditorHelper.setEditorSwipedIn();
-                        contactEditorHelper.startEditorEdit(contactsAdapter.getItem(position), position);
+                        contactEditor.setEditorSwipedIn();
+                        contactEditor.startEditorEdit(contactsAdapter.getItem(position), position);
                         break;
                     default:
                         if (debug) Timber.tag(TAG).i("swipe swipeDir is %s", swipeDir);
@@ -480,16 +478,20 @@ public class CallActivity
 
     //--------------------- actions
 
-    private void clickBtnCancelInEditor() {contactEditorHelper.cancelContact();}
-    private void clickBtnSaveInEditor() {contactEditorHelper.saveContact();}
-    private void clickBtnStartEditorAdd() {contactEditorHelper.startEditorAdd();}
-    private void clickBtnDeleteFromEditor() {contactEditorHelper.deleteContact();}
+    private void clickBtnCancelInEditor() {
+        contactEditor.cancelContact();}
+    private void clickBtnSaveInEditor() {
+        contactEditor.saveContact();}
+    private void clickBtnStartEditorAdd() {
+        contactEditor.startEditorAdd();}
+    private void clickBtnDeleteFromEditor() {
+        contactEditor.deleteContact();}
 
     void clickBtnClearContact() {
         if (debug) Timber.tag(TAG).i("clickBtnClearContact");
-        if (chosenContactHelper.isChosen()) {
-            chosenContactHelper.clear();
-            activeContactHelper.goToState(EActiveContactState.Default);
+        if (chosenContact.isChosen()) {
+            chosenContact.clear();
+            activeContact.goToState(EActiveContactState.Default);
         } else {
             viewManager.clearSearch();
         }
@@ -497,8 +499,8 @@ public class CallActivity
 
     private void clickContactItem(Contact contact, int position) {
         if (debug) Timber.tag(TAG).i("clickContactItem");
-        chosenContactHelper.choose(contact, position);
-        activeContactHelper.goToState(EActiveContactState.FromChosen);
+        chosenContact.choose(contact, position);
+        activeContact.goToState(EActiveContactState.FromChosen);
     }
 
     public void clickBtnChangeDevice() {
@@ -521,7 +523,7 @@ public class CallActivity
 
     @Override
     public String getRemAddr() {
-        return activeContactHelper.getIp();
+        return activeContact.getIp();
     }
 
     @Override
@@ -583,14 +585,14 @@ public class CallActivity
             deviceListAdapter.addDevice(device, rssi);
     }
 
-       //--------------------- LocationListener
+    //--------------------- LocationListener
 
     @Override public void onLocationChanged(Location location) {}
     @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
     @Override public void onProviderEnabled(String provider) {}
     @Override public void onProviderDisabled(String provider) {}
 
-    //--------------------- CallActivityViewManager
+    //--------------------- IBtToUiCtrl
 
     public void setVisibleMain() {
         runOnUiThread(() -> {
