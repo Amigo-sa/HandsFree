@@ -56,6 +56,7 @@ public class ConnectorBluetooth
     private LeScanner leScanner;
     private boolean scanWithFilter;
     private IScanListener mIScanListener;
+    private String chosenAddr;
     // хранилища данных
     private volatile StorageData<byte[]> storageFromBt;
     private volatile StorageData<byte[][]> storageToBt;
@@ -390,7 +391,7 @@ public class ConnectorBluetooth
     //--------------------- ICallFsmListener
 
     private void searchDevice() {
-        if (PreferencesProcessor.getBtChosenAddrPref() != null && PreferencesProcessor.getBtChosenAddrPref().length() > 0) {
+        if (chosenAddr != null && chosenAddr.length() > 0) {
             leScanner.setDeviceAddress(PreferencesProcessor.getBtChosenAddrPref());
             startScan();
         }
@@ -436,7 +437,8 @@ public class ConnectorBluetooth
                 break;
 
             case RP_BtEnabled:
-                if (BluetoothAdapter.checkBluetoothAddress(PreferencesProcessor.getBtChosenAddrPref()))
+                chosenAddr = PreferencesProcessor.getBtChosenAddrPref();
+                if (BluetoothAdapter.checkBluetoothAddress(chosenAddr))
                     toBtFsm(RP_BtChosenValid, to);
                 else
                     toBtFsm(RP_BtChosenInvalid, to);
