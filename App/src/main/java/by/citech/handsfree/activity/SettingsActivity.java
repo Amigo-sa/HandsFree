@@ -3,9 +3,6 @@ package by.citech.handsfree.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers;
-
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,14 +17,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers;
+
 import java.util.Locale;
 
 import by.citech.handsfree.R;
-import by.citech.handsfree.application.OpModeProcessor;
+import by.citech.handsfree.application.ThisAppControl;
 import by.citech.handsfree.parameters.Colors;
-import by.citech.handsfree.settings.SettingsHelper;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.settings.SettingsDefault;
+import by.citech.handsfree.settings.SettingsHelper;
 import timber.log.Timber;
 
 public class SettingsActivity
@@ -120,7 +119,10 @@ public class SettingsActivity
             try {
                 return super.onCreateView(inflater, container, savedInstanceState);
             } finally {
-                setDividerPreferences(DIVIDER_PADDING_CHILD | DIVIDER_CATEGORY_AFTER_LAST | DIVIDER_CATEGORY_BETWEEN);
+                setDividerPreferences(
+                        DIVIDER_PADDING_CHILD
+                        | DIVIDER_CATEGORY_AFTER_LAST
+                        | DIVIDER_CATEGORY_BETWEEN);
             }
         }
 
@@ -159,7 +161,7 @@ public class SettingsActivity
                     getRefreshedEditTextPref(prefName);
                     break;
                 case SettingsDefault.TypeName.opMode:
-                    OpModeProcessor.onOpModeChange();
+                    ThisAppControl.restartApplication();
                     break;
                 case SettingsDefault.TypeName.audioCodecType:
                     getRefreshedListPref(prefName);

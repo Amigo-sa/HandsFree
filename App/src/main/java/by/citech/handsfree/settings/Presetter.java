@@ -10,58 +10,46 @@ class Presetter {
 
     static void setOpMode(EOpMode opMode) {
         if (opMode != null) {
+            Settings.Common.opMode = opMode;
             switch (opMode) {
                 case Bt2Bt:
-                    Settings.Common.opMode = EOpMode.Bt2Bt;
                     Settings.Bluetooth.btSinglePacket = false;
                     Settings.Bluetooth.btFactor = Settings.Common.bt2NetFactor;
                     break;
                 case DataGen2Bt:
-                    Settings.Common.opMode = EOpMode.DataGen2Bt;
                     Settings.Bluetooth.btSinglePacket = true;
                     Settings.AudioCommon.audioSingleFrame = true;
                     Settings.AudioCommon.audioBuffIsShorts = true;
                     break;
                 case AudIn2Bt:
-                    Settings.Common.opMode = EOpMode.AudIn2Bt;
                     Settings.Bluetooth.btSinglePacket = true;
                     Settings.AudioCommon.audioSingleFrame = true;
                     Settings.AudioCommon.audioBuffIsShorts = true;
                     break;
                 case Bt2AudOut:
-                    Settings.Common.opMode = EOpMode.Bt2AudOut;
                     Settings.AudioCommon.audioSingleFrame = false;
                     Settings.AudioCommon.audioBuffSizeBytes = 24000;
                     Settings.AudioCommon.audioBuffIsShorts = true;
                     break;
                 case AudIn2AudOut:
-                    Settings.Common.opMode = EOpMode.AudIn2AudOut;
                     Settings.AudioCommon.audioSingleFrame = false;
                     Settings.AudioCommon.audioBuffSizeBytes = 24000;
                     Settings.AudioCommon.audioBuffIsShorts = true;
                     break;
                 case Record:
-                    Settings.Common.opMode = EOpMode.Record;
                     Settings.Bluetooth.btSinglePacket = false;
                     Settings.Bluetooth.btFactor = Settings.Common.bt2NetFactor;
                     break;
                 case Net2Net:
-                    setToDefault();
-                    if (debug) Timber.e("setOpMode opMode is Net2Net (not implemented), set to default");
-                    break;
                 case Normal:
-                    setToDefault();
-                    break;
                 default:
                     setToDefault();
-                    if (debug) Timber.e("setOpMode no matches for opMode, set to default");
                     break;
             }
         } else {
-            Settings.Common.opMode = SettingsDefault.Common.opMode;
-            if (debug) Timber.e("setOpMode illegal value, set to default");
+            setToDefault();
         }
-        if (debug) Timber.w("setOpMode opMode set to %s", Settings.Common.opMode.getSettingName());
+        if (debug) Timber.w("opMode set to %s", Settings.Common.opMode.getSettingName());
     }
 
     private static void setToDefault() {

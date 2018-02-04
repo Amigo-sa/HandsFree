@@ -1,29 +1,27 @@
 package by.citech.handsfree.ui;
 
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
+import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
-/**
- * Created by tretyak on 09.01.2018.
- */
+public class TouchListener implements View.OnTouchListener {
 
-public class LinearLayoutTouchListener implements View.OnTouchListener {
-
-    static final String logTag = "ActivitySwipeDetector";
     // TODO change this runtime based on screen resolution. for 1920x1080 is to small the 100 distance
-    static final int MIN_DISTANCE = 100;
-    private float downX, downY, upX, upY;
+
+    private static final int MIN_DISTANCE = 100;
+    private float downX, downY, upX, upY, deltaX, deltaY;
     private ISwipeListener iSwipeListener;
 
-    public LinearLayoutTouchListener(ISwipeListener iSwipeListener) {
+    public TouchListener(ISwipeListener iSwipeListener) {
         this.iSwipeListener = iSwipeListener;
     }
+
     private void onRightToLeftSwipe() {
         iSwipeListener.onSwipe(ISwipeListener.SwipeDirection.LEFT);
     }
+
     private void onLeftToRightSwipe() {
         iSwipeListener.onSwipe(ISwipeListener.SwipeDirection.RIGH);
     }
@@ -47,8 +45,8 @@ public class LinearLayoutTouchListener implements View.OnTouchListener {
             case MotionEvent.ACTION_UP: {
                 upX = motionEvent.getX();
                 upY = motionEvent.getY();
-                float deltaX = downX - upX;
-                float deltaY = downY - upY;
+                deltaX = downX - upX;
+                deltaY = downY - upY;
                 // swipe horizontal?
                 if (Math.abs(deltaX) > MIN_DISTANCE) {
                     // left or right
@@ -61,7 +59,7 @@ public class LinearLayoutTouchListener implements View.OnTouchListener {
                         return true;
                     }
                 } else {
-                    Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
+                    if (Settings.debug) Timber.i("Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
                     // return false; // We don't consume the event
                 }
                 // swipe vertical?
@@ -76,7 +74,7 @@ public class LinearLayoutTouchListener implements View.OnTouchListener {
                         return true;
                     }
                 } else {
-                    Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
+                    if (Settings.debug) Timber.i("Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
                 }
                 return false; // no swipe horizontally and no swipe vertically
             } // case MotionEvent.ACTION_UP:

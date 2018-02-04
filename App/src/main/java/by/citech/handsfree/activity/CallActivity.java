@@ -36,7 +36,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Locale;
@@ -50,7 +49,7 @@ import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.bluetoothlegatt.ui.IMenuListener;
 import by.citech.handsfree.bluetoothlegatt.ui.IUiToBtListener;
 import by.citech.handsfree.bluetoothlegatt.ui.LeDeviceListAdapter;
-import by.citech.handsfree.call.CallUi;
+import by.citech.handsfree.input.TwoInputController;
 import by.citech.handsfree.contact.ActiveContact;
 import by.citech.handsfree.contact.ChosenContact;
 import by.citech.handsfree.contact.Contact;
@@ -74,8 +73,7 @@ import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.ui.IGetView;
 import by.citech.handsfree.ui.IMsgToUi;
-import by.citech.handsfree.ui.ISwipeListener;
-import by.citech.handsfree.ui.LinearLayoutTouchListener;
+import by.citech.handsfree.ui.TouchListener;
 import by.citech.handsfree.util.Keyboard;
 import timber.log.Timber;
 
@@ -85,7 +83,7 @@ import static by.citech.handsfree.util.Network.getIpAddr;
 public class CallActivity
         extends AppCompatActivity
         implements INetInfoGetter, IBluetoothListener, LocationListener, IGetView,
-        IThreading, IBtToUiCtrl, CallUi.ICallUi, IMsgToUi, IScanListener {
+        IThreading, IBtToUiCtrl, TwoInputController.ITwoInput, IMsgToUi, IScanListener {
 
     private static final String STAG = Tags.DeviceControlActivity;
     private static final boolean debug = Settings.debug;
@@ -99,35 +97,27 @@ public class CallActivity
     public static final int REQUEST_LOCATION = 99;
     public static final int REQUEST_MICROPHONE = 98;
 
-    // TODO: отображение траффика для дебага
-    private TextView textViewBtInTraffic, textViewBtOutTraffic, textViewNetInTraffic, textViewNetOutTraffic;
-
     private CallActivityViewManager viewManager;
+    private DialogProcessor dialogProcessor;
     private ActionBar actionBar;
 
     // список найденных устройств
-    private ListView listDevices;
     private LeDeviceListAdapter deviceListAdapter;
+
     // ддя списка контактов
-    private DialogProcessor dialogProcessor;
-    private RecyclerView viewRecyclerContacts;
-    private EditText editTextSearch, editTextContactName, editTextContactIp;
     private ContactsAdapter contactsAdapter;
     private ContactsAdapter.SwipeCrutch swipeCrutch;
     private ActiveContact activeContact;
     private ChosenContact chosenContact;
     private ContactEditor contactEditor;
-    private LinearLayoutTouchListener linearLayoutTouchListener;
 
     // для включения разрешения местоположения
     private LocationManager locationManager;
     private String provider;
 
     // интерфейсы для работы gui с bt
-    private BluetoothUi bluetoothUi;
-    private IUiToBtListener IUiToBtListener;
+    private IUiToBtListener iUiToBtListener;
     private IMenuListener iMenuListener;
-    private ISwipeListener iSwipeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,19 +129,20 @@ public class CallActivity
         if (debug) Timber.tag(TAG).w("onCreate opMode is %s", opMode);
 
         viewManager = new CallActivityViewManager(opMode,this);
+
         enPermissions();
 
-        //---------------- TEST START
-        Handler handler = new Handler();
-        NumberedTrafficAnalyzer.getInstance()
-                .setListener(viewManager)
-                .setHandler(handler)
-                .setInterval(1000);
-        RssiReporter.getInstance()
-                .setListener(viewManager)
-                .setHandler(handler)
-                .setInterval(1000);
-        //---------------- TEST END
+        if (opMode != EOpMode.Normal) {
+            Handler handler = new Handler();
+            NumberedTrafficAnalyzer.getInstance()
+                    .setListener(viewManager)
+                    .setHandler(handler)
+                    .setInterval(1000);
+            RssiReporter.getInstance()
+                    .setListener(viewManager)
+                    .setHandler(handler)
+                    .setInterval(1000);
+        }
 
         viewManager.setDefaultView();
 
@@ -159,25 +150,20 @@ public class CallActivity
         dialogProcessor = new DialogProcessor(this);
         contactEditor = new ContactEditor();
 
-        listDevices = findViewById(R.id.listDevices);
-        viewRecyclerContacts = findViewById(R.id.viewRecyclerContacts);
-        editTextSearch = findViewById(R.id.editTextSearch);
-        editTextContactName = findViewById(R.id.editTextContactName);
-        editTextContactIp = findViewById(R.id.editTextContactIp);
-
         findViewById(R.id.btnChangeDevice).setOnClickListener((v) -> clickBtnChangeDevice());
         findViewById(R.id.btnClearContact).setOnClickListener((v) -> clickBtnClearContact());
         findViewById(R.id.btnAddContact).setOnClickListener((v) -> clickBtnStartEditorAdd());
         findViewById(R.id.btnDelContact).setOnClickListener((v) -> clickBtnDeleteFromEditor());
         findViewById(R.id.btnSaveContact).setOnClickListener((v) -> clickBtnSaveInEditor());
         findViewById(R.id.btnCancelContact).setOnClickListener((v) -> clickBtnCancelInEditor());
-        findViewById(R.id.btnGreen).setOnClickListener((v) -> onClickBtnGreen());
-        findViewById(R.id.btnRed).setOnClickListener((v) -> onClickBtnRed());
+        findViewById(R.id.btnGreen).setOnClickListener((v) -> onInput1());
+        findViewById(R.id.btnRed).setOnClickListener((v) -> onInput2());
 
         setupToolbar();
         setupContactsAdapter();
         setupContactEditor();
         setupContactor();
+        setupListDevices();
 
         ThisApp.getThisAppBuilder()
                 .setiNetInfoGetter(this)
@@ -188,22 +174,19 @@ public class CallActivity
                 .setiBtList(deviceListAdapter)
                 .build();
 
-        BluetoothUi.getInstance()
+        BluetoothUi bluetoothUi = ThisApp.getBluetoothUi();
+
+        bluetoothUi
                 .setmIBluetoothListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
                 .registerListenerBroadcast()
                 .build();
 
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-
-        bluetoothUi = BluetoothUi.getInstance();
-        IUiToBtListener = bluetoothUi;
+        iUiToBtListener = bluetoothUi;
         iMenuListener = bluetoothUi;
-        iSwipeListener = bluetoothUi;
 
-        linearLayoutTouchListener = new LinearLayoutTouchListener(iSwipeListener);
-        findViewById(R.id.baseView).setOnTouchListener(linearLayoutTouchListener);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
     @Override
@@ -221,7 +204,7 @@ public class CallActivity
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) { //может быть и не вызван, ефективен при повороте экрана
+    protected void onRestoreInstanceState(Bundle savedInstanceState) { //может быть и не вызван, эффективен при повороте экрана
         super.onRestoreInstanceState(savedInstanceState);
         if (debug) Timber.tag(TAG).w("onRestoreInstanceState");
     }
@@ -282,13 +265,6 @@ public class CallActivity
     private void onCreateScanMenu(Menu menu) {
         if (debug) Timber.tag(TAG).i("onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
-//        if (!IUiToBtListener.isScanning()) {
-//            menu.findItem(R.id.menu_stop).setVisible(false);
-//            menu.findItem(R.id.menu_scan).setVisible(true);
-//        } else {
-//            menu.findItem(R.id.menu_stop).setVisible(true);
-//            menu.findItem(R.id.menu_scan).setVisible(false);
-//        }
     }
 
     @Override
@@ -303,6 +279,8 @@ public class CallActivity
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 finish();
+                break;
+            default:
                 break;
         }
         return true;
@@ -354,16 +332,13 @@ public class CallActivity
 
     private void enPermission(String permission) {
         if (debug) Timber.tag(TAG).i("enPermission");
+        if (provider == null) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
-                if (provider != null)
-                    locationManager.requestLocationUpdates(provider, 400, 1, this);
-            }
+            if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED)
+                locationManager.requestLocationUpdates(provider, 400, 1, this);
         } else {
-            if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-                if (provider != null)
-                    locationManager.requestLocationUpdates(provider, 400, 1, this);
-            }
+            if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED)
+                locationManager.requestLocationUpdates(provider, 400, 1, this);
         }
     }
 
@@ -371,13 +346,14 @@ public class CallActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_LOCATION:
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     enPermission(Manifest.permission.ACCESS_FINE_LOCATION);
                 break;
             case REQUEST_MICROPHONE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     enPermission(Manifest.permission.RECORD_AUDIO);
+                break;
+            default:
                 break;
         }
     }
@@ -407,6 +383,7 @@ public class CallActivity
 
     private void setupContactsAdapter() {
         if (debug) Timber.tag(TAG).i("setupContactsAdapter");
+        RecyclerView viewRecyclerContacts = findViewById(R.id.viewRecyclerContacts);
         contactsAdapter = new ContactsAdapter(Contactor.getInstance().getContacts());
         contactsAdapter.setOnClickViewListener(this::clickContactItem);
         swipeCrutch = contactsAdapter.new SwipeCrutch();
@@ -435,12 +412,15 @@ public class CallActivity
             @Override public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 contactEditor.contactFieldChanged();}
         };
+        EditText editTextContactIp = findViewById(R.id.editTextContactIp);
+        EditText editTextContactName = findViewById(R.id.editTextContactName);
         editTextContactIp.addTextChangedListener(textWatcher);
         editTextContactName.addTextChangedListener(textWatcher);
     }
 
     private void setupContactor() {
         if (debug) Timber.tag(TAG).i("setupContactor");
+        EditText editTextSearch = findViewById(R.id.editTextSearch);
         editTextSearch.setHintTextColor(Colors.GRAY);
         editTextSearch.addTextChangedListener(new TextWatcher() {
             @Override public void afterTextChanged(Editable arg0) {contactsAdapter.filter(editTextSearch.getText().toString());}
@@ -451,6 +431,20 @@ public class CallActivity
                 .setiMsgToUi(this)
                 .setListener(contactEditor);
         contactEditor.getAllContacts();
+    }
+
+    private void setupListDevices() {
+        TouchListener touchListener = new TouchListener(ThisApp.getBluetoothUi());
+        findViewById(R.id.baseView).setOnTouchListener(touchListener);
+        ListView listDevices = findViewById(R.id.listDevices);
+        listDevices.setAdapter(deviceListAdapter);
+        listDevices.setOnTouchListener(touchListener);
+        listDevices.setOnItemClickListener((parent, view, position, id) -> {
+                    BluetoothDevice device = deviceListAdapter.getDevice(position);
+                    if (device == null) return;
+                    iUiToBtListener.clickItemList(device);
+                }
+        );
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
@@ -500,18 +494,8 @@ public class CallActivity
 
     public void clickBtnChangeDevice() {
         setVisibleList();
-        listDevices.setAdapter(deviceListAdapter);
-        listDevices.setOnTouchListener(linearLayoutTouchListener);
-        listDevices.setOnItemClickListener((parent, view1, position, id) -> {
-                    final BluetoothDevice device = deviceListAdapter.getDevice(position);
-                    if (device == null) return;
-                    IUiToBtListener.clickItemList(device);
-                }
-        );
         if (debug) Timber.tag(TAG).i("before caller getBluetoothAdapter");
-        // При выборе конкретного устройства в списке устройств получаем адрес и имя устройства,
-        // останавливаем сканирование и запускаем новое Activity
-        IUiToBtListener.clickBtnListener();
+        iUiToBtListener.clickBtnListener();
     }
 
     //--------------------- INetInfoGetter
@@ -562,8 +546,8 @@ public class CallActivity
         // initialize list device
         if (deviceListAdapter != null)
             deviceListAdapter.clear();
-        if (IUiToBtListener.isConnected())
-            deviceListAdapter.addDevice(IUiToBtListener.getConnectedDevice(), 200);
+        if (iUiToBtListener.isConnected())
+            deviceListAdapter.addDevice(iUiToBtListener.getConnectedDevice(), 200);
         actionBar.setCustomView(R.layout.actionbar);
         invalidateOptionsMenu();
     }

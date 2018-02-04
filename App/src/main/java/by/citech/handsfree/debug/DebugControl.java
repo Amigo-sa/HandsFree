@@ -1,15 +1,8 @@
 package by.citech.handsfree.debug;
 
-/**
- * Created by tretyak on 30.01.2018.
- */
-
 public class DebugControl {
 
-
-    //
 //    private class DebugFsmListener implements DebugFsm.IDebugFsmListener {
-//
 //        @Override
 //        public void onFsmStateChange(IFsmState from, IFsmState to, IFsmReport report) {
 //            if (Settings.debug) Timber.i(TAG, "onFsmStateChange");
@@ -48,7 +41,6 @@ public class DebugControl {
 //                    break;
 //            }
 //        }
-//
 //    }
 
 }

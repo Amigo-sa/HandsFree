@@ -38,7 +38,6 @@ public class ThisAppBuilder implements
         ActivityFsm.IActivityFsmListenerRegister,
         DebugFsm.IDebugFsmListenerRegister {
 
-    private static final String TAG = Tags.ThisAppBuilder;
     private static final boolean debug = Settings.debug;
 
     //--------------------- preparation
@@ -51,19 +50,17 @@ public class ThisAppBuilder implements
     private IBtList iBtList;
     private EOpMode opMode;
 
-    {
-        opMode = Settings.Common.opMode;
-    }
+    //--------------------- constructor
 
-    //--------------------- singleton
-
-    private static volatile ThisAppBuilder instance = null;
-
-    public ThisAppBuilder(EOpMode opMode) {
+    ThisAppBuilder(EOpMode opMode) {
         this.opMode = opMode;
     }
 
     //--------------------- getters and setters
+
+    public EOpMode getOpMode() {
+        return opMode;
+    }
 
     public ThisAppBuilder setiNetInfoGetter(INetInfoGetter listener) {
         iNetInfoGetter = listener;
@@ -160,7 +157,7 @@ public class ThisAppBuilder implements
 
     private void build2Bt(EDataSource dataSource) {
         if (debug) Timber.i("build2Bt");
-        if (       iBtToUiCtrl == null
+        if (iBtToUiCtrl == null
                 || iMsgToUi == null
                 || iBtList == null
                 || dataSource == null) {

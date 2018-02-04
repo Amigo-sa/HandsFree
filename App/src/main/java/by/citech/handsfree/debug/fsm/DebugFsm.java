@@ -4,6 +4,7 @@ import android.support.annotation.CallSuper;
 
 import java.util.EnumMap;
 
+import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.fsm.FsmCore;
 import by.citech.handsfree.fsm.IFsmListener;
 import by.citech.handsfree.parameters.Tags;
