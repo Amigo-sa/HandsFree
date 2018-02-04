@@ -13,7 +13,9 @@ import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.call.CallControl;
 import by.citech.handsfree.call.CallHandshake;
 import by.citech.handsfree.network.ConnectorNet;
+import by.citech.handsfree.proximity.ProximitySensorListener;
 import by.citech.handsfree.settings.PreferencesProcessor;
+import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.ThreadingManager;
 import timber.log.Timber;
 
@@ -22,6 +24,7 @@ public class ThisApp
         implements ActivityFsm.IActivityFsmListenerRegister {
 
     private static ThisAppBuilder thisAppBuilder;
+    private static ProximitySensorListener proximitySensorListener;
     private static BluetoothManager bluetoothManager;
     private static BluetoothAdapter bluetoothAdapter;
     private static ThreadingManager threadingManager;
@@ -37,25 +40,35 @@ public class ThisApp
     @Override
     public void onCreate() {
         super.onCreate();
-        Timber.plant(new Timber.DebugTree());
+        if (Settings.debug) Timber.plant(new Timber.DebugTree());
+        appContext = getApplicationContext();
         PreferencesProcessor.init(this);
+
         thisAppBuilder = new ThisAppBuilder(PreferencesProcessor.getOpModePref());
+
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
+
         threadingManager = ThreadingManager.getInstance();
         threadingManager.activate();
-        appContext = getApplicationContext();
+
         activityFsm = ActivityFsm.getInstance();
         connectorBluetooth = ConnectorBluetooth.getInstance();
         bluetoothUi = BluetoothUi.getInstance();
         connectorNet = ConnectorNet.getInstance();
         callControl = CallControl.getInstance();
         callHandshake = CallHandshake.getInstance();
+
         broadcastReceiverWrapper = new BroadcastReceiverWrapper();
-        appContext = getApplicationContext();
         registerReceiver(
                 broadcastReceiverWrapper.getGattUpdateReceiver(),
                 BroadcastReceiverWrapper.makeGattUpdateIntentFilter());
+
+        proximitySensorListener = new ProximitySensorListener();
+
+        //TEST START
+        proximitySensorListener.register();
+        //TEST END
     }
 
     @Override
@@ -68,6 +81,7 @@ public class ThisApp
         super.onLowMemory();
     }
 
+    public static ProximitySensorListener getProximitySensorListener() {return proximitySensorListener;}
     public static BluetoothUi getBluetoothUi() {return bluetoothUi;}
     public static BroadcastReceiverWrapper getBroadcastReceiverWrapper() {return broadcastReceiverWrapper;}
     public static ThisAppBuilder getThisAppBuilder() {return thisAppBuilder;}
