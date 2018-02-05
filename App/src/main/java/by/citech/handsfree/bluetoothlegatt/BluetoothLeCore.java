@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
@@ -35,6 +36,9 @@ public class BluetoothLeCore
                    RssiReporter.IRssiProviderRegister{
 
     private final static String TAG = "WSD_BluetoothLeCore";
+    private static BluetoothManager mBluetoothManager;
+    private static BluetoothAdapter mBluetoothAdapter;
+
     private static volatile BluetoothLeCore instance = null;
 
     private BluetoothLeCore(){
@@ -51,9 +55,6 @@ public class BluetoothLeCore
         }
         return instance;
     }
-
-    private BluetoothManager mBluetoothManager;
-    private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
@@ -223,21 +224,35 @@ public class BluetoothLeCore
     public boolean initialize() {
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
-        if (mBluetoothManager == null) {
-            mBluetoothManager = ThisApp.getBluetoothManager();
-            if (mBluetoothManager == null) {
-                if (Settings.debug) Log.e(TAG, "Unable to initialize BluetoothManager.");
-                return false;
-            }
+        if (getBluetoothManager() == null) {
+            if (Settings.debug) Log.e(TAG, "Unable to initialize BluetoothManager.");
+            return false;
         }
 
-        mBluetoothAdapter = ThisApp.getBluetoothAdapter();
-        if (mBluetoothAdapter == null) {
+        if (getBluetoothAdapter() == null) {
             if (Settings.debug) Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
+
         return true;
     }
+
+    public static BluetoothManager getBluetoothManager() {
+        if (mBluetoothManager == null)
+            mBluetoothManager = (BluetoothManager) ThisApp.getAppContext().getSystemService(Context.BLUETOOTH_SERVICE);
+        return mBluetoothManager;
+    }
+
+    public static BluetoothAdapter getBluetoothAdapter() {
+        if (mBluetoothAdapter == null) {
+            mBluetoothManager = getBluetoothManager();
+            if (mBluetoothManager != null) {
+                mBluetoothAdapter = mBluetoothManager.getAdapter();
+            }
+        }
+        return mBluetoothAdapter;
+    }
+
 
     /**
      * Connects to the GATT server hosted on the Bluetooth LE device.

@@ -64,7 +64,7 @@ public class LeScanner {
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
             if (Settings.debug) Timber.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
-            bluetoothAdapter = ThisApp.getBluetoothManager().getAdapter();
+            bluetoothAdapter = BluetoothLeCore.getBluetoothAdapter();
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
         return bluetoothAdapter;

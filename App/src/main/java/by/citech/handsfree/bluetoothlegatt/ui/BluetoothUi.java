@@ -105,7 +105,7 @@ public class BluetoothUi implements IUiToBtListener,
     }
 
     public BluetoothUi registerListenerBroadcast() {
-        ThisApp.registerBroadcastListener(this);
+        ThisApp.getBroadcastReceiverWrapper().registerListener(this);
         return this;
     }
 

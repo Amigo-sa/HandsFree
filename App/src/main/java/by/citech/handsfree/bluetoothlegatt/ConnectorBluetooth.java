@@ -194,13 +194,13 @@ public class ConnectorBluetooth
     }
 
     private boolean isBtSuppported(){
-        BluetoothManager bluetoothManager = ThisApp.getBluetoothManager();
-        BluetoothAdapter bluetoothAdapter = ThisApp.getBluetoothAdapter();
+        BluetoothManager bluetoothManager = BluetoothLeCore.getBluetoothManager();
+        BluetoothAdapter bluetoothAdapter = BluetoothLeCore.getBluetoothAdapter();
         return !(bluetoothManager == null || bluetoothAdapter == null);
     }
 
     private void enableBt(){
-        BluetoothAdapter bluetoothAdapter = ThisApp.getBluetoothAdapter();
+        BluetoothAdapter bluetoothAdapter = BluetoothLeCore.getBluetoothAdapter();
         if (!bluetoothAdapter.isEnabled())
             bluetoothAdapter.enable();
     }
@@ -210,7 +210,7 @@ public class ConnectorBluetooth
 
         leDataTransmitter.addIRxDataListener(iRxComplex);
         leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
-        ThisApp.registerBroadcastListener(this);
+        ThisApp.getBroadcastReceiverWrapper().registerListener(this);
     }
 
     private void onStop() {
@@ -435,7 +435,7 @@ public class ConnectorBluetooth
             case RP_Enable:
                 if (Settings.debug) Timber.i(TAG, "RP_Enable");
                 enableBt();
-                if (ThisApp.getBluetoothAdapter().isEnabled())
+                if (BluetoothLeCore.getBluetoothAdapter().isEnabled())
                     toBtFsm(RP_BtEnabled, to);
                 else
                     toBtFsm(RP_BtDisabled, to);
@@ -480,8 +480,8 @@ public class ConnectorBluetooth
                 break;
 
             case RP_Disable:
-                if (ThisApp.getBluetoothAdapter().isEnabled())
-                    ThisApp.getBluetoothAdapter().disable();
+                if (BluetoothLeCore.getBluetoothAdapter().isEnabled())
+                    BluetoothLeCore.getBluetoothAdapter().disable();
                 break;
 
             case RP_TurningOff:
