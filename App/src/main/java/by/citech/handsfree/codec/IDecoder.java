@@ -1,4 +1,4 @@
-package by.citech.handsfree.codec.audio;
+package by.citech.handsfree.codec;
 
 public interface IDecoder {
     void initiateDecoder();

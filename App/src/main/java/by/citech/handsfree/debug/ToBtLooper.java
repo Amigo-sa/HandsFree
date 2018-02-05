@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import by.citech.handsfree.codec.audio.AudioCodecFactory;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
-import by.citech.handsfree.codec.audio.ICodec;
+import by.citech.handsfree.codec.ICodec;
 import by.citech.handsfree.common.IBuilding;
 import by.citech.handsfree.data.StorageData;
 import by.citech.handsfree.debug.fsm.DebugFsm;

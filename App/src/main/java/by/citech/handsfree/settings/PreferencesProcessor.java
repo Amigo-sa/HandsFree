@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import android.support.v7.preference.PreferenceManagerFix;
-import android.util.Log;
 
 import by.citech.handsfree.R;
 import by.citech.handsfree.codec.audio.EAudioCodecType;
