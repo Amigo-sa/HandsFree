@@ -13,6 +13,7 @@ import by.citech.handsfree.exchange.IStreamer;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class ToAudioOut
         implements IStreamer, IRxComplex {
@@ -60,10 +61,10 @@ public class ToAudioOut
     @Override
     public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
-            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            Timber.w("prepareStream stream is finished, return");
             return;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (debug) Log.i(TAG, "prepareStream version HIGH");
+            Timber.i("prepareStream version HIGH");
             audioTrack = new AudioTrack.Builder()
                     .setAudioAttributes(new AudioAttributes.Builder()
                             .setUsage(audioUsage)
@@ -78,7 +79,7 @@ public class ToAudioOut
                     .setTransferMode(audioMode)
                     .build();
         } else {
-            if (debug) Log.i(TAG, "prepareStream version LOW");
+            Timber.i("prepareStream version LOW");
             audioTrack = new AudioTrack(
                     audioStreamType,
                     audioRate,
@@ -88,7 +89,7 @@ public class ToAudioOut
                     audioMode
             );
         }
-        if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
+        Timber.w(String.format(Locale.US, "prepareStream parameters is:" +
                         " audioBuffIsShorts is %b," +
                         " audioRate is %d," +
                         " audioBuffSizeBytes is %d," +
@@ -105,14 +106,14 @@ public class ToAudioOut
 
     @Override
     public void finishStream() {
-        if (debug) Log.i(TAG, "finishStream");
+        Timber.i("finishStream");
         isFinished = true;
         streamOff();
         if (audioTrack != null) {
             audioTrack.release();
             audioTrack = null;
         }
-        if (debug) Log.i(TAG, "finishStream done");
+        Timber.i("finishStream done");
     }
 
     @Override
@@ -120,16 +121,16 @@ public class ToAudioOut
         if (isStreaming() || !isReadyToStream()) {
             return;
         } else {
-            if (debug) Log.i(TAG, "streamOn");
+            Timber.i("streamOn");
         }
         isStreaming = true;
         audioTrack.play();
-        if (debug) Log.i(TAG, "streamOn done");
+        Timber.i("streamOn done");
     }
 
     @Override
     public void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
+        Timber.i("streamOff");
         buffCnt = 0;
         isStreaming = false;
         if (audioTrack != null) {
@@ -137,7 +138,7 @@ public class ToAudioOut
                 audioTrack.stop();
             }
         }
-        if (debug) Log.i(TAG, "streamOff done");
+        Timber.i("streamOff done");
     }
 
     @Override
@@ -148,10 +149,10 @@ public class ToAudioOut
     @Override
     public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "isReadyToStream finished");
+            Timber.w("isReadyToStream finished");
             return false;
         } else if (!isPrepared) {
-            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            Timber.w("isReadyToStream not prepared");
             return false;
         } else {
             return true;
@@ -163,23 +164,23 @@ public class ToAudioOut
     @Override
     public void sendData(byte[] data) {
         if (buffCnt == 0) {
-            if (debug) Log.i(TAG, "sendData data[] buffCnt = 0, first receive");
+            Timber.i("sendData data[] buffCnt = 0, first receive");
         }
         int dataLength;
         if (data == null) {
-            if (debug) Log.w(TAG, "sendData byte[] data is null, return");
+            Timber.w("sendData byte[] data is null, return");
             return;
         } else {
             dataLength = data.length;
             if (audioBuffIsShorts || dataLength == 0) {
-                if (debug) Log.w(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
+                Timber.w("sendData byte[]" + StatusMessages.ERR_PARAMETERS);
                 return;
             }
         }
         if (!isStreaming() || !isReadyToStream()){
             return;
         } else {
-            if (debug) Log.i(TAG, "sendData byte[]");
+            Timber.i("sendData byte[]");
         }
         if (buffBytes == null) {
             buffBytes = new byte[audioBuffSizeBytes];
@@ -187,44 +188,43 @@ public class ToAudioOut
         try {
             System.arraycopy(data, 0, buffBytes, buffCnt, dataLength);
         } catch (Exception e) {
-            if (debug) Log.w(TAG, String.format(Locale.US,
-                    "sendData byte[] buffCnt is %d, dataLength is %d",
-                    buffCnt, dataLength));
+            Timber.w("sendData byte[] buffCnt is %d, dataLength is %d",
+                    buffCnt, dataLength);
             e.printStackTrace();
         }
         buffCnt = buffCnt + dataLength;
         if (buffCnt >= audioBuffSizeBytes) {
             if (isReadyToStream()) {
-                if (debug) Log.i(TAG, "sendData byte[] buffered bytes to play: " + buffCnt);
+                Timber.i("sendData byte[] buffered bytes to play: %s", buffCnt);
                 audioTrack.write(buffBytes, 0, audioBuffSizeBytes);
                 buffBytes = null;
                 buffCnt = 0;
             }
         } else {
-            if (debug) Log.i(TAG, "sendData byte[] buffered bytes: " + buffCnt);
+            Timber.i("sendData byte[] buffered bytes: " + buffCnt);
         }
     }
 
     @Override
     public void sendData(short[] data) {
         if (buffCnt == 0) {
-            if (debug) Log.i(TAG, "sendData short[] buffCnt = 0, first receive");
+            Timber.i("sendData short[] buffCnt = 0, first receive");
         }
         int dataLength;
         if (data == null) {
-            if (debug) Log.w(TAG, "sendData short[] data is null, return");
+            Timber.w("sendData short[] data is null, return");
             return;
         } else {
             dataLength = data.length;
             if (!audioBuffIsShorts || dataLength == 0) {
-                if (debug) Log.w(TAG, "sendData short[]" + StatusMessages.ERR_PARAMETERS);
+                Timber.w("sendData short[]" + StatusMessages.ERR_PARAMETERS);
                 return;
             }
         }
         if (!isStreaming() || !isReadyToStream()){
             return;
         } else {
-            if (debug) Log.i(TAG, "sendData short[]");
+            Timber.i("sendData short[]");
         }
         if (buffShorts == null) {
             buffShorts = new short[audioBuffSizeShorts];
@@ -232,7 +232,7 @@ public class ToAudioOut
         try {
             System.arraycopy(data, 0, buffShorts, buffCnt, dataLength);
         } catch (Exception e) {
-            if (debug) Log.w(TAG, String.format(Locale.US,
+            Timber.w(String.format(Locale.US,
                     "sendData short[] buffCnt is %d, dataLength is %d",
                     buffCnt, dataLength));
             e.printStackTrace();
@@ -240,13 +240,13 @@ public class ToAudioOut
         buffCnt = buffCnt + dataLength;
         if (buffCnt >= audioBuffSizeShorts) {
             if (isReadyToStream()) {
-                if (debug) Log.i(TAG, "sendData short[] buffered shorts to play: " + buffCnt);
+                Timber.i("sendData short[] buffered shorts to play: " + buffCnt);
                 audioTrack.write(buffShorts, 0, audioBuffSizeShorts);
                 buffShorts = null;
                 buffCnt = 0;
             }
         } else {
-            if (debug) Log.i(TAG, "sendData short[] buffered shorts: " + buffCnt);
+            Timber.i("sendData short[] buffered shorts: " + buffCnt);
         }
     }
 

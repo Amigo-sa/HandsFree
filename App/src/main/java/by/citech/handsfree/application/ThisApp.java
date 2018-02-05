@@ -41,7 +41,7 @@ public class ThisApp
     @Override
     public void onCreate() {
         super.onCreate();
-        if (Settings.debug) Timber.plant(new Timber.DebugTree());
+        Timber.plant(new Timber.DebugTree());
         appContext = getApplicationContext();
         commonHandler = new Handler();
         PreferencesProcessor.init(this);

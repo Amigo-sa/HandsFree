@@ -1,21 +1,16 @@
 package by.citech.handsfree.generator;
 
-import android.util.Log;
-
 import java.util.Arrays;
 
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 import static by.citech.handsfree.generator.DataGeneratorFactory.MAX_SHORT;
 import static by.citech.handsfree.generator.DataGeneratorFactory.QPP;
 import static java.lang.Math.PI;
 
 public class StaticSineGenerator {
-
-    private static final String TAG = Tags.StaticSineGenerator;
-    private static final String STAG = TAG + " ST";
-    private static final boolean debug = Settings.debug;
 
     private static final double MULT = MAX_SHORT;
     private static short[][] staticSineShorts;
@@ -43,10 +38,8 @@ public class StaticSineGenerator {
 
     public static void printSine() {
         for (int i = 0; i < QPP; i++) {
-            if (debug) Log.i(STAG, String.format(
-                    "printSine value of sine chunk number %d: %s",
-                    i, Arrays.toString(staticSineShorts[i]))
-            );
+            Timber.i("printSine value of sine chunk number %d: %s",
+                    i, Arrays.toString(staticSineShorts[i]));
         }
     }
 

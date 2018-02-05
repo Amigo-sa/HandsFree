@@ -14,6 +14,7 @@ import java.util.Locale;
 import by.citech.handsfree.R;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 
 public class ContactsAdapter
@@ -64,23 +65,23 @@ public class ContactsAdapter
         }
 
         public void resetSwipe() {
-            if (debug) Log.i(TAG, "resetSwipe");
+            Timber.i("resetSwipe");
             isSwiped = false;
             swipedPos = -1;
             swipedView = null;
         }
 
         public void resolveSwipe() {
-            if (debug) Log.i(TAG, "resolveSwipe");
+            Timber.i("resolveSwipe");
             if (isSwiped) {
-                if (debug) Log.i(TAG, "resolveSwipe is swiped");
+                Timber.i("resolveSwipe is swiped");
                 if (swipedPos < 0) {
-                    if (debug) Log.e(TAG, "resolveSwipe swipedPos < 0");
+                    Timber.e("resolveSwipe swipedPos < 0");
                 } else {
                     notifyItemChanged(swipedPos);
                 }
                 if (swipedView == null) {
-                    if (debug) Log.e(TAG, "resolveSwipe swipedView == null");
+                    Timber.e("resolveSwipe swipedView == null");
                 } else {
                     swipedView.setVisibility(View.VISIBLE);
                 }
@@ -108,7 +109,7 @@ public class ContactsAdapter
         if (position >= 0 && contacts != null && position < contacts.size()) {
             return contacts.get(position);
         } else {
-            if (debug) Log.e(TAG, "getItem something went wrong");
+            Timber.e("getItem something went wrong");
             return null;
         }
     }
@@ -123,7 +124,7 @@ public class ContactsAdapter
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//      if (debug) Log.i(TAG, "onCreateViewHolder");
+//      Timber.i("onCreateViewHolder");
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_element_contact, parent, false);
         return new ViewHolder(v);
     }
@@ -131,7 +132,7 @@ public class ContactsAdapter
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Contact contact = contacts.get(position);
-//      if (debug) Log.i(TAG, "onBindViewHolder " + contact.toString());
+//      Timber.i("onBindViewHolder " + contact.toString());
         holder.textViewContactName.setText(contact.getName());
         holder.textViewContactIp.setText(contact.getIp());
         holder.itemView.setOnClickListener((view) -> {
@@ -143,37 +144,37 @@ public class ContactsAdapter
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
-//      if (debug) Log.i(TAG, "onViewRecycled: " + getDebugItemInfoFromViewHolder(holder));
+//      Timber.i("onViewRecycled: " + getDebugItemInfoFromViewHolder(holder));
         super.onViewRecycled(holder);
     }
 
     @Override
     public boolean onFailedToRecycleView(ViewHolder holder) {
-//      if (debug) Log.i(TAG, "onFailedToRecycleView: " + getDebugItemInfoFromViewHolder(holder));
+//      Timber.i("onFailedToRecycleView: " + getDebugItemInfoFromViewHolder(holder));
         return super.onFailedToRecycleView(holder);
     }
 
     @Override
     public void onViewAttachedToWindow(ViewHolder holder) {
-//      if (debug) Log.i(TAG, "onViewAttachedToWindow: " + getDebugItemInfoFromViewHolder(holder));
+//      Timber.i("onViewAttachedToWindow: " + getDebugItemInfoFromViewHolder(holder));
         super.onViewAttachedToWindow(holder);
     }
 
     @Override
     public void onViewDetachedFromWindow(ViewHolder holder) {
-//      if (debug) Log.i(TAG, "onViewDetachedFromWindow: " + getDebugItemInfoFromViewHolder(holder));
+//      Timber.i("onViewDetachedFromWindow: " + getDebugItemInfoFromViewHolder(holder));
         super.onViewDetachedFromWindow(holder);
     }
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-//      if (debug) Log.i(TAG, "onAttachedToRecyclerView");
+//      Timber.i("onAttachedToRecyclerView");
         super.onAttachedToRecyclerView(recyclerView);
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-//      if (debug) Log.i(TAG, "onDetachedFromRecyclerView");
+//      Timber.i("onDetachedFromRecyclerView");
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
@@ -197,7 +198,7 @@ public class ContactsAdapter
     @Override
     public int getItemCount() {
         if (contacts == null) {
-            if (debug) Log.e(TAG, "getItemCount contacts are null");
+            Timber.e("getItemCount contacts are null");
             return 0;
         } else {
             return contacts.size();
@@ -207,7 +208,7 @@ public class ContactsAdapter
     @Override
     public long getItemId(int position) {
         if (contacts == null) {
-            if (debug) Log.e(TAG, "getItemCount contacts are null");
+            Timber.e("getItemCount contacts are null");
             return 0;
         } else {
             return contacts.get(position).getId();
@@ -215,7 +216,7 @@ public class ContactsAdapter
     }
 
     public void filter(String charText) {
-//      if (debug) Log.i(TAG, "filter");
+//      Timber.i("filter");
         charText = charText.toLowerCase(Locale.getDefault());
         contacts = new ArrayList<>();
         if (charText.length() == 0) {

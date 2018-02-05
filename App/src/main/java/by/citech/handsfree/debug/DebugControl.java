@@ -5,7 +5,7 @@ public class DebugControl {
 //    private class DebugFsmListener implements DebugFsm.IDebugFsmListener {
 //        @Override
 //        public void onFsmStateChange(IFsmState from, IFsmState to, IFsmReport report) {
-//            if (Settings.debug) Timber.i("onFsmStateChange");
+//            Timber.i("onFsmStateChange");
 //            EDebugReport reportCasted = (EDebugReport) report;
 //            switch (reportCasted) {
 //                case RP_TurningOn:

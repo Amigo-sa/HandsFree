@@ -7,6 +7,7 @@ import java.util.*;
 
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class Network {
 
@@ -33,9 +34,9 @@ public class Network {
                 return buf.toString();
             }
         } catch (Exception e) {
-            if (debug) Log.i(TAG, "getMacAddr exception");
+            Timber.i("getMacAddr exception");
         } // for now eat exceptions
-        if (debug) Log.e(TAG, "getMacAddr empty address");
+        Timber.e("getMacAddr empty address");
         return "";
     }
 
@@ -66,9 +67,9 @@ public class Network {
                 }
             }
         } catch (Exception e) {
-            if (debug) Log.e(TAG, "getIpAddr exception");
+            Timber.e("getIpAddr exception");
         } // for now eat exceptions
-        if (debug) Log.e(TAG, "getIpAddr empty address");
+        Timber.e("getIpAddr empty address");
         return "";
     }
 

@@ -23,7 +23,6 @@ public class CallControl implements
         CallFsm.ICallFsmReporter {
 
     private static final String TAG = Tags.CallControl;
-    private static final boolean debug = Settings.debug;
 
     private boolean isBtDisconnectManual;
 

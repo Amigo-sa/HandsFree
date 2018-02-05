@@ -49,7 +49,7 @@ class Presetter {
         } else {
             setToDefault();
         }
-        if (debug) Timber.w("opMode set to %s", Settings.Common.opMode.getSettingName());
+        Timber.w("opMode set to %s", Settings.Common.opMode.getSettingName());
     }
 
     private static void setToDefault() {
@@ -67,46 +67,46 @@ class Presetter {
     static void setAudioCodecType(EAudioCodecType audioCodecType) {
         if (audioCodecType == null) {
             Settings.AudioCommon.audioCodecType = SettingsDefault.AudioCommon.audioCodecType;
-            if (debug) Timber.e("setAudioCodecType illegal value, set to default");
+            Timber.e("setAudioCodecType illegal value, set to default");
         } else Settings.AudioCommon.audioCodecType = audioCodecType;
-        if (debug) Timber.w("audioCodecType set to %s", Settings.AudioCommon.audioCodecType.getSettingName());
+        Timber.w("audioCodecType set to %s", Settings.AudioCommon.audioCodecType.getSettingName());
     }
 
     static void setBt2NetFactor(int bt2NetFactor) {
         if (bt2NetFactor < 0) {
             Settings.Common.bt2NetFactor = SettingsDefault.Common.bt2NetFactor;
-            if (debug) Timber.e("setBt2NetFactor illegal value, set to default");
+            Timber.e("setBt2NetFactor illegal value, set to default");
         } else Settings.Common.bt2NetFactor = bt2NetFactor;
-        if (debug) Timber.w("setBt2NetFactor set to %s", Settings.Common.bt2NetFactor);
+        Timber.w("setBt2NetFactor set to %s", Settings.Common.bt2NetFactor);
     }
 
     static void setBt2BtPacketSize(int bt2BtPacketSize) {
         if (bt2BtPacketSize < 0) {
             Settings.Bluetooth.bt2BtPacketSize = SettingsDefault.Bluetooth.bt2BtPacketSize;
-            if (debug) Timber.e("setBt2BtPacketSize illegal value, set to default");
+            Timber.e("setBt2BtPacketSize illegal value, set to default");
         } else Settings.Bluetooth.bt2BtPacketSize = bt2BtPacketSize;
-        if (debug) Timber.w("setBt2BtPacketSize set to %s", Settings.Bluetooth.bt2BtPacketSize);
+        Timber.w("setBt2BtPacketSize set to %s", Settings.Bluetooth.bt2BtPacketSize);
     }
 
     static void setBtLatencyMs(int btLatencyMs) {
         if (btLatencyMs < 0) {
             Settings.Bluetooth.btLatencyMs = SettingsDefault.Bluetooth.btLatencyMs;
-            if (debug) Timber.e("setBtLatencyMs illegal value, set to default");
+            Timber.e("setBtLatencyMs illegal value, set to default");
         } else Settings.Bluetooth.btLatencyMs = btLatencyMs;
-        if (debug) Timber.w("setBtLatencyMs set to %s", Settings.Bluetooth.btLatencyMs);
+        Timber.w("setBtLatencyMs set to %s", Settings.Bluetooth.btLatencyMs);
     }
 
     static void setBtSinglePacket(boolean btSinglePacket) {
         Settings.Bluetooth.btSinglePacket = btSinglePacket;
-        if (debug) Timber.w("setBtSinglePacket set to %s", Settings.Bluetooth.btSinglePacket);
+        Timber.w("setBtSinglePacket set to %s", Settings.Bluetooth.btSinglePacket);
     }
 
     static void setBtChosenAddr(String btChosenAddr) {
         if (!BluetoothHelper.isValidAddr(btChosenAddr)) {
             Settings.Bluetooth.btChosenAddr = SettingsDefault.Bluetooth.btChosenAddr;
-            if (debug) Timber.e("setBtChosenAddr illegal value, set to default");
+            Timber.e("setBtChosenAddr illegal value, set to default");
         } else Settings.Bluetooth.btChosenAddr = btChosenAddr;
-        if (debug) Timber.w("setBtChosenAddr set to %s", Settings.Bluetooth.btChosenAddr);
+        Timber.w("setBtChosenAddr set to %s", Settings.Bluetooth.btChosenAddr);
     }
 
 }

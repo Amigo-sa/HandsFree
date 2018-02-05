@@ -54,7 +54,7 @@ public class LeDeviceListAdapter extends BaseAdapter implements IBtList {
 
     public void addDevice(BluetoothDevice device, boolean connecting, boolean connected) {
         if (!mLeDevices.contains(device)) {
-            if (Settings.debug) Timber.i("addDevice device added: %s", device.getAddress());
+            Timber.i("addDevice device added: %s", device.getAddress());
             mLeDevices.add(device);
             this.connecting.add(connecting);
             this.connected.add(connected);
@@ -77,7 +77,7 @@ public class LeDeviceListAdapter extends BaseAdapter implements IBtList {
             if (position >= 0 && position <= mLeDevices.size())
                 return mLeDevices.get(position);
         } else
-            if (Settings.debug) Timber.e("Index out of bounds list %s", position);
+            Timber.e("Index out of bounds list %s", position);
         return null;
     }
 

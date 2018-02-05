@@ -19,69 +19,69 @@ public class ElementsMemCtrl <T extends Comparable<T> & IIdentifier & ICopy<T>> 
     }
 
     public List<T> getList() {
-        if (debug) Timber.i("getList");
+        Timber.i("getList");
         return elements;
     }
 
     //--------------------- main
 
     public void sort() {
-        if (debug) Timber.i("sort");
-        if (debug) {Timber.d("sort before: "); for (T t : elements) {Timber.d(t.toString());}}
+        Timber.i("sort");
+        Timber.d("sort before: "); for (T t : elements) Timber.d(t.toString());
         Collections.sort(elements);
-        if (debug) {Timber.d("sort after: "); for (T t : elements) {Timber.d(t.toString());}}
+        Timber.d("sort after: "); for (T t : elements) Timber.d(t.toString());
     }
 
     public boolean add(T entry) {
-        if (debug) Timber.i("add");
+        Timber.i("add");
         if (elements.add(entry)) {
-            if (debug) Timber.i("add success");
+            Timber.i("add success");
             sort();
             return true;
         } else {
-            if (debug) Timber.e("add fail");
+            Timber.e("add fail");
             return false;
         }
     }
 
     public boolean delete(T entry) {
-        if (debug) Timber.i("delete");
+        Timber.i("delete");
         if (elements.remove(entry)) {
-            if (debug) Timber.i("delete success");
+            Timber.i("delete success");
             return true;
         } else {
-            if (debug) Timber.e("delete fail");
+            Timber.e("delete fail");
             return false;
         }
     }
 
     public boolean update(T entryToUpd, T entryToCopy) {
-        if (debug) Timber.i("update");
+        Timber.i("update");
         if (elements.contains(entryToUpd)) {
-            if (debug) Timber.i("update found element");
+            Timber.i("update found element");
             entryToUpd.doCopy(entryToCopy);
         } else {
-            if (debug) Timber.e("update no such element");
+            Timber.e("update no such element");
             return false;
         }
         if (entryToCopy.compareTo(entryToUpd) == 0) {
-            if (debug) Timber.i("update need to sort");
+            Timber.i("update need to sort");
             sort();
         } else {
-            if (debug) Timber.i("update no need to sort");
+            Timber.i("update no need to sort");
         }
         return true;
     }
 
     public boolean checkForUniq(T entry) {
-        if (debug) Timber.i("checkForUniq");
+        Timber.i("checkForUniq");
         for (T t : elements) {
             if (t.equals(entry)) {
-                if (debug) Timber.w("checkForUniq not unique");
+                Timber.w("checkForUniq not unique");
                 return false;
             }
         }
-        if (debug) Timber.i("checkForUniq unique");
+        Timber.i("checkForUniq unique");
         return true;
     }
 

@@ -83,7 +83,7 @@ public class Bt2BtRecorder
 
     @Override
     public void build() {
-        if (debug) Timber.tag(TAG).i("baseStart");
+        Timber.tag(TAG).i("baseStart");
         registerDebugFsmListener(this, TAG);
         isActive = true;
         addRunnable(main);
@@ -91,7 +91,7 @@ public class Bt2BtRecorder
 
     @Override
     public void destroy() {
-        if (debug) Timber.tag(TAG).i("destroy");
+        Timber.tag(TAG).i("destroy");
         unregisterDebugFsmListener(this, TAG);
         stopDebug();
         isActive = false;
@@ -102,7 +102,7 @@ public class Bt2BtRecorder
     //--------------------- main
 
     private void record() {
-        if (debug) Timber.tag(TAG).i("record");
+        Timber.tag(TAG).i("record");
         int dataAssembledCount = 0;
         while (isRecording) {
             while (storageFromBt.isEmpty()) {
@@ -116,10 +116,10 @@ public class Bt2BtRecorder
             dataBuff[dataAssembledCount] = storageFromBt.getData();
             dataAssembledCount++;
             if (dataAssembledCount == btFactor) {
-                if (debug) Timber.tag(TAG).i("run recorder output buffer contains enough data, saving");
+                Timber.tag(TAG).i("run recorder output buffer contains enough data, saving");
                 dataSaved[dataSavedCount] = dataBuff;
                 dataSavedCount++;
-                if (debug) Timber.tag(TAG).i(
+                Timber.tag(TAG).i(
                         "run recorder cache contains %d arraysX2 of %d arraysX1 of %d bytes each",
                         dataSavedCount, dataAssembledCount, Settings.Bluetooth.bt2BtPacketSize);
                 dataAssembledCount = 0;
@@ -128,7 +128,7 @@ public class Bt2BtRecorder
     }
 
     private void play() {
-        if (debug) Timber.tag(TAG).i("play");
+        Timber.tag(TAG).i("play");
         for (int i = 0; i < dataSavedCount; i++) {
             storageToBt.putData(dataSaved[i]);
         }
@@ -139,7 +139,7 @@ public class Bt2BtRecorder
 
     @Override
     public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
-        if (debug) Timber.tag(TAG).i("onFsmStateChange");
+        Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -153,7 +153,7 @@ public class Bt2BtRecorder
     }
 
     private void startDebug() {
-        if (debug) Timber.tag(TAG).i("startDebug");
+        Timber.tag(TAG).i("startDebug");
         switch (getDebugFsmState()) {
             case ST_DebugPlay:
                 isPlaying = true;
@@ -167,7 +167,7 @@ public class Bt2BtRecorder
     }
 
     private void stopDebug() {
-        if (debug) Timber.tag(TAG).i("stopDebug");
+        Timber.tag(TAG).i("stopDebug");
         isPlaying = false;
         isRecording = false;
         storageToBt.clear();

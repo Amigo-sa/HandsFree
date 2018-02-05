@@ -36,7 +36,7 @@ public class PreferencesProcessor {
     //-------------------------- applyPrefsToSettings
 
     public static void applyPrefsToSettings(Context context) {
-        if (debug) Timber.i("applyPrefsToSettings");
+        Timber.i("applyPrefsToSettings");
         PreferenceManagerFix.setDefaultValues(context, R.xml.settings, false);
         Presetter.setAudioCodecType(processEnum(SettingsDefault.AudioCommon.audioCodecType));
         Presetter.setBtSinglePacket(getBtSinglePacketPref());
@@ -153,12 +153,12 @@ public class PreferencesProcessor {
     private static <T extends ISettingEnum<T>> T processEnum(T defaultT) {
         String read = getEnumPref(defaultT);
         if (read == null || read.isEmpty()) {
-            if (debug) Timber.e("processEnum read illegal value: <%s>", read);
+            Timber.e("processEnum read illegal value: <%s>", read);
         } else {
-            if (debug) Timber.i("processEnum read: <%s>", read);
+            Timber.i("processEnum read: <%s>", read);
             for (T t : defaultT.getValues()) {
                 if (read.matches(t.getSettingNumber())) {
-                    if (debug) Timber.i("processEnum found matching setting: <%s>", t);
+                    Timber.i("processEnum found matching setting: <%s>", t);
                     return t;
                 }
             }

@@ -21,7 +21,7 @@ public class ViewHelper {
 
     public static void startAnimation(View view, Animation animation) {
         if (view == null || animation == null) {
-            if (debug) Timber.e("startAnimation%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("startAnimation%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         view.startAnimation(animation);
@@ -29,7 +29,7 @@ public class ViewHelper {
 
     public static void clearAnimation(View view) {
         if (view == null) {
-            if (debug) Timber.e("clearAnimation%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("clearAnimation%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         view.clearAnimation();
@@ -39,7 +39,7 @@ public class ViewHelper {
 
     public static boolean getVisibility(View view) {
         if (view == null) {
-            if (debug) Timber.e("getVisibility%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("getVisibility%s", StatusMessages.ERR_PARAMETERS);
             return false;
         }
         return (view.getVisibility() != View.VISIBLE);
@@ -49,14 +49,14 @@ public class ViewHelper {
 
     public static String getText(EditText editText) {
         if (editText == null) {
-            if (debug) Timber.e("getText%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("getText%s", StatusMessages.ERR_PARAMETERS);
             return "";
         }
         Editable editable = editText.getText();
         if (editable != null) {
             return editable.toString();
         } else {
-            if (debug) Timber.e("getText editable is null");
+            Timber.e("getText editable is null");
             return "";
         }
     }
@@ -65,7 +65,7 @@ public class ViewHelper {
 
     public static void setColor(View view, int color) {
         if (view == null) {
-            if (debug) Timber.e("setColor%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("setColor%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         view.setBackgroundColor(color);
@@ -73,7 +73,7 @@ public class ViewHelper {
 
     public static void setText(TextView textView, String text) {
         if (textView == null) {
-            if (debug) Timber.e("startAnimation%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("startAnimation%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         textView.setText(text);
@@ -81,7 +81,7 @@ public class ViewHelper {
 
     public static void setColorAndText(TextView textView, int stringResId, int color) {
         if (textView == null) {
-            if (debug) Timber.e("setColorAndText%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("setColorAndText%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         textView.setText(stringResId);
@@ -90,7 +90,7 @@ public class ViewHelper {
 
     public static void setColorAndText(TextView textView, String label, int color) {
         if (textView == null) {
-            if (debug) Timber.e("setColorAndText%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("setColorAndText%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         textView.setText(label);
@@ -101,7 +101,7 @@ public class ViewHelper {
 
     public static void setVisibility(View view, int visibility) {
         if (view == null) {
-            if (debug) Timber.e("setVisibility%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("setVisibility%s", StatusMessages.ERR_PARAMETERS);
         } else {
             view.setVisibility(visibility);
         }
@@ -111,7 +111,7 @@ public class ViewHelper {
 
     public static void enable(TextView textView, int color) {
         if (textView == null) {
-            if (debug) Timber.e("enable%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("enable%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         textView.setEnabled(true);
@@ -120,7 +120,7 @@ public class ViewHelper {
 
     public static void enable(TextView TextView, int color, String label) {
         if (TextView == null) {
-            if (debug) Timber.e("enable%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("enable%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         TextView.setEnabled(true);
@@ -129,12 +129,12 @@ public class ViewHelper {
 
     public static void enableGreen(TextView... textViews) {
         if (textViews == null) {
-            if (debug) Timber.e("enableGreen%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("enableGreen%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         for (TextView textView : textViews) {
             if (textView == null) {
-                if (debug) Timber.e("enableGreen button%s", StatusMessages.ERR_PARAMETERS);
+                Timber.e("enableGreen button%s", StatusMessages.ERR_PARAMETERS);
                 continue;
             }
             textView.setEnabled(true);
@@ -146,7 +146,7 @@ public class ViewHelper {
 
     public static void disableGray(TextView textView, String label) {
         if (textView == null) {
-            if (debug) Timber.e("disableGray%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("disableGray%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         textView.setEnabled(false);
@@ -155,12 +155,12 @@ public class ViewHelper {
 
     public static void disableGray(TextView... textViews) {
         if (textViews == null) {
-            if (debug) Timber.e("disableGray textViews%s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("disableGray textViews%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         for (TextView textView : textViews) {
             if (textView == null) {
-                if (debug) Timber.e("disableGray textView%s", StatusMessages.ERR_PARAMETERS);
+                Timber.e("disableGray textView%s", StatusMessages.ERR_PARAMETERS);
                 continue;
             }
             textView.setEnabled(false);

@@ -146,7 +146,7 @@ public class ConnectorBluetooth
     }
 
     public ConnectorBluetooth setmHandler(Handler mHandler) {
-        if (Settings.debug) Timber.i("mHandler = %s", mHandler);
+        Timber.i("mHandler = %s", mHandler);
         leScanner.setHandler(mHandler);
         return this;
     }
@@ -157,7 +157,7 @@ public class ConnectorBluetooth
     }
 
     public ConnectorBluetooth setiBluetoothListener(IBluetoothListener mIBluetoothListener) {
-        if (Settings.debug) Timber.i("mIBluetoothListener = %s", mIBluetoothListener);
+        Timber.i("mIBluetoothListener = %s", mIBluetoothListener);
         characteristics.setIBluetoothListener(mIBluetoothListener);
         leDataTransmitter.setIBluetoothListener(mIBluetoothListener);
         return this;
@@ -208,7 +208,7 @@ public class ConnectorBluetooth
     }
 
     private void build() {
-        if (Settings.debug) Timber.i("build");
+        Timber.i("build");
 
         leDataTransmitter.addIRxDataListener(iRxComplex);
         leDataTransmitter.setBluetoothLeCore(mBluetoothLeCore);
@@ -216,7 +216,7 @@ public class ConnectorBluetooth
     }
 
     private void onStop() {
-        if (Settings.debug) Timber.i("onStop");
+        Timber.i("onStop");
         if (getBLEState() == BluetoothLeState.TRANSMIT_DATA)
             bleController.setCommand(exchangeDataOff)
                          .setCommand(disconnectDevice)
@@ -261,17 +261,17 @@ public class ConnectorBluetooth
     @Override
     public void actionConnected() {
         setBLEState(getBLEState(), BluetoothLeState.CONNECTED);
-        if (Settings.debug) Timber.i("mBTDevice = %s", mBTDevice);
+        Timber.i("mBTDevice = %s", mBTDevice);
         mBTDeviceConn = mBTDevice;
 
         long end_time = System.currentTimeMillis();
-        if (Settings.debug) Timber.i("Connecting await time = %s", (end_time - start_time));
+        Timber.i("Connecting await time = %s", (end_time - start_time));
         setStorages();
     }
 
     @Override
     public void actionDisconnected() {
-        if (Settings.debug) Timber.i("actionDisconnected()");
+        Timber.i("actionDisconnected()");
 
         if (BLEState != BluetoothLeState.DISCONECTED) {
             mBTDeviceConn = null;
@@ -346,13 +346,12 @@ public class ConnectorBluetooth
     //---------------------------- blecontroller states ------------------------------
 
     private synchronized BluetoothLeState getBLEState() {
-        if (Settings.debug) Timber.i("getBLEState is %s", BLEState.getName());
+        Timber.i("getBLEState is %s", BLEState.getName());
         return BLEState;
     }
 
     private synchronized boolean setBLEState(BluetoothLeState fromBLEState, BluetoothLeState toBLEState) {
-        if (Settings.debug)
-            Timber.w("setState from %s to %s", fromBLEState.getName(), toBLEState.getName());
+        Timber.w("setState from %s to %s", fromBLEState.getName(), toBLEState.getName());
         if (BLEState == fromBLEState) {
             if (fromBLEState.availableStates().contains(toBLEState)) {
                 BLEState = toBLEState;
@@ -375,7 +374,7 @@ public class ConnectorBluetooth
 
     @Override
     public void setStorages() {
-        if (Settings.debug) Timber.i("setStorages()");
+        Timber.i("setStorages()");
         leDataTransmitter.setStorageFromBt((storageFromBt));
         leDataTransmitter.setStorageToBt(storageToBt);
         mBluetoothLeCore.setCallbackWriteListener(leDataTransmitter);
@@ -418,7 +417,7 @@ public class ConnectorBluetooth
         switch (report) {
             case RP_TurningOn:
 
-                if (Settings.debug) Timber.i("RP_TurningOn");
+                Timber.i("RP_TurningOn");
 
                 if (!isBtSuppported()) {
                     toBtFsm(RP_BtNotSupported, to);
@@ -436,7 +435,7 @@ public class ConnectorBluetooth
                 break;
 
             case RP_Enable:
-                if (Settings.debug) Timber.i("RP_Enable");
+                Timber.i("RP_Enable");
                 enableBt();
                 if (BluetoothLeCore.getBluetoothAdapter().isEnabled())
                     toBtFsm(RP_BtEnabled, to);
@@ -454,32 +453,32 @@ public class ConnectorBluetooth
                 break;
 
             case RP_SearchStart:
-                if (Settings.debug) Timber.i("RP_SearchStart");
+                Timber.i("RP_SearchStart");
                 searchDevice();
                 break;
 
             case RP_Connect:
-                if (Settings.debug) Timber.i("RP_Connect");
+                Timber.i("RP_Connect");
                 connecting();
                 break;
 
             case RP_ExchangeEnable:
-                if (Settings.debug) Timber.i("RP_ExchangeEnable");
+                Timber.i("RP_ExchangeEnable");
                 enableTransmitData();
                 break;
 
             case RP_ExchangeDisable:
-                if (Settings.debug) Timber.i("RP_ExchangeDisable");
+                Timber.i("RP_ExchangeDisable");
                 disableTransmitData();
                 break;
 
             case RP_SearchStop:
-                if (Settings.debug) Timber.i("RP_SearchStop");
+                Timber.i("RP_SearchStop");
                 stopScan();
                 break;
 
             case RP_Disconnect:
-                if (Settings.debug) Timber.i("ReportConnectStop");
+                Timber.i("ReportConnectStop");
                 disconnect();
                 break;
 
@@ -489,7 +488,7 @@ public class ConnectorBluetooth
                 break;
 
             case RP_TurningOff:
-                if (Settings.debug) Timber.i("RP_TurningOff");
+                Timber.i("RP_TurningOff");
                 onStop();
                 break;
 

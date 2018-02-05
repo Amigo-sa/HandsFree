@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import by.citech.handsfree.common.IPrepareObject;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class CraftedThreadPool
         implements IPrepareObject {
@@ -79,7 +80,7 @@ public class CraftedThreadPool
 
     void activate() {
         prepareObject();
-        if (debug) Log.i(TAG,"activate");
+        Timber.i("activate");
         if (isActive) {
             Log.e(TAG,"activate already active, return");
             return;
@@ -89,7 +90,7 @@ public class CraftedThreadPool
     }
 
     void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+        Timber.i("deactivate");
         runnables.clear();
         for (ThreadShard thread : threads) {
             if (thread != null) {
@@ -105,11 +106,11 @@ public class CraftedThreadPool
 
     void addRunnable(Runnable runnable) {
         if (runnable == null) {
-            if (debug) Log.w(TAG, "addRunnable runnable is null, return");
+            Timber.w("addRunnable runnable is null, return");
         } else if (!runnables.offer(runnable)) {
-            if (debug) Log.w(TAG, "addRunnable add fail, return");
+            Timber.w("addRunnable add fail, return");
         } else if (idleThreadNumber < 1) {
-            if (debug) Log.i(TAG, "addRunnable low on threads, creating new one");
+            Timber.i("addRunnable low on threads, creating new one");
             if (!upThread()) {
                 new ExtraThreadShard().start();
             }
@@ -117,7 +118,7 @@ public class CraftedThreadPool
     }
 
     private synchronized boolean upThread() {
-        if (debug) Log.i(TAG,"upThread");
+        Timber.i("upThread");
         if (procThreadNumber(null, null) < initialThreadNumber && isActive) {
             new ThreadShard().start();
             return true;
@@ -131,7 +132,7 @@ public class CraftedThreadPool
             switch (eventToProcess) {
                 case plusOneRunning:
                     if (!threads.offer(threadToProcess)) {
-                        if (debug) Log.i(TAG, "procThreadNumber add thread failed");
+                        Timber.i("procThreadNumber add thread failed");
                     } else {
                         idleThreadNumber = ++idleThreadNumber;
                     }
@@ -139,7 +140,7 @@ public class CraftedThreadPool
                     break;
                 case minusOneRunning:
                     if (!threads.remove(threadToProcess)) {
-                        if (debug) Log.i(TAG, "procThreadNumber remove thread failed");
+                        Timber.i("procThreadNumber remove thread failed");
                     } else {
                         idleThreadNumber = --idleThreadNumber;
                     }
@@ -157,11 +158,11 @@ public class CraftedThreadPool
             }
             int runningThreadNumber = threads.size();
             if (idleThreadNumber < 1 && runningThreadNumber > 0) {
-                if (debug) Log.w(TAG, String.format(Locale.US,
+                Timber.w(String.format(Locale.US,
                         "procThreadNumber %d of %d threads is idle",
                         idleThreadNumber, runningThreadNumber));
             } else {
-                if (debug) Log.i(TAG, String.format(Locale.US,
+                Timber.i(String.format(Locale.US,
                         "procThreadNumber %d of %d threads is idle",
                         idleThreadNumber, runningThreadNumber));
             }
@@ -182,7 +183,7 @@ public class CraftedThreadPool
                     break;
             }
         }
-        if (debug) Log.w(TAG, "procExtraThread running extra threads: " + runningExtraThreadNumber);
+        Timber.w("procExtraThread running extra threads: " + runningExtraThreadNumber);
     }
 
     private synchronized Runnable getAvailableRun() {
@@ -200,13 +201,13 @@ public class CraftedThreadPool
         private boolean isActive;
         @Override
         public void run() {
-            if (debug) Log.i(TAG,"ThreadShard run");
+            Timber.i("ThreadShard run");
             procThreadNumber(Event.plusOneRunning, this);
             isActive = true;
             while (isActive) {
                 toRun = getAvailableRun();
                 if (toRun == null) {
-                    if (debug) Log.w(TAG,"ThreadShard run toRun is null, waiting");
+                    Timber.w("ThreadShard run toRun is null, waiting");
                     waiting.run();
                 } else if (toRun != waiting) {
                     procThreadNumber(Event.minusOneIdle, this);
@@ -226,11 +227,11 @@ public class CraftedThreadPool
         Runnable toRun;
         @Override
         public void run() {
-            if (debug) Log.w(TAG, "ExtraThreadShard run");
+            Timber.w("ExtraThreadShard run");
             procExtraThread(Event.plusOneRunning);
             toRun = getAvailableRun();
             if (toRun == null) {
-                if (debug) Log.w(TAG, "ExtraThreadShard run toRun is null, return");
+                Timber.w("ExtraThreadShard run toRun is null, return");
             } else if (toRun != waiting) {
                 toRun.run();
             }

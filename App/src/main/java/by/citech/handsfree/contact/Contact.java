@@ -38,31 +38,31 @@ public class Contact
         state = EContactState.Null;
         this.name = name;
         this.ip = ip;
-        if (debug) Timber.d(toString() + " contactTrunkCount is: " + (++contactTrunkCount));
+        Timber.d(toString() + " contactTrunkCount is: " + (++contactTrunkCount));
     }
 
     public Contact(long id, String name, String ip) {
         this(name, ip);
         this.id = id;
-        if (debug) Timber.d(toString() + " contactFullCount is: " + (++contactFullCount));
+        Timber.d(toString() + " contactFullCount is: " + (++contactFullCount));
     }
 
     public Contact(long id, Contact contact) {
         this(contact.getName(), contact.getIp());
         this.id = id;
-        if (debug) Timber.d(toString() + " contactFullCount is: " + (++contactFullCount));
+        Timber.d(toString() + " contactFullCount is: " + (++contactFullCount));
     }
 
     public static boolean checkForEqual(Contact toCheck1, Contact toCheck2) {
-        if (debug) Timber.i("checkForEqual");
+        Timber.i("checkForEqual");
         return toCheck1.ip.equals(toCheck2.ip);
     }
 
     public static boolean checkForValid(Contact contact) {
-        if (debug) Timber.i("checkForValid");
+        Timber.i("checkForValid");
         boolean isIpValid = InetAddress.checkForValidityIpAddr(contact.getIp());
         boolean isNameValid = Name.checkForValidityContactName(contact.getName());
-        if (debug) Timber.i("checkForValid ip is %s, name is %s",
+        Timber.i("checkForValid ip is %s, name is %s",
                 isIpValid   ? VALID : INVALID,
                 isNameValid ? VALID : INVALID);
         return isIpValid && isNameValid;
@@ -118,7 +118,7 @@ public class Contact
         clone.ip = this.ip;
         clone.id = this.id;
         clone.state = EContactState.valueOf(this.state.name());
-        if (debug) Timber.tag(TAG).w("original is " + this.toString() + "\nclone is " + clone.toString());
+        Timber.tag(TAG).w("original is " + this.toString() + "\nclone is " + clone.toString());
         return clone;
     }
 

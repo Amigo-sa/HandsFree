@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 public class StorageData<T> {
 
@@ -35,7 +36,7 @@ public class StorageData<T> {
     public T getData() {
         T dataOut = фифошка.poll();
         if (dataOut == null) {
-            if (debug) Log.e(TAG, "getData is null");
+            Timber.e("getData is null");
         }
         return dataOut;
     }
@@ -43,7 +44,7 @@ public class StorageData<T> {
     public void putData(T dataIn) {
         if (isWriteLocked) return;
         if (dataIn == null) {
-            if (debug) Log.e(TAG, "putData is null");
+            Timber.e("putData is null");
             return;
         }
         фифошка.offer(dataIn);

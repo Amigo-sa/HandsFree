@@ -10,6 +10,7 @@ import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.EDataSource;
 import by.citech.handsfree.threading.IThreading;
+import timber.log.Timber;
 
 public class RedirectFromNet
         extends AsyncTask<EDataSource, IStreamer, Void>
@@ -30,11 +31,11 @@ public class RedirectFromNet
 
     @Override
     protected Void doInBackground(EDataSource... params) {
-        if (debug) Log.i(TAG, "doInBackground");
+        Timber.i("doInBackground");
         IStreamer iStreamer;
         switch (params[0]) {
             case MICROPHONE:
-                if (debug) Log.i(TAG, "doInBackground audio");
+                Timber.i("doInBackground audio");
                 try {
                     ToAudioOut toAudioOut = new ToAudioOut();
                     iExchangeCtrl.setReceiver(toAudioOut);
@@ -62,7 +63,7 @@ public class RedirectFromNet
                 addRunnable(iStreamer::streamOn);
                 break;
             default:
-                if (debug) Log.e(TAG, "doInBackground default dataSource");
+                Timber.e("doInBackground default dataSource");
                 break;
         }
         return null;
@@ -70,7 +71,7 @@ public class RedirectFromNet
 
     @Override
     protected void onProgressUpdate(IStreamer... iStreamers) {
-        if (debug) Log.i(TAG, "onProgressUpdate");
+        Timber.i("onProgressUpdate");
         iStreamerRegister.registerTransmitterCtrl(iStreamers[0]);
     }
 

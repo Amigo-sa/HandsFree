@@ -15,6 +15,7 @@ import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
 import by.citech.handsfree.statistic.TrafficAnalyzer;
+import timber.log.Timber;
 
 public class ToBluetooth
         implements IStreamer, IRxComplex,
@@ -84,12 +85,12 @@ public class ToBluetooth
     @Override
     public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
-            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            Timber.w("prepareStream stream is finished, return");
             return;
         } else {
-            if (debug) Log.i(TAG, "prepareStream");
+            Timber.i("prepareStream");
         }
-        if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
+        Timber.w(String.format(Locale.US, "prepareStream parameters is:" +
                         " btSignificantAll is %b," +
                         " btSinglePacket is %b," +
                         " btFactor is %d," +
@@ -108,7 +109,7 @@ public class ToBluetooth
 
     @Override
     public void finishStream() {
-        if (debug) Log.i(TAG, "finishStream");
+        Timber.i("finishStream");
         isFinished = true;
         streamOff();
         storage = null;
@@ -117,17 +118,17 @@ public class ToBluetooth
     @Override
     public void streamOn() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "streamOn stream is finished, return");
+            Timber.w("streamOn stream is finished, return");
             return;
         } else {
-            if (debug) Log.i(TAG, "streamOn");
+            Timber.i("streamOn");
         }
         isStreaming = true;
     }
 
     @Override
     public void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
+        Timber.i("streamOff");
         isStreaming = false;
         storage.clear();
     }
@@ -140,10 +141,10 @@ public class ToBluetooth
     @Override
     public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "isReadyToStream finished");
+            Timber.w("isReadyToStream finished");
             return false;
         } else if (!isPrepared) {
-            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            Timber.w("isReadyToStream not prepared");
             return false;
         } else {
             return true;
@@ -155,7 +156,7 @@ public class ToBluetooth
     @Override
     public void sendData(byte[] data) {
         if (data == null) {
-            if (debug) Log.i(TAG, "sendData byte[]" + StatusMessages.ERR_PARAMETERS);
+            Timber.i("sendData byte[]" + StatusMessages.ERR_PARAMETERS);
             return;
         }
         if (!isStreaming() || !isReadyToStream()) return;
@@ -181,7 +182,7 @@ public class ToBluetooth
                     dataAssembled[i] = Arrays.copyOf(Arrays.copyOfRange(data, i * btSignificantBytes, (i + 1) * btSignificantBytes), btToBtSendSize);
                 }
             }
-            if (debug) Log.i(TAG, "sendData data assembled");
+            Timber.i("sendData data assembled");
         }
         if (isStreaming() && isReadyToStream()) {
             storage.putData(dataAssembled);

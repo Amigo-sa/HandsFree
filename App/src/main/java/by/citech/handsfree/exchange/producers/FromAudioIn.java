@@ -13,6 +13,7 @@ import by.citech.handsfree.settings.ISettingsCtrl;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.ESeverityLevel;
+import timber.log.Timber;
 
 public class FromAudioIn
         implements IStreamer {
@@ -52,12 +53,12 @@ public class FromAudioIn
     @Override
     public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
-            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            Timber.w("prepareStream stream is finished, return");
             return;
         } else if (receiver == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
-            if (debug) Log.i(TAG, "prepareStream");
+            Timber.i("prepareStream");
             this.iRxComplex = receiver;
         }
         recorder = new AudioRecord(
@@ -66,7 +67,7 @@ public class FromAudioIn
                 audioInChannel,
                 audioEncoding,
                 audioBuffSizeBytes);
-        if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
+        Timber.w(String.format(Locale.US, "prepareStream parameters is:" +
                         " audioBuffIsShorts is %b," +
                         " audioRate is %d," +
                         " audioBuffSizeBytes is %d," +
@@ -83,7 +84,7 @@ public class FromAudioIn
 
     @Override
     public void finishStream() {
-        if (debug) Log.i(TAG, "finishStream");
+        Timber.i("finishStream");
         isFinished = true;
         streamOff();
         if (recorder != null) {
@@ -95,7 +96,7 @@ public class FromAudioIn
 
     @Override
     public void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
+        Timber.i("streamOff");
         isStreaming = false;
         if (recorder != null) {
             if (recorder.getState() == AudioRecord.STATE_INITIALIZED) {
@@ -112,10 +113,10 @@ public class FromAudioIn
     @Override
     public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "isReadyToStream finished");
+            Timber.w("isReadyToStream finished");
             return false;
         } else if (!isPrepared) {
-            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            Timber.w("isReadyToStream not prepared");
             return false;
         } else {
             return true;
@@ -127,7 +128,7 @@ public class FromAudioIn
         if (isStreaming() || !isReadyToStream()) {
             return;
         } else {
-            if (debug) Log.i(TAG, "streamOn");
+            Timber.i("streamOn");
         }
         isStreaming = true;
         recorder.startRecording();
@@ -135,7 +136,7 @@ public class FromAudioIn
             if (audioBuffIsShorts) streamShorts();
             else                   streamBytes();
         }
-        if (debug) Log.i(TAG, "streamOn done");
+        Timber.i("streamOn done");
     }
 
     //--------------------- main
@@ -149,7 +150,7 @@ public class FromAudioIn
     }
 
     private byte[] fillBytesBuff(int readLeft) {
-        if (debug) Log.d(TAG, "fillBytesBuff");
+        Timber.d("fillBytesBuff");
         byte[] buffer = new byte[audioBuffSizeBytes];
         int readCount = 0;
         int readOffset = 0;
@@ -158,12 +159,12 @@ public class FromAudioIn
             readLeft -= readCount;
             readOffset += readCount;
         }
-        if (debug) Log.d(TAG, "fillBytesBuff done");
+        Timber.d("fillBytesBuff done");
         return buffer;
     }
 
     private short[] fillShortsBuff(int readLeft) {
-        if (debug) Log.d(TAG, "fillShortsBuff");
+        Timber.d("fillShortsBuff");
         short[] buffer = new short[audioBuffSizeShorts];
         int readCount = 0;
         int readOffset = 0;
@@ -172,7 +173,7 @@ public class FromAudioIn
             readLeft -= readCount;
             readOffset += readCount;
         }
-        if (debug) Log.d(TAG, "fillShortsBuff done");
+        Timber.d("fillShortsBuff done");
         return buffer;
     }
 

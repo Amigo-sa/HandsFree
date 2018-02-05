@@ -46,7 +46,7 @@ public class Contactor implements IElement<Contact> {
     //--------------------- getters and setters
 
     public List<Contact> getContacts() {
-        if (debug) Timber.i("getContacts");
+        Timber.i("getContacts");
         return memCtrl.getList();
     }
 
@@ -64,10 +64,10 @@ public class Contactor implements IElement<Contact> {
 
     @Override
     public boolean initiateElements() {
-        if (debug) Timber.i("getAllContacts");
+        Timber.i("getAllContacts");
         getDbCtrl().test(); //TODO: remove, test
         if (!getDbCtrl().downloadAllContacts(contacts)) {
-            if (debug) Timber.e("getAllContacts downloadAllContacts fail");
+            Timber.e("getAllContacts downloadAllContacts fail");
             return false;
         }
         memCtrl.sort();
@@ -78,35 +78,35 @@ public class Contactor implements IElement<Contact> {
 
     @Override
     public void addElement(Contact toAdd) {
-        if (debug) Timber.i("addElement");
+        Timber.i("addElement");
         if (check(toAdd)) {
-            if (debug) Timber.w("addElement toAdd is %s", toAdd.toString());
+            Timber.w("addElement toAdd is %s", toAdd.toString());
             long contactId = getDbCtrl().add(toAdd);
             if (contactId == -1) {
                 toAdd.setState(FailToAdd);
-                if (debug) Timber.e("addElement to db fail");
+                Timber.e("addElement to db fail");
             } else {
                 toAdd.setId(contactId);
                 if (!memCtrl.add(toAdd)) {
                     toAdd.setState(FailToAdd);
-                    if (debug) Timber.e("addElement to memory fail");
+                    Timber.e("addElement to memory fail");
                 } else toAdd.setState(SuccessAdd);
             }
             reportContact(toAdd);
-            if (debug) Timber.w("addElement added is %s", toAdd.toString());
+            Timber.w("addElement added is %s", toAdd.toString());
         }
     }
 
     @Override
     public void deleteElement(Contact toDelete) {
-        if (debug) Timber.i("deleteElement");
+        Timber.i("deleteElement");
         if (toDelete != null) {
             if (!getDbCtrl().delete(toDelete)) {
                 toDelete.setState(FailDelete);
-                if (debug) Timber.e("deleteElement db fail");
+                Timber.e("deleteElement db fail");
             } else if (!memCtrl.delete(toDelete)) {
                 toDelete.setState(FailDelete);
-                if (debug) Timber.e("deleteElement memory fail");
+                Timber.e("deleteElement memory fail");
             } else toDelete.setState(SuccessDelete);
         }
         reportContact(toDelete);
@@ -114,19 +114,19 @@ public class Contactor implements IElement<Contact> {
 
     @Override
     public void updateElement(Contact toUpdate, Contact toCopy) {
-        if (debug) Timber.i("updateElement");
+        Timber.i("updateElement");
         if (check(toUpdate, toCopy)) {
-            if (debug) Timber.w("updateElement toCopy is %s", toCopy);
-            if (debug) Timber.w("updateElement toUpdate is %s", toUpdate);
+            Timber.w("updateElement toCopy is %s", toCopy);
+            Timber.w("updateElement toUpdate is %s", toUpdate);
             if (!getDbCtrl().update(toUpdate, toCopy)) {
                 toUpdate.setState(FailUpdate);
-                if (debug) Timber.e("updateElement db fail");
+                Timber.e("updateElement db fail");
             } else if (!memCtrl.update(toUpdate, toCopy)) {
                 toUpdate.setState(FailUpdate);
-                if (debug) Timber.e("updateElement memory fail");
+                Timber.e("updateElement memory fail");
             } else toUpdate.setState(SuccessUpdate);
             reportContact(toUpdate);
-            if (debug) Timber.w("updateElement updated is %s", toUpdate.toString());
+            Timber.w("updateElement updated is %s", toUpdate.toString());
         }
     }
 
@@ -140,7 +140,7 @@ public class Contactor implements IElement<Contact> {
     }
 
     private boolean check(Contact toUpdate, Contact toCopy) {
-        if (debug) Timber.i("check if copy");
+        Timber.i("check if copy");
         if (toUpdate != null) {
             if (toCopy == null) {
                 toUpdate.setState(FailUpdate);
@@ -157,7 +157,7 @@ public class Contactor implements IElement<Contact> {
      }
 
     private boolean check(Contact contact) {
-        if (debug) Timber.i("check");
+        Timber.i("check");
         if (contact != null) {
             if (!Contact.checkForValid(contact)) {
                 contact.setState(FailInvalid);
@@ -170,10 +170,10 @@ public class Contactor implements IElement<Contact> {
     }
 
     private void reportContact(Contact... toReport) {
-        if (debug) Timber.i("reportContact");
+        Timber.i("reportContact");
         if (listener != null && iMsgToUi != null) {
             iMsgToUi.sendToUiRunnable(false, () -> listener.onChange(toReport));
-        } else if (debug) Timber.e("reportContact%s", StatusMessages.ERR_PARAMETERS);
+        } else Timber.e("reportContact%s", StatusMessages.ERR_PARAMETERS);
     }
 
 }

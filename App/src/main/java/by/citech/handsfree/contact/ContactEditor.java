@@ -94,12 +94,12 @@ public class ContactEditor
     //--------------------- enter point
 
     public void startEditorEdit(Contact contact, int position) {
-        if (debug) Timber.i("startEditorEdit");
+        Timber.i("startEditorEdit");
         goToState(EContactEditorState.Edit, contact, position);
     }
 
     public void startEditorAdd() {
-        if (debug) Timber.i("startEditorAdd");
+        Timber.i("startEditorAdd");
         goToState(EContactEditorState.Add);
     }
 
@@ -110,7 +110,7 @@ public class ContactEditor
     }
 
     public void goToState(EContactEditorState toState, Contact contact, int position) {
-        if (debug) Timber.i("goToState");
+        Timber.i("goToState");
         editorState = toState;
         switch (editorState) {
             case Add:
@@ -127,7 +127,7 @@ public class ContactEditor
                 contactToEditPosition = -1;
                 viewManager.hideEditor();
                 if (isSwipedIn) {
-                    if (debug) Timber.i("goToState Inactive isSwipedIn");
+                    Timber.i("goToState Inactive isSwipedIn");
                     if (isDeleted || isEdited) {
                         swipeCrutch.resetSwipe();
                     } else {
@@ -143,7 +143,7 @@ public class ContactEditor
                 activeContact.goToState(EActiveContactState.Default);
                 return;
             default:
-                if (debug) Timber.e("goToState editorState default");
+                Timber.e("goToState editorState default");
                 return;
         }
         viewManager.showEditor();
@@ -153,12 +153,12 @@ public class ContactEditor
     //--------------------- commands
 
     public void getAllContacts() {
-        if (debug) Timber.i("getAllContacts");
+        Timber.i("getAllContacts");
         addRunnable(() -> iContact.initiateElements());
     }
 
     public void cancelContact() {
-        if (debug) Timber.i("cancelContact");
+        Timber.i("cancelContact");
         switch (editorState) {
             case Edit:
                 goToState(EContactEditorState.Edit, contactToEdit, contactToEditPosition);
@@ -172,7 +172,7 @@ public class ContactEditor
     }
 
     public void deleteContact() {
-        if (debug) Timber.i("deleteContact");
+        Timber.i("deleteContact");
         isDeletePending = true;
         freezeState();
         contactToDeletePosition = contactToEditPosition;
@@ -183,7 +183,7 @@ public class ContactEditor
     }
 
     public void saveContact() {
-        if (debug) Timber.i("saveContact");
+        Timber.i("saveContact");
         switch (editorState) {
             case Add:
                 freezeState();
@@ -204,7 +204,7 @@ public class ContactEditor
     //--------------------- on command results
 
     private void onContactDelSucc() {
-        if (debug) Timber.i("onContactDelSucc");
+        Timber.i("onContactDelSucc");
         isDeletePending = false;
         isDeleted = true;
         contactsAdapter.notifyItemRemoved(contactToDeletePosition);
@@ -214,7 +214,7 @@ public class ContactEditor
     }
 
     private void onContactAddSucc(int position) {
-        if (debug) Timber.i("onContactAddSucc");
+        Timber.i("onContactAddSucc");
         isAddPending = false;
         contactToEditPosition = position;
         goToState(EContactEditorState.Edit, contactToAdd, position);
@@ -222,7 +222,7 @@ public class ContactEditor
     }
 
     private void onContactEditSucc(int position) {
-        if (debug) Timber.i("onContactEditSucc");
+        Timber.i("onContactEditSucc");
         isEditPending = false;
         isEdited = true;
         contactToEditPosition = position;
@@ -230,21 +230,21 @@ public class ContactEditor
     }
 
     private void onContactDelFail() {
-        if (debug) Timber.i("onContactDelFail");
+        Timber.i("onContactDelFail");
         isDeletePending = false;
         isDeleted = false;
         releaseState();
     }
 
     private void onContactAddFail() {
-        if (debug) Timber.i("onContactAddFail");
+        Timber.i("onContactAddFail");
         isAddPending = false;
         contactToAdd = null;
         releaseState();
     }
 
     private void onContactEditFail() {
-        if (debug) Timber.i("onContactEditFail");
+        Timber.i("onContactEditFail");
         isEditPending = false;
         releaseState();
     }
@@ -256,12 +256,12 @@ public class ContactEditor
     }
 
     private void freezeState() {
-        if (debug) Timber.i("freezeState");
+        Timber.i("freezeState");
         viewManager.setEditorButtonsFreeze();
     }
 
     private void releaseState() {
-        if (debug) Timber.i("releaseState");
+        Timber.i("releaseState");
         viewManager.setEditorButtonsRelease();
     }
 
@@ -269,9 +269,9 @@ public class ContactEditor
 
     @Override
     public void onChange(Contact... contacts) {
-        if (debug) Timber.i("onChange");
+        Timber.i("onChange");
         if (contacts == null || contacts.length == 0 || contacts[0] == null) {
-            if (debug) Timber.e("onChange returned contact is null");
+            Timber.e("onChange returned contact is null");
 //          goToState(EContactEditorState.Inactive); //TODO: разобраться, зачем это тут было
             return;
         }
@@ -282,7 +282,7 @@ public class ContactEditor
             contactsAdapter.notifyDataSetChanged();
         } else {
             int position = contactsAdapter.getItemPosition(contact);
-            if (debug) Timber.w("onChange: state is %s, pos is %d, contact is %s",
+            Timber.w("onChange: state is %s, pos is %d, contact is %s",
                     state.getMessage(), position, contact.toString());
             switch (state) {
                 case FailDelete:

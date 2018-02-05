@@ -59,7 +59,7 @@ public class TouchListener implements View.OnTouchListener {
                         return true;
                     }
                 } else {
-                    if (Settings.debug) Timber.i("Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
+                    Timber.i("Swipe was only " + Math.abs(deltaX) + " long horizontally, need at least " + MIN_DISTANCE);
                     // return false; // We don't consume the event
                 }
                 // swipe vertical?
@@ -74,7 +74,7 @@ public class TouchListener implements View.OnTouchListener {
                         return true;
                     }
                 } else {
-                    if (Settings.debug) Timber.i("Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
+                    Timber.i("Swipe was only " + Math.abs(deltaX) + " long vertically, need at least " + MIN_DISTANCE);
                 }
                 return false; // no swipe horizontally and no swipe vertically
             } // case MotionEvent.ACTION_UP:

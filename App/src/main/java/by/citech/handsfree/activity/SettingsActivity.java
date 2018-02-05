@@ -67,7 +67,7 @@ public class SettingsActivity
     //-------------------------- setup
 
     private void setupActionBar() {
-        if (debug) Timber.i("setupActionBar");
+        Timber.i("setupActionBar");
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowHomeEnabled(true);
@@ -104,7 +104,7 @@ public class SettingsActivity
 
         @Override
         public void onCreatePreferencesFix(@Nullable Bundle savedInstanceState, String rootKey) {
-            if (debug) Timber.i("onCreatePreferencesFix");
+            Timber.i("onCreatePreferencesFix");
             setPreferencesFromResource(R.xml.settings, rootKey);
             SettingsHelper.prepareListPref    ((ListPreference    ) findPreference(getString(R.string.opMode         )), Settings.Common.opMode                                                       );
             SettingsHelper.prepareListPref    ((ListPreference    ) findPreference(getString(R.string.audioCodecType )), Settings.AudioCommon.audioCodecType                                          );
@@ -131,7 +131,7 @@ public class SettingsActivity
         private String getRefreshedListPref(String prefName) {
             ListPreference pref = (ListPreference) findPreference(prefName);
             CharSequence newSummary = pref.getEntry();
-            if (debug) Timber.w("getRefreshedListPref %s set to %s", prefName, newSummary);
+            Timber.w("getRefreshedListPref %s set to %s", prefName, newSummary);
             pref.setSummary(newSummary);
             return newSummary.toString();
         }
@@ -139,7 +139,7 @@ public class SettingsActivity
         private String getRefreshedEditTextPref(String prefName) {
             EditTextPreference pref = (EditTextPreference) findPreference(prefName);
             String newSummary = pref.getText();
-            if (debug) Timber.w("getRefreshedEditTextPref %s set to %s", prefName, newSummary);
+            Timber.w("getRefreshedEditTextPref %s set to %s", prefName, newSummary);
             pref.setSummary(newSummary);
             return newSummary;
         }
@@ -148,9 +148,9 @@ public class SettingsActivity
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String prefName) {
-            if (debug) Timber.i("onSharedPreferenceChanged prefName is %s", prefName);
+            Timber.i("onSharedPreferenceChanged prefName is %s", prefName);
             if (prefName == null || prefName.isEmpty()) {
-                if (debug) Timber.e("onSharedPreferenceChanged prefName is illegal");
+                Timber.e("onSharedPreferenceChanged prefName is illegal");
                 return;
             }
             switch (prefName) {

@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class Disconnect
         extends AsyncTask<IConnCtrl, Void, Void> {
@@ -26,7 +27,7 @@ public class Disconnect
 
     @Override
     protected Void doInBackground(IConnCtrl... iConnCtrl) {
-        if (debug) Log.i(TAG, "doInBackground");
+        Timber.i("doInBackground");
         if (iConnCtrl[0].isAliveConnection()) {
             iConnCtrl[0].closeConnection();
             try {
@@ -45,13 +46,13 @@ public class Disconnect
                 }
             }
             if (!iConnCtrl[0].isAliveConnection()) {
-                if (debug) Log.i(TAG, "doInBackground connection closed");
+                Timber.i("doInBackground connection closed");
                 return null;
             }
             iConnCtrl[0].closeConnectionForce();
-            if (debug) Log.w(TAG, "doInBackground connection force close");
+            Timber.w("doInBackground connection force close");
         }
-        if (debug) Log.i(TAG, "doInBackground connection already closed");
+        Timber.i("doInBackground connection already closed");
         return null;
     }
 

@@ -60,15 +60,15 @@ public class ToNet
     @Override
     public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
-            if (debug) Timber.tag(TAG).w("prepareStream stream is finished, return");
+            Timber.tag(TAG).w("prepareStream stream is finished, return");
             return;
         } else if (receiver == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
-            if (debug) Timber.tag(TAG).i("prepareStream");
+            Timber.tag(TAG).i("prepareStream");
             this.iRxComplex = receiver;
         }
-        if (debug) Timber.tag(TAG).w("streamOn parameters is:" +
+        Timber.tag(TAG).w("streamOn parameters is:" +
                         " netSignificantAll is %b," +
                         " netChunkSignificantBytes is %d," +
                         " netChunkSize is %d," +
@@ -85,7 +85,7 @@ public class ToNet
 
     @Override
     public void finishStream() {
-        if (debug) Timber.tag(TAG).i("finishStream");
+        Timber.tag(TAG).i("finishStream");
         isFinished = true;
         streamOff();
         iRxComplex = null;
@@ -94,7 +94,7 @@ public class ToNet
 
     @Override
     public void streamOff() {
-        if (debug) Timber.tag(TAG).i("streamOff");
+        Timber.tag(TAG).i("streamOff");
         isStreaming = false;
     }
 
@@ -106,10 +106,10 @@ public class ToNet
     @Override
     public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Timber.tag(TAG).w("isReadyToStream finished");
+            Timber.tag(TAG).w("isReadyToStream finished");
             return false;
         } else if (!isPrepared) {
-            if (debug) Timber.tag(TAG).w("isReadyToStream not prepared");
+            Timber.tag(TAG).w("isReadyToStream not prepared");
             return false;
         } else {
             return true;
@@ -121,7 +121,7 @@ public class ToNet
         if (isStreaming() || !isReadyToStream()) {
             return;
         } else {
-            if (debug) Timber.tag(TAG).i("streamOn");
+            Timber.tag(TAG).i("streamOn");
         }
         isStreaming = true;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -140,30 +140,30 @@ public class ToNet
             if (netChunk != null) {
                 netChunkSizeActual = netChunk.length;
                 if (netChunkSizeActual != netChunkSize) {
-                    if (debug) Timber.tag(TAG).e("streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize);
+                    Timber.tag(TAG).e("streamOn readed chunk of length %d, expected %d", netChunkSizeActual, netChunkSize);
                 } else {
                     baos.write(netChunk, 0, netChunkSize);
                     netChunkCount++;
                 }
             } else {
-                if (debug) Timber.tag(TAG).e("streamOn readed null data from storage");
+                Timber.tag(TAG).e("streamOn readed null data from storage");
                 return;
             }
-            if (debug) Timber.tag(TAG).i("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize);
+            Timber.tag(TAG).i("streamOn net out buff contains %d netChunks of %d bytes each", netChunkCount, netChunkSize);
             if (netChunkCount == netFactor) {
-                if (debug) Timber.tag(TAG).w("streamOn net out buff contains enough data of %d bytes, sending", baos.size());
+                Timber.tag(TAG).w("streamOn net out buff contains enough data of %d bytes, sending", baos.size());
                 if (isStreaming() && isReadyToStream()) {
                     iRxComplex.sendData(baos.toByteArray());
                 }
                 netChunkCount = 0;
                 baos.reset();
             } else if (netChunkCount > netFactor) {
-                if (debug) Timber.tag(TAG).e("streamOn too much data in net out buff");
+                Timber.tag(TAG).e("streamOn too much data in net out buff");
                 netChunkCount = 0;
                 baos.reset();
             }
         }
-        if (debug) Timber.tag(TAG).i("streamOn done");
+        Timber.tag(TAG).i("streamOn done");
     }
 
 }

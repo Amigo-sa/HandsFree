@@ -85,7 +85,7 @@ public class ConnectorNet implements
     //--------------------- runnables
 
     private Runnable startServerDelayed = () -> {
-        if (debug) Timber.i("startServerDelayed run");
+        Timber.i("startServerDelayed run");
         while (isBaseStopInProcess) try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -95,12 +95,12 @@ public class ConnectorNet implements
     };
 
     private Runnable stopStreaming = () -> {
-        if (debug) Timber.i("stopStreaming run");
+        Timber.i("stopStreaming run");
         stopStream();
     };
 
     private Runnable stopNetworking = () -> {
-        if (debug) Timber.i("stopNetworking run");
+        Timber.i("stopNetworking run");
         stopStream();
         disconnect(iConnCtrl);
         stopServer();
@@ -165,12 +165,12 @@ public class ConnectorNet implements
     //--------------------- main
 
     public void build() {
-        if (debug) Timber.i("build");
+        Timber.i("build");
         startServer();
     }
 
     public void destroy() {
-        if (debug) Timber.i("destroy");
+        Timber.i("destroy");
         isBaseStopInProcess = true;
         iNetInfoGetter = null;
         handler = null;
@@ -180,7 +180,7 @@ public class ConnectorNet implements
     }
 
     private void finishBaseStop() {
-        if (debug) Timber.i("finishBaseStop");
+        Timber.i("finishBaseStop");
         iServerCtrl = null;
         iClientCtrl = null;
         iConnCtrl = null;
@@ -189,7 +189,7 @@ public class ConnectorNet implements
     }
 
     private void processReport(Report report) {
-        if (debug) Timber.i("processReport: %s", report);
+        Timber.i("processReport: %s", report);
         if (report == null) return;
         switch (report) {
             case ServerStopped:
@@ -305,9 +305,9 @@ public class ConnectorNet implements
 
     @Override
     public void registerClientCtrl(IClientCtrl iClientCtrl) {
-        if (debug) Timber.i("registerClientCtrl");
+        Timber.i("registerClientCtrl");
         if (iClientCtrl == null) {
-            if (debug) Timber.e("registerClientCtrl iClientCtrl is null");
+            Timber.e("registerClientCtrl iClientCtrl is null");
         } else {
             this.iClientCtrl = iClientCtrl;
         }
@@ -317,9 +317,9 @@ public class ConnectorNet implements
 
     @Override
     public void registerTransmitterCtrl(IStreamer iStreamer) {
-        if (debug) Timber.i("registerTransmitterCtrl");
+        Timber.i("registerTransmitterCtrl");
         if (iStreamer == null) {
-            if (debug) Timber.e("registerTransmitterCtrl fromCtrl is null");
+            Timber.e("registerTransmitterCtrl fromCtrl is null");
         } else {
             transmitterCtrls.add(iStreamer);
         }
@@ -329,53 +329,53 @@ public class ConnectorNet implements
 
     @Override
     public void onServerStop() {
-        if (debug) Timber.i("onServerStop");
+        Timber.i("onServerStop");
         processReport(Report.ServerStopped);
     }
 
     //--------------------- network
 
     private void startServer() {
-        if (debug) Timber.i("startServer");
+        Timber.i("startServer");
         if (isBaseStopInProcess) {
-            if (debug) Timber.i("startServer base stop in process, waiting");
+            Timber.i("startServer base stop in process, waiting");
             addRunnable(startServerDelayed);
         } else {
-            if (debug) Timber.i("startServer base stop is finished, starting server");
+            Timber.i("startServer base stop is finished, starting server");
             new ServerOn(this, handler).execute(iNetInfoGetter.getLocPort());
         }
     }
 
     private void connect() {
-        if (debug) Timber.i("connect");
+        Timber.i("connect");
         new ClientConn(this, handler).execute(
                 String.format("ws://%s:%s", remAddr, remPort));
     }
 
     private void disconnect(IConnCtrl iConnCtrl) {
-        if (debug) Timber.i("disconnect");
+        Timber.i("disconnect");
         printConnectControl();
         if (iConnCtrl != null) {
             new Disconnect(this).execute(iConnCtrl);
         } else {
-            if (debug) Timber.e("disconnect iConnCtrl is null");
+            Timber.e("disconnect iConnCtrl is null");
         }
     }
 
     private void exchangeStart() {
-        if (debug) Timber.i("exchangeStart");
+        Timber.i("exchangeStart");
         printConnectControl();
         new RedirectToNet(this, iConnCtrl.getTransmitter(), storageToNet).execute(dataSource);
         new RedirectFromNet(this, iConnCtrl, storageFromNet).execute(dataSource);
     }
 
     private void exchangeStop() {
-        if (debug) Timber.i("stopStreaming");
+        Timber.i("stopStreaming");
         addRunnable(stopStreaming);
     }
 
     private boolean isValidCoordinates() {
-        if (debug) Timber.i("isValidCoordinates");
+        Timber.i("isValidCoordinates");
         remAddr = iNetInfoGetter.getRemAddr();
         remPort = iNetInfoGetter.getRemPort();
         return !(remAddr.matches(getIpAddr(Settings.Network.isIpv4Used))
@@ -384,7 +384,7 @@ public class ConnectorNet implements
     }
 
     private void printConnectControl() {
-        if (debug) Timber.i("printConnectControl iConnCtrl is instance of %s",
+        Timber.i("printConnectControl iConnCtrl is instance of %s",
                 (iConnCtrl == null)        ? "null"        :
                 (iConnCtrl == iServerCtrl) ? "iServerCtrl" :
                 (iConnCtrl == iClientCtrl) ? "iClientCtrl" : "unknown");
@@ -393,21 +393,21 @@ public class ConnectorNet implements
     //--------------------- network low level
 
     private void stopServer() {
-        if (debug) Timber.i("stopServer");
+        Timber.i("stopServer");
         if (iServerCtrl != null) {
             new ServerOff(this).execute(iServerCtrl);
         }
     }
 
     private void stopStream() {
-        if (debug) Timber.i("stopStream");
+        Timber.i("stopStream");
         for (IStreamer transmitterCtrl : transmitterCtrls) {
             if (transmitterCtrl != null) {
                 transmitterCtrl.finishStream();
             }
             transmitterCtrls.remove(transmitterCtrl);
         }
-        if (debug) Timber.i("stopStream done");
+        Timber.i("stopStream done");
     }
 
     //--------------------- misc
@@ -417,7 +417,7 @@ public class ConnectorNet implements
     }
 
     private void sendMessage(String message) {
-        if (debug) Timber.i("sendMessage %s", message);
+        Timber.i("sendMessage %s", message);
         new SendMessage(this, iConnCtrl.getTransmitter()).execute(message);
     }
 

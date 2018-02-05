@@ -7,6 +7,7 @@ import java.util.List;
 
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class TrafficAnalyzer
         extends Thread {
@@ -62,10 +63,10 @@ public class TrafficAnalyzer
     @Override
     public void run() {
         if (iTrafficReporter == null) {
-            if (debug) Log.e(TAG, "run one of key parameters are null");
+            Timber.e("run one of key parameters are null");
             return;
         }
-        if (debug) Log.i(TAG, "run");
+        Timber.i("run");
         isRunning = true;
         while (isRunning) {
             currTimestamp = System.currentTimeMillis();
@@ -87,7 +88,7 @@ public class TrafficAnalyzer
     }
 
     public void deactivate() {
-        if (debug) Log.i(TAG, "deactivate");
+        Timber.i("deactivate");
         isRunning = false;
     }
 

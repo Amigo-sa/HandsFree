@@ -128,7 +128,7 @@ public class CallActivity
 
         PreferencesProcessor.applyPrefsToSettings(this);
         opMode = Settings.Common.opMode;
-        if (debug) Timber.tag(TAG).w("onCreate opMode is %s", opMode);
+        Timber.tag(TAG).w("onCreate opMode is %s", opMode);
 
         viewManager = new CallActivityViewManager(opMode,this);
 
@@ -197,7 +197,7 @@ public class CallActivity
     @Override
     public void onStart() {
         super.onStart();
-        if (debug) Timber.tag(TAG).w("onStart");
+        Timber.tag(TAG).w("onStart");
     }
 
     //-------------------------- base
@@ -205,49 +205,49 @@ public class CallActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (debug) Timber.tag(TAG).w("onSaveInstanceState");
+        Timber.tag(TAG).w("onSaveInstanceState");
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) { //может быть и не вызван, эффективен при повороте экрана
         super.onRestoreInstanceState(savedInstanceState);
-        if (debug) Timber.tag(TAG).w("onRestoreInstanceState");
+        Timber.tag(TAG).w("onRestoreInstanceState");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (debug) Timber.tag(TAG).w("onResume");
+        Timber.tag(TAG).w("onResume");
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (debug) Timber.tag(TAG).w("onPostCreate");
+        Timber.tag(TAG).w("onPostCreate");
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if (debug) Timber.tag(TAG).w("onPostResume");
+        Timber.tag(TAG).w("onPostResume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (debug) Timber.tag(TAG).w("onPause");
+        Timber.tag(TAG).w("onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (debug) Timber.tag(TAG).w("onStop");
+        Timber.tag(TAG).w("onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (debug) Timber.tag(TAG).w("onDestroy");
+        Timber.tag(TAG).w("onDestroy");
     }
 
     //-------------------------- menu
@@ -262,13 +262,13 @@ public class CallActivity
     }
 
     private void onCreateConnectMenu(Menu menu) {
-        if (debug) Timber.tag(TAG).i("onCreateConnectMenu");
+        Timber.tag(TAG).i("onCreateConnectMenu");
         getMenuInflater().inflate(R.menu.scan_menu, menu);
         actionBar.setCustomView(null);
     }
 
     private void onCreateScanMenu(Menu menu) {
-        if (debug) Timber.tag(TAG).i("onCreateScanMenu");
+        Timber.tag(TAG).i("onCreateScanMenu");
         getMenuInflater().inflate(R.menu.main_menu, menu);
     }
 
@@ -287,10 +287,10 @@ public class CallActivity
 
     @Override
     public void onBackPressed() {
-        if (debug) Timber.tag(TAG).i("onBackPressed");
+        Timber.tag(TAG).i("onBackPressed");
         Keyboard.hideSoftKeyboard(this);
         if (viewManager.isMainViewHidden()) {
-            if (debug) Timber.tag(TAG).i("onBackPressed showMainView");
+            Timber.tag(TAG).i("onBackPressed showMainView");
             viewManager.showMainView();
             actionBar.setCustomView(null);
             contactEditor.goToState(EContactEditorState.Inactive);
@@ -304,7 +304,7 @@ public class CallActivity
     //-------------------------- permissons
 
     private void enPermissions() {
-        if (debug) Timber.tag(TAG).i("enPermissions");
+        Timber.tag(TAG).i("enPermissions");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), true);
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, REQUEST_LOCATION))
@@ -314,7 +314,7 @@ public class CallActivity
     }
 
     private boolean checkPermission(String permission, int requestPermission) {
-        if (debug) Timber.tag(TAG).i("checkPermission()");
+        Timber.tag(TAG).i("checkPermission()");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 this.requestPermissions(new String[]{permission}, requestPermission);
@@ -330,7 +330,7 @@ public class CallActivity
     }
 
     private void enPermission(String permission) {
-        if (debug) Timber.tag(TAG).i("enPermission");
+        Timber.tag(TAG).i("enPermission");
         if (provider == null) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (this.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED)
@@ -381,7 +381,7 @@ public class CallActivity
     }
 
     private void setupContactsAdapter() {
-        if (debug) Timber.tag(TAG).i("setupContactsAdapter");
+        Timber.tag(TAG).i("setupContactsAdapter");
         RecyclerView viewRecyclerContacts = findViewById(R.id.viewRecyclerContacts);
         contactsAdapter = new ContactsAdapter(Contactor.getInstance().getContacts());
         contactsAdapter.setOnClickViewListener(this::clickContactItem);
@@ -395,7 +395,7 @@ public class CallActivity
     }
 
     private void setupContactEditor() {
-        if (debug) Timber.tag(TAG).i("setupContactEditor");
+        Timber.tag(TAG).i("setupContactEditor");
         chosenContact = new ChosenContact(viewManager);
         activeContact = new ActiveContact(chosenContact, viewManager);
         contactEditor
@@ -418,7 +418,7 @@ public class CallActivity
     }
 
     private void setupContactor() {
-        if (debug) Timber.tag(TAG).i("setupContactor");
+        Timber.tag(TAG).i("setupContactor");
         EditText editTextSearch = findViewById(R.id.editTextSearch);
         editTextSearch.setHintTextColor(Colors.GRAY);
         editTextSearch.addTextChangedListener(new TextWatcher() {
@@ -437,27 +437,21 @@ public class CallActivity
         findViewById(R.id.baseView).setOnTouchListener(touchListener);
 
         ListView listDevices = findViewById(R.id.listDevices);
-        ListView connectDevices = findViewById(R.id.listConnectDevices);
-
         listDevices.setAdapter(deviceListAdapter);
-        connectDevices.setAdapter(connectDeviceListAdapter);
-
         listDevices.setOnTouchListener(touchListener);
-
         listDevices.setOnItemClickListener((parent, view, position, id) -> {
-                    BluetoothDevice device = deviceListAdapter.getDevice(position);
-                    if (device == null) return;
-                    iUiToBtListener.clickItemList(device);
-                }
-        );
-
-        connectDevices.setOnItemClickListener((parent, view1, position, id) -> {
-            final BluetoothDevice device = connectDeviceListAdapter.getDevice(position);
+            BluetoothDevice device = deviceListAdapter.getDevice(position);
             if (device == null) return;
             iUiToBtListener.clickItemList(device);
         });
 
-
+        ListView connectDevices = findViewById(R.id.listConnectDevices);
+        connectDevices.setAdapter(connectDeviceListAdapter);
+        connectDevices.setOnItemClickListener((parent, view, position, id) -> {
+            final BluetoothDevice device = connectDeviceListAdapter.getDevice(position);
+            if (device == null) return;
+            iUiToBtListener.clickItemList(device);
+        });
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
@@ -466,7 +460,7 @@ public class CallActivity
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {return false;}
             @Override
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                if (debug) Timber.tag(TAG).i("onSwiped");
+                Timber.tag(TAG).i("onSwiped");
                 int position = viewHolder.getAdapterPosition();
                 swipeCrutch.designateSwipe(viewHolder.itemView, position);
                 switch (swipeDir) {
@@ -475,7 +469,6 @@ public class CallActivity
                         contactEditor.startEditorEdit(contactsAdapter.getItem(position), position);
                         break;
                     default:
-                        if (debug) Timber.tag(TAG).i("swipe swipeDir is %s", swipeDir);
                         break;
                 }
             }
@@ -490,7 +483,7 @@ public class CallActivity
     private void clickBtnDeleteFromEditor() {contactEditor.deleteContact();}
 
     void clickBtnClearContact() {
-        if (debug) Timber.tag(TAG).i("clickBtnClearContact");
+        Timber.tag(TAG).i("clickBtnClearContact");
         if (chosenContact.isChosen()) {
             chosenContact.clear();
             activeContact.goToState(EActiveContactState.Default);
@@ -500,14 +493,14 @@ public class CallActivity
     }
 
     private void clickContactItem(Contact contact, int position) {
-        if (debug) Timber.tag(TAG).i("clickContactItem");
+        Timber.tag(TAG).i("clickContactItem");
         chosenContact.choose(contact, position);
         activeContact.goToState(EActiveContactState.FromChosen);
     }
 
     public void clickBtnChangeDevice() {
         setVisibleList();
-        if (debug) Timber.tag(TAG).i("before caller getBluetoothAdapter");
+        Timber.tag(TAG).i("before caller getBluetoothAdapter");
         iUiToBtListener.clickBtnListener();
     }
 
@@ -556,9 +549,7 @@ public class CallActivity
 
     @Override
     public void onStartScan() {
-        // initialize list device
-        if (deviceListAdapter != null)
-            deviceListAdapter.clear();
+        deviceListAdapter.clear();
         if (iUiToBtListener.isConnected()) {
             Timber.i("iUiToBtListener.getConnectedDevice() %s", iUiToBtListener.getConnectedDevice());
             connectDeviceListAdapter.addDevice(iUiToBtListener.getConnectedDevice(), false, true);
@@ -575,8 +566,7 @@ public class CallActivity
 
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
-        if (deviceListAdapter != null)
-            deviceListAdapter.addDevice(device, false, false);
+        deviceListAdapter.addDevice(device, false, false);
     }
 
     //--------------------- LocationListener
@@ -620,29 +610,29 @@ public class CallActivity
 
     @Override
     public void sendToUiToast(boolean isFromUiThread, String message) {
-        if (debug) Timber.i("sendToUiToast");
+        Timber.i("sendToUiToast");
         sendToUiRunnable(isFromUiThread, () -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public void sendToUiDialog(boolean isFromUiThread, EDialogType toRun, Map<EDialogState, Runnable> toDoMap, String... messages) {
-        if (debug) Timber.i("sendToUiDialog");
+        Timber.i("sendToUiDialog");
         if (!isFinishing()) {
             sendToUiRunnable(isFromUiThread, () -> dialogProcessor.runDialog(toRun, toDoMap, messages));
         } else {
-            if (debug) Timber.e("sendToUiDialog isFinishing, not sending");
+            Timber.e("sendToUiDialog isFinishing, not sending");
         }
     }
 
     @Override
     public void recallFromUiDialog(boolean isFromUiThread, EDialogType toDeny, EDialogState onDeny) {
-        if (debug) Timber.i("recallFromUiDialog");
+        Timber.i("recallFromUiDialog");
         sendToUiRunnable(isFromUiThread, () -> dialogProcessor.denyDialog(toDeny, onDeny));
     }
 
     @Override
     public void sendToUiRunnable(boolean isFromUiThread, Runnable toDo) {
-        if (debug) Timber.i("sendToUiRunnable");
+        Timber.i("sendToUiRunnable");
         if (isFromUiThread) {
             toDo.run();
         } else {

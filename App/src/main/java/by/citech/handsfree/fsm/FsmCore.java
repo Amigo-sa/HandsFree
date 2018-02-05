@@ -50,9 +50,9 @@ abstract public class FsmCore<
     synchronized protected R getFsmPreviousReport() {return prevReport;}
 
     synchronized protected boolean checkFsmReport(R report, S from, String msg) {
-        if (debug) Timber.w("%s checkFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
+        Timber.w("%s checkFsmReport: report <%s> from <%s>, message: <%s>", fsmName, report, from, msg);
         if (report == null || from == null || msg == null) {
-            if (debug) Timber.e("%s checkFsmReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
+            Timber.e("%s checkFsmReport %s", fsmName, StatusMessages.ERR_PARAMETERS);
             return false;
         } else return true;
     }
@@ -60,7 +60,7 @@ abstract public class FsmCore<
     //--------------------- listener
 
     synchronized protected void onFsmStateChange(S from, S to, R report) {
-        if (debug) Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, report);
+        Timber.w("%s onFsmStateChange: <%s> ==> <%s>, report: <%s>", fsmName, from, to, report);
         for (IFsmListener<R, S> listener : listeners) listener.onFsmStateChange(from, to, report);
     }
 
@@ -75,15 +75,15 @@ abstract public class FsmCore<
     synchronized protected boolean registerFsmListener(IFsmListener<R, S> listener, String message) {
         boolean isAdded;
         if (listener == null) {
-            if (debug) Timber.w("%s register fail, null listener: <%s>", fsmName, message);
+            Timber.w("%s register fail, null listener: <%s>", fsmName, message);
             return false;
         } else if (listeners.contains(listener)) {
-            if (debug) Timber.w("%s register fail, already registered: <%s>", fsmName, message);
+            Timber.w("%s register fail, already registered: <%s>", fsmName, message);
             isAdded = true;
         } else {
             isAdded = listeners.add(listener);
-            if (isAdded) {if (debug) Timber.i("%s register success: <%s>, count: <%d>", fsmName, message, listeners.size());}
-            else         {if (debug) Timber.e("%s register fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
+            if (isAdded) {Timber.i("%s register success: <%s>, count: <%d>", fsmName, message, listeners.size());}
+            else         {Timber.e("%s register fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
         }
         if (isAdded) listener.onFsmStateChange(prevState, currState, currReport);
         return isAdded;
@@ -92,8 +92,8 @@ abstract public class FsmCore<
     synchronized protected boolean unregisterFsmListener(IFsmListener<R, S> listener, String message) {
         boolean isRemoved;
         isRemoved = listeners.remove(listener);
-        if (isRemoved) {if (debug) Timber.i("%s unregister success: <%s>, count: <%d>", fsmName, message, listeners.size());}
-        else           {if (debug) Timber.e("%s unregister fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
+        if (isRemoved) {Timber.i("%s unregister success: <%s>, count: <%d>", fsmName, message, listeners.size());}
+        else           {Timber.e("%s unregister fail: <%s>, count: still <%d>", fsmName, message, listeners.size());}
         return isRemoved;
     }
 
@@ -113,8 +113,8 @@ abstract public class FsmCore<
                 currState = to;
                 onFsmStateChange(from, to, report);
                 return true;
-            } else if (debug) Timber.e("%s process: <%s> not available from <%s>", fsmName, to, from);
-        } else if (debug) Timber.e("%s process: currState is <%s>, not <%s>", fsmName, currState, from);
+            } else Timber.e("%s process: <%s> not available from <%s>", fsmName, to, from);
+        } else Timber.e("%s process: currState is <%s>, not <%s>", fsmName, currState, from);
         return false;
     }
 

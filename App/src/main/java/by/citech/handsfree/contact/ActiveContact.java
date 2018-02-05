@@ -21,7 +21,7 @@ public class ActiveContact {
     //--------------------- getters and setters
 
     public Contact getContact() {
-        if (debug) Timber.i("getContact %s", currState);
+        Timber.i("getContact %s", currState);
         switch (currState) {
             case IpFromSearch:
             case FromEditor:
@@ -34,7 +34,7 @@ public class ActiveContact {
     }
 
     public String getName() {
-        if (debug) Timber.i("getName %s", currState);
+        Timber.i("getName %s", currState);
         switch (currState) {
             case FromChosen:
                 return getContact().getName();
@@ -46,7 +46,7 @@ public class ActiveContact {
     }
 
     public String getIp() {
-        if (debug) Timber.i("getIp %s", currState);
+        Timber.i("getIp %s", currState);
         switch (currState) {
             case FromChosen:
                 return getContact().getIp();
@@ -66,7 +66,7 @@ public class ActiveContact {
     }
 
     public void goToState(EActiveContactState toState) {
-        if (debug) Timber.i("goToState %s from %s", toState, currState);
+        Timber.i("goToState %s from %s", toState, currState);
         currState = toState;
         if (currState == EActiveContactState.Default) {
             if (chosenContact.isChosen()) {

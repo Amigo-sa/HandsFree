@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 import static by.citech.handsfree.util.ArrayHelper.arrayDoubleToShort;
 import static by.citech.handsfree.util.ArrayHelper.invertDoubleArr;
@@ -40,10 +41,8 @@ class CircleGenerator
         }
         length = circleShorts.length;
         for (int i = 0; i < length; i++) {
-            if (debug) Log.i(TAG, String.format(
-                    "constructor value of circle chunk number %d: %s",
-                    i, Arrays.toString(circleShorts[i]))
-            );
+            Timber.i("constructor value of circle chunk number %d: %s",
+                    i, Arrays.toString(circleShorts[i]));
         }
     }
 
@@ -52,7 +51,7 @@ class CircleGenerator
     @Override
     public short[] getNextDataShorts() {
         if (!isShorts) {
-            if (debug) Log.e(TAG, "getNextDataShorts while !isShorts");
+            Timber.e("getNextDataShorts while !isShorts");
             return null;
         } else if (chunkNumber == (length - 1)) {
             chunkNumber = 0;
@@ -65,10 +64,10 @@ class CircleGenerator
     @Override
     public byte[] getNextDataBytes() {
         if (isShorts) {
-            if (debug) Log.e(TAG, "getNextDataBytes while isShorts");
+            Timber.e("getNextDataBytes while isShorts");
             return null;
         } else {
-            if (debug) Log.e(STAG, "getNextDataBytes not supported yet");
+            Timber.e("getNextDataBytes not supported yet");
             return new byte[0];
         }
     }
@@ -78,10 +77,8 @@ class CircleGenerator
     private static short[] getQuarter(int quarterNum, double mult, int div) throws Exception {
         checkParameters(quarterNum, mult, div);
 
-        if (debug) Log.i(STAG, String.format(
-                "getQuarter: quarterNum = %d, mult = %s, div = %d",
-                quarterNum, mult, div)
-        );
+        Timber.i("getQuarter: quarterNum = %d, mult = %s, div = %d",
+                quarterNum, mult, div);
 
         double[] quarterD = new double[div];
 
@@ -114,23 +111,21 @@ class CircleGenerator
     private static short[] getPeriod(double mult, int div) throws Exception {
         checkParameters(mult, div);
 
-        if (debug) Log.i(STAG, String.format(
-                "getPeriod: mult = %s, div = %d",
-                mult, div)
-        );
+        Timber.i("getPeriod: mult = %s, div = %d",
+                mult, div);
 
         int quarterDiv = div / QPP;
-        if (debug) Log.i(STAG, "getPeriod: quarterDiv = " + quarterDiv);
+        Timber.i("getPeriod: quarterDiv = %s", quarterDiv);
 
         div = quarterDiv * QPP;
-        if (debug) Log.i(STAG, "getPeriod: div = " + div);
+        Timber.i("getPeriod: div = %s", div);
 
         short[] period = new short[div];
         int quarterNum;
 
         for (int i = 0; i < QPP; i++) {
             quarterNum = QPP - i;
-            if (debug) Log.i(STAG, "getPeriod: processing qurter number " + quarterNum);
+            Timber.i("getPeriod: processing qurter number %s", quarterNum);
             System.arraycopy(getQuarter(quarterNum, mult, quarterDiv), 0, period, quarterDiv * i, quarterDiv);
         }
 

@@ -12,12 +12,12 @@ public abstract class AudioCodecFactory
         switch (audioCodecType) {
             case Sit_3_0_java:
             case Sit_3_0_native:
-                if (debug) Timber.i("getAudioCodec audioCodecType Sit_3_0_java");
+                Timber.i("getAudioCodec audioCodecType Sit_3_0_java");
                 return new SitAudioCodec_3_0_java();
             case Sit_2_1_java:
             case Sit_2_1_native:
             default:
-                if (debug) Timber.i("getAudioCodec audioCodecType default Sit_2_1_java");
+                Timber.i("getAudioCodec audioCodecType default Sit_2_1_java");
                 return new SitAudioCodec_2_1_java();
         }
     }

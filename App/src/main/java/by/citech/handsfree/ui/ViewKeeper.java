@@ -37,7 +37,7 @@ public class ViewKeeper {
 
     private void freezeState(String key, TextView... textViews) {
         if (key == null || textViews == null || textViews.length < 1) {
-            if (debug) Timber.e("freezeState %s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("freezeState %s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         pairMap.remove(key);
@@ -51,11 +51,11 @@ public class ViewKeeper {
 
     private void releaseState(String key) {
         if (key == null) {
-            if (debug) Timber.e("releaseState %s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("releaseState %s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         if (pairMap == null) {
-            if (debug) Timber.e("releaseState pairMap is null, return");
+            Timber.e("releaseState pairMap is null, return");
             return;
         }
         Pair<TextView[], boolean[]> pair = pairMap.get(key);

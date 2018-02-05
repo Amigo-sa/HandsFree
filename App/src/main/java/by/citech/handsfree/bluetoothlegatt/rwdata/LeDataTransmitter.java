@@ -15,6 +15,7 @@ import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.threading.IThreading;
 import by.citech.handsfree.statistic.NumberedTrafficAnalyzer.INumberedTrafficAnalyzer;
+import timber.log.Timber;
 
 public class LeDataTransmitter implements CallbackWriteListener, IThreading, INumberedTrafficAnalyzer {
 
@@ -85,19 +86,19 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
 
     //нотификацию с устройства
     public void onlyReceiveData() {
-        if (debug) Log.i(TAG, "onlyReceiveData()");
+        Timber.i("onlyReceiveData()");
         receiveDataStart();
     }
 
     public void enableTransmitData() {
-        if (debug) Log.i(TAG, "enableTransmitData()");
+        Timber.i("enableTransmitData()");
         if (!isMtuChanged) setMTU();
         else               receiveDataStart();
     }
 
     //отключаем поток записи и нотификации
     public void disableTransmitData() {
-        if (debug) Log.i(TAG, "disableTransmitData() writepkt = " + totalReceiveCount);
+        Timber.i("disableTransmitData() writepkt = " + totalReceiveCount);
         writeThreadStop();
         notifyThreadStop();
         if (storageFromBt != null)
@@ -121,7 +122,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
         if (!characteristics.isEmpty()) {
             notifyThreadStart();
         } else {
-            if (debug) Log.i(TAG, "disconnectToast()");
+            Timber.i("disconnectToast()");
         }
     }
 
@@ -131,7 +132,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
             isNotifyStartRunning = true;
             while (isNotifyStartRunning) {
                 notifyCharacteristicStart();
-                if (debug) Log.i(TAG, "DescriptorWriteAwait for start...");
+                Timber.i("DescriptorWriteAwait for start...");
                 try {
                     Thread.sleep(NOTIFY_SET_PERIOD);
                 } catch (InterruptedException e) {
@@ -140,7 +141,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
                 time++;
                 if (time == WAIT_PERIOD) {
                     isNotifyStartRunning = false;
-                    if (debug) Log.e(TAG, "Device not started notify");
+                    Timber.e("Device not started notify");
                     if (mBluetoothLeService != null) {
                         //ConnectorBluetooth.getInstance().processState();
                         mBluetoothLeService.disconnect();
@@ -156,7 +157,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
             isNotifyStopRunning = true;
             while (isNotifyStopRunning) {
                 notifyCharacteristicStop();
-                if (debug) Log.i(TAG, "DescriptorWriteAwait for stop...");
+                Timber.i("DescriptorWriteAwait for stop...");
                 try {
                     Thread.sleep(NOTIFY_SET_PERIOD);
                 } catch (InterruptedException e) {
@@ -164,7 +165,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
                 }
                 if (time == WAIT_PERIOD) {
                     isNotifyStopRunning = false;
-                    if (debug) Log.e(TAG, "Device not stop notify");
+                    Timber.e("Device not stop notify");
                 }
                 time++;
             }
@@ -172,7 +173,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
     }
 
     private boolean setCharacteristicNotification(boolean enable) {
-        //if (debug) Log.i(TAG, "setNotifyCharacteristic = " + enable);
+        //Timber.i("setNotifyCharacteristic = " + enable);
         mNotifyCharacteristic = characteristics.getNotifyCharacteristic();
         if (mBluetoothLeService != null) {
             mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, enable);
@@ -184,25 +185,25 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
 
     @Override
     public void callbackDescriptorIsDone() {
-        if (debug) Log.i(TAG, "callbackDescriptorIsDone");
+        Timber.i("callbackDescriptorIsDone");
         //notifyDescriptorWritten = true;
         //после запуска нотификации запускаем и запись
         if (isNotifyStartRunning) {
-            if (debug) Log.i(TAG, "notify started");
+            Timber.i("notify started");
             characteristic_write = characteristics.getWriteCharacteristic();
             writeThreadStart();
             isNotifyStartRunning = false;
         }
         if (isNotifyStopRunning) {
-            if (debug) Log.i(TAG, "notify stopped");
+            Timber.i("notify stopped");
             isNotifyStopRunning = false; //TODO: правильная логика?
         }
     }
 
     @Override
     public void rcvBtPktIsDone(byte[] data) {
-        //if (debug) Log.w(TAG, "notify: " + data.length);
-        //if (debug) Log.i(TAG, "rcvBtPktIsDone()");
+        //Timber.w("notify: " + data.length);
+        //Timber.i("rcvBtPktIsDone()");
         analyzeNumberedBytes(data);
         totalReceiveCount++;
         switch (Settings.Common.opMode) {
@@ -231,7 +232,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
     // Прослушка калбэка onMtuChanged
     @Override
     public void onMtuChangeIsDone(int mtu) {
-        if (debug) Log.i(TAG, "onMtuChangeIsDone() = " + mtu);
+        Timber.i("onMtuChangeIsDone() = " + mtu);
         isMtuChanged = true;
         receiveDataStart();
     }
@@ -274,12 +275,12 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    //if (debug) Log.w(TAG, "numBtPkt = " + numBtPkt);
+                    //Timber.w("numBtPkt = " + numBtPkt);
                     numBtPkt++;
                     // если Калбэк не пришёл то в любом случае разрешаем запись, поскольку коннет интервал был выдержан
                     if (!callback && (WRITE_TYPE == BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)) {
                         callback = true;
-                        //if (debug) Log.e(TAG, "num write package without callback " + lostPackets++);
+                        //Timber.e("num write package without callback " + lostPackets++);
                     }
                 }
             }
@@ -291,7 +292,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
     @Override
     public void callbackIsDone() {
         callback = true;
-        //if (debug) Log.i(TAG, "callbackIsDone()");
+        //Timber.i("callbackIsDone()");
     }
 
     private void writeThreadStop(){
@@ -305,7 +306,7 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
      * */
 
     private void writeByteArrayData(byte[] data){
-//      if (debug) Log.w(TAG, "write: " + Arrays.toString(data));
+//      Timber.w("write: " + Arrays.toString(data));
         writeInCharacteristicByteArray(data, WRITE_TYPE);
     }
 
@@ -313,9 +314,9 @@ public class LeDataTransmitter implements CallbackWriteListener, IThreading, INu
         characteristic_write.setValue(data);
         characteristic_write.setWriteType(writeType);
         if (mBluetoothLeService.oneCharacteristicWrite(characteristic_write)) {
-            if (debug) Log.w(TAG, "write success");
+            Timber.w("write success");
         } else {
-            if (debug) Log.w(TAG, "write fail");
+            Timber.w("write fail");
         }
     }
 }

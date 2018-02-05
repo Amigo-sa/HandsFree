@@ -7,6 +7,7 @@ import java.util.List;
 
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 import static by.citech.handsfree.util.CollectionHelper.getArrayListInitiatedWithNulls;
 import static by.citech.handsfree.util.ArrayHelper.arrayDoubleToShort;
@@ -46,7 +47,7 @@ class SineGenerator
         }
         length = preparedSineS.length;
         for (int i = 0; i < length; i++) {
-            if (debug) Log.i(TAG, String.format(
+            Timber.i(String.format(
                     "constructor value of sine chunk number %d: %s",
                     i, Arrays.toString(preparedSineS[i]))
             );
@@ -58,7 +59,7 @@ class SineGenerator
     @Override
     public short[] getNextDataShorts() {
         if (!isShorts) {
-            if (debug) Log.e(TAG, "getNextDataShorts while !isShorts");
+            Timber.e("getNextDataShorts while !isShorts");
             return null;
         } else if (chunkNumber == (length - 1)) {
             chunkNumber = 0;
@@ -71,10 +72,10 @@ class SineGenerator
     @Override
     public byte[] getNextDataBytes() {
         if (isShorts) {
-            if (debug) Log.e(TAG, "getNextDataBytes while isShorts");
+            Timber.e("getNextDataBytes while isShorts");
             return null;
         } else {
-            if (debug) Log.e(STAG, "getNextDataBytes not supported yet");
+            Timber.e("getNextDataBytes not supported yet");
             return new byte[0];
         }
     }
@@ -90,7 +91,7 @@ class SineGenerator
             return quartersS.get(quarterNum);
         }
 
-        if (debug) Log.i(TAG, String.format(
+        Timber.i(String.format(
                 "getQuarter: quarterNum = %d, mult = %s, div = %d",
                 quarterNum, mult, div)
         );
@@ -100,10 +101,8 @@ class SineGenerator
 
         System.arraycopy(period, (quarterNum - 1) * div, quarter, 0, div);
 
-        if (debug) Log.i(TAG, String.format(
-                "getQuarter length of quarter is %d, value is %s",
-                quarter.length, Arrays.toString(quarter))
-        );
+        Timber.i("getQuarter length of quarter is %d, value is %s",
+                quarter.length, Arrays.toString(quarter));
 
         quartersS.add(quarterNum, quarter);
         return quarter;
@@ -118,7 +117,7 @@ class SineGenerator
             return periodS;
         }
 
-        if (debug) Log.i(TAG, String.format(
+        Timber.i(String.format(
                 "getPeriod: mult = %s, div = %d",
                 mult, div)
         );
@@ -126,7 +125,7 @@ class SineGenerator
         short[] period = periodS;
         arrayDoubleToShort(getSinePeriod(mult, div), period);
 
-        if (debug) Log.i(TAG, String.format(
+        Timber.i(String.format(
                 "getPeriod length of periodD is %d, value is %s",
                 period.length, Arrays.toString(period))
         );
@@ -148,7 +147,7 @@ class SineGenerator
             sine[i] = mult * Math.sin(delta * i);
         }
 
-        if (debug) Log.i(TAG, String.format(
+        Timber.i(String.format(
                 "getSinePeriod length of sine is %d, value is %s",
                 sine.length, Arrays.toString(sine))
         );

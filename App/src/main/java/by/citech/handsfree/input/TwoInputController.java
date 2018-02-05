@@ -51,7 +51,7 @@ public class TwoInputController implements
 
     private void onInput1Call() {
         ECallState state = getCallFsmState();
-        if (debug) Timber.w("onInput1Call opMode is %s, state is %s", opMode, state);
+        Timber.w("onInput1Call opMode is %s, state is %s", opMode, state);
         switch (state) {
             case ST_Ready:
                 toCall(RP_OutStartedLocal);
@@ -66,7 +66,7 @@ public class TwoInputController implements
 
     private void onInput1Debug() {
         EDebugState debugState = getDebugFsmState();
-        if (debug) Timber.w("onInput1Debug opMode is %s, debugState is %s", opMode, debugState);
+        Timber.w("onInput1Debug opMode is %s, debugState is %s", opMode, debugState);
         switch (opMode) {
             case DataGen2Bt:
             case AudIn2Bt:
@@ -109,7 +109,7 @@ public class TwoInputController implements
 
     private void onInput2Call() {
         ECallState state = getCallFsmState();
-        if (debug) Timber.w("onInput2Call opMode is %s, state is %s", opMode, state);
+        Timber.w("onInput2Call opMode is %s, state is %s", opMode, state);
         switch (state) {
             case ST_Call:
                 toCall(RP_CallEndedLocal);
@@ -128,7 +128,7 @@ public class TwoInputController implements
 
     private void onInput2Debug() {
         EDebugState state = getDebugFsmState();
-        if (debug) Timber.w("onInput2Debug opMode is %s, state is %s", opMode, state);
+        Timber.w("onInput2Debug opMode is %s, state is %s", opMode, state);
         switch (opMode) {
             case AudIn2Bt:
             case DataGen2Bt:

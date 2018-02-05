@@ -54,7 +54,7 @@ public class Bt2AudOutLooper
 
     @Override
     public void build() {
-        if (debug) Timber.tag(TAG).i("build");
+        Timber.tag(TAG).i("build");
         registerDebugFsmListener(this, TAG);
         try {
             iStreamer.prepareStream(this);
@@ -65,7 +65,7 @@ public class Bt2AudOutLooper
 
     @Override
     public void destroy() {
-        if (debug) Timber.tag(TAG).i("destroy");
+        Timber.tag(TAG).i("destroy");
         unregisterDebugFsmListener(this, TAG);
         stopDebug();
         iStreamer.finishStream();
@@ -78,7 +78,7 @@ public class Bt2AudOutLooper
     //--------------------- ICallFsmListener
 
     public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
-        if (debug) Timber.tag(TAG).i("onFsmStateChange");
+        Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -92,14 +92,14 @@ public class Bt2AudOutLooper
     }
 
     private void startDebug() {
-        if (debug) Timber.tag(TAG).i("startDebug");
+        Timber.tag(TAG).i("startDebug");
         iStreamer.streamOn();
         codec.initiateEncoder();
         codec.initiateDecoder();
     }
 
     private void stopDebug() {
-        if (debug) Timber.tag(TAG).i("stopDebug");
+        Timber.tag(TAG).i("stopDebug");
         iStreamer.streamOff();
         isSession = false;
     }
@@ -109,20 +109,20 @@ public class Bt2AudOutLooper
     @Override
     public void sendData(byte[] data) {
         if (data == null || data.length != codecType.getEncodedBytesSize()) {
-            if (debug) Timber.w("sendData byte[]%s", StatusMessages.ERR_PARAMETERS);
+            Timber.w("sendData byte[]%s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         short[] dataDecoded = codec.getDecodedData(data);
-//      if (debug) Log.w(TAG, String.format(Locale.US,
+//      Timber.w(String.format(Locale.US,
 //              "sendData byte[] data received length is %d, toString is %s",
 //              data.length,
 //              Arrays.toString(data)));
-//      if (debug) Log.w(TAG, String.format(Locale.US,
+//      Timber.w(String.format(Locale.US,
 //              "sendData byte[] data decoded length is %d, toString is %s",
 //              dataDecoded.length,
 //              Arrays.toString(dataDecoded)));
         if (!isSession) {
-            if (debug) Timber.tag(TAG).i("sendData byte[], first sendData on session");
+            Timber.tag(TAG).i("sendData byte[], first sendData on session");
             isSession = true;
         }
         iRxComplex.sendData(dataDecoded);

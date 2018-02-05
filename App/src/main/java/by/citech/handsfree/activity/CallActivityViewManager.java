@@ -254,7 +254,7 @@ public class CallActivityViewManager
     //--------------------- main
 
     void setDefaultView() {
-        if (debug) Timber.tag(TAG).i("setDefaultView");
+        Timber.tag(TAG).i("setDefaultView");
 
         setVisibility(getViewTraffic(), View.GONE);
         setColorAndText(getBtnChangeDevice(), R.string.connect_device, DARKCYAN);
@@ -427,7 +427,7 @@ public class CallActivityViewManager
         } else if (button == getBtnRed()) {
             return Colors.RED;
         } else {
-            if (debug) Timber.tag(TAG).e("enableBtnCall color not defined");
+            Timber.tag(TAG).e("enableBtnCall color not defined");
             return Colors.GRAY;
         }
     }
@@ -447,7 +447,7 @@ public class CallActivityViewManager
     }
 
     private void stopCallAnim() {
-        if (debug) Timber.tag(TAG).i("stopCallAnim");
+        Timber.tag(TAG).i("stopCallAnim");
         clearAnimation(getBtnGreen());
         isCallAnim = false;
     }
@@ -468,8 +468,8 @@ public class CallActivityViewManager
         Animation a = null;
         if (iGetter != null) {
             a = iGetter.getAnimation(id);
-            if (a == null) {if (debug) Timber.tag(TAG).w("getAnimFromGetter anim is still null, return");}
-        } else {if (debug) Timber.tag(TAG).e("getAnimFromGetter iGetter is null, return");}
+            if (a == null) {Timber.tag(TAG).w("getAnimFromGetter anim is still null, return");}
+        } else {Timber.tag(TAG).e("getAnimFromGetter iGetter is null, return");}
         return a;
     }
 
@@ -477,8 +477,8 @@ public class CallActivityViewManager
         T t = null;
         if (iGetter != null) {
             t = iGetter.getView(id);
-            if (t == null) {if (debug) Timber.tag(TAG).w("getViewFromGetter view is still null, return");}
-        } else {if (debug) Timber.tag(TAG).e("getViewFromGetter iGetter is null, return");}
+            if (t == null) {Timber.tag(TAG).w("getViewFromGetter view is still null, return");}
+        } else {Timber.tag(TAG).e("getViewFromGetter iGetter is null, return");}
         return t;
     }
 

@@ -19,6 +19,7 @@ import by.citech.handsfree.network.server.connection.websockets.WebSocketFrame;
 import by.citech.handsfree.parameters.Messages;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class Server
         extends NanoWSD
@@ -58,7 +59,7 @@ public class Server
 
     @Override
     public IServerCtrl startServer(int serverTimeout) throws IOException {
-        if (debug) Log.i(TAG, "startServer");
+        Timber.i("startServer");
         start(serverTimeout);
         return this;
     }
@@ -66,13 +67,13 @@ public class Server
     @Override
     public boolean isAliveServer() {
         boolean isAliveServer = isAlive();
-        if (debug) Log.i(TAG, "isAliveServer is alive: " + isAliveServer);
+        Timber.i("isAliveServer is alive: " + isAliveServer);
         return isAliveServer;
     }
 
     @Override
     public void stopServer() {
-        if (debug) Log.i(TAG, "stopServer");
+        Timber.i("stopServer");
         stop();
     }
 
@@ -81,10 +82,10 @@ public class Server
     @Override
     public void sendData(byte[] data) {
         if (data == null || webSocket == null) {
-            if (debug) Log.i(TAG, "sendData data or websocket is null");
+            Timber.i("sendData data or websocket is null");
             return;
         }
-        if (debug) Log.i(TAG, String.format(
+        Timber.i(String.format(
                 "sendData: %d bytes, toString: %s",
                 data.length, Arrays.toString(data)));
         try {
@@ -97,12 +98,12 @@ public class Server
     @Override
     public void sendMessage(String message) {
         if (message == null || webSocket == null) {
-            if (debug) Log.i(TAG, "sendMessage message or websocket is null");
+            Timber.i("sendMessage message or websocket is null");
             return;
         }
         try {
             webSocket.send(message);
-            if (debug) Log.i(TAG, "sendMessage sended: " + message);
+            Timber.i("sendMessage sended: " + message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,13 +113,13 @@ public class Server
 
     @Override
     public IRxComplex getTransmitter() {
-        if (debug) Log.i(TAG, "getTransmitter");
+        Timber.i("getTransmitter");
         return this;
     }
 
     @Override
     public void setReceiver(IRxComplex iRxComplex) {
-        if (debug) Log.i(TAG, "setReceiver");
+        Timber.i("setReceiver");
         this.receiver = iRxComplex;
     }
 
@@ -126,7 +127,7 @@ public class Server
 
     @Override
     public void closeConnection() {
-        if (debug) Log.i(TAG, "closeConnection");
+        Timber.i("closeConnection");
         if (webSocket != null) {
             try {
                 webSocket.close(CloseCode.NormalClosure, Messages.SRV2CLT_ONCLOSE, false);
@@ -138,7 +139,7 @@ public class Server
 
     @Override
     public void closeConnectionForce() {
-        if (debug) Log.i(TAG, "closeConnectionForce");
+        Timber.i("closeConnectionForce");
         if (webSocket != null) {
             try {
                 webSocket.close(CloseCode.AbnormalClosure, Messages.SRV2CLT_ONCLOSE, false);
@@ -156,7 +157,7 @@ public class Server
     //--------------------- main
 
     private void procState(ELinkState state) {
-        if (debug) Log.i(TAG, String.format(
+        Timber.i(String.format(
                 "procState from %s to %s",
                 this.state.name(), state.name()));
         this.state = state;
@@ -171,12 +172,12 @@ public class Server
 
         @Override
         protected void onOpen() {
-            if (debug) Log.i(TAG, "onOpen");
+            Timber.i("onOpen");
             procState(ELinkState.Opened);
             handler.sendEmptyMessage(StatusMessages.SRV_ONOPEN);
             try {
                 send(Messages.SRV2CLT_ONOPEN);
-                if (debug) Log.i(TAG, "onOpen message sended: " + Messages.SRV2CLT_ONOPEN);
+                Timber.i("onOpen message sended: " + Messages.SRV2CLT_ONOPEN);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -184,8 +185,8 @@ public class Server
 
         @Override
         protected void onClose(CloseCode code, String reason, boolean initiatedByRemote) {
-            if (debug) Log.i(TAG, "onClose");
-            if (debug) Log.i(TAG,
+            Timber.i("onClose");
+            Timber.i(
                     "Initiated by " + (initiatedByRemote ? "remote. " : "self. ") +
                     "Close code is <" + code + ">. " +
                     "Reason is <" + reason + ">.");
@@ -196,27 +197,27 @@ public class Server
         @Override
         protected void onMessage(WebSocketFrame message) {
             byte[] receivedData = message.getBinaryPayload();
-            if (debug) Log.i(TAG, String.format(Locale.US,
+            Timber.i(String.format(Locale.US,
                     "onMessage received bytes: %d bytes, toString: %s",
                     receivedData.length, Arrays.toString(receivedData)));
             if (receiver != null) {
-                if (debug) Log.i(TAG, "onMessage redirecting");
+                Timber.i("onMessage redirecting");
                 receiver.sendData(receivedData);
             } else {
-                if (debug) Log.i(TAG, "onMessage not redirecting");
+                Timber.i("onMessage not redirecting");
                 handler.sendEmptyMessage(StatusMessages.SRV_ONMESSAGE);
             }
         }
 
         @Override
         protected void onPong(WebSocketFrame pong) {
-            if (debug) Log.i(TAG, "onPong " + pong);
+            Timber.i("onPong " + pong);
             handler.sendEmptyMessage(StatusMessages.SRV_ONPONG);
         }
 
         @Override
         protected void onException(IOException exception) {
-            if (debug) Log.i(TAG, "onException " + exception.getMessage());
+            Timber.i("onException " + exception.getMessage());
             if (debug) Server.LOG.log(Level.SEVERE, "exception occured", exception);
             procState(ELinkState.Failure);
             handler.sendEmptyMessage(StatusMessages.SRV_ONFAILURE);
@@ -224,13 +225,13 @@ public class Server
 
         @Override
         protected void debugFrameReceived(WebSocketFrame frame) {
-            if (debug) Log.i(TAG, "debugFrameReceived");
+            Timber.i("debugFrameReceived");
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMERX);
         }
 
         @Override
         protected void debugFrameSent(WebSocketFrame frame) {
-            if (debug) Log.i(TAG, "debugFrameSent");
+            Timber.i("debugFrameSent");
             handler.sendEmptyMessage(StatusMessages.SRV_ONDEBUGFRAMETX);
         }
 

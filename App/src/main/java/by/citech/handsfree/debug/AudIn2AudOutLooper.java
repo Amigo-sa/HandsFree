@@ -69,7 +69,7 @@ public class AudIn2AudOutLooper
 
     @Override
     public void build() {
-        if (debug) Timber.tag(TAG).i("build");
+        Timber.tag(TAG).i("build");
         registerDebugFsmListener(this, TAG);
         try {
             toCtrl.prepareStream(null);
@@ -81,7 +81,7 @@ public class AudIn2AudOutLooper
 
     @Override
     public void destroy() {
-        if (debug) Timber.tag(TAG).i("destroy");
+        Timber.tag(TAG).i("destroy");
         unregisterDebugFsmListener(this, TAG);
         stopDebug();
         fromCtrl.finishStream();
@@ -97,7 +97,7 @@ public class AudIn2AudOutLooper
 
     @Override
     public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
-        if (debug) Timber.tag(TAG).i("onFsmStateChange");
+        Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -111,7 +111,7 @@ public class AudIn2AudOutLooper
     }
 
     private void startDebug() {
-        if (debug) Timber.tag(TAG).i("startDebug");
+        Timber.tag(TAG).i("startDebug");
         codec.initiateEncoder();
         codec.initiateDecoder();
         toCtrl.streamOn();
@@ -119,7 +119,7 @@ public class AudIn2AudOutLooper
     }
 
     private void stopDebug() {
-        if (debug) Timber.tag(TAG).i("stopDebug");
+        Timber.tag(TAG).i("stopDebug");
         fromCtrl.streamOff();
         toCtrl.streamOff();
     }
@@ -128,16 +128,16 @@ public class AudIn2AudOutLooper
 
     @Override
     public void sendData(byte[] data) {
-        if (debug) Timber.tag(TAG).i("sendData byte[]");
+        Timber.tag(TAG).i("sendData byte[]");
         if (iRxComplex != null) {
-            if (debug) Timber.tag(TAG).i("sendData data sended");
+            Timber.tag(TAG).i("sendData data sended");
             iRxComplex.sendData(data);
         }
     }
 
     @Override
     public void sendData(short[] data) {
-        if (debug) Timber.tag(TAG).i("sendData short[]");
+        Timber.tag(TAG).i("sendData short[]");
         if (iRxComplex != null) {
             if (audioSingleFrame) {
                 iRxComplex.sendData(getPreparedData(data));
@@ -145,7 +145,7 @@ public class AudIn2AudOutLooper
                 int from;
                 for (int i = 0; i < buff2CodecFactor; i++) {
                     from = i * codecFactor;
-                    if (debug) Timber.tag(TAG).i("sendData from is %s", from);
+                    Timber.tag(TAG).i("sendData from is %s", from);
                     System.arraycopy(getPreparedData(Arrays.copyOfRange(data, from, from + codecFactor)), 0, data, from, codecFactor);
                 }
                 iRxComplex.sendData(data);

@@ -51,9 +51,9 @@ public class ThreadingManager {
     //--------------------- main
 
     boolean addRunnable(Runnable runnable) {
-        if (debug) Timber.tag(TAG).i("addRunnable");
+        Timber.tag(TAG).i("addRunnable");
         if (runnable == null) {
-            if (debug) Timber.tag(TAG).e("addRunnable runnable is null");
+            Timber.tag(TAG).e("addRunnable runnable is null");
             return false;
         }
         threadPool.addRunnable(runnable);

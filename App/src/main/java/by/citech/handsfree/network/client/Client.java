@@ -52,7 +52,7 @@ public class Client
 
     @Override
     public IClientCtrl startClient() {
-        if (debug) Timber.tag(TAG).i("startClient");
+        Timber.tag(TAG).i("startClient");
         client = new OkHttpClient.Builder()
                 .readTimeout(Settings.Network.clientReadTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(Settings.Network.connectTimeout, TimeUnit.MILLISECONDS)
@@ -73,7 +73,7 @@ public class Client
 
     @Override
     public void closeConnection() {
-        if (debug) Timber.tag(TAG).i("closeConnection");
+        Timber.tag(TAG).i("closeConnection");
         if (webSocket != null) {
             webSocket.close(1000, "user manually closed connection");
         }
@@ -81,7 +81,7 @@ public class Client
 
     @Override
     public void closeConnectionForce() {
-        if (debug) Timber.tag(TAG).i("closeConnectionForce");
+        Timber.tag(TAG).i("closeConnectionForce");
         if (webSocket != null) {
             webSocket.cancel();
             handler.sendEmptyMessage(StatusMessages.CLT_CANCEL);
@@ -98,13 +98,13 @@ public class Client
 
     @Override
     public IRxComplex getTransmitter() {
-        if (debug) Timber.tag(TAG).i("getTransmitter");
+        Timber.tag(TAG).i("getTransmitter");
         return this;
     }
 
     @Override
     public void setReceiver(IRxComplex iRxComplex) {
-        if (debug) Timber.tag(TAG).i("setReceiver");
+        Timber.tag(TAG).i("setReceiver");
         this.receiver = iRxComplex;
     }
 
@@ -113,10 +113,10 @@ public class Client
     @Override
     public void sendData(byte[] data) {
         if (data == null || webSocket == null) {
-            if (debug) Timber.tag(TAG).i("sendData data or websocket is null");
+            Timber.tag(TAG).i("sendData data or websocket is null");
             return;
         }
-        if (debug) Timber.tag(TAG).i("sendData: %d bytes, toString: %s",
+        Timber.tag(TAG).i("sendData: %d bytes, toString: %s",
                 data.length, Arrays.toString(data));
         webSocket.send(ByteString.of(data));
     }
@@ -124,52 +124,52 @@ public class Client
     @Override
     public void sendMessage(String message) {
         if (message == null || webSocket == null) {
-            if (debug) Timber.tag(TAG).i("sendMessage message or websocket is null");
+            Timber.tag(TAG).i("sendMessage message or websocket is null");
             return;
         }
         webSocket.send(message);
-        if (debug) Timber.tag(TAG).i("sendMessage sended: %s", message);
+        Timber.tag(TAG).i("sendMessage sended: %s", message);
     }
 
     //--------------------- main
 
     private void procState(ELinkState state) {
-        if (debug) Timber.tag(TAG).i("procState from %s to %s, connections count is %d",
+        Timber.tag(TAG).i("procState from %s to %s, connections count is %d",
                 this.state.name(), state.name(), client.connectionPool().connectionCount());
         this.state = state;
     }
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
-        if (debug) Timber.tag(TAG).i("onOpen");
+        Timber.tag(TAG).i("onOpen");
         this.webSocket = webSocket;
         procState(ELinkState.Opened);
         webSocket.send(Messages.CLT2SRV_ONOPEN);
-        if (debug) Timber.tag(TAG).i("onOpen message sended: %s", Messages.CLT2SRV_ONOPEN);
+        Timber.tag(TAG).i("onOpen message sended: %s", Messages.CLT2SRV_ONOPEN);
         handler.sendEmptyMessage(StatusMessages.CLT_ONOPEN);
     }
 
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
-        if (debug) Timber.tag(TAG).i("onMessage received bytes: %d bytes, to hex: %s",
+        Timber.tag(TAG).i("onMessage received bytes: %d bytes, to hex: %s",
                 bytes.size(), bytes.hex());
         if (receiver != null) {
-            if (debug) Timber.tag(TAG).i("onMessage redirecting");
+            Timber.tag(TAG).i("onMessage redirecting");
             receiver.sendData(bytes.toByteArray());
         } else {
-            if (debug) Timber.tag(TAG).i("onMessage not redirecting");
+            Timber.tag(TAG).i("onMessage not redirecting");
             handler.sendEmptyMessage(StatusMessages.CLT_ONMESSAGE_BYTES);
         }
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String text) {
-        if (debug) Timber.tag(TAG).i("onMessage received text: %s", text);
+        Timber.tag(TAG).i("onMessage received text: %s", text);
         handler.obtainMessage(StatusMessages.CLT_ONMESSAGE_TEXT, text).sendToTarget();
     }
 
     @Override public void onClosing(WebSocket webSocket, int code, String reason) {
-        if (debug) Timber.tag(TAG).i("onClosing");
+        Timber.tag(TAG).i("onClosing");
         webSocket.close(1000, Messages.CLT2SRV_ONCLOSE);
         procState(ELinkState.Closing);
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSING);
@@ -177,14 +177,14 @@ public class Client
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
-        if (debug) Timber.tag(TAG).i("onClosed");
+        Timber.tag(TAG).i("onClosed");
         procState(ELinkState.Closed);
         handler.sendEmptyMessage(StatusMessages.CLT_ONCLOSED);
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        if (debug) Timber.tag(TAG).i("onFailure");
+        Timber.tag(TAG).i("onFailure");
         procState(ELinkState.Failure);
         handler.sendEmptyMessage(StatusMessages.CLT_ONFAILURE);
     }

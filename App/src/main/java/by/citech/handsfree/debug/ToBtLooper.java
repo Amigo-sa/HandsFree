@@ -73,7 +73,7 @@ public class ToBtLooper
 
     @Override
     public void build() {
-        if (debug) Timber.tag(TAG).i("build");
+        Timber.tag(TAG).i("build");
         registerDebugFsmListener(this, TAG);
         try {
             source.prepareStream(this);
@@ -85,7 +85,7 @@ public class ToBtLooper
 
     @Override
     public void destroy() {
-        if (debug) Timber.tag(TAG).i("destroy");
+        Timber.tag(TAG).i("destroy");
         unregisterDebugFsmListener(this, TAG);
         stopDebug();
         destination.finishStream();
@@ -100,7 +100,7 @@ public class ToBtLooper
 
     @Override
     public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
-        if (debug) Timber.tag(TAG).i("onFsmStateChange");
+        Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -114,7 +114,7 @@ public class ToBtLooper
     }
 
     private void startDebug() {
-        if (debug) Timber.tag(TAG).i("startDebug");
+        Timber.tag(TAG).i("startDebug");
         codec.initiateEncoder();
         codec.initiateDecoder();
         destination.streamOn();
@@ -122,7 +122,7 @@ public class ToBtLooper
     }
 
     private void stopDebug() {
-        if (debug) Timber.tag(TAG).i("stopDebug");
+        Timber.tag(TAG).i("stopDebug");
         destination.streamOff();
         source.streamOff();
         isSession = false;
@@ -132,16 +132,16 @@ public class ToBtLooper
 
     @Override
     public void sendData(short[] data) {
-        if (debug) Timber.tag(TAG).w("sendData short[] row (shorts): %s", Arrays.toString(data));
+        Timber.tag(TAG).w("sendData short[] row (shorts): %s", Arrays.toString(data));
         if (data == null || data.length != codecType.getDecodedShortsSize()) {
-            if (debug) Timber.tag(TAG).w("sendData short[]%s", StatusMessages.ERR_PARAMETERS);
+            Timber.tag(TAG).w("sendData short[]%s", StatusMessages.ERR_PARAMETERS);
         } else if (iRxComplex != null) {
             if (!isSession) {
-                if (debug) Timber.tag(TAG).i("sendData short[], first sendData on session");
+                Timber.tag(TAG).i("sendData short[], first sendData on session");
                 isSession = true;
             }
             byte[] toSend = codec.getEncodedData(data);
-            if (debug) Timber.tag(TAG).w("sendData short[] encoded (bytes): %s", Arrays.toString(toSend));
+            Timber.tag(TAG).w("sendData short[] encoded (bytes): %s", Arrays.toString(toSend));
             iRxComplex.sendData(toSend);
 //          iRxComplex.sendData(codec.getEncodedData(data));
         }

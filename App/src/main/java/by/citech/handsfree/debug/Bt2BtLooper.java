@@ -71,7 +71,7 @@ public class Bt2BtLooper
 
     @Override
     public void build() {
-        if (debug) Timber.tag(TAG).i("build");
+        Timber.tag(TAG).i("build");
         registerDebugFsmListener(this, TAG);
         isRunning = false;
         isActive = true;
@@ -80,7 +80,7 @@ public class Bt2BtLooper
 
     @Override
     public void destroy() {
-        if (debug) Timber.tag(TAG).i("destroy");
+        Timber.tag(TAG).i("destroy");
         unregisterDebugFsmListener(this, TAG);
         stopDebug();
         isActive = false;
@@ -91,7 +91,7 @@ public class Bt2BtLooper
 
     @Override
     public void onFsmStateChange(EDebugState from, EDebugState to, EDebugReport why) {
-        if (debug) Timber.tag(TAG).i("onFsmStateChange");
+        Timber.tag(TAG).i("onFsmStateChange");
         switch (why) {
             case RP_StartDebug:
                 startDebug();
@@ -105,14 +105,14 @@ public class Bt2BtLooper
     }
 
     private void startDebug() {
-        if (debug) Timber.tag(TAG).i("startDebug");
+        Timber.tag(TAG).i("startDebug");
         storageBtToNet.setWriteLocked(false);
         storageNetToBt.setWriteLocked(false);
         isRunning = true;
     }
 
     private void stopDebug() {
-        if (debug) Timber.tag(TAG).i("stopDebug");
+        Timber.tag(TAG).i("stopDebug");
         isRunning = false;
         storageBtToNet.setWriteLocked(true);
         storageNetToBt.setWriteLocked(true);
@@ -123,7 +123,7 @@ public class Bt2BtLooper
     //--------------------- looping
 
     private void looping() {
-        if (debug) Timber.tag(TAG).i("looping");
+        Timber.tag(TAG).i("looping");
         int btCount = 0;
         while (isRunning) {
             if (dataBuff == null) {
@@ -138,10 +138,10 @@ public class Bt2BtLooper
                 }
             }
             dataBuff[btCount] = storageBtToNet.getData();
-            if (debug) Timber.tag(TAG).i("looping output buffer got array number %d, which have length of %d", btCount, dataBuff[btCount].length);
+            Timber.tag(TAG).i("looping output buffer got array number %d, which have length of %d", btCount, dataBuff[btCount].length);
             btCount++;
             if (btCount == btFactor) {
-                if (debug) Timber.tag(TAG).i("looping output buffer contains enough data, putting in storage");
+                Timber.tag(TAG).i("looping output buffer contains enough data, putting in storage");
                 btCount = 0;
                 storageNetToBt.putData(dataBuff);
                 dataBuff = null;

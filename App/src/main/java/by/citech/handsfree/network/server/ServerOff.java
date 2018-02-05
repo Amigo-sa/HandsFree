@@ -5,6 +5,7 @@ import android.util.Log;
 
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class ServerOff
         extends AsyncTask<IServerCtrl, Void, Void> {
@@ -20,7 +21,7 @@ public class ServerOff
 
     @Override
     protected Void doInBackground(IServerCtrl... iServerCtrl) {
-        if (debug) Log.i(TAG, "doInBackground");
+        Timber.i("doInBackground");
         if (iServerCtrl[0].isAliveServer()) {
             iServerCtrl[0].stopServer();
             while (iServerCtrl[0].isAliveServer()) {
@@ -30,9 +31,9 @@ public class ServerOff
                     e.printStackTrace();
                 }
             }
-            if (debug) Log.i(TAG, "doInBackground server stopped");
+            Timber.i("doInBackground server stopped");
         } else {
-            if (debug) Log.i(TAG, "doInBackground server already stopped");
+            Timber.i("doInBackground server already stopped");
         }
 
         return null;
@@ -40,7 +41,7 @@ public class ServerOff
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        if (debug) Log.i(TAG, "onPostExecute");
+        Timber.i("onPostExecute");
         iServerOff.onServerStop();
     }
 

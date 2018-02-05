@@ -63,7 +63,7 @@ public class LeScanner {
 
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
-            if (Settings.debug) Timber.w("getBluetoothAdapter bluetoothAdapter is null, get");
+            Timber.w("getBluetoothAdapter bluetoothAdapter is null, get");
             bluetoothAdapter = BluetoothLeCore.getBluetoothAdapter();
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
@@ -80,14 +80,14 @@ public class LeScanner {
 
 
     private void startInnerScan(BluetoothLeScanner leScanner, ScanSettings scanSettings){
-        if (Settings.debug) Timber.i("start scanLeDevice()");
+        Timber.i("start scanLeDevice()");
         leScanner.startScan((scanWithFilter) ? scanFilters : null, scanSettings, mScanCallback);
         if (!scanWithFilter) mHandler.post(() -> iScanListener.onStartScan());
         mScanning = true;
     }
 
     private void stopInnerScan(BluetoothLeScanner leScanner){
-        if (Settings.debug) Timber.i("stop scanLeDevice()");
+        Timber.i("stop scanLeDevice()");
         mScanning = false;
         leScanner.stopScan(mScanCallback);
         mHandler.post(() -> iScanListener.onStopScan());
@@ -142,13 +142,13 @@ public class LeScanner {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            if (Settings.debug) Timber.i("onBatchScanResults() ");
+            Timber.i("onBatchScanResults() ");
         }
 
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            if (Settings.debug) Timber.i("onScanFailed() %s", errorCode);
+            Timber.i("onScanFailed() %s", errorCode);
         }
     };
 

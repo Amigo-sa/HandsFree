@@ -89,7 +89,7 @@ public class ThisAppBuilder implements
     //--------------------- main
 
     public void build() {
-        if (debug) Timber.i("build");
+        Timber.i("build");
         switch (opMode) {
             case Bt2Bt:        buildBt2Bt(); break;
             case Net2Net:      buildNet2Net(); break;
@@ -104,7 +104,7 @@ public class ThisAppBuilder implements
     }
 
     public void destroy() {
-        if (debug) Timber.i("destroy");
+        Timber.i("destroy");
         iNetInfoGetter = null;
         iBluetoothListener = null;
         opMode = null;
@@ -115,13 +115,13 @@ public class ThisAppBuilder implements
     //--------------------- data from bluetooth redirects to network and vice versa
 
     private void buildNormal() {
-        if (debug) Timber.i("buildNormal");
+        Timber.i("buildNormal");
 
         if (iNetInfoGetter == null
                 || iBluetoothListener == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null) {
-            if (debug) Timber.e("buildNormal illegal parameters");
+            Timber.e("buildNormal illegal parameters");
             return;
         }
 
@@ -148,11 +148,11 @@ public class ThisAppBuilder implements
     //--------------------- data from data source redirects to bluetooth
 
     private void build2Bt(EDataSource dataSource) {
-        if (debug) Timber.i("build2Bt");
+        Timber.i("build2Bt");
         if (       iBtToUiCtrl == null
                 || iMsgToUi == null
                 || dataSource == null) {
-            if (debug) Timber.e("build2Bt illegal parameters");
+            Timber.e("build2Bt illegal parameters");
             return;
         }
 
@@ -180,11 +180,11 @@ public class ThisAppBuilder implements
     //--------------------- data from bluetooth redirects to dynamic
 
     private void buildBt2AudOut() {
-        if (debug) Timber.i("buildBt2AudOut");
+        Timber.i("buildBt2AudOut");
         if (iBluetoothListener == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null) {
-            if (debug) Timber.e("buildBt2AudOut illegal parameters");
+            Timber.e("buildBt2AudOut illegal parameters");
             return;
         }
 
@@ -202,7 +202,7 @@ public class ThisAppBuilder implements
     //--------------------- data from microphone redirects to dynamic
 
     private void buildAudIn2AudOut() {
-        if (debug) Timber.i("buildAudIn2AudOut");
+        Timber.i("buildAudIn2AudOut");
 
         AudIn2AudOutLooper audIn2AudOutLooper = new AudIn2AudOutLooper(true);
         audIn2AudOutLooper.build();
@@ -211,11 +211,11 @@ public class ThisAppBuilder implements
     //--------------------- data from bluetooth loops back to bluetooth
 
     private void buildBt2Bt() {
-        if (debug) Timber.i("buildBt2Bt");
+        Timber.i("buildBt2Bt");
         if (iBluetoothListener == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null) {
-            if (debug) Timber.e("buildBt2Bt illegal parameters");
+            Timber.e("buildBt2Bt illegal parameters");
             return;
         }
 
@@ -237,11 +237,11 @@ public class ThisAppBuilder implements
     //--------------------- data from bluetooth recorded and looped back to bluetooth
 
     private void buildRecord() {
-        if (debug) Timber.i("buildRecord");
+        Timber.i("buildRecord");
         if (iBluetoothListener == null
                 || iBtToUiCtrl == null
                 || iMsgToUi == null) {
-            if (debug) Timber.e("buildBt2Bt illegal parameters");
+            Timber.e("buildBt2Bt illegal parameters");
             return;
         }
 
@@ -263,7 +263,7 @@ public class ThisAppBuilder implements
     //--------------------- data from network looped back to network
 
     private void buildNet2Net() {
-        if (debug) Timber.i("buildNet2Net");
+        Timber.i("buildNet2Net");
     }
 
 }

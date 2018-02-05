@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class ServerOn
         extends AsyncTask<String, IServerCtrl, Void> {
@@ -26,7 +27,7 @@ public class ServerOn
     @Override
     protected Void doInBackground(String... port) {
         int portNum = Integer.parseInt(port[0]);
-        if (debug) Log.i(TAG, "doInBackground portnum is " + portNum);
+        Timber.i("doInBackground portnum is " + portNum);
         Server server = new Server(portNum, handler);
 
         if (!server.isAliveServer()) {
@@ -55,7 +56,7 @@ public class ServerOn
 
     @Override
     protected void onProgressUpdate(IServerCtrl... iServerCtrl) {
-        if (debug) Log.i(TAG, "onProgressUpdate");
+        Timber.i("onProgressUpdate");
         iServerCtrlReg.registerServerCtrl(iServerCtrl[0]);
     }
 

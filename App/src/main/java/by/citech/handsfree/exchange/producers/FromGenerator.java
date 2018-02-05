@@ -12,6 +12,7 @@ import by.citech.handsfree.generator.IDataGenerator;
 import by.citech.handsfree.parameters.StatusMessages;
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 public class FromGenerator
         implements IStreamer {
@@ -46,16 +47,16 @@ public class FromGenerator
     @Override
     public void prepareStream(IRxComplex receiver) throws Exception {
         if (isFinished) {
-            if (debug) Log.w(TAG, "prepareStream stream is finished, return");
+            Timber.w("prepareStream stream is finished, return");
             return;
         } else if (receiver == null) {
             throw new Exception(TAG + " " + StatusMessages.ERR_PARAMETERS);
         } else {
-            if (debug) Log.i(TAG, "prepareStream");
+            Timber.i("prepareStream");
             this.iRxComplex = receiver;
         }
         dataGenerator = DataGeneratorFactory.getDataGenerator(buffSize, isShorts, dataType);
-        if (debug) Log.w(TAG, String.format(Locale.US, "prepareStream parameters is:" +
+        Timber.w(String.format(Locale.US, "prepareStream parameters is:" +
                         " buffSize is %d," +
                         " isShorts is %b",
                 buffSize,
@@ -68,7 +69,7 @@ public class FromGenerator
 
     @Override
     public void finishStream() {
-        if (debug) Log.i(TAG, "finishStream");
+        Timber.i("finishStream");
         isFinished = true;
         streamOff();
         iRxComplex = null;
@@ -79,7 +80,7 @@ public class FromGenerator
         if (isStreaming() || !isReadyToStream()) {
             return;
         } else {
-            if (debug) Log.i(TAG, "streamOn");
+            Timber.i("streamOn");
         }
         isStreaming = true;
         while (isStreaming() && isReadyToStream()) {
@@ -98,7 +99,7 @@ public class FromGenerator
 
     @Override
     public void streamOff() {
-        if (debug) Log.i(TAG, "streamOff");
+        Timber.i("streamOff");
         isStreaming = false;
     }
 
@@ -110,10 +111,10 @@ public class FromGenerator
     @Override
     public boolean isReadyToStream() {
         if (isFinished) {
-            if (debug) Log.w(TAG, "isReadyToStream finished");
+            Timber.w("isReadyToStream finished");
             return false;
         } else if (!isPrepared) {
-            if (debug) Log.w(TAG, "isReadyToStream not prepared");
+            Timber.w("isReadyToStream not prepared");
             return false;
         } else {
             return true;
