@@ -140,7 +140,9 @@ public class ConnectorBluetooth
     }
 
     public boolean isConnected() {
-        return getBLEState() != BluetoothLeState.DISCONECTED;
+        return  (getBLEState() == BluetoothLeState.CONNECTED) ||
+                (getBLEState() == BluetoothLeState.SERVICES_DISCOVERED) ||
+                (getBLEState() == BluetoothLeState.TRANSMIT_DATA);
     }
 
     public ConnectorBluetooth setmHandler(Handler mHandler) {

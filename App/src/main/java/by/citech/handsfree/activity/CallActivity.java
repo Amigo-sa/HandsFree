@@ -559,8 +559,10 @@ public class CallActivity
         // initialize list device
         if (deviceListAdapter != null)
             deviceListAdapter.clear();
-        if (iUiToBtListener.isConnected())
+        if (iUiToBtListener.isConnected()) {
+            Timber.i("iUiToBtListener.getConnectedDevice() %s", iUiToBtListener.getConnectedDevice());
             connectDeviceListAdapter.addDevice(iUiToBtListener.getConnectedDevice(), false, true);
+        }
         actionBar.setCustomView(R.layout.actionbar);
         invalidateOptionsMenu();
     }
