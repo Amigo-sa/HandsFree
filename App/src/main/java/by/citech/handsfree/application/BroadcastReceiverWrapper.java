@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.parameters.Tags;
+import timber.log.Timber;
 
 public class BroadcastReceiverWrapper {
 
@@ -79,7 +80,7 @@ public class BroadcastReceiverWrapper {
             //if (Settings.debug) Log.i(TAG, "onReceive");
             final String action = intent.getAction();
             if (BluetoothLeCore.ACTION_GATT_CONNECTED.equals(action)) {
-                Log.i(TAG, "BluetoothLeCore.ACTION_GATT_CONNECTED");
+                Timber.i("BluetoothLeCore.ACTION_GATT_CONNECTED");
                 notifyConnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_DISCONNECTED.equals(action)) {
                 notifyDisconnectedListeners();

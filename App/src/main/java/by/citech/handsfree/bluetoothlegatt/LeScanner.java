@@ -63,7 +63,7 @@ public class LeScanner {
 
     private BluetoothAdapter getBluetoothAdapter() {
         if (bluetoothAdapter == null) {
-            if (Settings.debug) Timber.w(TAG, "getBluetoothAdapter bluetoothAdapter is null, get");
+            if (Settings.debug) Timber.w("getBluetoothAdapter bluetoothAdapter is null, get");
             bluetoothAdapter = BluetoothLeCore.getBluetoothAdapter();
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("00:11:22:33:AA:BB");
         }
@@ -80,14 +80,14 @@ public class LeScanner {
 
 
     private void startInnerScan(BluetoothLeScanner leScanner, ScanSettings scanSettings){
-        if (Settings.debug) Timber.i(TAG, "start scanLeDevice()");
+        if (Settings.debug) Timber.i("start scanLeDevice()");
         leScanner.startScan((scanWithFilter) ? scanFilters : null, scanSettings, mScanCallback);
         if (!scanWithFilter) mHandler.post(() -> iScanListener.onStartScan());
         mScanning = true;
     }
 
     private void stopInnerScan(BluetoothLeScanner leScanner){
-        if (Settings.debug) Timber.i(TAG, "stop scanLeDevice()");
+        if (Settings.debug) Timber.i("stop scanLeDevice()");
         mScanning = false;
         leScanner.stopScan(mScanCallback);
         mHandler.post(() -> iScanListener.onStopScan());
@@ -104,21 +104,23 @@ public class LeScanner {
 
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
+
         final BluetoothLeScanner leScanner = getBluetoothAdapter().getBluetoothLeScanner();
-        ScanSettings scanSettings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setReportDelay(0)
-                .build();
-        //scan specified devices only with ScanFilter  // С использованием фильтрации
-        if (scanWithFilter) {
-            ScanFilter scanFilter = new ScanFilter.Builder()
-                    .setDeviceAddress(deviceAddress)
-                    .build();
-            scanFilters = new ArrayList<ScanFilter>();
-            scanFilters.add(scanFilter);
-        }
 
         if (enable) {
+
+            ScanSettings scanSettings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .setReportDelay(0)
+                    .build();
+            //scan specified devices only with ScanFilter  // С использованием фильтрации
+            if (scanWithFilter) {
+                ScanFilter scanFilter = new ScanFilter.Builder()
+                        .setDeviceAddress(deviceAddress)
+                        .build();
+                scanFilters = new ArrayList<ScanFilter>();
+                scanFilters.add(scanFilter);
+            }
 
             // Stops scanning after a pre-defined scan period.
             if (!scanWithFilter) stopScanThroughPeriod(leScanner);
@@ -140,13 +142,13 @@ public class LeScanner {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            if (Settings.debug) Timber.i(TAG, "onBatchScanResults() ");
+            if (Settings.debug) Timber.i("onBatchScanResults() ");
         }
 
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            if (Settings.debug) Timber.i(TAG, "onScanFailed() %s", errorCode);
+            if (Settings.debug) Timber.i("onScanFailed() %s", errorCode);
         }
     };
 

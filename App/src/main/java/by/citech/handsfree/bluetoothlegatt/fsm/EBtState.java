@@ -9,53 +9,49 @@ import static by.citech.handsfree.util.CollectionHelper.eSet;
 
 public enum EBtState implements IFsmState<EBtState> {
 
+//  ST_DeviceChosen,
+//  ST_DeviceNotChosen,
+//  ST_Searching,
+//  ST_Found,
+//  ST_Disconnected,
+//  ST_ExchangeDisabling,
+//  ST_ExchangeEnabling,
+//  ST_BtDisabled,
+//  ST_BtEnabling,
     ST_TurnedOff,
     ST_TurnedOn,
     ST_BtPrepared,
     ST_BtPrepareFail,
-    ST_BtEnabling,
     ST_BtEnabled,
-    ST_BtDisabled,
-    ST_DeviceChosen,
-    ST_DeviceNotChosen,
-    ST_Searching,
-    ST_Found,
     ST_Connecting,
     ST_Disconnecting,
-    ST_DisconnectingManual,
-    ST_Disconnected,
-    ST_DisconnectedManual,
     ST_Incompatible,
     ST_Connected,
-    ST_ExchangeDisabling,
-    ST_ExchangeEnabling,
-    ST_ExchangeEnabled,
+    ST_Exchange,
     ST_Failure;
 
     static {
         availableFromAny = s(ST_Failure, ST_TurnedOff);
-        ST_TurnedOff           .a(ST_TurnedOn);
-        ST_TurnedOn            .a(ST_BtPrepared, ST_BtPrepareFail);
-        ST_BtPrepared          .a(ST_BtEnabling);
-        ST_BtPrepareFail       .a();
-        ST_BtEnabling          .a(ST_BtEnabling, ST_BtEnabled, ST_BtDisabled);
-        ST_BtEnabled           .a(ST_DeviceChosen, ST_DeviceNotChosen);
-        ST_BtDisabled          .a(ST_BtEnabling);
-        ST_DeviceChosen        .a(ST_DeviceChosen, ST_Searching);
-        ST_DeviceNotChosen     .a(ST_DeviceChosen);
-        ST_Searching           .a(ST_DeviceChosen, ST_Found);
-        ST_Found               .a(ST_Searching, ST_Connecting);
-        ST_Connecting          .a(ST_Disconnected, ST_Incompatible, ST_Connected);
-        ST_Disconnecting       .a(ST_Disconnecting, ST_Disconnected);
-        ST_DisconnectingManual .a(ST_DisconnectingManual, ST_DisconnectedManual);
-        ST_Disconnected        .a(ST_Searching, ST_Connecting);
-        ST_DisconnectedManual  .a(ST_DeviceChosen);
-        ST_Incompatible        .a(ST_DeviceChosen);
-        ST_Connected           .a(ST_Disconnected, ST_Disconnecting, ST_ExchangeEnabling);
-        ST_ExchangeEnabling    .a(ST_Disconnected, ST_Disconnecting, ST_Connected, ST_ExchangeEnabling, ST_ExchangeEnabled);
-        ST_ExchangeDisabling   .a(ST_Disconnected, ST_Disconnecting, ST_Connected, ST_ExchangeDisabling);
-        ST_ExchangeEnabled     .a(ST_Disconnected, ST_Disconnecting, ST_Connected, ST_ExchangeDisabling);
-        ST_Failure             .a();
+//      ST_DeviceChosen      .a(ST_DeviceChosen, ST_Connecting);
+//      ST_DeviceNotChosen   .a(ST_Connecting);
+//      ST_Searching         .a(ST_DeviceChosen, ST_Found);
+//      ST_Found             .a(ST_Searching, ST_Connecting);
+//      ST_Disconnected      .a(ST_Searching, ST_Connecting, ST_DeviceChosen);
+//      ST_ExchangeEnabling  .a(ST_BtEnabled, ST_Disconnecting, ST_Connected, ST_ExchangeEnabling, ST_Exchange);
+//      ST_ExchangeDisabling .a(ST_BtEnabled, ST_Disconnecting, ST_Connected, ST_ExchangeDisabling);
+//      ST_BtDisabled        .a(ST_BtEnabling);
+//      ST_BtEnabling        .a(ST_BtEnabling, ST_BtEnabled, ST_BtPrepared);
+        ST_TurnedOff         .a(ST_TurnedOn);
+        ST_TurnedOn          .a(ST_BtPrepared, ST_BtPrepareFail);
+        ST_BtPrepared        .a(ST_BtEnabled);
+        ST_BtPrepareFail     .a();
+        ST_BtEnabled         .a(ST_Connecting);
+        ST_Connecting        .a(ST_BtEnabled, ST_Incompatible, ST_Connected);
+        ST_Disconnecting     .a(ST_BtEnabled, ST_Disconnecting);
+        ST_Incompatible      .a(ST_BtEnabled, ST_Disconnecting);
+        ST_Connected         .a(ST_BtEnabled, ST_Disconnecting, ST_Exchange);
+        ST_Exchange          .a(ST_BtEnabled, ST_Disconnecting);
+        ST_Failure           .a();
     }
 
     //--------------------- constructor

@@ -294,7 +294,7 @@ public class BluetoothLeCore
 
         //--------------- TEST START
         // mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        mBluetoothGatt = device.connectGatt(ThisApp.getAppContext(), true, mGattCallback);
+        mBluetoothGatt = device.connectGatt(ThisApp.getAppContext(), false, mGattCallback);
         //--------------- TEST END
 
         mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);

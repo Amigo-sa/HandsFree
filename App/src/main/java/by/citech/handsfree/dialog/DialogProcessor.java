@@ -36,9 +36,9 @@ public class DialogProcessor {
     //--------------------- main
 
     public synchronized void runDialog(EDialogType toRun, Map<EDialogState, Runnable> toDoMap, String... messages) {
-        if (debug) Timber.i(TAG, "runDialog");
+        if (debug) Timber.i("runDialog");
         if (toRun == null) {
-            Timber.e(TAG, "runDialog + %s", StatusMessages.ERR_PARAMETERS);
+            Timber.e("runDialog + %s", StatusMessages.ERR_PARAMETERS);
             return;
         }
         denyDialog(null, null);
@@ -74,33 +74,33 @@ public class DialogProcessor {
     }
 
     public synchronized void denyDialog(EDialogType toDeny, EDialogState onDeny) {
-        if (debug) Timber.i(TAG, "denyDialog");
+        if (debug) Timber.i("denyDialog");
         if (currentDialog == null) {
-            if (debug) Timber.i(TAG, "denyDialog currentDialog is null, return");
+            if (debug) Timber.i("denyDialog currentDialog is null, return");
             return;
         } else if (!currentDialog.isShowing()) {
-            if (debug) Timber.i(TAG, "denyDialog there is no running dialog, return");
+            if (debug) Timber.i("denyDialog there is no running dialog, return");
             return;
         } else if (toDeny != null) {
             if (currentType == toDeny) {
-                if (debug) Timber.i(TAG, "denyDialog found dialog to deny, deny");
+                if (debug) Timber.i("denyDialog found dialog to deny, deny");
                 if (onDeny != null) {
                     currentState = onDeny;
                 }
             } else if (currentType != null) {
-                if (debug) Timber.i(TAG, "denyDialog not found dialog to deny, return");
+                if (debug) Timber.i("denyDialog not found dialog to deny, return");
                 return;
             } else {
-                if (debug) Timber.i(TAG, "denyDialog currentType is null, deny any dialog");
+                if (debug) Timber.i("denyDialog currentType is null, deny any dialog");
             }
         } else {
-            if (debug) Timber.i(TAG, "denyDialog deny any dialog");
+            if (debug) Timber.i("denyDialog deny any dialog");
         }
         currentDialog.dismiss();
     }
 
     private void onDialogEnd() {
-        if (debug) Timber.i(TAG, "onDialogEnd");
+        if (debug) Timber.i("onDialogEnd");
         currentState = EDialogState.Idle;
         currentType = null;
     }
@@ -108,23 +108,23 @@ public class DialogProcessor {
     //--------------------- delayedDialogs
 
     private void dialogReconnect(Map<EDialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Timber.i(TAG, "dialogReconnect");
+        if (debug) Timber.i("dialogReconnect");
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogDelete onDismiss");
+                    if (debug) Timber.i("dialogDelete onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Timber.i(TAG, "dialogDelete cancel");
+                            if (debug) Timber.i("dialogDelete cancel");
                             break;
                         case Proceed:
-                            if (debug) Timber.i(TAG, "dialogDelete delete");
+                            if (debug) Timber.i("dialogDelete delete");
                             toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
-                            if (debug) Timber.i(TAG, "dialogDelete just dismiss");
+                            if (debug) Timber.i("dialogDelete just dismiss");
                             break;
                         default:
-                            Timber.e(TAG, "dialogDelete currentState default");
+                            Timber.e("dialogDelete currentState default");
                             break;
                     }
                     onDialogEnd();
@@ -147,23 +147,23 @@ public class DialogProcessor {
     }
 
     private void dialogDisconnecting(Map<EDialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Timber.i(TAG, "dialogDisconnecting");
+        if (debug) Timber.i("dialogDisconnecting");
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogDelete onDismiss");
+                    if (debug) Timber.i("dialogDelete onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Timber.i(TAG, "dialogDelete cancel");
+                            if (debug) Timber.i("dialogDelete cancel");
                             break;
                         case Proceed:
-                            if (debug) Timber.i(TAG, "dialogDelete delete");
+                            if (debug) Timber.i("dialogDelete delete");
                             toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
-                            if (debug) Timber.i(TAG, "dialogDelete just dismiss");
+                            if (debug) Timber.i("dialogDelete just dismiss");
                             break;
                         default:
-                            Timber.e(TAG, "dialogDelete currentState default");
+                            Timber.e("dialogDelete currentState default");
                             break;
                     }
                     onDialogEnd();
@@ -188,11 +188,11 @@ public class DialogProcessor {
 
 
     private void dialogDisconnect(Map<EDialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Timber.i(TAG, "dialogDisconnect");
+        if (debug) Timber.i("dialogDisconnect");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogConnect just dismiss");
+                    if (debug) Timber.i("dialogConnect just dismiss");
                     toDoMap.get(EDialogState.Idle).run();
                     onDialogEnd();
                 });
@@ -208,11 +208,11 @@ public class DialogProcessor {
     }
 
     private void dialogConnect(Map<EDialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Timber.i(TAG, "dialogConnect");
+        if (debug) Timber.i("dialogConnect");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogConnect just dismiss");
+                    if (debug) Timber.i("dialogConnect just dismiss");
                     toDoMap.get(EDialogState.Idle).run();
                     onDialogEnd();
                 });
@@ -228,21 +228,21 @@ public class DialogProcessor {
     }
 
     private void dialogConnecting(Map<EDialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Timber.i(TAG, "dialogConnecting");
+        if (debug) Timber.i("dialogConnecting");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogConnecting onDismiss");
+                    if (debug) Timber.i("dialogConnecting onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Timber.i(TAG, "dialogConnecting cancel");
+                            if (debug) Timber.i("dialogConnecting cancel");
                             toDoMap.get(EDialogState.Cancel).run();
                             break;
                         case Idle:
-                            if (debug) Timber.i(TAG, "dialogConnecting just dismiss");
+                            if (debug) Timber.i("dialogConnecting just dismiss");
                             break;
                         default:
-                            Timber.e(TAG, "dialogConnecting currentState default");
+                            Timber.e("dialogConnecting currentState default");
                             break;
                     }
                     onDialogEnd();
@@ -263,30 +263,30 @@ public class DialogProcessor {
     }
 
     private void dialogSave(final Map<EDialogState, Runnable> toDoMap) {
-        if (debug) Timber.i(TAG, "dialogSave");
+        if (debug) Timber.i("dialogSave");
     }
 
     private void dialogDelete(final Map<EDialogState, Runnable> toDoMap) {
-        if (debug) Timber.i(TAG, "dialogDelete");
+        if (debug) Timber.i("dialogDelete");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogDelete onDismiss");
+                    if (debug) Timber.i("dialogDelete onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Timber.i(TAG, "dialogDelete cancel");
+                            if (debug) Timber.i("dialogDelete cancel");
                             toDoMap.get(EDialogState.Cancel).run();
                             break;
                         case Proceed:
-                            if (debug) Timber.i(TAG, "dialogDelete delete");
+                            if (debug) Timber.i("dialogDelete delete");
                             toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
-                            if (debug) Timber.i(TAG, "dialogDelete just dismiss");
+                            if (debug) Timber.i("dialogDelete just dismiss");
                             toDoMap.get(EDialogState.Cancel).run();
                             break;
                         default:
-                            Timber.e(TAG, "dialogDelete currentState default");
+                            Timber.e("dialogDelete currentState default");
                             break;
                     }
                     onDialogEnd();
@@ -313,27 +313,27 @@ public class DialogProcessor {
 
 
     private void dialogChose(final Map<EDialogState, Runnable> toDoMap, String deviceName) {
-        if (debug) Timber.i(TAG, "dialogChose");
+        if (debug) Timber.i("dialogChose");
         TextView title;
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setOnDismissListener((dialog) -> {
-                    if (debug) Timber.i(TAG, "dialogChose onDismiss");
+                    if (debug) Timber.i("dialogChose onDismiss");
                     switch (currentState) {
                         case Cancel:
-                            if (debug) Timber.i(TAG, "dialogChose cancel");
+                            if (debug) Timber.i("dialogChose cancel");
                             //toDoMap.get(EDialogState.Cancel).run();
                             break;
                         case Proceed:
-                            if (debug) Timber.i(TAG, "dialogChose to connect");
+                            if (debug) Timber.i("dialogChose to connect");
                             toDoMap.get(EDialogState.Proceed).run();
                             break;
                         case Idle:
-                            if (debug) Timber.i(TAG, "dialogChose just dismiss");
+                            if (debug) Timber.i("dialogChose just dismiss");
                            // toDoMap.get(EDialogState.Cancel).run();
                             break;
                         default:
-                            Timber.e(TAG, "dialogChose currentState default");
+                            Timber.e("dialogChose currentState default");
                             break;
                     }
                     onDialogEnd();

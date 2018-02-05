@@ -25,6 +25,8 @@ public class CallControl implements
     private static final String TAG = Tags.CallControl;
     private static final boolean debug = Settings.debug;
 
+    private boolean isBtDisconnectManual;
+
     //--------------------- singleton
 
     private static volatile CallControl instance = null;
@@ -102,11 +104,16 @@ public class CallControl implements
                 toBt(EBtReport.RP_Enable);
                 break;
             case RP_DisconnectManual:
-                toCall(ECallReport.RP_BtError);
+                isBtDisconnectManual = true;
+                toBt(EBtReport.RP_Disconnect);
                 break;
             case RP_BtDisconnected:
+                if (isBtDisconnectManual) {
+                    isBtDisconnectManual = false;
+                } else {
+                    toBt(EBtReport.RP_Connect);
+                }
                 toCall(ECallReport.RP_BtError);
-                toBt(EBtReport.RP_Connect);
                 break;
             default:
                 break;

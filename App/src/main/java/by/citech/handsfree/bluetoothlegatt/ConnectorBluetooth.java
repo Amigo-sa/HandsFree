@@ -251,6 +251,7 @@ public class ConnectorBluetooth
 
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
+        Timber.i("scanWithFilter = %s", scanWithFilter);
         toBtFsm(EBtReport.RP_BtFound);
         stopScan();
     }
@@ -400,10 +401,8 @@ public class ConnectorBluetooth
     //--------------------- ICallFsmListener
 
     private void searchDevice() {
-        if (chosenAddr != null && chosenAddr.length() > 0) {
-            leScanner.setDeviceAddress(chosenAddr);
-            startScan();
-        }
+        leScanner.setDeviceAddress(chosenAddr);
+        startScan();
     }
 
     private boolean toBtFsm(EBtReport report) {
