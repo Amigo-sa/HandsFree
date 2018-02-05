@@ -1,15 +1,11 @@
 package by.citech.handsfree.application;
 
 import android.app.Application;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Handler;
-import android.os.Vibrator;
 
 import by.citech.handsfree.activity.fsm.ActivityFsm;
-import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.ui.BluetoothUi;
 import by.citech.handsfree.call.CallControl;
@@ -31,8 +27,6 @@ public class ThisApp
     private static ProximitySensorListener proximitySensorListener;
     private static ProximityLocker proximityLocker;
     private static VibrationSwitch vibrationSwitch;
-//  private static BluetoothManager bluetoothManager;
-//  private static BluetoothAdapter bluetoothAdapter;
     private static ThreadingManager threadingManager;
     private static ConnectorBluetooth connectorBluetooth;
     private static BluetoothUi bluetoothUi;
@@ -53,9 +47,6 @@ public class ThisApp
         PreferencesProcessor.init(this);
 
         thisAppBuilder = new ThisAppBuilder(PreferencesProcessor.getOpModePref());
-
-//      bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-//      if (bluetoothManager != null) bluetoothAdapter = bluetoothManager.getAdapter();
 
         threadingManager = ThreadingManager.getInstance();
         threadingManager.activate();
@@ -101,7 +92,5 @@ public class ThisApp
     public static ConnectorNet getConnectorNet() {return connectorNet;}
     public static ConnectorBluetooth getConnectorBluetooth() {return connectorBluetooth;}
     public static Context getAppContext() {return appContext;}
-//  public static BluetoothManager getBluetoothManager() {return bluetoothManager;}
-//  public static BluetoothAdapter getBluetoothAdapter() {return bluetoothAdapter;}
 
 }

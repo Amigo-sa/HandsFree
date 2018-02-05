@@ -16,6 +16,8 @@ public class VibrationSwitch {
     private Runnable stop = () -> vibrator.cancel();
     private Handler handler;
 
+    //-------------------------- constructor
+
     public VibrationSwitch(Handler handler) {
         pattern = new long[]{400, 600, 400, 600, 400, 600};
         repeat = pattern.length - 2;
@@ -24,6 +26,8 @@ public class VibrationSwitch {
                 .getAppContext()
                 .getSystemService(Context.VIBRATOR_SERVICE);
     }
+
+    //-------------------------- main
 
     public void turnOn() {
         if (!isReady()) return;
@@ -36,6 +40,8 @@ public class VibrationSwitch {
         handler.removeCallbacks(stop);
         vibrator.cancel();
     }
+
+    //-------------------------- additional
 
     private boolean isReady() {
         return vibrator != null && handler != null;

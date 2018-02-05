@@ -12,6 +12,8 @@ public class ProximityLocker {
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
 
+    //-------------------------- constructor
+
     public ProximityLocker() {
         powerManager = (PowerManager) ThisApp
                 .getAppContext()
@@ -22,6 +24,8 @@ public class ProximityLocker {
                 this.getClass().getCanonicalName());
     }
 
+    //-------------------------- main
+
     public void turnOn() {
         if (!isReady()) return;
         if (!wakeLock.isHeld()) wakeLock.acquire(TIMEOUT);
@@ -31,6 +35,8 @@ public class ProximityLocker {
         if (!isReady()) return;
         if (wakeLock.isHeld()) wakeLock.release();
     }
+
+    //-------------------------- additional
 
     private boolean isReady() {
         return powerManager != null && wakeLock != null;

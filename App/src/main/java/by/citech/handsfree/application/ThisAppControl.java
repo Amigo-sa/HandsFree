@@ -24,10 +24,12 @@ public class ThisAppControl {
     public static void restartApp() {
         Context context = ThisApp.getAppContext();
         Intent intent = new Intent(context, CallActivity.class);
-        int pendingIntentId = 123456;
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, pendingIntentId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManaget = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManaget.set(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent);
+        int requestCode = 1645645356;
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null)
+            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent);
         exitApp();
     }
 
