@@ -10,18 +10,13 @@ import java.util.LinkedList;
 
 import by.citech.handsfree.bluetoothlegatt.BluetoothLeCore;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
-import by.citech.handsfree.settings.Settings;
-
-/**
- * Created by tretyak on 21.11.2017.
- */
+import by.citech.handsfree.parameters.Tags;
 
 public class BroadcastReceiverWrapper {
 
-    private final static String TAG = "WSD_BroadcastReceiver";
+    private final static String TAG = Tags.BroadcastReceiverWrapper;
 
     private LinkedList<ConnectAction> listeners;
-
 
     public BroadcastReceiverWrapper() {
         listeners = new LinkedList<>();
@@ -89,7 +84,6 @@ public class BroadcastReceiverWrapper {
             } else if (BluetoothLeCore.ACTION_GATT_DISCONNECTED.equals(action)) {
                 notifyDisconnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                Log.i(TAG, "BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED");
                 notifyServiceDiscovered();
             } else if (BluetoothLeCore.ACTION_DESCRIPTOR_WRITE.equals(action)) {
                 notifyEnabled();

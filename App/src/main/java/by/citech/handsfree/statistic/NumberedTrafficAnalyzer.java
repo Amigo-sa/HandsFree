@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import by.citech.handsfree.parameters.Tags;
 import by.citech.handsfree.settings.Settings;
+import timber.log.Timber;
 
 import static by.citech.handsfree.util.MathHelper.convertByteArrToIntRaw;
 
@@ -135,7 +136,7 @@ public class NumberedTrafficAnalyzer {
     }
 
     void resetStatistic() {
-        handler.removeCallbacks(postToPost);
+        if (handler != null) handler.removeCallbacks(postToPost);
         isDeactivated = true;
         packetSize = 0;
         totalLostPacketsCount = 0;
@@ -196,13 +197,12 @@ public class NumberedTrafficAnalyzer {
     //--------------------- additional
 
     private void logError(int actualInt, long lastLost) {
-        Log.e(TAG, String.format(
-                "analyzeNumberedBytes: приняли <%08x>, ожидали <%08x>, потеряно %d, всего потеряно %d",
-                actualInt, expectedInt, lastLost, totalPacketsCount));
+        Timber.e("analyzeNumberedBytes: приняли <%08x>, ожидали <%08x>, потеряно %d, всего потеряно %d",
+                actualInt, expectedInt, lastLost, totalPacketsCount);
     }
 
     private void logOk(int actualInt) {
-        Log.w(TAG, String.format("analyzeNumberedBytes: приняли %08x", actualInt));
+        Timber.w("analyzeNumberedBytes: приняли %08x", actualInt);
     }
 
     private void postThePost() {

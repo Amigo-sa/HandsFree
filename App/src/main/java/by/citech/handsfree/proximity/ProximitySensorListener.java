@@ -25,33 +25,33 @@ public class ProximitySensorListener
 
     public ProximitySensorListener() {
         sensorManager = (SensorManager) ThisApp.getAppContext().getSystemService(Context.SENSOR_SERVICE);
-        if (sensorManager != null) {
-            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-            toDoOnClose = new ArrayList<>();
-            toDoOnFar = new ArrayList<>();
-        }
+        if (sensorManager == null) return;
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        if (sensor == null) return;
+        toDoOnClose = new ArrayList<>();
+        toDoOnFar = new ArrayList<>();
     }
 
     public void register() {
-        if (isReady()) {
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
-            prepare();
-        }
+        if (!isReady()) return;
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        prepare();
     }
 
     public void unregister() {
-        if (isReady()) {
-            sensorManager.unregisterListener(this);
-            prepare();
-        }
+        if (!isReady()) return;
+        sensorManager.unregisterListener(this);
+        prepare();
     }
 
     public void addOnClose(Runnable r) {
-        if (isReady() && r != null) toDoOnClose.add(r);
+        if (!isReady()) return;
+        if (r != null) toDoOnClose.add(r);
     }
 
     public void addOnFar(Runnable r) {
-        if (isReady() && r != null) toDoOnFar.add(r);
+        if (!isReady()) return;
+        if (r != null) toDoOnFar.add(r);
     }
 
     //-------------------------- SensorEventListener
@@ -90,7 +90,6 @@ public class ProximitySensorListener
         }
         return state;
     }
-
 
     private void prepare() {
         toDoOnClose.clear();

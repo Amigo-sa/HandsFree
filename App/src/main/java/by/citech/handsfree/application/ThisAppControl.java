@@ -10,7 +10,7 @@ import by.citech.handsfree.activity.ExitActivity;
 
 public class ThisAppControl {
 
-    public static void exitApplication() {
+    public static void exitApp() {
         Context context = ThisApp.getAppContext();
         Intent intent = new Intent(context, ExitActivity.class);
         intent.addFlags(
@@ -21,14 +21,14 @@ public class ThisAppControl {
         context.startActivity(intent);
     }
 
-    public static void restartApplication() {
+    public static void restartApp() {
         Context context = ThisApp.getAppContext();
         Intent intent = new Intent(context, CallActivity.class);
         int pendingIntentId = 123456;
         PendingIntent pendingIntent = PendingIntent.getActivity(context, pendingIntentId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager alarmManaget = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManaget.set(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent);
-        exitApplication();
+        exitApp();
     }
 
 }

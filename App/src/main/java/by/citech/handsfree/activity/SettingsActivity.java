@@ -161,7 +161,7 @@ public class SettingsActivity
                     getRefreshedEditTextPref(prefName);
                     break;
                 case SettingsDefault.TypeName.opMode:
-                    ThisAppControl.restartApplication();
+                    ThisAppControl.restartApp();
                     break;
                 case SettingsDefault.TypeName.audioCodecType:
                     getRefreshedListPref(prefName);

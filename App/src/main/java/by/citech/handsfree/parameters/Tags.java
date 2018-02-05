@@ -95,4 +95,6 @@ public class Tags {
     public static final String CallControl = PREFIX + "CallControl";
     public static final String CallHandshake = PREFIX + "CallHandshake";
     public static final String BtFsm = PREFIX + "BtFsm";
+    public static final String ProximityLocker = PREFIX + "ProximityLocker";
+    public static final String BroadcastReceiverWrapper = PREFIX + "BroadcastReceiverWrapper";
 }

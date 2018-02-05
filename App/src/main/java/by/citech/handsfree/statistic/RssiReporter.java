@@ -3,7 +3,6 @@ package by.citech.handsfree.statistic;
 import android.os.Handler;
 
 import by.citech.handsfree.parameters.Tags;
-import by.citech.handsfree.statistic.RssiReporter.IRssiReporter;
 import by.citech.handsfree.settings.Settings;
 
 public class RssiReporter {
