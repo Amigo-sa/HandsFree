@@ -103,6 +103,8 @@ public class CallActivity
 
     // список найденных устройств
     private LeDeviceListAdapter deviceListAdapter;
+    // список найденных устройств
+    private LeDeviceListAdapter connectDeviceListAdapter;
 
     // ддя списка контактов
     private ContactsAdapter contactsAdapter;
@@ -147,6 +149,8 @@ public class CallActivity
         viewManager.setDefaultView();
 
         deviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
+        connectDeviceListAdapter = new LeDeviceListAdapter(this.getLayoutInflater());
+
         dialogProcessor = new DialogProcessor(this);
         contactEditor = new ContactEditor();
 
@@ -171,7 +175,6 @@ public class CallActivity
                 .setiScanListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
-                .setiBtList(deviceListAdapter)
                 .build();
 
         BluetoothUi bluetoothUi = ThisApp.getBluetoothUi();
@@ -180,6 +183,8 @@ public class CallActivity
                 .setmIBluetoothListener(this)
                 .setiBtToUiCtrl(this)
                 .setiMsgToUi(this)
+                .setiBtConnectList(connectDeviceListAdapter)
+                .setiBtList(deviceListAdapter)
                 .registerListenerBroadcast()
                 .build();
 
@@ -270,12 +275,6 @@ public class CallActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_scan:
-                iMenuListener.menuScanStartListener();
-                break;
-            case R.id.menu_stop:
-                iMenuListener.menuScanStopListener();
-                break;
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 finish();
@@ -436,15 +435,29 @@ public class CallActivity
     private void setupListDevices() {
         TouchListener touchListener = new TouchListener(ThisApp.getBluetoothUi());
         findViewById(R.id.baseView).setOnTouchListener(touchListener);
+
         ListView listDevices = findViewById(R.id.listDevices);
+        ListView connectDevices = findViewById(R.id.listConnectDevices);
+
         listDevices.setAdapter(deviceListAdapter);
+        connectDevices.setAdapter(connectDeviceListAdapter);
+
         listDevices.setOnTouchListener(touchListener);
+
         listDevices.setOnItemClickListener((parent, view, position, id) -> {
                     BluetoothDevice device = deviceListAdapter.getDevice(position);
                     if (device == null) return;
                     iUiToBtListener.clickItemList(device);
                 }
         );
+
+        connectDevices.setOnItemClickListener((parent, view1, position, id) -> {
+            final BluetoothDevice device = connectDeviceListAdapter.getDevice(position);
+            if (device == null) return;
+            iUiToBtListener.clickItemList(device);
+        });
+
+
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
@@ -547,7 +560,7 @@ public class CallActivity
         if (deviceListAdapter != null)
             deviceListAdapter.clear();
         if (iUiToBtListener.isConnected())
-            deviceListAdapter.addDevice(iUiToBtListener.getConnectedDevice(), 200);
+            connectDeviceListAdapter.addDevice(iUiToBtListener.getConnectedDevice(), false, true);
         actionBar.setCustomView(R.layout.actionbar);
         invalidateOptionsMenu();
     }
@@ -561,7 +574,7 @@ public class CallActivity
     @Override
     public void scanCallback(BluetoothDevice device, int rssi) {
         if (deviceListAdapter != null)
-            deviceListAdapter.addDevice(device, rssi);
+            deviceListAdapter.addDevice(device, false, false);
     }
 
     //--------------------- LocationListener

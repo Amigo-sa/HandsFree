@@ -78,46 +78,56 @@ public class LeScanner {
         scanLeDevice(false);
     }
 
+
+    private void startInnerScan(BluetoothLeScanner leScanner, ScanSettings scanSettings){
+        if (Settings.debug) Timber.i(TAG, "start scanLeDevice()");
+        leScanner.startScan((scanWithFilter) ? scanFilters : null, scanSettings, mScanCallback);
+        if (!scanWithFilter) mHandler.post(() -> iScanListener.onStartScan());
+        mScanning = true;
+    }
+
+    private void stopInnerScan(BluetoothLeScanner leScanner){
+        if (Settings.debug) Timber.i(TAG, "stop scanLeDevice()");
+        mScanning = false;
+        leScanner.stopScan(mScanCallback);
+        mHandler.post(() -> iScanListener.onStopScan());
+    }
+
+
+    private void stopScanThroughPeriod(BluetoothLeScanner leScanner){
+        mHandler.postDelayed(() -> {
+            stopInnerScan(leScanner);
+        }, SCAN_PERIOD);
+    }
+
+
+
     // процедура сканирования устройства
     private void scanLeDevice(final boolean enable) {
         final BluetoothLeScanner leScanner = getBluetoothAdapter().getBluetoothLeScanner();
-        ScanFilter scanFilter;
         ScanSettings scanSettings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .setReportDelay(0)
                 .build();
         //scan specified devices only with ScanFilter  // С использованием фильтрации
         if (scanWithFilter) {
-            scanFilter = new ScanFilter.Builder()
+            ScanFilter scanFilter = new ScanFilter.Builder()
                     .setDeviceAddress(deviceAddress)
                     .build();
             scanFilters = new ArrayList<ScanFilter>();
             scanFilters.add(scanFilter);
         }
 
-
         if (enable) {
-            if (Settings.debug) Timber.i(TAG, "start scanLeDevice()");
+
             // Stops scanning after a pre-defined scan period.
-            if (!scanWithFilter)
-                mHandler.postDelayed(() -> {
-                    if (Settings.debug) Timber.i(TAG, "stop scanLeDevice()");
-                    mScanning = false;
-                    leScanner.stopScan(mScanCallback);
-                    mHandler.post(() -> iScanListener.onStopScan());
-                }, SCAN_PERIOD);
+            if (!scanWithFilter) stopScanThroughPeriod(leScanner);
+            startInnerScan(leScanner, scanSettings);
 
-                leScanner.startScan((scanWithFilter) ? scanFilters : null, scanSettings, mScanCallback);
-                if (!scanWithFilter) mHandler.post(() -> iScanListener.onStartScan());
-                mScanning = true;
-
-        } else {
-            if (Settings.debug) Timber.i(TAG, "stop scanLeDevice()");
-            mScanning = false;
-            leScanner.stopScan(mScanCallback);
-            if (!scanWithFilter) mHandler.post(() -> iScanListener.onStopScan());
-        }
+        } else
+            stopInnerScan(leScanner);
     }
+
 
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
@@ -136,7 +146,7 @@ public class LeScanner {
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            if (Settings.debug) Timber.i(TAG, "onScanFailed() " + errorCode);
+            if (Settings.debug) Timber.i(TAG, "onScanFailed() %s", errorCode);
         }
     };
 

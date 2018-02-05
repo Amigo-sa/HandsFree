@@ -10,8 +10,8 @@ public interface IUiToBtListener {
     void clickItemList(BluetoothDevice device);
     BluetoothDevice getConnectedDevice();
     void clickBtnListener();
-    void clickBtnScanListener();
 
     boolean isScanning();
+    boolean isConnecting();
     boolean isConnected();
 }

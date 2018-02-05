@@ -36,7 +36,6 @@ public class ChoseDialogCommand implements Command {
     @Override
     public void execute() {
         Map<EDialogState, Runnable> map = new HashMap<>();
-        Log.i("ChoseDialogCommand", "execute()");
         map.put(EDialogState.Proceed, () -> {
             bluetoothUi.clickBtnChoseProceed();});
         iMsgToUi.sendToUiDialog(true, EDialogType.Chose, map, device.getName());

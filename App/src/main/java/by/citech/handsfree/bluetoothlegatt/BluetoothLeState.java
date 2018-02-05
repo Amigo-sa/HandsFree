@@ -21,6 +21,18 @@ public enum BluetoothLeState {
         }
     },
 
+    CONNECTING{
+        @Override
+        public HashSet<BluetoothLeState> availableStates() {
+            return new HashSet<> (Arrays.asList(DISCONECTED, CONNECTED));
+        }
+
+        @Override
+        public String getName() {
+            return "Connected";
+        }
+    },
+
     CONNECTED{
         @Override
         public HashSet<BluetoothLeState> availableStates() {

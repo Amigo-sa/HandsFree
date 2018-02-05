@@ -7,6 +7,7 @@ import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
 import by.citech.handsfree.bluetoothlegatt.ConnectorBluetooth;
 import by.citech.handsfree.bluetoothlegatt.IBluetoothListener;
+import by.citech.handsfree.bluetoothlegatt.IBtList;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.UiController;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.button.ButtonChangeViewOffCommand;
 import by.citech.handsfree.bluetoothlegatt.ui.uicommands.button.ButtonChangeViewOnCommand;
@@ -42,6 +43,8 @@ public class BluetoothUi implements IUiToBtListener,
     private IMsgToUi iMsgToUi;
     private IBtToUiCtrl iBtToUiCtrl;
     private IBluetoothListener mIBluetoothListener;
+    private IBtList iBtList;
+    private IBtList iBtConnectList;
     private BluetoothDevice mBtDevice;
 
     //--------------------- singleton
@@ -91,6 +94,16 @@ public class BluetoothUi implements IUiToBtListener,
         return this;
     }
 
+    public BluetoothUi setiBtList(IBtList iBtList) {
+        this.iBtList = iBtList;
+        return this;
+    }
+
+    public BluetoothUi setiBtConnectList(IBtList iBtConnectList) {
+        this.iBtConnectList = iBtConnectList;
+        return this;
+    }
+
     public BluetoothUi registerListenerBroadcast() {
         ThisApp.registerBroadcastListener(this);
         return this;
@@ -121,13 +134,10 @@ public class BluetoothUi implements IUiToBtListener,
         connDialogInfoOn.setDevice(device);
 
         if (device.equals(getConnectedDevice())) {
-            Log.i("BluetoothUi", "discDialogOn");
             uiController.setCommand(discDialogOn).execute();
         } else if (getConnectedDevice() != null) {
-            Log.i("BluetoothUi", "reconnDiaologOn");
             uiController.setCommand(reconnDiaologOn).execute();
         } else {
-            Log.i("BluetoothUi", "choseDialogCommand");
             uiController.setCommand(choseDialogCommand).execute();
         }
     }
@@ -138,23 +148,20 @@ public class BluetoothUi implements IUiToBtListener,
         ConnectorBluetooth.getInstance().startScan();
     }
 
-    @Override
-    public void clickBtnScanListener() {
-        if (isScanning())
-            ConnectorBluetooth.getInstance().startScan();
-        else
-            ConnectorBluetooth.getInstance().stopScan();
-    }
-
     public void clickBtnChoseProceed() {
-        Log.i("BluetoothUi", "clickBtnChoseProceed");
-        uiController.setCommand(connDialogOn).execute();
         ConnectorBluetooth.getInstance().getDeviceForConnecting(mBtDevice);
+        iBtConnectList.addDevice(mBtDevice, true, false);
+        iBtList.removeDevice(mBtDevice);
     }
 
     @Override
     public boolean isScanning() {
         return ConnectorBluetooth.getInstance().isScanning();
+    }
+
+    @Override
+    public boolean isConnecting() {
+        return ConnectorBluetooth.getInstance().isConnecting();
     }
 
     @Override
@@ -171,18 +178,23 @@ public class BluetoothUi implements IUiToBtListener,
 
     @Override
     public void actionConnected() {
-        uiController.setCommand(connDialogOn).undo();
-        uiController.setCommand(connDialogInfoOn).execute();
-        uiController.setCommand(connDialogInfoOn).undo();
+//        uiController.setCommand(connDialogOn).undo();
+//        uiController.setCommand(connDialogInfoOn).execute();
+//        uiController.setCommand(connDialogInfoOn).undo();
         uiController.setCommand(buttonViewColorChangeOn).execute();
+        iBtConnectList.clear();
+        iBtConnectList.addDevice(mBtDevice, false, true);
+        iBtList.removeDevice(mBtDevice);
+
     }
 
     @Override
     public void actionDisconnected() {
-        uiController.setCommand(connDialogOn).undo();
+        //uiController.setCommand(connDialogOn).undo();
         uiController.setCommand(disconnDialogInfoOn).execute();
         uiController.setCommand(disconnDialogInfoOn).undo();
         uiController.setCommand(buttonViewColorChangeOff).execute();
+        iBtConnectList.clear();
     }
 
     @Override
@@ -201,10 +213,10 @@ public class BluetoothUi implements IUiToBtListener,
     public void onSwipe(SwipeDirection direction) {
         switch (direction){
             case UP:
-                ConnectorBluetooth.getInstance().stopScan();
+                //ConnectorBluetooth.getInstance().stopScan();
                 break;
             case DOWN:
-                ConnectorBluetooth.getInstance().startScan();
+                //ConnectorBluetooth.getInstance().startScan();
                 break;
             case LEFT:
             case RIGH:
@@ -224,6 +236,5 @@ public class BluetoothUi implements IUiToBtListener,
     public void menuScanStopListener() {
         ConnectorBluetooth.getInstance().stopScan();
     }
-
 
 }

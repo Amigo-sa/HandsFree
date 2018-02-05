@@ -22,6 +22,7 @@ import by.citech.handsfree.data.SampleGattAttributes;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.statistic.RssiReporter;
 import by.citech.handsfree.statistic.TrafficAnalyzer;
+import timber.log.Timber;
 
 /**
  * Created by tretyak on 24.01.2018.
@@ -84,6 +85,7 @@ public class BluetoothLeCore
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
+            Log.i(TAG, "onConnectionStateChange");
             if (newState == BluetoothProfile.STATE_CONNECTED) {
 
                 //------------- TEST START

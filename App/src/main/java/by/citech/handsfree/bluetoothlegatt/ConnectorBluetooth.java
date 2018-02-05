@@ -135,6 +135,10 @@ public class ConnectorBluetooth
         return leScanner.isScanning();
     }
 
+    public boolean isConnecting(){
+        return (BLEState == BluetoothLeState.CONNECTING);
+    }
+
     public boolean isConnected() {
         return getBLEState() != BluetoothLeState.DISCONECTED;
     }
@@ -330,6 +334,7 @@ public class ConnectorBluetooth
     }
 
     public void connecting() {
+        setBLEState(getBLEState(), BluetoothLeState.CONNECTING);
         bleController.setCommand(connectDevice).execute();
     }
 

@@ -47,7 +47,6 @@ public class ThisAppBuilder implements
     private IScanListener iScanListener;
     private IBtToUiCtrl iBtToUiCtrl;
     private IMsgToUi iMsgToUi;
-    private IBtList iBtList;
     private EOpMode opMode;
 
     //--------------------- constructor
@@ -87,11 +86,6 @@ public class ThisAppBuilder implements
         return this;
     }
 
-    public ThisAppBuilder setiBtList(IBtList iBtList) {
-        this.iBtList = iBtList;
-        return this;
-    }
-
     //--------------------- main
 
     public void build() {
@@ -116,7 +110,6 @@ public class ThisAppBuilder implements
         opMode = null;
         iBtToUiCtrl = null;
         iMsgToUi = null;
-        iBtList = null;
     }
 
     //--------------------- data from bluetooth redirects to network and vice versa
@@ -127,8 +120,7 @@ public class ThisAppBuilder implements
         if (iNetInfoGetter == null
                 || iBluetoothListener == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null
-                || iBtList == null) {
+                || iMsgToUi == null) {
             if (debug) Timber.e("buildNormal illegal parameters");
             return;
         }
@@ -157,9 +149,8 @@ public class ThisAppBuilder implements
 
     private void build2Bt(EDataSource dataSource) {
         if (debug) Timber.i("build2Bt");
-        if (iBtToUiCtrl == null
+        if (       iBtToUiCtrl == null
                 || iMsgToUi == null
-                || iBtList == null
                 || dataSource == null) {
             if (debug) Timber.e("build2Bt illegal parameters");
             return;
@@ -192,8 +183,7 @@ public class ThisAppBuilder implements
         if (debug) Timber.i("buildBt2AudOut");
         if (iBluetoothListener == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null
-                || iBtList == null) {
+                || iMsgToUi == null) {
             if (debug) Timber.e("buildBt2AudOut illegal parameters");
             return;
         }
@@ -224,8 +214,7 @@ public class ThisAppBuilder implements
         if (debug) Timber.i("buildBt2Bt");
         if (iBluetoothListener == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null
-                || iBtList == null) {
+                || iMsgToUi == null) {
             if (debug) Timber.e("buildBt2Bt illegal parameters");
             return;
         }
@@ -251,8 +240,7 @@ public class ThisAppBuilder implements
         if (debug) Timber.i("buildRecord");
         if (iBluetoothListener == null
                 || iBtToUiCtrl == null
-                || iMsgToUi == null
-                || iBtList == null) {
+                || iMsgToUi == null) {
             if (debug) Timber.e("buildBt2Bt illegal parameters");
             return;
         }

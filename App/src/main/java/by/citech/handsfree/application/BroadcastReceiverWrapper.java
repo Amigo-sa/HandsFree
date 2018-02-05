@@ -89,6 +89,7 @@ public class BroadcastReceiverWrapper {
             } else if (BluetoothLeCore.ACTION_GATT_DISCONNECTED.equals(action)) {
                 notifyDisconnectedListeners();
             } else if (BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                Log.i(TAG, "BluetoothLeCore.ACTION_GATT_SERVICES_DISCOVERED");
                 notifyServiceDiscovered();
             } else if (BluetoothLeCore.ACTION_DESCRIPTOR_WRITE.equals(action)) {
                 notifyEnabled();

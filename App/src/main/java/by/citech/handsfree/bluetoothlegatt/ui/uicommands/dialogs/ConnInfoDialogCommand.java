@@ -41,7 +41,7 @@ public class ConnInfoDialogCommand implements Command {
     @Override
     public void execute() {
         Map<EDialogState, Runnable> map = new HashMap<>();
-        map.put(EDialogState.Idle, () -> iBtToUiCtrl.setVisibleMain());
+        map.put(EDialogState.Idle, () ->{} );//iBtToUiCtrl.setVisibleMain()
         iMsgToUi.sendToUiDialog(true, EDialogType.Connect, map, device.getName());
     }
 
