@@ -73,6 +73,13 @@ public class ProximitySensorListener
         }
     }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        Timber.w("onAccuracyChanged");
+    }
+
+    //-------------------------- additional
+
     private EDistance processDistance(float distance) {
         if (distance <= 0.1F && state != Close) {
             state = Close;
@@ -84,12 +91,6 @@ public class ProximitySensorListener
         return state;
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        Timber.w("onAccuracyChanged");
-    }
-
-    //-------------------------- additional
 
     private void prepare() {
         toDoOnClose.clear();

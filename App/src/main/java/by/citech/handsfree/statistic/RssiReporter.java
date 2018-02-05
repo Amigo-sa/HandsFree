@@ -31,16 +31,13 @@ public class RssiReporter {
     private static volatile RssiReporter instance = null;
 
     private RssiReporter() {
+        interval = MIN_INTERVAL;
     }
 
     public static RssiReporter getInstance() {
         if (instance == null) {
             synchronized (RssiReporter.class) {
-                if (instance == null) {
-                    instance = new RssiReporter();
-                }
-            }
-        }
+                if (instance == null) {instance = new RssiReporter();}}}
         return instance;
     }
 
@@ -64,11 +61,13 @@ public class RssiReporter {
     //--------------------- main
 
     private void registerRssiProvider(IRssiProvider provider) {
+        if (!isReady()) return;
         handler.postDelayed(requestRssi, interval);
         this.provider = provider;
     }
 
     private void unregisterRssiProvider(IRssiProvider provider) {
+        if (!isReady()) return;
         handler.removeCallbacks(requestRssi);
         if (this.provider == provider) this.provider = null;
     }
@@ -76,8 +75,15 @@ public class RssiReporter {
     //--------------------- main
 
     public void onRssiResponse(int rssi) {
-        if (listener != null) handler.post(() -> listener.onRssiUpdated(rssi));
+        if (!isReady()) return;
+        handler.post(() -> listener.onRssiUpdated(rssi));
         handler.postDelayed(requestRssi, interval);
+    }
+
+    //--------------------- main
+
+    private boolean isReady() {
+        return handler != null && listener != null;
     }
 
     //--------------------- interfaces
