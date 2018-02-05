@@ -1,7 +1,6 @@
 package by.citech.handsfree.bluetoothlegatt.ui;
 
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 
 import by.citech.handsfree.application.ThisApp;
 import by.citech.handsfree.bluetoothlegatt.ConnectAction;
@@ -21,6 +20,7 @@ import by.citech.handsfree.ui.IBtToUiCtrl;
 import by.citech.handsfree.ui.IMsgToUi;
 import by.citech.handsfree.settings.Settings;
 import by.citech.handsfree.ui.ISwipeListener;
+import timber.log.Timber;
 
 public class BluetoothUi implements IUiToBtListener,
                                     ConnectAction,
@@ -133,6 +133,8 @@ public class BluetoothUi implements IUiToBtListener,
         disconnDialogInfoOn.setDevice(device);
         connDialogInfoOn.setDevice(device);
 
+        ConnectorBluetooth.getInstance().stopScan();
+
         if (device.equals(getConnectedDevice())) {
             uiController.setCommand(discDialogOn).execute();
         } else if (getConnectedDevice() != null) {
@@ -149,7 +151,8 @@ public class BluetoothUi implements IUiToBtListener,
     }
 
     public void clickBtnChoseProceed() {
-        ConnectorBluetooth.getInstance().getDeviceForConnecting(mBtDevice);
+        ConnectorBluetooth.getInstance().setmBTDevice(mBtDevice);
+        ConnectorBluetooth.getInstance().requestConnect();
         iBtConnectList.addDevice(mBtDevice, true, false);
         iBtList.removeDevice(mBtDevice);
     }
@@ -183,8 +186,9 @@ public class BluetoothUi implements IUiToBtListener,
 //        uiController.setCommand(connDialogInfoOn).undo();
         uiController.setCommand(buttonViewColorChangeOn).execute();
         iBtConnectList.clear();
-        iBtConnectList.addDevice(mBtDevice, false, true);
-        iBtList.removeDevice(mBtDevice);
+        Timber.i("mBtDevice = %s",  getConnectedDevice());
+        iBtConnectList.addDevice(getConnectedDevice(), false, true);
+        iBtList.removeDevice(getConnectedDevice());
 
     }
 

@@ -1,6 +1,7 @@
 package by.citech.handsfree.bluetoothlegatt;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 /**
@@ -12,7 +13,7 @@ public enum BluetoothLeState {
     DISCONECTED{
         @Override
         public HashSet<BluetoothLeState> availableStates() {
-            return new HashSet<> (Arrays.asList(CONNECTED));
+            return new HashSet<> (Collections.singletonList(CONNECTING));
         }
 
         @Override

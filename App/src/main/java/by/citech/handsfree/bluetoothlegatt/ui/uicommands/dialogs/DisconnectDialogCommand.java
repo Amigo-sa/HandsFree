@@ -35,7 +35,7 @@ public class DisconnectDialogCommand implements Command {
     @Override
     public void execute() {
         Map<EDialogState, Runnable> map = new HashMap<>();
-        map.put(EDialogState.Proceed, () -> connectorBluetooth.disconnect());
+        map.put(EDialogState.Proceed, () -> connectorBluetooth.requestDisconnectManual());
         iMsgToUi.sendToUiDialog(true, EDialogType.Disconnecting, map, device.getName());
     }
 

@@ -21,7 +21,7 @@ public enum EBtReport implements IFsmReport<EBtState> {
     RP_BtFound                 (ST_Found),
     RP_Connect                 (ST_Connecting),
     RP_Disconnect              (ST_Disconnecting),
-    RP_DisconnectManual        (ST_Disconnecting),
+    RP_DisconnectManual        (ST_DisconnectingManual),
     RP_BtConnectedCompatible   (ST_Connected),
     RP_BtConnectedIncompatible (ST_Incompatible),
     RP_BtDisconnected          (ST_Disconnected),

@@ -35,10 +35,7 @@ public class ReconnectDialogCommand implements Command {
     @Override
     public void execute() {
         Map<EDialogState, Runnable> map = new HashMap<>();
-        map.put(EDialogState.Proceed, () -> {
-            connectorBluetooth.disconnect();
-            connectorBluetooth.connecting();
-        });
+        map.put(EDialogState.Proceed, () -> connectorBluetooth.requestDisconnect());
         iMsgToUi.sendToUiDialog(true, EDialogType.Reconnect, map, device.getName());
     }
 
